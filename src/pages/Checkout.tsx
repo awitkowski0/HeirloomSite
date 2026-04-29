@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { useLocation, Navigate } from 'react-router-dom';
-import { useQuery, useAction } from "convex/react";
+import { Link } from 'react-router-dom';
+import { useAction } from "convex/react";
+import { useCart } from '../context/CartContext';
 import { api } from "../../convex/_generated/api";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_TYooMQauvdEDq54NiTphI7jx');
@@ -48,39 +49,36 @@ function StripeCheckoutForm({ onSuccess }: { onSuccess: () => void }) {
 }
 
 export default function Checkout() {
-  const location = useLocation();
-  const checkoutData = location.state;
+  const { cart, subtotal: cartSubtotal } = useCart();
 
   const paymentProvider = 'stripe';
   
   const [clientSecret, setClientSecret] = useState('');
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   
   const createPaymentIntent = useAction(api.stripe.createPaymentIntent);
   
-  const finalTotalCalc = () => {
-    if (!checkoutData) return 0;
-    const itemTotal = checkoutData.basePrice + checkoutData.addition;
-    const tax = Math.round(itemTotal * 0.08);
-    return itemTotal + 150 + tax;
-  };
+  const shipping = cart.length > 0 ? 150 : 0;
+  const tax = Math.round(cartSubtotal * 0.08);
+  const finalTotal = cartSubtotal + shipping + tax;
 
   useEffect(() => {
-    if (paymentProvider === 'stripe' && checkoutData) {
-      createPaymentIntent({ amount: finalTotalCalc() * 100, currency: 'usd' })
+    if (paymentProvider === 'stripe' && finalTotal > 0) {
+      createPaymentIntent({ amount: finalTotal * 100, currency: 'usd' })
       .then(data => setClientSecret(data.clientSecret || ''))
       .catch(console.error);
     }
-  }, [paymentProvider, checkoutData]);
+  }, [paymentProvider, finalTotal]);
 
-  if (!checkoutData) {
-    return <Navigate to="/gallery" replace />;
+  if (cart.length === 0) {
+    return (
+      <div className="container" style={{ paddingTop: '120px', textAlign: 'center' }}>
+        <h2 className="headline-lg">Your cart is empty</h2>
+        <p className="body-lg" style={{ marginTop: '16px', marginBottom: '32px' }}>Start exploring our handcrafted collection to build your legacy.</p>
+        <Link to="/gallery" className="add-to-cart" style={{ width: 'auto', padding: '12px 32px' }}>Browse Gallery</Link>
+      </div>
+    );
   }
-
-  const { cribName, wood, stainName, basePrice, addition, image } = checkoutData;
-  const itemTotal = basePrice + addition;
-  const shipping = 150;
-  const tax = Math.round(itemTotal * 0.08);
-  const finalTotal = itemTotal + shipping + tax;
 
   const handleSuccess = () => {
     alert("Transaction completed successfully! Your heirloom is being prepared.");
@@ -137,44 +135,64 @@ export default function Checkout() {
             </section>
 
             <section style={{ padding: '32px', backgroundColor: 'var(--surface-container-lowest)', borderRadius: '12px', boxShadow: 'var(--shadow-ambient)', border: '1px solid var(--surface-container-highest)' }}>
-               <h2 className="headline-md" style={{ marginBottom: '24px' }}>Payment Method</h2>
+               <h2 className="headline-md" style={{ marginBottom: '24px' }}>Terms & Conditions</h2>
+               <div style={{ 
+                 backgroundColor: 'var(--surface-container-highest)', 
+                 padding: '24px', 
+                 borderRadius: '12px', 
+                 marginBottom: '24px',
+                 maxHeight: '200px',
+                 overflowY: 'auto',
+                 fontSize: '13px',
+                 lineHeight: '1.6',
+                 color: 'var(--on-surface-variant)',
+                 border: '1px solid var(--outline-variant)'
+               }}>
+                 <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>1. Refund & Cancellation Policy</p>
+                 <p style={{ marginBottom: '16px' }}>Buyer may cancel for a full refund (less any credit-card fees) within 48 hours of the order date by written notice only. After 48 hours, the order is committed and non-cancellable. Any later cancellation results in full forfeiture of the 50% deposit as reasonable liquidated damages (13 Pa.C.S. § 2718).</p>
+                 
+                 <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>2. All Sales Final / No Returns</p>
+                 <p style={{ marginBottom: '16px' }}>Custom orders are built to Buyer’s exact specifications. No cancellations, modifications, returns, exchanges, or refunds after the 48-hour period. (13 Pa.C.S. Article 2 and UTPCPL).</p>
+                 
+                 <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>3. Deposit Requirement</p>
+                 <p style={{ marginBottom: '16px' }}>A minimum 50% non-refundable deposit of the total order price is required to place any custom order. Production begins immediately. Balance due before delivery.</p>
+                 
+                 <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>4. Delivery Terms</p>
+                 <p style={{ marginBottom: '16px' }}>Delivery date is estimated only. Seller is not liable for delays beyond control. Risk of loss passes to Buyer upon delivery.</p>
+                 
+                 <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>5. Inspection and Acceptance</p>
+                 <p style={{ marginBottom: '16px' }}>Buyer must inspect goods immediately upon delivery. Signing the delivery receipt constitutes acceptance as conforming unless visible damage is expressly noted. Concealed defects must be reported within 5 business days.</p>
+                 
+                 <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>6. Limited Warranty</p>
+                 <p>Seller makes no independent warranties. Buyer receives solely any manufacturer’s warranty. Seller expressly disclaims all express and implied warranties to the fullest extent permitted by Pennsylvania law.</p>
+               </div>
+
+               <label style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', cursor: 'pointer', padding: '16px', backgroundColor: agreedToTerms ? 'var(--primary-container)' : 'transparent', borderRadius: '8px', border: '1px solid var(--outline-variant)', transition: 'all 0.2s' }}>
+                 <input 
+                   type="checkbox" 
+                   checked={agreedToTerms} 
+                   onChange={e => setAgreedToTerms(e.target.checked)}
+                   style={{ width: '20px', height: '20px' }}
+                 />
+                 <span className="label-large" style={{ color: agreedToTerms ? 'var(--on-primary-container)' : 'var(--on-surface)' }}>
+                   I have read and agree to the Refund and Cancellation Policy
+                 </span>
+               </label>
+
+               <h2 className="headline-md" style={{ marginBottom: '24px', opacity: agreedToTerms ? 1 : 0.5 }}>Payment Method</h2>
                
                {!paymentProvider && <p>Loading payment provider...</p>}
 
-               {paymentProvider === 'paypal' && (
-                 <PayPalScriptProvider options={{ clientId: "test", currency: "USD", intent: "capture" }}>
-                   <PayPalButtons 
-                     style={{ layout: "vertical" }} 
-                     createOrder={(_data, actions) => {
-                       return actions.order.create({
-                         intent: "CAPTURE",
-                         purchase_units: [
-                           {
-                             description: `${cribName} - ${wood.replace(/([A-Z])/g, ' $1').trim()} - ${stainName}`,
-                             amount: {
-                               currency_code: "USD",
-                               value: finalTotal.toString(),
-                               breakdown: {
-                                 item_total: { currency_code: "USD", value: itemTotal.toString() },
-                                 shipping: { currency_code: "USD", value: shipping.toString() },
-                                 tax_total: { currency_code: "USD", value: tax.toString() }
-                               }
-                             }
-                           },
-                         ],
-                       });
-                     }}
-                     onApprove={(_data, actions) => {
-                       return actions.order!.capture().then(() => handleSuccess());
-                     }}
-                   />
-                 </PayPalScriptProvider>
-               )}
+
+
+               {!agreedToTerms && <p className="body-sm text-secondary" style={{ marginBottom: '16px' }}>Please agree to the terms above to enable payment.</p>}
 
                {paymentProvider === 'stripe' && clientSecret && (
-                 <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'flat' } }}>
-                    <StripeCheckoutForm onSuccess={handleSuccess} />
-                 </Elements>
+                 <div style={{ opacity: agreedToTerms ? 1 : 0.5, pointerEvents: agreedToTerms ? 'auto' : 'none' }}>
+                   <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'flat' } }}>
+                      <StripeCheckoutForm onSuccess={handleSuccess} />
+                   </Elements>
+                 </div>
                )}
             </section>
           </div>
@@ -200,24 +218,28 @@ export default function Checkout() {
         <div className="configuration-panel" style={{ flex: 5 }}>
           <div style={{ position: 'sticky', top: '100px', backgroundColor: 'var(--surface-container)', padding: '32px', borderRadius: '12px', boxShadow: 'var(--shadow-ambient)' }}>
              <h2 className="headline-md" style={{ marginBottom: '32px' }}>Order Summary</h2>
-             <div style={{ display: 'flex', gap: '24px', marginBottom: '32px' }}>
-                <div style={{ width: '128px', height: '128px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, backgroundColor: 'white' }}>
-                   <img style={{ width: '100%', height: '100%', objectFit: 'contain' }} src={image} alt={cribName} />
-                </div>
-                <div style={{ flexGrow: 1 }}>
-                   <h3 className="headline-md" style={{ fontSize: '20px', marginBottom: '4px' }}>{cribName}</h3>
-                   <span className="label-caps text-primary" style={{ padding: '4px 8px', backgroundColor: 'var(--surface-container-highest)', borderRadius: '4px', fontSize: '10px' }}>
-                     {wood.replace(/([A-Z])/g, ' $1').trim()} • {stainName}
-                   </span>
-                   <p className="body-md text-on-surface-variant" style={{ marginTop: '16px' }}>Hand-sanded finish</p>
-                   <p className="body-md" style={{ marginTop: '8px' }}>${itemTotal.toLocaleString()}.00</p>
-                </div>
+             
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
+                {cart.map((item) => (
+                  <div key={item.id} style={{ display: 'flex', gap: '16px' }}>
+                     <div style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, backgroundColor: 'white' }}>
+                        <img style={{ width: '100%', height: '100%', objectFit: 'contain' }} src={item.image} alt={item.cribName} />
+                     </div>
+                     <div style={{ flexGrow: 1 }}>
+                        <h3 className="body-lg" style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.cribName}</h3>
+                        <p className="label-caps text-on-surface-variant" style={{ fontSize: '10px' }}>
+                          {item.wood.replace(/([A-Z])/g, ' $1').trim()} • {item.stainName}
+                        </p>
+                        <p className="body-md" style={{ marginTop: '4px' }}>${item.price.toLocaleString()}.00 x {item.quantity}</p>
+                     </div>
+                  </div>
+                ))}
              </div>
 
              <div style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--on-surface-variant)' }}>
                    <span>Subtotal</span>
-                   <span>${itemTotal.toLocaleString()}.00</span>
+                   <span>${cartSubtotal.toLocaleString()}.00</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--on-surface-variant)' }}>
                    <span>White Glove Shipping</span>

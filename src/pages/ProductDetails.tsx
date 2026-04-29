@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
   
   const isStaged = new URLSearchParams(window.location.search).get('mode') === 'staging';
   const inventoryData = useQuery(api.inventory.get, { useStaged: isStaged });
@@ -84,24 +86,7 @@ export default function ProductDetails() {
               <span className="badge badge-filled">Customizable</span>
             </div>
           </div>
-          <div className="bento-grid">
-            <div className="bento-card">
-              <span className="material-symbols-outlined text-primary">verified</span>
-              <p className="label-caps">Greenguard Gold</p>
-            </div>
-            <div className="bento-card">
-              <span className="material-symbols-outlined text-primary">forest</span>
-              <p className="label-caps">FSC Certified</p>
-            </div>
-            <div className="bento-card">
-              <span className="material-symbols-outlined text-primary">shield</span>
-              <p className="label-caps">JPMA Certified</p>
-            </div>
-            <div className="bento-card">
-              <span className="material-symbols-outlined text-primary">family_history</span>
-              <p className="label-caps">Life Warranty</p>
-            </div>
-          </div>
+
         </div>
 
         <div className="configuration-panel">
@@ -124,7 +109,19 @@ export default function ProductDetails() {
               >
                 {currentConfig.cribName}
               </h2>
-              <p className="body-lg subtitle">A legacy piece for the modern nursery.</p>
+              <p 
+                className="body-lg subtitle"
+                style={{ 
+                  marginTop: '12px', 
+                  color: 'var(--on-surface-variant)',
+                  borderBottom: isEditMode ? '1px dashed var(--primary)' : 'none',
+                  outline: 'none'
+                }}
+                contentEditable={isEditMode}
+                suppressContentEditableWarning={true}
+              >
+                {currentConfig.description || "A legacy piece for the modern nursery."}
+              </p>
             </div>
             <div className="price-row">
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
@@ -219,9 +216,20 @@ export default function ProductDetails() {
               className="add-to-cart" 
               disabled={!selectedStain}
               style={{ opacity: selectedStain ? 1 : 0.5, cursor: selectedStain ? 'pointer' : 'not-allowed' }}
-              onClick={() => navigate('/checkout', { state: { cribName: currentConfig.cribName, wood: selectedWood, stainName: selectedStain, basePrice, addition, image: getImagePath() } })}
+              onClick={() => {
+                addToCart({
+                  id: `${currentConfig.cribName}-${selectedWood}-${selectedStain}`,
+                  cribName: currentConfig.cribName,
+                  wood: selectedWood,
+                  stainName: selectedStain,
+                  price: basePrice + addition,
+                  image: getImagePath() || '',
+                  quantity: 1
+                });
+                alert("Added to cart!");
+              }}
             >
-              {selectedStain ? "ADD TO NURSERY" : "OUT OF STOCK"}
+              {selectedStain ? "ADD TO CART" : "OUT OF STOCK"}
             </button>
             <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • White Glove Shipping</p>
           </section>

@@ -5,6 +5,7 @@ export default defineSchema({
   inventory: defineTable({
     cribName: v.string(),
     wood: v.string(),
+    description: v.optional(v.string()),
     basePrice: v.number(),
     stains: v.array(v.object({
       name: v.string(),
@@ -16,6 +17,7 @@ export default defineSchema({
   inventory_staged: defineTable({
     cribName: v.string(),
     wood: v.string(),
+    description: v.optional(v.string()),
     basePrice: v.number(),
     stains: v.array(v.object({
       name: v.string(),
@@ -29,5 +31,13 @@ export default defineSchema({
   }),
   settings_staged: defineTable({
     paymentProvider: v.string(),
+  }),
+  showroom: defineTable({
+    image: v.string(),
+    spots: v.array(v.object({
+      x: v.number(),
+      y: v.number(),
+      productName: v.string(),
+    }))
   }),
 });

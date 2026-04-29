@@ -24,7 +24,7 @@ export default function Admin() {
   const [newImage, setNewImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [paymentProvider] = useState('stripe');
+
 
   const rawInventory = useQuery(api.inventory.get, { useStaged: true });
   

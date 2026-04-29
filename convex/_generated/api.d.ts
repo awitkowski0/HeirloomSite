@@ -10,6 +10,7 @@
 
 import type * as inventory from "../inventory.js";
 import type * as settings from "../settings.js";
+import type * as showroom from "../showroom.js";
 import type * as stripe from "../stripe.js";
 
 import type {
@@ -21,6 +22,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   inventory: typeof inventory;
   settings: typeof settings;
+  showroom: typeof showroom;
   stripe: typeof stripe;
 }>;
 

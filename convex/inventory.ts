@@ -18,6 +18,7 @@ export const save = mutation({
       id: v.optional(v.string()),
       cribName: v.string(),
       wood: v.string(),
+      description: v.optional(v.string()),
       basePrice: v.number(),
       stains: v.array(v.object({
         name: v.string(),
@@ -37,6 +38,7 @@ export const save = mutation({
       await ctx.db.insert("inventory_staged", {
         cribName: item.cribName,
         wood: item.wood,
+        description: item.description,
         basePrice: item.basePrice,
         stains: item.stains,
       });
@@ -67,6 +69,7 @@ export const publish = mutation({
       await ctx.db.insert("inventory", {
         cribName: item.cribName,
         wood: item.wood,
+        description: item.description,
         basePrice: item.basePrice,
         stains: item.stains,
       });
