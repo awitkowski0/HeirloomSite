@@ -11,8 +11,12 @@ export const get = query({
     // Resolve storage ID if it's not a URL
     let image = data.image;
     if (image && !image.startsWith('http')) {
-      const url = await ctx.storage.getUrl(image);
-      image = url || image;
+      try {
+        const url = await ctx.storage.getUrl(image);
+        image = url || image;
+      } catch (e) {
+        console.error("Failed to resolve showroom image", e);
+      }
     }
     
     return { ...data, image };

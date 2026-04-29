@@ -9,8 +9,12 @@ export const get = query({
     return await Promise.all(items.map(async (item) => {
       const stains = await Promise.all(item.stains.map(async (stain) => {
         if (stain.image && !stain.image.startsWith('http')) {
-          const url = await ctx.storage.getUrl(stain.image);
-          return { ...stain, image: url || stain.image };
+          try {
+            const url = await ctx.storage.getUrl(stain.image);
+            return { ...stain, image: url || stain.image };
+          } catch (e) {
+            return stain;
+          }
         }
         return stain;
       }));
