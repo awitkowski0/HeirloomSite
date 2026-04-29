@@ -15,6 +15,7 @@ export const save = mutation({
   args: { 
     password: v.string(),
     inventory: v.array(v.object({
+      id: v.optional(v.string()),
       cribName: v.string(),
       wood: v.string(),
       basePrice: v.number(),
