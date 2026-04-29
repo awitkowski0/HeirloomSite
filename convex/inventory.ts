@@ -30,21 +30,25 @@ export const save = mutation({
   },
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    
     const existing = await ctx.db.query("inventory_staged").collect();
     for (const doc of existing) {
       await ctx.db.delete(doc._id);
     }
+    
     for (const item of args.inventory) {
+      if (!item.cribName || !item.wood) continue;
+      
       await ctx.db.insert("inventory_staged", {
-        cribName: item.cribName,
-        wood: item.wood,
-        description: item.description,
-        basePrice: item.basePrice,
-        stains: item.stains.map((s: any) => ({
-          name: s.name,
-          inStock: s.inStock,
-          priceAddition: s.priceAddition,
-          image: s.image
+        cribName: String(item.cribName),
+        wood: String(item.wood),
+        description: item.description ? String(item.description) : undefined,
+        basePrice: typeof item.basePrice === 'number' ? item.basePrice : 2499,
+        stains: (item.stains || []).map((s: any) => ({
+          name: s.name ? String(s.name) : "Default",
+          inStock: typeof s.inStock === 'boolean' ? s.inStock : true,
+          priceAddition: typeof s.priceAddition === 'number' ? s.priceAddition : 0,
+          image: s.image ? String(s.image) : undefined
         })),
       });
     }
