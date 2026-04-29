@@ -232,11 +232,6 @@ export default function Checkout() {
                    <span className="headline-md text-primary" style={{ fontSize: '24px' }}>${finalTotal.toLocaleString()}.00</span>
                 </div>
              </div>
-
-             <div style={{ marginTop: '32px', padding: '16px', backgroundColor: 'var(--surface-container-lowest)', borderRadius: '8px', border: '1px dashed var(--outline-variant)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span className="material-symbols-outlined text-secondary">eco</span>
-                <p className="body-md" style={{ fontSize: '12px', color: 'var(--on-secondary-container)', lineHeight: '1.2' }}>Your purchase plants 5 native trees in protected forests. Thank you for choosing sustainability.</p>
-             </div>
           </div>
         </div>
       </div>
