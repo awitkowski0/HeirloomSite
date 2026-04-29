@@ -51,8 +51,7 @@ export default function Checkout() {
   const location = useLocation();
   const checkoutData = location.state;
 
-  const settings = useQuery(api.settings.get, {});
-  const paymentProvider = settings?.paymentProvider;
+  const paymentProvider = 'stripe';
   
   const [clientSecret, setClientSecret] = useState('');
   

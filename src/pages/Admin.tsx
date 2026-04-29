@@ -24,28 +24,21 @@ export default function Admin() {
   const [newImage, setNewImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [paymentProvider, setPaymentProvider] = useState('paypal');
+  const [paymentProvider] = useState('stripe');
 
   const rawInventory = useQuery(api.inventory.get, { useStaged: true });
-  const rawSettings = useQuery(api.settings.get, { useStaged: true });
   
   const saveInventoryMutation = useMutation(api.inventory.save);
-  const saveSettingsMutation = useMutation(api.settings.save);
   const generateUploadUrl = useMutation(api.inventory.generateUploadUrl);
   const verifyPasswordMutation = useMutation(api.settings.verifyPassword);
   const publishInventoryMutation = useMutation(api.inventory.publish);
-  const publishSettingsMutation = useMutation(api.settings.publish);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    if (rawInventory && loading) {
+    if (rawInventory) {
       setInventory(rawInventory);
       setLoading(false);
     }
-    if (rawSettings && rawSettings.paymentProvider) {
-      setPaymentProvider(rawSettings.paymentProvider);
-    }
-  }, [isAuthenticated, rawInventory, rawSettings, loading]);
+  }, [rawInventory]);
 
   const uniqueCribNames = Array.from(new Set(inventory.map(i => i.cribName)));
   const uniqueWoods = Array.from(new Set(inventory.map(i => i.wood)));
@@ -69,15 +62,7 @@ export default function Admin() {
     }
   };
 
-  const saveSettings = async (newProvider: string) => {
-    try {
-      setPaymentProvider(newProvider);
-      await saveSettingsMutation({ password: adminPassword, paymentProvider: newProvider });
-      alert('Payment provider updated!');
-    } catch (e) {
-      alert('Failed to save settings. Unauthorized.');
-    }
-  };
+
 
   const toggleStock = (cribIndex: number, stainIndex: number) => {
     const newInventory = [...inventory];
@@ -219,7 +204,6 @@ export default function Admin() {
     if (!window.confirm("Push all staged changes to the LIVE site? This will overwrite existing prices and names.")) return;
     try {
       await publishInventoryMutation({ password: adminPassword });
-      await publishSettingsMutation({ password: adminPassword });
       alert("Successfully published to Live Site!");
     } catch (e) {
       alert("Failed to publish.");
@@ -263,25 +247,7 @@ export default function Admin() {
         </div>
       </div>
 
-      <div style={{ backgroundColor: 'var(--surface-container-lowest)', padding: '32px', borderRadius: '12px', marginBottom: '48px', boxShadow: 'var(--shadow-ambient)' }}>
-         <h2 className="headline-md" style={{ marginBottom: '24px' }}>Global Settings</h2>
-         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-            <div>
-               <label className="label-caps" style={{ display: 'block', marginBottom: '8px' }}>Active Payment Provider</label>
-               <select 
-                 value={paymentProvider} 
-                 onChange={e => saveSettings(e.target.value)} 
-                 style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', width: '200px' }}
-               >
-                 <option value="paypal">PayPal</option>
-                 <option value="stripe">Stripe</option>
-               </select>
-            </div>
-            <p className="body-md text-on-surface-variant" style={{ marginTop: '16px', fontSize: '12px', maxWidth: '400px' }}>
-               Changes immediately take effect on the checkout page. Make sure you have the correct API keys set in your environment variables for the selected provider.
-            </p>
-         </div>
-      </div>
+
 
       {showAddForm && (
         <div style={{ backgroundColor: 'var(--surface-container)', padding: '32px', borderRadius: '12px', marginBottom: '48px', boxShadow: 'var(--shadow-ambient)' }}>
