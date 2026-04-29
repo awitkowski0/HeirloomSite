@@ -4,7 +4,11 @@ import { ConvexProvider, ConvexReactClient } from "convex/react";
 import './index.css'
 import App from './App.tsx'
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
+if (!convexUrl) {
+  console.error("VITE_CONVEX_URL is not defined. Please add it to your environment variables.");
+}
+const convex = new ConvexReactClient(convexUrl as string);
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
