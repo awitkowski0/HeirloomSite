@@ -4,8 +4,10 @@ import { v } from "convex/values";
 export const get = query({
   args: { useStaged: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
-    const table = args.useStaged ? "inventory_staged" : "inventory";
-    return await ctx.db.query(table).collect();
+    if (args.useStaged) {
+      return await ctx.db.query("inventory_staged").collect();
+    }
+    return await ctx.db.query("inventory").collect();
   },
 });
 
