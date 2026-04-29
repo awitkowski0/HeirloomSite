@@ -29,9 +29,7 @@ async function uploadImage(filePath) {
       body: fileContent,
     });
     const { storageId } = await response.json();
-    // Use the clean storage URL format
-    const baseUrl = convexUrl.replace("https://", "").split(".")[0];
-    return `https://${baseUrl}.convex.cloud/api/storage/${storageId}`;
+    return storageId;
   } catch (e) {
     console.error(`Failed to upload ${filePath}:`, e);
     return null;

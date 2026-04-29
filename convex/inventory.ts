@@ -26,19 +26,7 @@ export const get = query({
 export const save = mutation({
   args: { 
     password: v.string(),
-    inventory: v.array(v.object({
-      id: v.optional(v.string()),
-      cribName: v.string(),
-      wood: v.string(),
-      description: v.optional(v.string()),
-      basePrice: v.number(),
-      stains: v.array(v.object({
-        name: v.string(),
-        inStock: v.boolean(),
-        priceAddition: v.number(),
-        image: v.optional(v.string())
-      }))
-    }))
+    inventory: v.array(v.any())
   },
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
@@ -52,7 +40,12 @@ export const save = mutation({
         wood: item.wood,
         description: item.description,
         basePrice: item.basePrice,
-        stains: item.stains,
+        stains: item.stains.map((s: any) => ({
+          name: s.name,
+          inStock: s.inStock,
+          priceAddition: s.priceAddition,
+          image: s.image
+        })),
       });
     }
   },
