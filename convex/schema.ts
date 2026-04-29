@@ -40,4 +40,12 @@ export default defineSchema({
       productName: v.string(),
     }))
   }),
+  showroom_staged: defineTable({
+    image: v.string(),
+    spots: v.array(v.object({
+      x: v.number(),
+      y: v.number(),
+      productName: v.string(),
+    }))
+  }),
 });

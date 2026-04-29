@@ -4,10 +4,18 @@ import { v } from "convex/values";
 export const get = query({
   args: { useStaged: v.optional(v.boolean()) },
   handler: async (ctx, args) => {
-    if (args.useStaged) {
-      return await ctx.db.query("inventory_staged").collect();
-    }
-    return await ctx.db.query("inventory").collect();
+    const table = args.useStaged ? "inventory_staged" : "inventory";
+    const items = await ctx.db.query(table).collect();
+    return await Promise.all(items.map(async (item) => {
+      const stains = await Promise.all(item.stains.map(async (stain) => {
+        if (stain.image && !stain.image.startsWith('http')) {
+          const url = await ctx.storage.getUrl(stain.image);
+          return { ...stain, image: url || stain.image };
+        }
+        return stain;
+      }));
+      return { ...item, stains };
+    }));
   },
 });
 

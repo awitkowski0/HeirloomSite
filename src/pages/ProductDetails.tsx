@@ -231,7 +231,7 @@ export default function ProductDetails() {
             >
               {selectedStain ? "ADD TO CART" : "OUT OF STOCK"}
             </button>
-            <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • White Glove Shipping</p>
+            <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • Handcrafted for you</p>
           </section>
         </div>
       </div>

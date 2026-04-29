@@ -29,9 +29,10 @@ export default function Admin() {
   const rawInventory = useQuery(api.inventory.get, { useStaged: true });
   
   const saveInventoryMutation = useMutation(api.inventory.save);
+  const publishInventory = useMutation(api.inventory.publish);
+  const publishShowroom = useMutation(api.showroom.publish);
   const generateUploadUrl = useMutation(api.inventory.generateUploadUrl);
   const verifyPasswordMutation = useMutation(api.settings.verifyPassword);
-  const publishInventoryMutation = useMutation(api.inventory.publish);
 
   useEffect(() => {
     if (rawInventory) {
@@ -62,7 +63,25 @@ export default function Admin() {
     }
   };
 
+  const publishToLive = async () => {
+    if (!confirm('Are you sure you want to push all staged products to the live site?')) return;
+    try {
+      await publishInventory({ password: adminPassword });
+      alert('Inventory published to live site!');
+    } catch (e) {
+      alert('Failed to publish.');
+    }
+  };
 
+  const publishShowroomToLive = async () => {
+    if (!confirm('Are you sure you want to push staged showroom hotspots to the live site?')) return;
+    try {
+      await publishShowroom({ password: adminPassword });
+      alert('Showroom published to live site!');
+    } catch (e) {
+      alert('Failed to publish showroom.');
+    }
+  };
 
   const toggleStock = (cribIndex: number, stainIndex: number) => {
     const newInventory = [...inventory];
@@ -200,16 +219,6 @@ export default function Admin() {
 
   if (loading) return <div className="container" style={{ padding: '80px 24px' }}>Loading...</div>;
 
-  const handlePublish = async () => {
-    if (!window.confirm("Push all staged changes to the LIVE site? This will overwrite existing prices and names.")) return;
-    try {
-      await publishInventoryMutation({ password: adminPassword });
-      alert("Successfully published to Live Site!");
-    } catch (e) {
-      alert("Failed to publish.");
-    }
-  };
-
   return (
     <div className="container" style={{ padding: '80px 24px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px', padding: '24px', backgroundColor: 'var(--surface-container-low)', borderRadius: '16px' }}>
@@ -223,10 +232,6 @@ export default function Admin() {
               <span className="material-symbols-outlined">visibility</span>
               Preview
             </a>
-            <button onClick={handlePublish} className="add-to-cart" style={{ width: 'auto', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="material-symbols-outlined">publish</span>
-              Publish to Live
-            </button>
             <button onClick={() => {
               localStorage.removeItem('adminPassword');
               setIsAuthenticated(false);
@@ -243,8 +248,10 @@ export default function Admin() {
            <button onClick={() => setShowAddForm(!showAddForm)} className="filter-btn active" style={{ width: 'auto', padding: '12px 24px' }}>
               {showAddForm ? 'Cancel' : 'Add Product / Variant'}
            </button>
-           <button onClick={saveInventory} className="add-to-cart" style={{ width: 'auto', padding: '12px 24px' }}>Save Staged Inventory</button>
-        </div>
+            <button onClick={saveInventory} className="filter-btn active" style={{ width: 'auto', padding: '12px 24px', backgroundColor: 'var(--secondary-container)' }}>Save Staged Changes</button>
+            <button onClick={publishToLive} className="add-to-cart" style={{ width: 'auto', padding: '12px 24px' }}>Publish Inventory Live</button>
+            <button onClick={publishShowroomToLive} className="add-to-cart" style={{ width: 'auto', padding: '12px 24px', backgroundColor: 'var(--tertiary)' }}>Publish Showroom Live</button>
+         </div>
       </div>
 
 

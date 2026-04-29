@@ -242,7 +242,7 @@ export default function Checkout() {
                    <span>${cartSubtotal.toLocaleString()}.00</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--on-surface-variant)' }}>
-                   <span>White Glove Shipping</span>
+                   <span>Shipping</span>
                    <span>${shipping.toLocaleString()}.00</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--on-surface-variant)' }}>

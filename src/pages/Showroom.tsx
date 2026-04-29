@@ -5,12 +5,12 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Showroom() {
   const navigate = useNavigate();
-  const showroomData = useQuery(api.showroom.get);
+  const isStaged = new URLSearchParams(window.location.search).get('mode') === 'staging';
+  const showroomData = useQuery(api.showroom.get, { useStaged: isStaged });
   const saveShowroom = useMutation(api.showroom.save);
   
   const adminPassword = localStorage.getItem('adminPassword');
   const isAdmin = !!adminPassword;
-  const isStaged = new URLSearchParams(window.location.search).get('mode') === 'staging';
   const isEditMode = isAdmin && isStaged;
 
   const [hoveredSpot, setHoveredSpot] = useState<number | null>(null);

@@ -72,7 +72,7 @@ function App() {
                   <p className="body-md text-on-surface-variant" style={{ maxWidth: '400px' }}>Handcrafted for generations. We believe in the tactile beauty of natural materials and the quiet confidence of master woodworking.</p>
                </div>
                <div style={{ textAlign: 'right' }}>
-                  <h3 className="label-caps text-primary" style={{ marginBottom: '16px' }}>Contact Our Master Craftsmen</h3>
+                  <h3 className="label-caps text-primary" style={{ marginBottom: '16px' }}>Contact Us</h3>
                   <p className="body-lg" style={{ marginBottom: '8px' }}>support@heirloomcribs.com</p>
                   <p className="body-md text-on-surface-variant">Available Mon-Fri, 9am - 5pm EST</p>
                   <p className="body-md text-on-surface-variant" style={{ marginTop: '24px' }}>© 2026 Heirloom Cribs. All Rights Reserved.</p>
