@@ -124,7 +124,7 @@ export default function Showroom() {
           </div>
         ))}
 
-        <div style={{ position: 'absolute', bottom: '48px', left: '48px', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)', pointerEvents: 'none' }}>
+        <div className="showroom-hero-text" style={{ position: 'absolute', bottom: '48px', left: '48px', color: 'white', textShadow: '0 2px 4px rgba(0,0,0,0.5)', pointerEvents: 'none' }}>
           <p className="label-caps" style={{ color: 'white', marginBottom: '8px', opacity: 0.9 }}>INTERACTIVE SHOWROOM</p>
           <h1 className="headline-xl">The Sanctuary Series</h1>
           <p className="body-lg" style={{ marginTop: '16px', maxWidth: '450px', opacity: 0.9 }}>Explore our curated nursery showroom. Tap the markers to view handcrafted details and bespoke pricing.</p>
@@ -146,7 +146,7 @@ export default function Showroom() {
           </p>
         </div>
         
-        <div className="showroom-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px' }}>
+        <div className="showroom-features">
            <div style={{ backgroundColor: 'var(--surface-container-low)', padding: '40px', borderRadius: '16px', textAlign: 'center' }}>
               <span className="material-symbols-outlined text-primary" style={{ fontSize: '40px', marginBottom: '24px' }}>precision_manufacturing</span>
               <h3 className="headline-md" style={{ marginBottom: '16px' }}>Traditional Joinery</h3>

@@ -22,7 +22,7 @@ const client = new ConvexClient(convexUrl);
 
 async function uploadImage(filePath) {
   try {
-    const uploadUrl = await client.mutation(api.inventory.generateUploadUrl, { password: adminPassword });
+    const uploadUrl = await client.mutation(api.images.generateUploadUrl, { password: adminPassword });
     const fileContent = fs.readFileSync(filePath);
     const response = await fetch(uploadUrl, {
       method: "POST",
@@ -36,6 +36,12 @@ async function uploadImage(filePath) {
   }
 }
 
+function parseStainName(fileName) {
+  const name = fileName.replace(/\.(jpg|jpeg|png|webp|gif)$/i, "");
+  const parts = name.split(/[_\-\s]+/);
+  return parts[parts.length - 1] || name;
+}
+
 async function seed() {
   if (!fs.existsSync(inventoryDir)) {
     console.error(`Inventory directory not found at ${inventoryDir}`);
@@ -44,6 +50,7 @@ async function seed() {
 
   console.log("Starting bulk import...");
   const inventory = [];
+  const seenStains = new Set();
 
   const cribs = fs.readdirSync(inventoryDir).filter(f => !f.startsWith(".") && fs.statSync(path.join(inventoryDir, f)).isDirectory());
   
@@ -53,41 +60,59 @@ async function seed() {
     
     for (const woodName of woods) {
       const woodPath = path.join(cribPath, woodName);
-      const stains = fs.readdirSync(woodPath).filter(f => !f.startsWith(".") && f.endsWith(".jpg"));
+      const files = fs.readdirSync(woodPath).filter(f => !f.startsWith(".") && /\.(jpg|jpeg|png|webp|gif)$/i.test(f));
       
       console.log(`Processing: ${cribName} - ${woodName}...`);
       
       const stainList = [];
-      for (const stainFileName of stains) {
-        const stainPath = path.join(woodPath, stainFileName);
-        // Extract stain name from filename: e.g. "FQP 101_Mission Crib_RedOak_Natural.jpg" -> "Natural"
-        const stainName = stainFileName.replace(".jpg", "").split("_").pop();
+      for (const fileName of files) {
+        const filePath = path.join(woodPath, fileName);
+        const stainName = parseStainName(fileName);
         
-        console.log(`  Uploading stain: ${stainName}`);
-        const imageUrl = await uploadImage(stainPath);
+        console.log(`  Uploading: ${fileName} -> stain: ${stainName}`);
+        const storageId = await uploadImage(filePath);
         
-        stainList.push({
-          name: stainName,
-          inStock: true,
-          priceAddition: 0,
-          image: imageUrl || ""
-        });
+        if (storageId) {
+          stainList.push({
+            name: stainName,
+            inStock: true,
+            priceAddition: 0,
+            image: storageId,
+          });
+
+          await client.mutation(api.images.saveImageRecord, {
+            password: adminPassword,
+            cribName: cribName.replace("The ", ""),
+            wood: woodName,
+            storageId,
+            originalName: fileName,
+            mimeType: "image/jpeg",
+            size: fs.statSync(filePath).size,
+            autoLink: true,
+          });
+        } else {
+          console.error(`  Failed to upload: ${fileName}`);
+        }
       }
       
       inventory.push({
         cribName: cribName.replace("The ", ""),
         wood: woodName,
         description: cribName.includes("Mission") 
-          ? "The Mission Style Crib draws inspiration from the early 20th-century Arts and Crafts movement, a design era known for its emphasis on craftsmanship and simplicity. Characterized by clean geometric lines, vertical slats, rectilinear forms, and bold square posts, it celebrates the honest beauty of natural hardwood. Free from ornate embellishments, the evenly spaced spindles and honest craftsmanship create an open, architectural presence that feels both timeless and refreshingly modern style making it an ideal choice for the nursery."
+          ? "The Mission Style Crib draws inspiration from the early 20th-century Arts and Crafts movement..."
           : `The ${cribName} features exquisite Amish craftsmanship and timeless design.`,
         basePrice: 2499,
-        stains: stainList
+        stains: stainList,
       });
     }
   }
 
   console.log(`Uploading ${inventory.length} products to Convex...`);
   await client.mutation(api.inventory.save, { password: adminPassword, inventory });
+  
+  console.log("Discovering stain types from inventory...");
+  await client.mutation(api.stainTypes.autoDiscover, { password: adminPassword });
+  
   console.log("Bulk import complete! Staged inventory is now populated.");
   console.log("Next step: Go to /admin and click 'Publish to Live'.");
   process.exit(0);

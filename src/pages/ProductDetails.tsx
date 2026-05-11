@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -16,6 +16,9 @@ export default function ProductDetails() {
   
   const [selectedWood, setSelectedWood] = useState('');
   const [selectedStain, setSelectedStain] = useState('');
+  const [showCartPopup, setShowCartPopup] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const adminPassword = localStorage.getItem('adminPassword');
   const isAdmin = !!adminPassword;
@@ -28,13 +31,26 @@ export default function ProductDetails() {
   const productConfigurations = inventory.filter(i => i.cribName === decodedId);
   const currentConfig = productConfigurations.find(c => c.wood === selectedWood) || productConfigurations[0];
 
+  // Read preselected wood/stain from gallery query params
   useEffect(() => {
-    if (productConfigurations.length > 0 && !selectedWood) {
-      setSelectedWood(productConfigurations[0].wood);
-      const firstAvailableStain = productConfigurations[0].stains.find((s: any) => s.inStock);
-      if (firstAvailableStain) setSelectedStain(firstAvailableStain.name);
+    const params = new URLSearchParams(window.location.search);
+    const woodParam = params.get('wood');
+    const stainParam = params.get('stain');
+    if (productConfigurations.length === 0) return;
+    const targetWood = woodParam && productConfigurations.find(c => c.wood === woodParam) ? woodParam : productConfigurations[0].wood;
+    setSelectedWood(targetWood);
+    const targetConfig = productConfigurations.find(c => c.wood === targetWood) || productConfigurations[0];
+    if (stainParam && targetConfig.stains.find((s: any) => s.name === stainParam && s.inStock)) {
+      setSelectedStain(stainParam);
+    } else {
+      const firstAvailable = targetConfig.stains.find((s: any) => s.inStock);
+      if (firstAvailable) setSelectedStain(firstAvailable.name);
     }
-  }, [productConfigurations, selectedWood]);
+  }, [productConfigurations.length]);
+
+  useEffect(() => {
+    setGalleryIndex(0);
+  }, [selectedWood, selectedStain]);
 
   const handleWoodChange = (wood: string) => {
     setSelectedWood(wood);
@@ -53,9 +69,19 @@ export default function ProductDetails() {
   if (!currentConfig) return <div className="container" style={{ padding: '80px 24px' }}>Product not found.</div>;
 
   const currentStainData = currentConfig.stains.find((s: any) => s.name === selectedStain);
-  const getImagePath = () => {
-    return currentStainData ? currentStainData.image : currentConfig.stains[0]?.image;
-  };
+
+  const galleryImages: string[] = [];
+  if (currentStainData) {
+    if (currentStainData.gallery && currentStainData.gallery.length > 0) {
+      currentStainData.gallery.forEach((g: any) => {
+        if (g.url) galleryImages.push(g.url);
+      });
+    } else if (currentStainData.image) {
+      galleryImages.push(currentStainData.image);
+    }
+  } else if (currentConfig.stains[0]?.image) {
+    galleryImages.push(currentConfig.stains[0].image);
+  }
 
   const getStainColor = (name: string) => {
     const n = name.toLowerCase();
@@ -75,11 +101,43 @@ export default function ProductDetails() {
     <div className="container">
       <div className="grid-layout">
         <div className="product-showcase">
-          <div className="image-container" style={{ backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '500px' }}>
-            {getImagePath() ? (
-               <img src={getImagePath()} alt={currentConfig.cribName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <div className="image-container product-image" style={{ backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '500px', flexDirection: 'column', position: 'relative' }}>
+            {galleryImages.length > 0 ? (
+              <>
+                <img
+                  src={galleryImages[galleryIndex]}
+                  alt={currentConfig.cribName}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer', position: 'absolute', inset: 0 }}
+                  onClick={() => setLightboxOpen(true)}
+                />
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }}
+                      style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                    >
+                      <span className="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }}
+                      style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                    >
+                      <span className="material-symbols-outlined">chevron_right</span>
+                    </button>
+                    <div style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px', zIndex: 2 }}>
+                      {galleryImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={(e) => { e.stopPropagation(); setGalleryIndex(i); }}
+                          style={{ width: i === galleryIndex ? '20px' : '8px', height: '8px', borderRadius: '4px', border: 'none', backgroundColor: i === galleryIndex ? 'var(--primary)' : 'var(--outline-variant)', cursor: 'pointer', transition: 'all 0.2s' }}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
             ) : (
-               <div style={{ padding: '48px', textAlign: 'center', color: 'var(--error)' }}>Out of Stock</div>
+              <div style={{ padding: '48px', textAlign: 'center', color: 'var(--error)' }}>Out of Stock</div>
             )}
             <div className="badges">
               <span className="badge badge-outline">Handcrafted</span>
@@ -87,6 +145,29 @@ export default function ProductDetails() {
             </div>
           </div>
 
+          {galleryImages.length > 1 && (
+            <div style={{ display: 'flex', gap: '8px', marginTop: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {galleryImages.map((url, i) => (
+                <img
+                  key={i}
+                  src={url}
+                  alt=""
+                  onClick={() => setGalleryIndex(i)}
+                  style={{
+                    width: '72px',
+                    height: '72px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    border: i === galleryIndex ? '2px solid var(--primary)' : '2px solid transparent',
+                    opacity: i === galleryIndex ? 1 : 0.6,
+                    transition: 'all 0.2s',
+                    flexShrink: 0,
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="configuration-panel">
@@ -223,18 +304,51 @@ export default function ProductDetails() {
                   wood: selectedWood,
                   stainName: selectedStain,
                   price: basePrice + addition,
-                  image: getImagePath() || '',
+                  image: galleryImages[0] || '',
                   quantity: 1
                 });
-                alert("Added to cart!");
+                setShowCartPopup(true);
               }}
             >
               {selectedStain ? "ADD TO CART" : "OUT OF STOCK"}
             </button>
             <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • Handcrafted for you</p>
           </section>
+
+          {showCartPopup && (
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowCartPopup(false)}>
+              <div style={{ backgroundColor: 'var(--surface)', borderRadius: '16px', padding: '40px', maxWidth: '420px', width: '90%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--primary)', marginBottom: '16px' }}>check_circle</span>
+                <h2 className="headline-md" style={{ marginBottom: '8px' }}>Added to Cart!</h2>
+                <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>{currentConfig.cribName} — {selectedWood.replace(/([A-Z])/g, ' $1').trim()} / {selectedStain}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <Link to="/checkout" className="add-to-cart" style={{ width: '100%', padding: '14px 0', textAlign: 'center', textDecoration: 'none' }}>Go to Cart</Link>
+                  <button onClick={() => setShowCartPopup(false)} style={{ background: 'none', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '14px', cursor: 'pointer', color: 'var(--on-surface)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.08em' }}>Continue Shopping</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {lightboxOpen && galleryImages.length > 0 && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => setLightboxOpen(false)}>
+          <button onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+            <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>close</span>
+          </button>
+          <img src={galleryImages[galleryIndex]} alt="" style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }} onClick={e => e.stopPropagation()} />
+          {galleryImages.length > 1 && (
+            <>
+              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '48px', height: '48px', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_left</span>
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '48px', height: '48px', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_right</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,10 +1,12 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Header from './components/Header';
 import Gallery from './pages/Gallery';
 import ProductDetails from './pages/ProductDetails';
 import Showroom from './pages/Showroom';
 import Checkout from './pages/Checkout';
+import OrderConfirmation from './pages/OrderConfirmation';
 import Admin from './pages/Admin';
+import ImageManager from './pages/ImageManager';
 
 import { CartProvider } from './context/CartContext';
 
@@ -40,33 +42,51 @@ function App() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/images" element={<ImageManager />} />
         </Routes>
       </main>
       
+      {/* Mobile Bottom Navigation */}
+      <nav className="bottom-nav">
+        <Link to="/" className="nav-item">
+          <span className="material-symbols-outlined">store</span>
+          <span className="nav-label">Showroom</span>
+        </Link>
+        <Link to="/gallery" className="nav-item">
+          <span className="material-symbols-outlined">collections_bookmark</span>
+          <span className="nav-label">Gallery</span>
+        </Link>
+        <Link to="/checkout" className="nav-item" style={{ position: 'relative' }}>
+          <span className="material-symbols-outlined">shopping_bag</span>
+          <span className="nav-label">Cart</span>
+        </Link>
+      </nav>
+
       <footer style={{ backgroundColor: 'var(--surface-container-low)', marginTop: '96px', borderTop: '1px solid var(--outline-variant)', padding: '64px 24px' }}>
          <div className="container">
-            <div style={{ 
-               backgroundColor: 'var(--surface-container)', 
-               padding: '48px', 
-               borderRadius: '16px', 
-               marginBottom: '64px',
-               textAlign: 'center',
-               border: '1px solid var(--outline-variant)'
-            }}>
-               <h2 className="headline-md" style={{ marginBottom: '8px' }}>Join Our Community</h2>
-               <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>Subscribe for exclusive offers and design inspiration.</p>
-               <form style={{ display: 'flex', gap: '12px', justifyContent: 'center', maxWidth: '500px', margin: '0 auto' }} onSubmit={e => e.preventDefault()}>
-                  <input 
-                     type="email" 
-                     placeholder="Enter your email" 
-                     style={{ flex: 1, padding: '12px 20px', borderRadius: '8px', border: '1px solid var(--outline-variant)', backgroundColor: 'var(--surface)' }}
-                  />
-                  <button className="add-to-cart" style={{ width: 'auto', padding: '12px 32px' }}>Subscribe</button>
-               </form>
-            </div>
+             <div className="footer-newsletter" style={{ 
+                backgroundColor: 'var(--surface-container)', 
+                padding: '48px', 
+                borderRadius: '16px', 
+                marginBottom: '64px',
+                textAlign: 'center',
+                border: '1px solid var(--outline-variant)'
+             }}>
+                <h2 className="headline-md" style={{ marginBottom: '8px' }}>Join Our Community</h2>
+                <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>Subscribe for exclusive offers and design inspiration.</p>
+                <form onSubmit={e => e.preventDefault()}>
+                   <input 
+                      type="email" 
+                      placeholder="Enter your email" 
+                      style={{ flex: 1, padding: '12px 20px', borderRadius: '8px', border: '1px solid var(--outline-variant)', backgroundColor: 'var(--surface)' }}
+                   />
+                   <button className="add-to-cart" style={{ width: 'auto', padding: '12px 32px' }}>Subscribe</button>
+                </form>
+             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'start' }}>
+            <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', alignItems: 'start' }}>
                <div>
                   <span className="brand-title" style={{ fontSize: '24px', display: 'block', marginBottom: '16px' }}>Heirloom Cribs</span>
                   <p className="body-md text-on-surface-variant" style={{ maxWidth: '400px' }}>Handcrafted for generations. We believe in the tactile beauty of natural materials and the quiet confidence of master woodworking.</p>

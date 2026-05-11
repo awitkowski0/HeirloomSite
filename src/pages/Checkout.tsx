@@ -2,14 +2,14 @@ import { useState, useEffect } from 'react';
 
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { Link } from 'react-router-dom';
-import { useAction } from "convex/react";
+import { Link, useNavigate } from 'react-router-dom';
+import { useAction, useMutation } from "convex/react";
 import { useCart } from '../context/CartContext';
 import { api } from "../../convex/_generated/api";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_TYooMQauvdEDq54NiTphI7jx');
 
-function StripeCheckoutForm({ onSuccess }: { onSuccess: () => void }) {
+function StripeCheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId: string) => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -27,7 +27,7 @@ function StripeCheckoutForm({ onSuccess }: { onSuccess: () => void }) {
     if (error) {
       alert(error.message);
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      onSuccess();
+      onSuccess(paymentIntent.id);
     }
     setIsProcessing(false);
   };
@@ -49,14 +49,26 @@ function StripeCheckoutForm({ onSuccess }: { onSuccess: () => void }) {
 }
 
 export default function Checkout() {
-  const { cart, subtotal: cartSubtotal } = useCart();
+  const { cart, subtotal: cartSubtotal, clearCart, removeFromCart } = useCart();
+  const navigate = useNavigate();
 
   const paymentProvider = 'stripe';
   
   const [clientSecret, setClientSecret] = useState('');
+  const [clientSecretError, setClientSecretError] = useState('');
+  const [isLoadingSecret, setIsLoadingSecret] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   
+  const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [zip, setZip] = useState('');
+  
   const createPaymentIntent = useAction(api.stripe.createPaymentIntent);
+  const saveOrder = useMutation(api.orders.save);
   
   const shipping = cart.length > 0 ? 150 : 0;
   const tax = Math.round(cartSubtotal * 0.08);
@@ -64,9 +76,19 @@ export default function Checkout() {
 
   useEffect(() => {
     if (paymentProvider === 'stripe' && finalTotal > 0) {
+      setClientSecret('');
+      setClientSecretError('');
+      setIsLoadingSecret(true);
       createPaymentIntent({ amount: finalTotal * 100, currency: 'usd' })
-      .then(data => setClientSecret(data.clientSecret || ''))
-      .catch(console.error);
+      .then(data => {
+        setClientSecret(data.clientSecret || '');
+        setIsLoadingSecret(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setClientSecretError('Failed to initialize payment. Please try again or contact support.');
+        setIsLoadingSecret(false);
+      });
     }
   }, [paymentProvider, finalTotal]);
 
@@ -80,8 +102,37 @@ export default function Checkout() {
     );
   }
 
-  const handleSuccess = () => {
-    alert("Transaction completed successfully! Your heirloom is being prepared.");
+  const handleSuccess = async (paymentIntentId: string) => {
+    try {
+      const orderId = await saveOrder({
+        email,
+        firstName,
+        lastName,
+        address,
+        city,
+        state,
+        zip,
+        items: cart.map(item => ({
+          cribName: item.cribName,
+          wood: item.wood,
+          stainName: item.stainName,
+          price: item.price,
+          image: item.image,
+          quantity: item.quantity,
+        })),
+        subtotal: cartSubtotal,
+        shipping,
+        tax,
+        total: finalTotal,
+        paymentIntentId,
+        status: 'confirmed',
+      });
+      clearCart();
+      navigate(`/order-confirmation/${orderId}`);
+    } catch (err) {
+      console.error("Failed to save order", err);
+      alert("Payment succeeded but we couldn't save your order. Please contact support.");
+    }
   };
 
   return (
@@ -98,7 +149,7 @@ export default function Checkout() {
                <h2 className="headline-md" style={{ marginBottom: '24px' }}>Contact Information</h2>
                <div>
                   <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>EMAIL ADDRESS</label>
-                  <input type="email" placeholder="email@example.com" style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                   <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                </div>
             </section>
 
@@ -107,28 +158,28 @@ export default function Checkout() {
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                  <div>
                     <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>FIRST NAME</label>
-                    <input type="text" style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
-                 </div>
-                 <div>
-                    <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>LAST NAME</label>
-                    <input type="text" style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                     <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                  </div>
+                  <div>
+                     <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>LAST NAME</label>
+                     <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                  </div>
                  <div style={{ gridColumn: 'span 2' }}>
                     <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>ADDRESS</label>
-                    <input type="text" placeholder="123 Heritage Lane" style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                     <input type="text" placeholder="123 Heritage Lane" value={address} onChange={e => setAddress(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                  </div>
                  <div>
                     <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>CITY</label>
-                    <input type="text" style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
-                 </div>
-                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                    <div>
-                        <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>STATE</label>
-                        <input type="text" style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
-                    </div>
-                    <div>
-                        <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>ZIP CODE</label>
-                        <input type="text" style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                     <input type="text" value={city} onChange={e => setCity(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                     <div>
+                         <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>STATE</label>
+                         <input type="text" value={state} onChange={e => setState(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                     </div>
+                     <div>
+                         <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>ZIP CODE</label>
+                         <input type="text" value={zip} onChange={e => setZip(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                     </div>
                  </div>
                </div>
@@ -180,24 +231,35 @@ export default function Checkout() {
                </label>
 
                <h2 className="headline-md" style={{ marginBottom: '24px', opacity: agreedToTerms ? 1 : 0.5 }}>Payment Method</h2>
-               
-               {!paymentProvider && <p>Loading payment provider...</p>}
 
+                {isLoadingSecret && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '24px', justifyContent: 'center' }}>
+                    <div style={{ width: '20px', height: '20px', border: '2px solid var(--outline-variant)', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    <span className="body-md text-on-surface-variant">Preparing payment...</span>
+                  </div>
+                )}
 
+                {clientSecretError && (
+                  <div style={{ padding: '24px', backgroundColor: '#fef2f2', borderRadius: '8px', border: '1px solid #fecaca', marginBottom: '16px' }}>
+                    <p className="body-md" style={{ color: '#991b1b' }}>{clientSecretError}</p>
+                  </div>
+                )}
 
-               {!agreedToTerms && <p className="body-sm text-secondary" style={{ marginBottom: '16px' }}>Please agree to the terms above to enable payment.</p>}
+                {!agreedToTerms && !isLoadingSecret && !clientSecretError && (
+                  <p className="body-sm text-secondary" style={{ marginBottom: '16px' }}>Please agree to the terms above to enable payment.</p>
+                )}
 
-               {paymentProvider === 'stripe' && clientSecret && (
-                 <div style={{ opacity: agreedToTerms ? 1 : 0.5, pointerEvents: agreedToTerms ? 'auto' : 'none' }}>
-                   <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'flat' } }}>
-                      <StripeCheckoutForm onSuccess={handleSuccess} />
-                   </Elements>
-                 </div>
-               )}
+                {paymentProvider === 'stripe' && clientSecret && (
+                  <div style={{ opacity: agreedToTerms ? 1 : 0.5, pointerEvents: agreedToTerms ? 'auto' : 'none' }}>
+                    <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'flat' } }}>
+                       <StripeCheckoutForm onSuccess={handleSuccess} />
+                    </Elements>
+                  </div>
+                )}
             </section>
           </div>
 
-          <div style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid var(--surface-container-highest)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+          <div className="checkout-trust" style={{ marginTop: '48px', paddingTop: '32px', borderTop: '1px solid var(--surface-container-highest)' }}>
              <div style={{ display: 'flex', gap: '16px' }}>
                 <span className="material-symbols-outlined text-primary" style={{ fontSize: '32px' }}>verified</span>
                 <div>
@@ -219,21 +281,28 @@ export default function Checkout() {
           <div style={{ position: 'sticky', top: '100px', backgroundColor: 'var(--surface-container)', padding: '32px', borderRadius: '12px', boxShadow: 'var(--shadow-ambient)' }}>
              <h2 className="headline-md" style={{ marginBottom: '32px' }}>Order Summary</h2>
              
-             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
-                {cart.map((item) => (
-                  <div key={item.id} style={{ display: 'flex', gap: '16px' }}>
-                     <div style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, backgroundColor: 'white' }}>
-                        <img style={{ width: '100%', height: '100%', objectFit: 'contain' }} src={item.image} alt={item.cribName} />
-                     </div>
-                     <div style={{ flexGrow: 1 }}>
-                        <h3 className="body-lg" style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.cribName}</h3>
-                        <p className="label-caps text-on-surface-variant" style={{ fontSize: '10px' }}>
-                          {item.wood.replace(/([A-Z])/g, ' $1').trim()} • {item.stainName}
-                        </p>
-                        <p className="body-md" style={{ marginTop: '4px' }}>${item.price.toLocaleString()}.00 x {item.quantity}</p>
-                     </div>
-                  </div>
-                ))}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '32px' }}>
+                 {cart.map((item) => (
+                   <div key={item.id} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                      <div style={{ width: '80px', height: '80px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, backgroundColor: 'white' }}>
+                         <img style={{ width: '100%', height: '100%', objectFit: 'contain' }} src={item.image} alt={item.cribName} />
+                      </div>
+                      <div style={{ flexGrow: 1 }}>
+                         <h3 className="body-lg" style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.cribName}</h3>
+                         <p className="label-caps text-on-surface-variant" style={{ fontSize: '10px' }}>
+                           {item.wood.replace(/([A-Z])/g, ' $1').trim()} • {item.stainName}
+                         </p>
+                         <p className="body-md" style={{ marginTop: '4px' }}>${item.price.toLocaleString()}.00 x {item.quantity}</p>
+                      </div>
+                      <button
+                        onClick={() => removeFromCart(item.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--on-surface-variant)', fontSize: '18px', lineHeight: 1 }}
+                        title="Remove item"
+                      >
+                        <span className="material-symbols-outlined">close</span>
+                      </button>
+                   </div>
+                 ))}
              </div>
 
              <div style={{ borderTop: '1px solid var(--outline-variant)', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>

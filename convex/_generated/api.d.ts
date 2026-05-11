@@ -8,9 +8,12 @@
  * @module
  */
 
+import type * as images from "../images.js";
 import type * as inventory from "../inventory.js";
+import type * as orders from "../orders.js";
 import type * as settings from "../settings.js";
 import type * as showroom from "../showroom.js";
+import type * as stainTypes from "../stainTypes.js";
 import type * as stripe from "../stripe.js";
 
 import type {
@@ -20,9 +23,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  images: typeof images;
   inventory: typeof inventory;
+  orders: typeof orders;
   settings: typeof settings;
   showroom: typeof showroom;
+  stainTypes: typeof stainTypes;
   stripe: typeof stripe;
 }>;
 

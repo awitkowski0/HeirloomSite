@@ -6,17 +6,43 @@ export const get = query({
   handler: async (ctx, args) => {
     const table = args.useStaged ? "inventory_staged" : "inventory";
     const items = await ctx.db.query(table).collect();
+
+    const allImages = await ctx.db.query("images").collect();
+
     return await Promise.all(items.map(async (item) => {
       const stains = await Promise.all(item.stains.map(async (stain) => {
-        if (stain.image && !stain.image.startsWith('http')) {
+        let imageUrl = stain.image;
+        if (imageUrl && !imageUrl.startsWith('http')) {
           try {
-            const url = await ctx.storage.getUrl(stain.image);
-            return { ...stain, image: url || stain.image };
+            const url = await ctx.storage.getUrl(imageUrl as any);
+            imageUrl = url || imageUrl;
           } catch (e) {
-            return stain;
+            // keep as-is
           }
         }
-        return stain;
+
+        const matchingImages = allImages
+          .filter(img =>
+            img.cribName === item.cribName &&
+            img.wood === item.wood &&
+            img.stainName === stain.name
+          )
+          .sort((a, b) => a.order - b.order);
+
+        const gallery = (await Promise.all(matchingImages.map(async (img) => {
+          try {
+            const url = await ctx.storage.getUrl(img.storageId as any);
+            return url ? { id: img._id, url, originalName: img.originalName } : null;
+          } catch {
+            return null;
+          }
+        }))).filter(Boolean) as { id: string; url: string; originalName: string }[];
+
+        return {
+          ...stain,
+          image: imageUrl || stain.image,
+          gallery: gallery.length > 0 ? gallery : undefined,
+        };
       }));
       return { ...item, stains };
     }));
@@ -68,11 +94,9 @@ export const publish = mutation({
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
     
-    // Wipe live
     const live = await ctx.db.query("inventory").collect();
     for (const doc of live) await ctx.db.delete(doc._id);
     
-    // Copy staged to live
     const staged = await ctx.db.query("inventory_staged").collect();
     for (const item of staged) {
       await ctx.db.insert("inventory", {
@@ -93,6 +117,11 @@ export const updateCribName = mutation({
     const items = await ctx.db.query("inventory_staged").filter(q => q.eq(q.field("cribName"), args.oldName)).collect();
     for (const item of items) {
       await ctx.db.patch(item._id, { cribName: args.newName });
+    }
+
+    const images = await ctx.db.query("images").withIndex("by_crib", q => q.eq("cribName", args.oldName)).collect();
+    for (const img of images) {
+      await ctx.db.patch(img._id, { cribName: args.newName });
     }
   }
 });

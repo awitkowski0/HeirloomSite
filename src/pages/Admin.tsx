@@ -244,7 +244,11 @@ export default function Admin() {
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '48px' }}>
         <h1 className="headline-xl text-primary">Admin Dashboard</h1>
-        <div style={{ display: 'flex', gap: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+           <a href="/admin/images" className="filter-btn" style={{ width: 'auto', padding: '12px 24px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>photo_library</span>
+              Image Manager
+           </a>
            <button onClick={() => setShowAddForm(!showAddForm)} className="filter-btn active" style={{ width: 'auto', padding: '12px 24px' }}>
               {showAddForm ? 'Cancel' : 'Add Product / Variant'}
            </button>

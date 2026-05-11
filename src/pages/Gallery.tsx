@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 export default function Gallery() {
+  const navigate = useNavigate();
   const isStaged = new URLSearchParams(window.location.search).get('mode') === 'staging';
   const inventoryData = useQuery(api.inventory.get, { useStaged: isStaged });
   const loading = inventoryData === undefined;
@@ -15,7 +16,8 @@ export default function Gallery() {
   const updateCribName = useMutation(api.inventory.updateCribName);
   
   const [selectedWood, setSelectedWood] = useState<string>('All Collections');
-  const [hoveredProduct, setHoveredProduct] = useState<string | null>(null);
+  const [selectedStain, setSelectedStain] = useState<string>('All Stains');
+  const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
 
   if (loading) return (
     <div className="container" style={{ padding: '120px 24px', textAlign: 'center', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -50,90 +52,38 @@ export default function Gallery() {
   const products = Array.from(uniqueCribsMap.values());
   const allWoods = Array.from(new Set(inventory.map(i => i.wood)));
 
-  const filteredProducts = selectedWood === 'All Collections' 
-    ? products 
-    : products.filter(p => p.woods.includes(selectedWood));
+  const allStains = (() => {
+    const pool = selectedWood === 'All Collections' ? inventory : inventory.filter(i => i.wood === selectedWood);
+    const names = new Set<string>();
+    pool.forEach(i => i.stains.forEach((s: any) => names.add(s.name)));
+    return Array.from(names);
+  })();
+
+  const getDisplayConfig = (cribName: string) => {
+    const configs = inventory.filter(i => i.cribName === cribName);
+    let config = configs[0];
+    if (selectedWood !== 'All Collections') {
+      config = configs.find(c => c.wood === selectedWood) || config;
+    }
+    let stain = config.stains.find((s: any) => s.inStock);
+    if (selectedStain !== 'All Stains') {
+      stain = config.stains.find((s: any) => s.name === selectedStain && s.inStock) || stain;
+    }
+    return { config, stain };
+  };
 
   return (
     <div style={{ backgroundColor: 'var(--surface-bright)', minHeight: '100vh', paddingBottom: '120px' }}>
-      {/* Hero Header */}
-      <div style={{ 
-        position: 'relative', 
-        padding: '120px 24px 80px', 
-        backgroundColor: 'var(--surface-container-lowest)',
-        borderBottom: '1px solid var(--surface-container-highest)',
-        overflow: 'hidden'
-      }}>
-        {/* Subtle background element */}
-        <div style={{
-          position: 'absolute',
-          top: '-50%', left: '50%',
-          width: '100vw', height: '100vw',
-          transform: 'translate(-50%, 0)',
-          background: 'radial-gradient(circle, rgba(251,221,199,0.2) 0%, rgba(255,255,255,0) 70%)',
-          pointerEvents: 'none',
-          zIndex: 0
-        }} />
-        
-        <div className="container" style={{ position: 'relative', zIndex: 1, textAlign: 'center', maxWidth: '800px' }}>
-          <span className="label-caps" style={{ color: 'var(--secondary)', letterSpacing: '0.2em', marginBottom: '16px', display: 'block' }}>THE ARCHIVE</span>
-          <h1 className="headline-xl text-primary" style={{ fontSize: '56px', letterSpacing: '-0.03em', lineHeight: '1.1', marginBottom: '24px' }}>
-            Curated Elegance,<br/>Handcrafted for Life.
-          </h1>
-          <p className="body-lg text-on-surface-variant" style={{ fontSize: '20px', lineHeight: '1.6', margin: '0 auto' }}>
-            Explore our defining collections. Each silhouette is a testament to timeless design and artisanal integrity, meticulously built to hold your most precious cargo for generations.
-          </p>
-        </div>
-      </div>
-
-      {/* Filter Section */}
-      <div className="container" style={{ paddingTop: '64px', paddingBottom: '48px' }}>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '12px', 
-          flexWrap: 'wrap',
-          backgroundColor: 'var(--surface-container-lowest)',
-          padding: '8px',
-          borderRadius: '100px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
-          border: '1px solid var(--surface-container-highest)',
-          width: 'fit-content',
-          margin: '0 auto'
-        }}>
-          <button 
-            style={{
-              padding: '12px 24px',
-              borderRadius: '100px',
-              border: 'none',
-              background: selectedWood === 'All Collections' ? 'var(--primary)' : 'transparent',
-              color: selectedWood === 'All Collections' ? 'var(--on-primary)' : 'var(--on-surface-variant)',
-              fontFamily: 'var(--font-label)',
-              fontSize: '12px',
-              fontWeight: '700',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            }}
-            onClick={() => setSelectedWood('All Collections')}
-          >
-            The Full Archive
-          </button>
-          
-          {/* Divider */}
-          <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--outline-variant)' }} />
-
-          {allWoods.map(w => (
+      <div className="container" style={{ paddingTop: '20px', paddingBottom: '48px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <div className="filter-pills">
             <button 
-              key={w as string}
               style={{
                 padding: '12px 24px',
                 borderRadius: '100px',
                 border: 'none',
-                background: selectedWood === w ? 'var(--primary)' : 'transparent',
-                color: selectedWood === w ? 'var(--on-primary)' : 'var(--on-surface-variant)',
+                background: selectedWood === 'All Collections' ? 'var(--primary)' : 'transparent',
+                color: selectedWood === 'All Collections' ? 'var(--on-primary)' : 'var(--on-surface-variant)',
                 fontFamily: 'var(--font-label)',
                 fontSize: '12px',
                 fontWeight: '700',
@@ -142,90 +92,160 @@ export default function Gallery() {
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
               }}
-              onClick={() => setSelectedWood(w as string)}
+              onClick={() => { setSelectedWood('All Collections'); setSelectedStain('All Stains'); }}
             >
-              {(w as string).replace(/([A-Z])/g, ' $1').trim()}
+              Our Cribs
             </button>
-          ))}
+            
+            <div style={{ width: '1px', height: '24px', backgroundColor: 'var(--outline-variant)' }} />
+
+            {allWoods.map(w => (
+              <button 
+                key={w as string}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '100px',
+                  border: 'none',
+                  background: selectedWood === w ? 'var(--primary)' : 'transparent',
+                  color: selectedWood === w ? 'var(--on-primary)' : 'var(--on-surface-variant)',
+                  fontFamily: 'var(--font-label)',
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                }}
+                onClick={() => { setSelectedWood(w as string); setSelectedStain('All Stains'); }}
+              >
+                {(w as string).replace(/([A-Z])/g, ' $1').trim()}
+              </button>
+            ))}
+          </div>
+
+          {selectedWood !== 'All Collections' && allStains.length > 0 && (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              gap: '8px', 
+              flexWrap: 'wrap',
+            }}>
+              {allStains.map(stain => (
+                <button 
+                  key={stain}
+                  style={{
+                    padding: '8px 20px',
+                    borderRadius: '100px',
+                    border: '1px solid var(--outline-variant)',
+                    background: selectedStain === stain ? 'var(--secondary-container)' : 'transparent',
+                    color: selectedStain === stain ? 'var(--on-secondary-container)' : 'var(--on-surface-variant)',
+                    fontFamily: 'var(--font-label)',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onClick={() => setSelectedStain(selectedStain === stain ? 'All Stains' : stain)}
+                >
+                  {stain}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Premium Product Grid */}
       <div className="container" style={{ padding: '0 24px' }}>
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', 
-          gap: '40px' 
-        }}>
-          {filteredProducts.map(p => (
-            <Link 
-              to={`/product/${p.id}`} 
-              key={p.id} 
-              onMouseEnter={() => setHoveredProduct(p.id)}
-              onMouseLeave={() => setHoveredProduct(null)}
+        <div className="gallery-grid">
+          {products.map(p => {
+            const { config, stain } = getDisplayConfig(p.name);
+            const displayImage = stain?.image || p.img;
+            const displayPrice = config ? config.basePrice + (stain?.priceAddition || 0) : p.minPrice;
+            const displayWood = config ? config.wood : p.woods[0];
+            const hasActiveSelection = selectedWood !== 'All Collections' || selectedStain !== 'All Stains';
+            const isExpanded = expandedProduct === p.id;
+
+            return (
+            <div 
+              key={p.id}
+              className="product-card-wrapper"
+              onClick={() => {
+                if (window.innerWidth < 768) {
+                  if (!isExpanded) {
+                    setExpandedProduct(p.id);
+                    return;
+                  }
+                }
+                const params = new URLSearchParams();
+                if (selectedWood !== 'All Collections') params.set('wood', selectedWood);
+                if (selectedStain !== 'All Stains') params.set('stain', selectedStain);
+                const qs = params.toString();
+                navigate(`/product/${p.id}${qs ? `?${qs}` : ''}`);
+              }}
               style={{ 
-                textDecoration: 'none', 
-                color: 'inherit',
+                cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column'
               }}
             >
-              <div style={{ 
-                backgroundColor: 'var(--surface-container-lowest)', 
-                borderRadius: '16px',
-                overflow: 'hidden',
-                position: 'relative',
-                height: '420px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '24px',
-                border: '1px solid var(--surface-container-highest)',
-                boxShadow: hoveredProduct === p.id 
-                  ? '0 20px 40px rgba(50, 34, 20, 0.08)' 
-                  : '0 4px 10px rgba(50, 34, 20, 0.02)',
-                transition: 'all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                transform: hoveredProduct === p.id ? 'translateY(-8px)' : 'translateY(0)'
-              }}>
+              <div className="product-card">
                 
-                {/* Image scaling effect */}
-                <div style={{
-                  width: '100%', height: '100%',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  transform: hoveredProduct === p.id ? 'scale(1.05)' : 'scale(1)',
-                  transition: 'transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                }}>
-                  {p.img ? (
-                    <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))' }} />
+                {/* Image */}
+                <div className="product-card-img-wrap">
+                  {displayImage ? (
+                    <img key={selectedWood + selectedStain} src={displayImage} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))' }} />
                   ) : (
                     <div style={{ color: 'var(--outline-variant)' }}>Image Unavailable</div>
                   )}
                 </div>
 
+                {/* Mobile: Name overlay on tap */}
+                <div className={`product-info-overlay ${isExpanded ? 'visible' : ''}`}>
+                  <h3 className="headline-md" style={{ color: 'var(--primary)', marginBottom: '4px' }}>
+                    {p.name}
+                  </h3>
+                  <p className="body-md" style={{ color: 'var(--on-surface-variant)', fontWeight: '500' }}>
+                    {hasActiveSelection ? `$${displayPrice.toLocaleString()}` : `From $${p.minPrice.toLocaleString()}`}
+                  </p>
+                </div>
+
                 {/* Floating View Details Button */}
-                <div style={{
-                  position: 'absolute',
-                  bottom: '24px', left: '50%',
-                  transform: `translate(-50%, ${hoveredProduct === p.id ? '0' : '20px'})`,
-                  opacity: hoveredProduct === p.id ? 1 : 0,
-                  transition: 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  backdropFilter: 'blur(8px)',
-                  padding: '12px 24px',
-                  borderRadius: '100px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                <div className="view-details-btn" onClick={(e) => {
+                  e.stopPropagation();
+                  const params = new URLSearchParams();
+                  if (selectedWood !== 'All Collections') params.set('wood', selectedWood);
+                  if (selectedStain !== 'All Stains') params.set('stain', selectedStain);
+                  const qs = params.toString();
+                  navigate(`/product/${p.id}${qs ? `?${qs}` : ''}`);
                 }}>
                   <span className="label-caps" style={{ color: 'var(--primary)', letterSpacing: '0.1em' }}>View Details</span>
                   <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--primary)' }}>arrow_forward</span>
                 </div>
               </div>
 
-              <div style={{ padding: '24px 8px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+              {/* Desktop text section (hidden on mobile) */}
+              <div className="product-card-text" style={{ padding: '24px 8px 0' }}>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                  {p.woods.slice(0, 3).map((w: string) => (
+                  {hasActiveSelection ? (
+                     <span key={displayWood} style={{ 
+                       fontSize: '10px', 
+                       fontFamily: 'var(--font-label)',
+                       letterSpacing: '0.05em',
+                       textTransform: 'uppercase',
+                       color: 'var(--on-surface-variant)',
+                       padding: '4px 8px',
+                       border: '1px solid var(--outline-variant)',
+                       borderRadius: '4px'
+                     }}>
+                       {displayWood.replace(/([A-Z])/g, ' $1').trim()}
+                       {selectedStain !== 'All Stains' && <span> / {selectedStain}</span>}
+                     </span>
+                  ) : (
+                    p.woods.slice(0, 3).map((w: string) => (
                      <span key={w} style={{ 
                        fontSize: '10px', 
                        fontFamily: 'var(--font-label)',
@@ -238,8 +258,9 @@ export default function Gallery() {
                      }}>
                        {w.replace(/([A-Z])/g, ' $1').trim()}
                      </span>
-                  ))}
-                  {p.woods.length > 3 && <span style={{ fontSize: '10px', color: 'var(--outline)' }}>+{p.woods.length - 3}</span>}
+                    ))
+                  )}
+                  {!hasActiveSelection && p.woods.length > 3 && <span style={{ fontSize: '10px', color: 'var(--outline)' }}>+{p.woods.length - 3}</span>}
                 </div>
                 
                 <h3 
@@ -267,13 +288,14 @@ export default function Gallery() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ height: '1px', width: '24px', backgroundColor: 'var(--primary)', opacity: 0.2 }} />
                   <p className="body-lg" style={{ color: 'var(--primary)', fontWeight: '500' }}>
-                    From ${p.minPrice.toLocaleString()}
+                    {hasActiveSelection ? `$${displayPrice.toLocaleString()}` : `From $${p.minPrice.toLocaleString()}`}
                   </p>
                   <div style={{ height: '1px', width: '24px', backgroundColor: 'var(--primary)', opacity: 0.2 }} />
                 </div>
               </div>
-            </Link>
-          ))}
+            </div>
+            );
+          })}
         </div>
       </div>
     </div>
