@@ -40,9 +40,21 @@ function App() {
           <span className="material-symbols-outlined">store</span>
           <span className="nav-label">Showroom</span>
         </Link>
+        <Link to="/gallery" className="nav-item">
+          <span className="material-symbols-outlined">photo_library</span>
+          <span className="nav-label">Gallery</span>
+        </Link>
         <Link to="/products" className="nav-item">
           <span className="material-symbols-outlined">collections_bookmark</span>
           <span className="nav-label">Products</span>
+        </Link>
+        <Link to="/registry/new" className="nav-item">
+          <span className="material-symbols-outlined">card_giftcard</span>
+          <span className="nav-label">Registry</span>
+        </Link>
+        <Link to="/contact" className="nav-item">
+          <span className="material-symbols-outlined">mail</span>
+          <span className="nav-label">Contact</span>
         </Link>
         <Link to="/checkout" className="nav-item" style={{ position: 'relative' }}>
           <span className="material-symbols-outlined">shopping_bag</span>

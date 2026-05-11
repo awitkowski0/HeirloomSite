@@ -119,6 +119,7 @@ export const populateFromInventory = mutation({
 
           if (existingImages.length === 0) {
             await ctx.db.insert("images", {
+              productName: item.cribName,
               cribName: item.cribName,
               wood: item.wood,
               stainName: stain.name,

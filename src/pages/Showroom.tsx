@@ -25,9 +25,9 @@ export default function Showroom() {
   const resolvedFeatured = (() => {
     if (featured.length > 0) return featured;
     if (!inventory.length) return [];
-    const unique = [...new Map(inventory.map((i: any) => [i.cribName, i])).values()];
+    const unique = [...new Map(inventory.map((i: any) => [(i.productName ?? i.cribName), i])).values()];
     const shuffled = [...unique].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 8).map((i: any) => ({ cribName: i.cribName, stainName: undefined }));
+    return shuffled.slice(0, 8).map((i: any) => ({ productName: i.productName ?? i.cribName, cribName: i.cribName, stainName: undefined }));
   })();
 
   useEffect(() => {
@@ -103,10 +103,10 @@ export default function Showroom() {
   };
 
   const addFeatured = async () => {
-    const cribName = prompt("Enter crib name (e.g. Mission Crib):");
-    if (!cribName) return;
+    const productName = prompt("Enter product name (e.g. Mission Crib):");
+    if (!productName) return;
     const stainName = prompt("Enter stain name to show (default: Natural):") || undefined;
-    await saveAll({ featured: [...featured, { cribName, stainName }] });
+    await saveAll({ featured: [{ productName, cribName: productName, stainName }] });
   };
 
   const removeFeatured = async (index: number) => {
@@ -115,11 +115,11 @@ export default function Showroom() {
 
   const editFeatured = async (index: number) => {
     const item = featured[index];
-    const cribName = prompt("Enter crib name:", item.cribName);
-    if (!cribName) return;
+    const productName = prompt("Enter product name:", item.productName ?? item.cribName);
+    if (!productName) return;
     const stainName = prompt("Enter stain name (or blank for default):", item.stainName || '') || undefined;
     const newFeatured = [...featured];
-    newFeatured[index] = { cribName, stainName };
+    newFeatured[index] = { productName, cribName: productName, stainName };
     await saveAll({ featured: newFeatured });
   };
 
@@ -132,7 +132,8 @@ export default function Showroom() {
   };
 
   const getFeaturedProduct = (item: any) => {
-    const configs = inventory.filter((i: any) => i.cribName === item.cribName);
+    const pName = item.productName ?? item.cribName;
+    const configs = inventory.filter((i: any) => (i.productName ?? i.cribName) === pName);
     if (configs.length === 0) return null;
     const config = configs[0];
     const stainName = item.stainName || 'Natural';
@@ -234,13 +235,13 @@ export default function Showroom() {
                       if (!product) return;
                       const params = new URLSearchParams();
                       if (product.displayStainName) params.set('stain', product.displayStainName);
-                      navigate(`/product/${encodeURIComponent(item.cribName)}?${params.toString()}`);
+                      navigate(`/product/${encodeURIComponent(item.productName ?? item.cribName)}?${params.toString()}`);
                     }}
                     style={{ position: 'relative', ...(notFound ? { border: '2px dashed var(--error)', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}) }}
                   >
                     {notFound ? (
                       <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <p style={{ color: 'var(--error)', marginBottom: '12px' }}>"{item.cribName}" not found</p>
+                        <p style={{ color: 'var(--error)', marginBottom: '12px' }}>"{item.productName ?? item.cribName}" not found</p>
                         {isEditMode && (
                           <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                             {!isFallback && <button className="admin-edit-btn" onClick={(e) => { e.stopPropagation(); editFeatured(i); }}>Edit</button>}
@@ -252,13 +253,13 @@ export default function Showroom() {
                       <>
                         <div className="featured-card-img">
                           {product.displayImage ? (
-                            <img src={product.displayImage} alt={item.cribName} />
+                            <img src={product.displayImage} alt={item.productName ?? item.cribName} />
                           ) : (
                             <div style={{ color: 'var(--outline-variant)', fontSize: '14px' }}>No Image</div>
                           )}
                         </div>
                         <div className="featured-card-body">
-                          <h3>{item.cribName}</h3>
+                          <h3>{item.productName ?? item.cribName}</h3>
                           <p className="price">${product.displayPrice.toLocaleString()}</p>
                         </div>
                         {isEditMode && !isFallback && (

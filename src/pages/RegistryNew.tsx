@@ -13,32 +13,33 @@ export default function RegistryNew() {
   const [creatorName, setCreatorName] = useState('');
   const [eventDate, setEventDate] = useState('');
   const [message, setMessage] = useState('');
-  const [selectedItems, setSelectedItems] = useState<{ cribName: string; wood: string; stainName: string; title: string }[]>([]);
+  const [selectedItems, setSelectedItems] = useState<{ productName: string; wood: string; stainName: string; title: string }[]>([]);
   const [creating, setCreating] = useState(false);
   const [slug, setSlug] = useState('');
 
   const products = inventory.reduce((acc: any[], item: any) => {
-    if (!acc.find(p => p.cribName === item.cribName)) {
+    const pName = item.productName ?? item.cribName;
+    if (!acc.find(p => p.productName === pName)) {
       acc.push({
-        cribName: item.cribName,
-        woods: [...new Set(inventory.filter((i: any) => i.cribName === item.cribName).map((i: any) => i.wood))],
+        productName: pName,
+        woods: [...new Set(inventory.filter((i: any) => (i.productName ?? i.cribName) === pName).map((i: any) => i.wood))],
         stains: item.stains || [],
       });
     }
     return acc;
   }, []);
 
-  const toggleItem = (cribName: string) => {
-    const item = inventory.find((i: any) => i.cribName === cribName);
+  const toggleItem = (productName: string) => {
+    const item = inventory.find((i: any) => (i.productName ?? i.cribName) === productName);
     if (!item) return;
     const stain = item.stains?.find((s: any) => s.inStock) || item.stains?.[0];
     if (!stain) return;
     const wood = item.wood;
-    const exists = selectedItems.find(s => s.cribName === cribName);
+    const exists = selectedItems.find(s => s.productName === productName);
     if (exists) {
-      setSelectedItems(prev => prev.filter(s => s.cribName !== cribName));
+      setSelectedItems(prev => prev.filter(s => s.productName !== productName));
     } else {
-      setSelectedItems(prev => [...prev, { cribName, wood, stainName: stain.name, title: item.description || cribName }]);
+      setSelectedItems(prev => [...prev, { productName, wood, stainName: stain.name, title: item.description || productName }]);
     }
   };
 
@@ -49,7 +50,7 @@ export default function RegistryNew() {
       creatorName,
       eventDate: eventDate || undefined,
       message: message || undefined,
-      items: selectedItems.map(i => ({ cribName: i.cribName, wood: i.wood, stainName: i.stainName })),
+      items: selectedItems.map(i => ({ productName: i.productName, wood: i.wood, stainName: i.stainName })),
     });
     setSlug(result);
     setCreating(false);
@@ -104,15 +105,15 @@ export default function RegistryNew() {
               <h2 className="headline-sm" style={{ fontSize: '18px', marginBottom: '16px' }}>Select Items</h2>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px' }}>
                 {products.map((p: any) => {
-                  const selected = selectedItems.some(s => s.cribName === p.cribName);
+                  const selected = selectedItems.some(s => s.productName === p.productName);
                   return (
-                    <div key={p.cribName} onClick={() => toggleItem(p.cribName)}
+                    <div key={p.productName} onClick={() => toggleItem(p.productName)}
                       style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '14px 16px', borderRadius: '10px', cursor: 'pointer', backgroundColor: selected ? 'var(--primary-container)' : 'var(--surface)', border: `1px solid ${selected ? 'var(--primary)' : 'var(--outline-variant)'}`, transition: 'all 0.15s' }}>
                       <div style={{ width: '20px', height: '20px', borderRadius: '4px', border: `2px solid ${selected ? 'var(--primary)' : 'var(--outline-variant)'}`, backgroundColor: selected ? 'var(--primary)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         {selected && <span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'white' }}>check</span>}
                       </div>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '14px', fontWeight: 600 }}>{p.cribName}</p>
+                        <p style={{ fontSize: '14px', fontWeight: 600 }}>{p.productName}</p>
                         <p style={{ fontSize: '11px', color: 'var(--on-surface-variant)' }}>{p.woods.length} wood option{p.woods.length > 1 ? 's' : ''} · {p.stains.length} stain finish{p.stains.length > 1 ? 'es' : ''}</p>
                       </div>
                     </div>

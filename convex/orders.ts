@@ -11,7 +11,8 @@ export const save = mutation({
     state: v.string(),
     zip: v.string(),
     items: v.array(v.object({
-      cribName: v.string(),
+      productName: v.optional(v.string()),
+      cribName: v.optional(v.string()),
       wood: v.string(),
       stainName: v.string(),
       price: v.number(),
@@ -26,6 +27,15 @@ export const save = mutation({
     status: v.string(),
   },
   handler: async (ctx, args) => {
+    const items = args.items.map(item => ({
+      productName: item.productName ?? item.cribName,
+      cribName: item.cribName ?? item.productName,
+      wood: item.wood,
+      stainName: item.stainName,
+      price: item.price,
+      image: item.image,
+      quantity: item.quantity,
+    }));
     const orderId = await ctx.db.insert("orders", {
       email: args.email,
       firstName: args.firstName,
@@ -34,7 +44,7 @@ export const save = mutation({
       city: args.city,
       state: args.state,
       zip: args.zip,
-      items: args.items,
+      items,
       subtotal: args.subtotal,
       shipping: args.shipping,
       tax: args.tax,

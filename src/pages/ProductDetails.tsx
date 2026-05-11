@@ -20,7 +20,7 @@ export default function ProductDetails() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const decodedId = decodeURIComponent(id || '');
-  const productConfigurations = inventory.filter(i => i.cribName === decodedId);
+  const productConfigurations = inventory.filter((i: any) => (i.productName ?? i.cribName) === decodedId);
   const currentConfig = productConfigurations.find(c => c.wood === selectedWood) || productConfigurations[0];
 
   // Read preselected wood/stain from gallery query params
@@ -47,6 +47,7 @@ export default function ProductDetails() {
   useEffect(() => {
     if (currentConfig && selectedStain) {
       posthog.capture('product_view', {
+        productName: currentConfig.productName ?? currentConfig.cribName,
         cribName: currentConfig.cribName,
         wood: selectedWood,
         stain: selectedStain,
@@ -109,7 +110,7 @@ export default function ProductDetails() {
               <>
                 <img
                   src={galleryImages[galleryIndex]}
-                  alt={currentConfig.cribName}
+                  alt={currentConfig.productName ?? currentConfig.cribName}
                   style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer', position: 'absolute', inset: 0 }}
                   onClick={() => setLightboxOpen(true)}
                 />
@@ -177,7 +178,7 @@ export default function ProductDetails() {
           <section className="pricing-section">
             <div>
               <h2 className="headline-xl">
-                {currentConfig.cribName}
+                {currentConfig.productName ?? currentConfig.cribName}
               </h2>
               <p className="body-lg subtitle" style={{ marginTop: '12px', color: 'var(--on-surface-variant)' }}>
                 {currentConfig.description || "A legacy piece for the modern nursery."}
@@ -260,10 +261,11 @@ export default function ProductDetails() {
               disabled={!selectedStain}
               style={{ opacity: selectedStain ? 1 : 0.5, cursor: selectedStain ? 'pointer' : 'not-allowed' }}
               onClick={() => {
-                posthog.capture('add_to_cart', { cribName: currentConfig.cribName, wood: selectedWood, stain: selectedStain, price: currentConfig.basePrice + (currentStainData?.priceAddition || 0) });
+                const productName = currentConfig.productName ?? currentConfig.cribName;
+                posthog.capture('add_to_cart', { productName, cribName: currentConfig.cribName, wood: selectedWood, stain: selectedStain, price: currentConfig.basePrice + (currentStainData?.priceAddition || 0) });
                 addToCart({
-                  id: `${currentConfig.cribName}-${selectedWood}-${selectedStain}`,
-                  cribName: currentConfig.cribName,
+                  id: `${productName}-${selectedWood}-${selectedStain}`,
+                  productName,
                   wood: selectedWood,
                   stainName: selectedStain,
                   price: basePrice + addition,
@@ -283,7 +285,7 @@ export default function ProductDetails() {
               <div style={{ backgroundColor: 'var(--surface)', borderRadius: '16px', padding: '40px', maxWidth: '420px', width: '90%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
                 <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--primary)', marginBottom: '16px' }}>check_circle</span>
                 <h2 className="headline-md" style={{ marginBottom: '8px' }}>Added to Cart!</h2>
-                <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>{currentConfig.cribName} — {selectedWood.replace(/([A-Z])/g, ' $1').trim()} / {selectedStain}</p>
+                <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>{currentConfig.productName ?? currentConfig.cribName} — {selectedWood.replace(/([A-Z])/g, ' $1').trim()} / {selectedStain}</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <Link to="/checkout" className="add-to-cart" style={{ width: '100%', padding: '14px 0', textAlign: 'center', textDecoration: 'none' }}>Go to Cart</Link>
                   <button onClick={() => setShowCartPopup(false)} style={{ background: 'none', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '14px', cursor: 'pointer', color: 'var(--on-surface)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.08em' }}>Continue Shopping</button>

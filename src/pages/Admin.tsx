@@ -78,7 +78,13 @@ export default function Admin() {
   // Edit panel state
   const [editBasePrice, setEditBasePrice] = useState<number>(0);
   const [editDescription, setEditDescription] = useState<string>('');
+  const [editTags, setEditTags] = useState<string[]>([]);
+  const [editSku, setEditSku] = useState<string>('');
+  const [editSlug, setEditSlug] = useState<string>('');
+  const [editDimensions, setEditDimensions] = useState<string>('');
+  const [editWeight, setEditWeight] = useState<number>(0);
   const [editStains, setEditStains] = useState<any[]>([]);
+  const [tagInput, setTagInput] = useState('');
 
   // Stain type manager
   const [showStainManager, setShowStainManager] = useState(false);
@@ -141,6 +147,11 @@ export default function Admin() {
     if (selectedCrib && selectedWood && currentConfig) {
       setEditBasePrice(currentConfig.basePrice);
       setEditDescription(currentConfig.description || '');
+      setEditTags(currentConfig.tags || []);
+      setEditSku(currentConfig.sku || '');
+      setEditSlug(currentConfig.slug || '');
+      setEditDimensions(currentConfig.dimensions || '');
+      setEditWeight(currentConfig.weight ?? 0);
       setEditStains(currentConfig.stains.map((s: any) => ({ ...s })));
     }
   }, [selectedCrib, selectedWood, currentConfig]);
@@ -587,6 +598,14 @@ export default function Admin() {
             <span className="label-caps" style={{ fontSize: '10px', letterSpacing: '0.1em' }}>FOLDERS</span>
             <span style={{ fontSize: '10px', opacity: 0.4 }}>{counts['all'] || 0} files</span>
           </div>
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginBottom: '10px', padding: '0 4px' }}>
+            {['All', 'Cribs', 'Bassinets', 'Mattresses', 'Bedding', 'Furniture', 'Décor', 'Gear'].map(cat => (
+              <span key={cat} onClick={() => { setSelectedCrib(null); setSelectedWood(null); setSelectedStain(null); }}
+                style={{ padding: '2px 8px', borderRadius: '100px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer', background: (selectedCrib === null && (cat === 'All')) ? 'var(--primary)' : 'transparent', color: (selectedCrib === null && (cat === 'All')) ? 'var(--on-primary)' : 'var(--on-surface-variant)', border: '1px solid var(--outline-variant)', transition: 'all 0.15s' }}>
+                {cat}
+              </span>
+            ))}
+          </div>
           <TreeFolder label="All Products" count={counts['all']} selected={!selectedCrib && !selectedWood && !selectedStain}
             onSelect={() => { setSelectedCrib(null); setSelectedWood(null); setSelectedStain(null); }} />
           <div style={{ height: '1px', backgroundColor: 'var(--outline-variant)', margin: '6px 0', opacity: 0.3 }} />
@@ -610,7 +629,7 @@ export default function Admin() {
                     className="icon-btn" title="Move down" style={{ padding: '0', height: '14px', opacity: cribIdx === allCribs.length - 1 ? 0.15 : 0.35, fontSize: '0', cursor: cribIdx === allCribs.length - 1 ? 'default' : 'pointer' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: '12px' }}>keyboard_arrow_down</span>
                   </button>
-                  <button onClick={async () => { if (!confirm(`Delete entire crib "${crib}" and all its images?`)) return; await deleteCribMutation({ password: adminPassword, cribName: crib }); showNotif(`Deleted ${crib}`); }} className="icon-btn" title="Delete crib" style={{ padding: '2px', opacity: 0.4, fontSize: '0' }}><span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--error)' }}>delete</span></button>
+                  <button onClick={async () => { if (!confirm(`Delete entire product "${crib}" and all its images?`)) return; await deleteCribMutation({ password: adminPassword, cribName: crib }); showNotif(`Deleted ${crib}`); }} className="icon-btn" title="Delete product" style={{ padding: '2px', opacity: 0.4, fontSize: '0' }}><span className="material-symbols-outlined" style={{ fontSize: '14px', color: 'var(--error)' }}>delete</span></button>
                 </div>}>
                 {allWoods.map((wood, woodIdx) => {
                   const stainsFromImages = images ? [...new Set(images.filter(i => i.cribName === crib && i.wood === wood && i.stainName).map(i => i.stainName!))].sort() : [];
@@ -677,18 +696,18 @@ export default function Admin() {
                       <p style={{ fontSize: '14px', fontWeight: 600 }}>{crib}</p>
                       <p style={{ fontSize: '11px', color: 'var(--on-surface-variant)' }}>{counts[`crib:${crib}`] || 0} images</p>
                     </div>
-                    <button onClick={async (e) => { e.stopPropagation(); if (!confirm(`Delete entire crib "${crib}" and all its images?`)) return; await deleteCribMutation({ password: adminPassword, cribName: crib }); showNotif(`Deleted ${crib}`); }}
-                      className="icon-btn" title="Delete crib" style={{ position: 'absolute', top: '6px', right: '6px', opacity: 0.3, padding: '2px' }}>
+                    <button onClick={async (e) => { e.stopPropagation(); if (!confirm(`Delete entire product "${crib}" and all its images?`)) return; await deleteCribMutation({ password: adminPassword, cribName: crib }); showNotif(`Deleted ${crib}`); }}
+                      className="icon-btn" title="Delete product" style={{ position: 'absolute', top: '6px', right: '6px', opacity: 0.3, padding: '2px' }}>
                       <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'var(--error)' }}>delete</span>
                     </button>
                   </div>
                 ))}
                 <div onClick={() => {
-                  const name = prompt('New crib name:');
-                  if (name) { setSelectedCrib(name); setSelectedWood(null); showNotif(`Crib "${name}" created. Add a wood type to start.`); }
+                  const name = prompt('New product name:');
+                  if (name) { setSelectedCrib(name); setSelectedWood(null); showNotif(`Product "${name}" created. Add a wood type to start.`); }
                 }} style={{ padding: '20px', borderRadius: '10px', border: '2px dashed var(--outline-variant)', cursor: 'pointer', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
                   <span className="material-symbols-outlined" style={{ fontSize: '28px', color: 'var(--on-surface-variant)' }}>add</span>
-                  <p style={{ fontSize: '13px', color: 'var(--on-surface-variant)' }}>New Crib</p>
+                  <p style={{ fontSize: '13px', color: 'var(--on-surface-variant)' }}>New Product</p>
                 </div>
               </div>
             </div>
@@ -738,21 +757,51 @@ export default function Admin() {
                   <button onClick={async () => {
                     if (!inventory) return;
                     const updated = inventory.map(item => {
-                      if (item.cribName === selectedCrib && item.wood === selectedWood) return { ...item, basePrice: editBasePrice, description: editDescription, stains: editStains };
+                      if (item.cribName === selectedCrib && item.wood === selectedWood) return { ...item, basePrice: editBasePrice, description: editDescription, tags: editTags, sku: editSku, slug: editSlug, dimensions: editDimensions, weight: editWeight, stains: editStains };
                       return item;
                     });
                     await saveInventoryMutation({ password: adminPassword, inventory: updated });
                     showNotif('Saved');
                   }} className="filter-btn active" style={{ padding: '6px 16px', fontSize: '12px' }}>Save</button>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '12px', marginBottom: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                   <div>
                     <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>BASE PRICE ($)</label>
                     <input type="number" value={editBasePrice} onChange={e => setEditBasePrice(Number(e.target.value))} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px' }} />
                   </div>
                   <div>
+                    <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>SKU</label>
+                    <input type="text" value={editSku} onChange={e => setEditSku(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px' }} />
+                  </div>
+                  <div>
+                    <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>SLUG</label>
+                    <input type="text" value={editSlug} onChange={e => setEditSlug(e.target.value)} placeholder="URL-friendly ID" style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px' }} />
+                  </div>
+                  <div>
                     <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>DESCRIPTION</label>
                     <input type="text" value={editDescription} onChange={e => setEditDescription(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px' }} />
+                  </div>
+                  <div>
+                    <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>DIMENSIONS</label>
+                    <input type="text" value={editDimensions} onChange={e => setEditDimensions(e.target.value)} placeholder='e.g. 54"L x 30"W' style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px' }} />
+                  </div>
+                  <div>
+                    <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>WEIGHT (lbs)</label>
+                    <input type="number" value={editWeight} onChange={e => setEditWeight(Number(e.target.value))} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px' }} />
+                  </div>
+                </div>
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>TAGS</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', padding: '6px 8px', borderRadius: '6px', border: '1px solid var(--outline-variant)', minHeight: '32px', alignItems: 'center' }}>
+                    {editTags.map((tag, ti) => (
+                      <span key={ti} style={{ display: 'inline-flex', alignItems: 'center', gap: '2px', padding: '2px 8px', borderRadius: '4px', backgroundColor: 'var(--primary)', color: 'white', fontSize: '11px', fontWeight: 600 }}>
+                        {tag}
+                        <span onClick={() => setEditTags(editTags.filter((_, i) => i !== ti))} style={{ cursor: 'pointer', fontSize: '14px', lineHeight: '14px', opacity: 0.7 }}>×</span>
+                      </span>
+                    ))}
+                    <input type="text" value={tagInput} onChange={e => setTagInput(e.target.value)}
+                      onKeyDown={e => { if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) { e.preventDefault(); setEditTags([...editTags, tagInput.trim()]); setTagInput(''); } }}
+                      placeholder="Add tag..." style={{ border: 'none', outline: 'none', fontSize: '12px', flex: 1, minWidth: '80px', background: 'none' }} />
                   </div>
                 </div>
               </div>

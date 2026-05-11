@@ -51,21 +51,22 @@ export default function RegistryView() {
         <section aria-label="Registry items">
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {registry.items.map((item: any, idx: number) => {
-              const config = inventory.find((i: any) => i.cribName === item.cribName && i.wood === item.wood);
+              const pName = item.productName ?? item.cribName;
+              const config = inventory.find((i: any) => (i.productName ?? i.cribName) === pName && i.wood === item.wood);
               const stain = config?.stains?.find((s: any) => s.name === item.stainName);
               const price = config ? config.basePrice + (stain?.priceAddition || 0) : 0;
               return (
-                <article key={idx} onClick={() => navigate(`/product/${encodeURIComponent(item.cribName)}?wood=${encodeURIComponent(item.wood)}&stain=${encodeURIComponent(item.stainName)}`)}
+                <article key={idx} onClick={() => navigate(`/product/${encodeURIComponent(pName)}?wood=${encodeURIComponent(item.wood)}&stain=${encodeURIComponent(item.stainName)}`)}
                   style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', backgroundColor: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)', cursor: 'pointer', boxShadow: 'var(--shadow-ambient)' }}>
                   <div style={{ width: '80px', height: '80px', borderRadius: '8px', backgroundColor: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {stain?.image ? (
-                      <img src={stain.image} alt={item.cribName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} loading="lazy" />
+                      <img src={stain.image} alt={pName} style={{ width: '100%', height: '100%', objectFit: 'contain' }} loading="lazy" />
                     ) : (
                       <span className="material-symbols-outlined" style={{ fontSize: '32px', color: 'var(--outline-variant)' }}>crib</span>
                     )}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '2px' }}>{item.title || item.cribName}</h2>
+                    <h2 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '2px' }}>{item.title || pName}</h2>
                     <p style={{ fontSize: '12px', color: 'var(--on-surface-variant)' }}>{item.wood} / {item.stainName}</p>
                     <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--primary)', marginTop: '4px' }}>${price.toLocaleString()}</p>
                   </div>

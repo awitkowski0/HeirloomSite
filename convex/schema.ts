@@ -3,12 +3,18 @@ import { v } from "convex/values";
 
 export default defineSchema({
   inventory: defineTable({
-    cribName: v.string(),
+    productName: v.optional(v.string()),
+    cribName: v.optional(v.string()),
     wood: v.string(),
     category: v.optional(v.string()),
     description: v.optional(v.string()),
     basePrice: v.number(),
     order: v.optional(v.number()),
+    tags: v.optional(v.array(v.string())),
+    sku: v.optional(v.string()),
+    slug: v.optional(v.string()),
+    dimensions: v.optional(v.string()),
+    weight: v.optional(v.number()),
     stains: v.array(v.object({
       name: v.string(),
       inStock: v.boolean(),
@@ -26,11 +32,10 @@ export default defineSchema({
       productId: v.optional(v.string()),
     }))),
     featured: v.optional(v.array(v.object({
-      cribName: v.string(),
+      cribName: v.optional(v.string()),
+      productName: v.optional(v.string()),
       stainName: v.optional(v.string()),
     }))),
-    image: v.optional(v.string()),
-    spots: v.optional(v.any()),
   }),
   orders: defineTable({
     email: v.string(),
@@ -41,7 +46,8 @@ export default defineSchema({
     state: v.string(),
     zip: v.string(),
     items: v.array(v.object({
-      cribName: v.string(),
+      productName: v.optional(v.string()),
+      cribName: v.optional(v.string()),
       wood: v.string(),
       stainName: v.string(),
       price: v.number(),
@@ -67,7 +73,8 @@ export default defineSchema({
     eventDate: v.optional(v.string()),
     message: v.optional(v.string()),
     items: v.array(v.object({
-      cribName: v.string(),
+      productName: v.optional(v.string()),
+      cribName: v.optional(v.string()),
       wood: v.string(),
       stainName: v.string(),
       title: v.optional(v.string()),
@@ -75,7 +82,8 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_slug", ["slug"]),
   images: defineTable({
-    cribName: v.string(),
+    productName: v.optional(v.string()),
+    cribName: v.optional(v.string()),
     wood: v.string(),
     stainName: v.optional(v.string()),
     storageId: v.string(),
@@ -87,5 +95,6 @@ export default defineSchema({
     source: v.optional(v.string()),
   }).index("by_path", ["cribName", "wood", "stainName"])
     .index("by_crib", ["cribName"])
-    .index("by_stain", ["stainName"]),
+    .index("by_stain", ["stainName"])
+    .index("by_product", ["productName"]),
 });

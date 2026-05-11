@@ -10,6 +10,7 @@
 
 import type * as images from "../images.js";
 import type * as inventory from "../inventory.js";
+import type * as migrateToProductName from "../migrateToProductName.js";
 import type * as orders from "../orders.js";
 import type * as registries from "../registries.js";
 import type * as settings from "../settings.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   images: typeof images;
   inventory: typeof inventory;
+  migrateToProductName: typeof migrateToProductName;
   orders: typeof orders;
   registries: typeof registries;
   settings: typeof settings;

@@ -44,7 +44,8 @@ export const save = mutation({
       productId: v.optional(v.string()),
     }))),
     featured: v.optional(v.array(v.object({
-      cribName: v.string(),
+      cribName: v.optional(v.string()),
+      productName: v.optional(v.string()),
       stainName: v.optional(v.string()),
     }))),
   },
@@ -54,7 +55,13 @@ export const save = mutation({
     const existing = await ctx.db.query("showroom").first();
     const update: any = {};
     if (args.slides !== undefined) update.slides = args.slides;
-    if (args.featured !== undefined) update.featured = args.featured;
+    if (args.featured !== undefined) {
+      update.featured = args.featured.map((f: any) => ({
+        productName: f.productName ?? f.cribName,
+        cribName: f.cribName ?? f.productName,
+        stainName: f.stainName,
+      }));
+    }
 
     if (existing) {
       await ctx.db.patch(existing._id, { ...update, image: undefined, spots: undefined });

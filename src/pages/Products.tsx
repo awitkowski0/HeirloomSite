@@ -19,20 +19,29 @@ export default function Products() {
     paramCategory ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) : 'All'
   );
 
+  function getDefaultImage(stains: any[]): string {
+    const natural = stains?.find((s: any) => s.name.toLowerCase() === 'natural');
+    if (natural?.image) return natural.image;
+    const base = stains?.find((s: any) => Number(s.priceAddition) === 0);
+    if (base?.image) return base.image;
+    return stains?.[0]?.image || '';
+  }
+
   const products = useMemo(() => {
     const map = new Map();
     inventory.forEach(item => {
       const cat = item.category || 'Cribs';
       if (selectedCategory !== 'All' && cat !== selectedCategory) return;
-      if (searchQuery && !item.cribName.toLowerCase().includes(searchQuery.toLowerCase()) && !item.wood?.toLowerCase().includes(searchQuery.toLowerCase()) && !item.description?.toLowerCase().includes(searchQuery.toLowerCase())) return;
-      const key = item.cribName;
+      const pName = item.productName ?? item.cribName;
+      if (searchQuery && !pName.toLowerCase().includes(searchQuery.toLowerCase()) && !item.wood?.toLowerCase().includes(searchQuery.toLowerCase()) && !item.description?.toLowerCase().includes(searchQuery.toLowerCase())) return;
+      const key = pName;
       if (!map.has(key)) {
         map.set(key, {
           id: encodeURIComponent(key),
           name: key,
           category: cat,
           minPrice: item.basePrice,
-          img: item.stains?.[0]?.image || '',
+          img: getDefaultImage(item.stains),
           woods: [item.wood],
         });
       } else {
@@ -97,21 +106,21 @@ export default function Products() {
           </section>
         ) : (
           <section aria-label="Product grid">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+            <div className="featured-grid">
               {products.map(p => (
                 <article key={p.id} onClick={() => navigate(`/product/${p.id}`)}
-                  style={{ cursor: 'pointer', borderRadius: '12px', overflow: 'hidden', backgroundColor: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)', boxShadow: 'var(--shadow-ambient)' }}>
-                  <div style={{ aspectRatio: '4/3', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--surface-container-highest)', padding: '24px' }}>
+                  className="featured-card">
+                  <div className="featured-card-img">
                     {p.img ? (
-                      <img src={p.img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} loading="lazy" />
+                      <img src={p.img} alt={p.name} loading="lazy" />
                     ) : (
                       <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--outline-variant)' }}>crib</span>
                     )}
                   </div>
-                  <div style={{ padding: '16px 20px' }}>
+                  <div className="featured-card-body">
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-label)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary)' }}>{p.category || 'Crib'}</span>
-                    <h2 style={{ fontSize: '16px', fontWeight: 600, margin: '4px 0' }}>{p.name}</h2>
-                    <p style={{ fontSize: '14px', color: 'var(--on-surface-variant)' }}>From ${p.minPrice.toLocaleString()}</p>
+                    <h3>{p.name}</h3>
+                    <p className="price">From ${p.minPrice.toLocaleString()}</p>
                   </div>
                 </article>
               ))}

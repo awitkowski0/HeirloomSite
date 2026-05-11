@@ -24,21 +24,22 @@ export default function Gallery() {
     </div>
   );
 
-  // Aggregate by cribName
+  // Aggregate by product name
   const uniqueCribsMap = new Map();
   inventory.forEach(item => {
-    const cribId = encodeURIComponent(item.cribName);
-    if (!uniqueCribsMap.has(item.cribName)) {
-      uniqueCribsMap.set(item.cribName, {
+    const pName = item.productName ?? item.cribName;
+    const cribId = encodeURIComponent(pName);
+    if (!uniqueCribsMap.has(pName)) {
+      uniqueCribsMap.set(pName, {
         id: cribId,
-        name: item.cribName,
+        name: pName,
         minPrice: item.basePrice,
         material: item.wood.replace(/([A-Z])/g, ' $1').trim(),
         img: item.stains[0]?.image,
         woods: [item.wood]
       });
     } else {
-      const existing = uniqueCribsMap.get(item.cribName);
+      const existing = uniqueCribsMap.get(pName);
       if (item.basePrice < existing.minPrice) existing.minPrice = item.basePrice;
       if (!existing.woods.includes(item.wood)) existing.woods.push(item.wood);
     }
@@ -54,8 +55,8 @@ export default function Gallery() {
     return Array.from(names);
   })();
 
-  const getDisplayConfig = (cribName: string) => {
-    const configs = inventory.filter(i => i.cribName === cribName);
+  const getDisplayConfig = (productName: string) => {
+    const configs = inventory.filter((i: any) => (i.productName ?? i.cribName) === productName);
     let config = configs[0];
     if (selectedWood !== 'All Collections') {
       config = configs.find(c => c.wood === selectedWood) || config;
@@ -175,7 +176,7 @@ export default function Gallery() {
                     return;
                   }
                 }
-                posthog.capture('product_click', { cribName: p.name, wood: selectedWood, stain: selectedStain, source: 'card' });
+                posthog.capture('product_click', { productName: p.name, wood: selectedWood, stain: selectedStain, source: 'card' });
                 const params = new URLSearchParams();
                 if (selectedWood !== 'All Collections') params.set('wood', selectedWood);
                 if (selectedStain !== 'All Stains') params.set('stain', selectedStain);
@@ -212,7 +213,7 @@ export default function Gallery() {
                 {/* Floating View Details Button */}
                 <div className="view-details-btn" onClick={(e) => {
                   e.stopPropagation();
-                  posthog.capture('product_click', { cribName: p.name, wood: selectedWood, stain: selectedStain, source: 'view_details' });
+                  posthog.capture('product_click', { productName: p.name, wood: selectedWood, stain: selectedStain, source: 'view_details' });
                   const params = new URLSearchParams();
                   if (selectedWood !== 'All Collections') params.set('wood', selectedWood);
                   if (selectedStain !== 'All Stains') params.set('stain', selectedStain);

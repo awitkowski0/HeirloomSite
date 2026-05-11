@@ -2,7 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export interface CartItem {
   id: string;
-  cribName: string;
+  productName: string;
+  cribName?: string;
   wood: string;
   stainName: string;
   price: number;
@@ -40,7 +41,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addToCart = (item: CartItem) => {
     setCart(prev => {
       const existing = prev.find(i => 
-        i.cribName === item.cribName && 
+        i.productName === item.productName && 
         i.wood === item.wood && 
         i.stainName === item.stainName
       );

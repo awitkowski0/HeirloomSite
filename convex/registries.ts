@@ -8,7 +8,8 @@ export const create = mutation({
     eventDate: v.optional(v.string()),
     message: v.optional(v.string()),
     items: v.array(v.object({
-      cribName: v.string(),
+      productName: v.optional(v.string()),
+      cribName: v.optional(v.string()),
       wood: v.string(),
       stainName: v.string(),
       title: v.optional(v.string()),
@@ -16,12 +17,19 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const slug = args.creatorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).substring(2, 6);
+    const items = args.items.map(item => ({
+      productName: item.productName ?? item.cribName,
+      cribName: item.cribName ?? item.productName,
+      wood: item.wood,
+      stainName: item.stainName,
+      title: item.title,
+    }));
     await ctx.db.insert("registries", {
       slug,
       creatorName: args.creatorName,
       eventDate: args.eventDate,
       message: args.message,
-      items: args.items,
+      items,
       createdAt: Date.now(),
     });
     return slug;

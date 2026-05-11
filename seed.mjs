@@ -95,13 +95,16 @@ async function seed() {
         }
       }
       
+      const productName = cribName.replace("The ", "");
       inventory.push({
-        cribName: cribName.replace("The ", ""),
+        productName,
+        cribName: productName,
         wood: woodName,
         description: cribName.includes("Mission") 
           ? "The Mission Style Crib draws inspiration from the early 20th-century Arts and Crafts movement..."
           : `The ${cribName} features exquisite Amish craftsmanship and timeless design.`,
         basePrice: 2499,
+        category: "Cribs",
         stains: stainList,
       });
     }

@@ -10,7 +10,7 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     let items = await ctx.db.query("images").collect();
-    if (args.cribName) items = items.filter(i => i.cribName === args.cribName);
+    if (args.cribName) items = items.filter(i => (i.productName ?? i.cribName) === args.cribName);
     if (args.wood) items = items.filter(i => i.wood === args.wood);
     if (args.stainName !== undefined) items = items.filter(i => i.stainName === args.stainName);
     return (await Promise.all(items.map(async (img) => {
@@ -31,9 +31,9 @@ export const listByCrib = query({
     return (await Promise.all(items.map(async (img) => {
       try {
         const url = await ctx.storage.getUrl(img.storageId as any);
-        return { ...img, resolvedUrl: url || null };
+        return { ...img, resolvedUrl: url || null, productName: img.productName ?? img.cribName };
       } catch {
-        return { ...img, resolvedUrl: null };
+        return { ...img, resolvedUrl: null, productName: img.productName ?? img.cribName };
       }
     }))).sort((a, b) => a.order - b.order);
   },
@@ -46,9 +46,9 @@ export const listStainImages = query({
     return (await Promise.all(items.map(async (img) => {
       try {
         const url = await ctx.storage.getUrl(img.storageId as any);
-        return { ...img, resolvedUrl: url || null };
+        return { ...img, resolvedUrl: url || null, productName: img.productName ?? img.cribName };
       } catch {
-        return { ...img, resolvedUrl: null };
+        return { ...img, resolvedUrl: null, productName: img.productName ?? img.cribName };
       }
     }))).sort((a, b) => a.order - b.order);
   },
@@ -61,9 +61,9 @@ export const listAll = query({
     return (await Promise.all(items.map(async (img) => {
       try {
         const url = await ctx.storage.getUrl(img.storageId as any);
-        return { ...img, resolvedUrl: url || null };
+        return { ...img, resolvedUrl: url || null, productName: img.productName ?? img.cribName };
       } catch {
-        return { ...img, resolvedUrl: null };
+        return { ...img, resolvedUrl: null, productName: img.productName ?? img.cribName };
       }
     }))).sort((a, b) => a.order - b.order);
   },
@@ -75,10 +75,11 @@ export const getFolderTree = query({
     const items = await ctx.db.query("images").collect();
     const tree: Record<string, Record<string, string[]>> = {};
     for (const img of items) {
-      if (!tree[img.cribName]) tree[img.cribName] = {};
-      if (!tree[img.cribName][img.wood]) tree[img.cribName][img.wood] = [];
-      if (img.stainName && !tree[img.cribName][img.wood].includes(img.stainName)) {
-        tree[img.cribName][img.wood].push(img.stainName);
+      const name = img.productName ?? img.cribName ?? "Unknown";
+      if (!tree[name]) tree[name] = {};
+      if (!tree[name][img.wood]) tree[name][img.wood] = [];
+      if (img.stainName && !tree[name][img.wood].includes(img.stainName)) {
+        tree[name][img.wood].push(img.stainName);
       }
     }
     return tree;
@@ -150,6 +151,7 @@ export const saveImageRecord = mutation({
       .reduce((max, i) => Math.max(max, i.order), -1);
 
     await ctx.db.insert("images", {
+      productName: args.cribName,
       cribName: args.cribName,
       wood: args.wood,
       stainName: stainName ?? undefined,
@@ -249,6 +251,7 @@ export const bulkUpload = mutation({
         .reduce((max, i) => Math.max(max, i.order), -1);
 
       await ctx.db.insert("images", {
+        productName: upload.cribName,
         cribName: upload.cribName,
         wood: upload.wood,
         stainName: stainName ?? undefined,
