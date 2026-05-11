@@ -11,12 +11,16 @@
   },
   "dependencies": {
     "@azure/msal-browser": "^5.10.0",
+    "@convex-dev/migrations": "^0.3.4",
     "@paypal/react-paypal-js": "^9.2.0",
+    "@posthog/react": "^1.9.0",
     "@stripe/react-stripe-js": "^6.3.0",
     "@stripe/stripe-js": "^9.3.1",
     "convex": "^1.36.1",
+    "posthog-js": "^1.372.10",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-helmet-async": "^3.0.0",
     "react-router-dom": "^7.14.2",
     "stripe": "^22.1.0"
   },

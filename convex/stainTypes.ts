@@ -60,9 +60,9 @@ export const autoDiscover = mutation({
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
 
-    const staged = await ctx.db.query("inventory_staged").collect();
+    const items = await ctx.db.query("inventory").collect();
     const stainNames = new Set<string>();
-    for (const item of staged) {
+    for (const item of items) {
       for (const stain of item.stains) {
         stainNames.add(stain.name);
       }
@@ -89,11 +89,11 @@ export const populateFromInventory = mutation({
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
 
-    const staged = await ctx.db.query("inventory_staged").collect();
+    const items = await ctx.db.query("inventory").collect();
     const existingTypes = await ctx.db.query("stain_types").collect();
     const existingNames = new Set(existingTypes.map(s => s.name.toLowerCase()));
 
-    for (const item of staged) {
+    for (const item of items) {
       for (const stain of item.stains) {
         let stainTypeId: string | null = null;
 

@@ -1,31 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import posthog from 'posthog-js';
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { addToCart } = useCart();
   
-  const isStaged = new URLSearchParams(window.location.search).get('mode') === 'staging';
-  const inventoryData = useQuery(api.inventory.get, { useStaged: isStaged });
+  const inventoryData = useQuery(api.inventory.get as any, {});
   const loading = inventoryData === undefined;
-  const inventory = inventoryData || [];
+  const inventory: any[] = inventoryData || [];
   
   const [selectedWood, setSelectedWood] = useState('');
   const [selectedStain, setSelectedStain] = useState('');
   const [showCartPopup, setShowCartPopup] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-
-  const adminPassword = localStorage.getItem('adminPassword');
-  const isAdmin = !!adminPassword;
-  const isEditMode = isAdmin && isStaged;
-  
-  const updateCribName = useMutation(api.inventory.updateCribName);
-  const updateBasePrice = useMutation(api.inventory.updateBasePrice);
 
   const decodedId = decodeURIComponent(id || '');
   const productConfigurations = inventory.filter(i => i.cribName === decodedId);
@@ -51,6 +43,17 @@ export default function ProductDetails() {
   useEffect(() => {
     setGalleryIndex(0);
   }, [selectedWood, selectedStain]);
+
+  useEffect(() => {
+    if (currentConfig && selectedStain) {
+      posthog.capture('product_view', {
+        cribName: currentConfig.cribName,
+        wood: selectedWood,
+        stain: selectedStain,
+        productId: id,
+      });
+    }
+  }, [currentConfig, selectedWood, selectedStain, id]);
 
   const handleWoodChange = (wood: string) => {
     setSelectedWood(wood);
@@ -173,58 +176,17 @@ export default function ProductDetails() {
         <div className="configuration-panel">
           <section className="pricing-section">
             <div>
-              <h2 
-                className="headline-xl" 
-                contentEditable={isEditMode} 
-                suppressContentEditableWarning={true}
-                onBlur={(e) => {
-                  if (isEditMode && e.target.innerText !== currentConfig.cribName) {
-                    updateCribName({ password: adminPassword!, oldName: currentConfig.cribName, newName: e.target.innerText });
-                    navigate(`/product/${encodeURIComponent(e.target.innerText)}?mode=staging`, { replace: true });
-                  }
-                }}
-                style={{ 
-                  borderBottom: isEditMode ? '1px dashed var(--primary)' : 'none',
-                  outline: 'none'
-                }}
-              >
+              <h2 className="headline-xl">
                 {currentConfig.cribName}
               </h2>
-              <p 
-                className="body-lg subtitle"
-                style={{ 
-                  marginTop: '12px', 
-                  color: 'var(--on-surface-variant)',
-                  borderBottom: isEditMode ? '1px dashed var(--primary)' : 'none',
-                  outline: 'none'
-                }}
-                contentEditable={isEditMode}
-                suppressContentEditableWarning={true}
-              >
+              <p className="body-lg subtitle" style={{ marginTop: '12px', color: 'var(--on-surface-variant)' }}>
                 {currentConfig.description || "A legacy piece for the modern nursery."}
               </p>
             </div>
             <div className="price-row">
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
                 <span className="headline-lg price-current">$</span>
-                <span 
-                  className="headline-lg price-current"
-                  contentEditable={isEditMode} 
-                  suppressContentEditableWarning={true}
-                  onBlur={(e) => {
-                    if (isEditMode) {
-                      const newBasePrice = Number(e.target.innerText.replace(/[^0-9]/g, '')) - addition;
-                      if (!isNaN(newBasePrice) && newBasePrice > 0) {
-                        updateBasePrice({ password: adminPassword!, cribName: currentConfig.cribName, wood: selectedWood, newPrice: newBasePrice });
-                      }
-                    }
-                  }}
-                  style={{ 
-                    borderBottom: isEditMode ? '1px dashed var(--primary)' : 'none',
-                    outline: 'none',
-                    minWidth: '60px'
-                  }}
-                >
+                <span className="headline-lg price-current" style={{ minWidth: '60px' }}>
                   {totalPrice.toLocaleString()}
                 </span>
                 <span className="headline-lg price-current">.00</span>
@@ -298,6 +260,7 @@ export default function ProductDetails() {
               disabled={!selectedStain}
               style={{ opacity: selectedStain ? 1 : 0.5, cursor: selectedStain ? 'pointer' : 'not-allowed' }}
               onClick={() => {
+                posthog.capture('add_to_cart', { cribName: currentConfig.cribName, wood: selectedWood, stain: selectedStain, price: currentConfig.basePrice + (currentStainData?.priceAddition || 0) });
                 addToCart({
                   id: `${currentConfig.cribName}-${selectedWood}-${selectedStain}`,
                   cribName: currentConfig.cribName,

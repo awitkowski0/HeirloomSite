@@ -1,19 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import posthog from 'posthog-js';
 
 export default function Gallery() {
   const navigate = useNavigate();
-  const isStaged = new URLSearchParams(window.location.search).get('mode') === 'staging';
-  const inventoryData = useQuery(api.inventory.get, { useStaged: isStaged });
+  const inventoryData = useQuery(api.inventory.get as any, {});
   const loading = inventoryData === undefined;
-  const inventory = inventoryData || [];
-  
-  const adminPassword = localStorage.getItem('adminPassword');
-  const isAdmin = !!adminPassword;
-  const isEditMode = isAdmin && isStaged;
-  const updateCribName = useMutation(api.inventory.updateCribName);
+  const inventory: any[] = inventoryData || [];
   
   const [selectedWood, setSelectedWood] = useState<string>('All Collections');
   const [selectedStain, setSelectedStain] = useState<string>('All Stains');
@@ -180,6 +175,7 @@ export default function Gallery() {
                     return;
                   }
                 }
+                posthog.capture('product_click', { cribName: p.name, wood: selectedWood, stain: selectedStain, source: 'card' });
                 const params = new URLSearchParams();
                 if (selectedWood !== 'All Collections') params.set('wood', selectedWood);
                 if (selectedStain !== 'All Stains') params.set('stain', selectedStain);
@@ -216,6 +212,7 @@ export default function Gallery() {
                 {/* Floating View Details Button */}
                 <div className="view-details-btn" onClick={(e) => {
                   e.stopPropagation();
+                  posthog.capture('product_click', { cribName: p.name, wood: selectedWood, stain: selectedStain, source: 'view_details' });
                   const params = new URLSearchParams();
                   if (selectedWood !== 'All Collections') params.set('wood', selectedWood);
                   if (selectedStain !== 'All Stains') params.set('stain', selectedStain);
@@ -263,25 +260,7 @@ export default function Gallery() {
                   {!hasActiveSelection && p.woods.length > 3 && <span style={{ fontSize: '10px', color: 'var(--outline)' }}>+{p.woods.length - 3}</span>}
                 </div>
                 
-                <h3 
-                  className="headline-lg text-primary" 
-                  style={{ 
-                    fontSize: '28px', 
-                    marginBottom: '8px',
-                    borderBottom: isEditMode ? '1px dashed var(--primary)' : 'none',
-                    outline: 'none'
-                  }}
-                  contentEditable={isEditMode}
-                  suppressContentEditableWarning={true}
-                  onBlur={(e) => {
-                    if (isEditMode && e.target.innerText !== p.name) {
-                      updateCribName({ password: adminPassword!, oldName: p.name, newName: e.target.innerText });
-                    }
-                  }}
-                  onClick={(e) => {
-                    if (isEditMode) e.preventDefault();
-                  }}
-                >
+                <h3 className="headline-lg text-primary" style={{ fontSize: '28px', marginBottom: '8px' }}>
                   {p.name}
                 </h3>
                 

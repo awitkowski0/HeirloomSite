@@ -2,75 +2,64 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 export const get = query({
-  args: { useStaged: v.optional(v.boolean()) },
-  handler: async (ctx, args) => {
-    const table = args.useStaged ? "showroom_staged" : "showroom";
-    const data = await ctx.db.query(table).first();
+  args: {},
+  handler: async (ctx) => {
+    const data = await ctx.db.query("showroom").first();
     if (!data) return null;
-    
-    // Resolve storage ID if it's not a URL
-    let image = data.image;
-    if (image && !image.startsWith('http')) {
-      try {
-        const url = await ctx.storage.getUrl(image);
-        image = url || image;
-      } catch (e) {
-        console.error("Failed to resolve showroom image", e);
+
+    // Resolve slide images
+    let slides = data.slides || [];
+    slides = await Promise.all(slides.map(async (slide: any) => {
+      let img = slide.image;
+      if (img && !img.startsWith('http')) {
+        try {
+          const url = await ctx.storage.getUrl(img);
+          img = url || img;
+        } catch (e) {
+          console.error("Failed to resolve slide image", e);
+        }
       }
-    }
-    
-    return { ...data, image };
+      let imgMobile = slide.imageMobile;
+      if (imgMobile && !imgMobile.startsWith('http')) {
+        try {
+          const url = await ctx.storage.getUrl(imgMobile);
+          imgMobile = url || imgMobile;
+        } catch (e) {
+          console.error("Failed to resolve slide mobile image", e);
+        }
+      }
+      return { ...slide, image: img, imageMobile: imgMobile };
+    }));
+
+    return { ...data, slides };
   },
 });
 
 export const save = mutation({
   args: {
     password: v.string(),
-    image: v.string(),
-    spots: v.array(v.object({
-      x: v.number(),
-      y: v.number(),
-      productName: v.string(),
-    }))
+    slides: v.optional(v.array(v.object({
+      image: v.string(),
+      imageMobile: v.optional(v.string()),
+      productId: v.optional(v.string()),
+    }))),
+    featured: v.optional(v.array(v.object({
+      cribName: v.string(),
+      stainName: v.optional(v.string()),
+    }))),
   },
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
-    
-    // Always save to staged when using the admin tool
-    const existing = await ctx.db.query("showroom_staged").first();
-    if (existing) {
-      await ctx.db.patch(existing._id, {
-        image: args.image,
-        spots: args.spots,
-      });
-    } else {
-      await ctx.db.insert("showroom_staged", {
-        image: args.image,
-        spots: args.spots,
-      });
-    }
-  },
-});
 
-export const publish = mutation({
-  args: { password: v.string() },
-  handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
-    
-    const staged = await ctx.db.query("showroom_staged").first();
-    if (!staged) throw new Error("No staged showroom to publish");
-    
-    const live = await ctx.db.query("showroom").first();
-    if (live) {
-      await ctx.db.patch(live._id, {
-        image: staged.image,
-        spots: staged.spots,
-      });
+    const existing = await ctx.db.query("showroom").first();
+    const update: any = {};
+    if (args.slides !== undefined) update.slides = args.slides;
+    if (args.featured !== undefined) update.featured = args.featured;
+
+    if (existing) {
+      await ctx.db.patch(existing._id, { ...update, image: undefined, spots: undefined });
     } else {
-      await ctx.db.insert("showroom", {
-        image: staged.image,
-        spots: staged.spots,
-      });
+      await ctx.db.insert("showroom", update);
     }
   },
 });

@@ -5,20 +5,10 @@ export default defineSchema({
   inventory: defineTable({
     cribName: v.string(),
     wood: v.string(),
+    category: v.optional(v.string()),
     description: v.optional(v.string()),
     basePrice: v.number(),
-    stains: v.array(v.object({
-      name: v.string(),
-      inStock: v.boolean(),
-      priceAddition: v.number(),
-      image: v.optional(v.string()),
-    })),
-  }),
-  inventory_staged: defineTable({
-    cribName: v.string(),
-    wood: v.string(),
-    description: v.optional(v.string()),
-    basePrice: v.number(),
+    order: v.optional(v.number()),
     stains: v.array(v.object({
       name: v.string(),
       inStock: v.boolean(),
@@ -29,24 +19,18 @@ export default defineSchema({
   settings: defineTable({
     paymentProvider: v.string(),
   }),
-  settings_staged: defineTable({
-    paymentProvider: v.string(),
-  }),
   showroom: defineTable({
-    image: v.string(),
-    spots: v.array(v.object({
-      x: v.number(),
-      y: v.number(),
-      productName: v.string(),
-    }))
-  }),
-  showroom_staged: defineTable({
-    image: v.string(),
-    spots: v.array(v.object({
-      x: v.number(),
-      y: v.number(),
-      productName: v.string(),
-    }))
+    slides: v.optional(v.array(v.object({
+      image: v.string(),
+      imageMobile: v.optional(v.string()),
+      productId: v.optional(v.string()),
+    }))),
+    featured: v.optional(v.array(v.object({
+      cribName: v.string(),
+      stainName: v.optional(v.string()),
+    }))),
+    image: v.optional(v.string()),
+    spots: v.optional(v.any()),
   }),
   orders: defineTable({
     email: v.string(),
@@ -77,6 +61,19 @@ export default defineSchema({
     color: v.optional(v.string()),
     defaultPriceAddition: v.number(),
   }).index("by_name", ["name"]),
+  registries: defineTable({
+    slug: v.string(),
+    creatorName: v.string(),
+    eventDate: v.optional(v.string()),
+    message: v.optional(v.string()),
+    items: v.array(v.object({
+      cribName: v.string(),
+      wood: v.string(),
+      stainName: v.string(),
+      title: v.optional(v.string()),
+    })),
+    createdAt: v.number(),
+  }).index("by_slug", ["slug"]),
   images: defineTable({
     cribName: v.string(),
     wood: v.string(),

@@ -135,14 +135,36 @@ export default function ImageManager() {
 
   const images = useQuery(api.images.listAll);
   const stainTypes = useQuery(api.stainTypes.list);
-  const inventory = useQuery(api.inventory.get, { useStaged: true });
+  const inventory = useQuery(api.inventory.get as any, { useStaged: true }) as any[] | undefined;
 
   const linkImage = useMutation(api.images.linkImage);
   const unlinkImage = useMutation(api.images.unlinkImage);
   const deleteImage = useMutation(api.images.deleteImage);
   const generateUploadUrl = useMutation(api.images.generateUploadUrl);
   const bulkUpload = useMutation(api.images.bulkUpload);
+  const saveInventoryMutation = useMutation(api.inventory.save);
   const verifyPassword = useMutation(api.settings.verifyPassword);
+
+  const [editBasePrice, setEditBasePrice] = useState<number>(0);
+  const [editDescription, setEditDescription] = useState<string>('');
+  const [editStains, setEditStains] = useState<any[]>([]);
+  const [showEditPanel, setShowEditPanel] = useState(false);
+
+  useEffect(() => {
+    if (selectedCrib && selectedWood) {
+      const config = inventory?.find(i => i.cribName === selectedCrib && i.wood === selectedWood);
+      if (config) {
+        setEditBasePrice(config.basePrice);
+        setEditDescription(config.description || '');
+        setEditStains(config.stains.map((s: any) => ({ ...s })));
+        setShowEditPanel(true);
+      } else {
+        setShowEditPanel(false);
+      }
+    } else {
+      setShowEditPanel(false);
+    }
+  }, [selectedCrib, selectedWood, inventory]);
 
   const showNotif = useCallback((msg: string) => {
     setNotification(msg);
@@ -318,7 +340,7 @@ export default function ImageManager() {
     const msal = new PublicClientApplication({
       auth: {
         clientId,
-        authority: `https://login.microsoftonline.com/${import.meta.env.VITE_ONEDRIVE_TENANT_ID || 'common'}`,
+        authority: `https://login.microsoftonline.com/${import.meta.env.VITE_ONEDRIVE_TENANT_ID || 'consumers'}`,
         redirectUri: window.location.origin,
       },
       cache: { cacheLocation: 'localStorage' },
@@ -503,22 +525,24 @@ export default function ImageManager() {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <div>
-          <h1 className="headline-xl text-primary">Image Manager</h1>
-          <p className="body-md text-on-surface-variant">Browse, upload, and organize product images by crib, wood, and stain.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <a href="/admin" style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textDecoration: 'none', color: 'var(--on-surface)', fontSize: '13px', fontWeight: 600 }}>Back to Admin</a>
-          <button onClick={() => { localStorage.removeItem('adminPassword'); setIsAuthenticated(false); }} className="icon-btn" title="Logout">
-            <span className="material-symbols-outlined">logout</span>
-          </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px', padding: '24px', backgroundColor: 'var(--surface-container-low)', borderRadius: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 className="headline-lg text-primary">Image Manager</h1>
+            <p className="body-md text-on-surface-variant">Browse, upload, and organize product images by crib, wood, and stain.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <a href="/admin" style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textDecoration: 'none', color: 'var(--on-surface)', fontSize: '13px', fontWeight: 600 }}>Back to Admin</a>
+            <button onClick={() => { localStorage.removeItem('adminPassword'); setIsAuthenticated(false); }} className="icon-btn" title="Logout">
+              <span className="material-symbols-outlined">logout</span>
+            </button>
+          </div>
         </div>
       </div>
 
       <div style={{ display: 'flex', gap: '24px', minHeight: '70vh' }}>
         {/* Sidebar */}
-        <div style={{ width: '260px', flexShrink: 0, backgroundColor: 'var(--surface-container-low)', borderRadius: '12px', padding: '12px', overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
+        <div style={{ width: '260px', flexShrink: 0, backgroundColor: 'var(--surface-container-lowest)', borderRadius: '12px', padding: '16px', overflowY: 'auto', maxHeight: 'calc(100vh - 240px)', boxShadow: 'var(--shadow-ambient)' }}>
           <div style={{ marginBottom: '8px', padding: '0 8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span className="label-caps" style={{ fontSize: '11px' }}>FOLDERS</span>
             <span style={{ fontSize: '11px', opacity: 0.5 }}>{counts['all'] || 0} images</span>
@@ -553,7 +577,7 @@ export default function ImageManager() {
                     ? [...new Set(images.filter(i => i.cribName === crib && i.wood === wood && i.stainName).map(i => i.stainName!))].sort()
                     : [];
                   const stainsFromInventory = inventory
-                    ? [...new Set(inventory.filter(i => i.cribName === crib && i.wood === wood).flatMap(i => i.stains.map(s => s.name)))].sort()
+                    ? [...new Set(inventory.filter(i => i.cribName === crib && i.wood === wood).flatMap((i: any) => i.stains.map((s: any) => s.name)))].sort()
                     : [];
                   const allStains = [...new Set([...stainsFromImages, ...stainsFromInventory])].sort();
                   const hasUnassigned = images?.some(i => i.cribName === crib && i.wood === wood && !i.stainName);
@@ -594,7 +618,7 @@ export default function ImageManager() {
         </div>
 
         {/* Main Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ flex: 1, minWidth: 0, backgroundColor: 'var(--surface-container-lowest)', borderRadius: '12px', padding: '24px', boxShadow: 'var(--shadow-ambient)' }}>
           {/* Breadcrumb + Toolbar */}
           <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px' }}>
@@ -632,7 +656,7 @@ export default function ImageManager() {
               style={{
                 border: `2px dashed ${dragOver ? 'var(--primary)' : 'var(--outline-variant)'}`,
                 borderRadius: '12px',
-                padding: '24px',
+                padding: '32px',
                 textAlign: 'center',
                 marginBottom: '24px',
                 backgroundColor: dragOver ? 'var(--primary-container, #f0e8e0)' : 'var(--surface-container-low)',
@@ -661,6 +685,99 @@ export default function ImageManager() {
                     {oneDriveLoggedIn ? 'Open OneDrive' : 'Login with Microsoft'}
                   </button>
                 )}
+              </div>
+            </div>
+          )}
+
+          {showEditPanel && selectedCrib && selectedWood && (
+            <div style={{ marginBottom: '24px', padding: '20px', backgroundColor: 'var(--surface-container-low)', borderRadius: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 className="headline-sm text-primary" style={{ fontSize: '18px' }}>Inventory Settings</h3>
+                <button
+                  onClick={async () => {
+                    if (!inventory) return;
+                    const updated = inventory.map(item => {
+                      if (item.cribName === selectedCrib && item.wood === selectedWood) {
+                        return {
+                          ...item,
+                          basePrice: editBasePrice,
+                          description: editDescription,
+                          stains: editStains,
+                        };
+                      }
+                      return item;
+                    });
+                    await saveInventoryMutation({ password: adminPassword, inventory: updated });
+                    showNotif('Inventory settings saved!');
+                  }}
+                  className="filter-btn active"
+                  style={{ width: 'auto', padding: '8px 20px' }}
+                >
+                  Save Changes
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px', marginBottom: '16px' }}>
+                <div>
+                  <label className="label-caps" style={{ display: 'block', marginBottom: '4px', fontSize: '11px' }}>BASE PRICE ($)</label>
+                  <input type="number" value={editBasePrice} onChange={e => setEditBasePrice(Number(e.target.value))} style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '14px' }} />
+                </div>
+                <div>
+                  <label className="label-caps" style={{ display: 'block', marginBottom: '4px', fontSize: '11px' }}>DESCRIPTION</label>
+                  <input type="text" value={editDescription} onChange={e => setEditDescription(e.target.value)} placeholder="Product description" style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '14px' }} />
+                </div>
+              </div>
+
+              <div>
+                <label className="label-caps" style={{ display: 'block', marginBottom: '8px', fontSize: '11px' }}>STAINS</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {editStains.map((stain, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', backgroundColor: 'var(--surface)', borderRadius: '8px' }}>
+                      <input
+                        type="text"
+                        value={stain.name}
+                        onChange={e => {
+                          const next = [...editStains];
+                          next[i] = { ...next[i], name: e.target.value };
+                          setEditStains(next);
+                        }}
+                        style={{ width: '120px', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--outline-variant)', fontSize: '13px', fontWeight: 600 }}
+                      />
+                      <span className="label-caps" style={{ fontSize: '10px' }}>+$</span>
+                      <input
+                        type="number"
+                        value={stain.priceAddition}
+                        onChange={e => {
+                          const next = [...editStains];
+                          next[i] = { ...next[i], priceAddition: Number(e.target.value) };
+                          setEditStains(next);
+                        }}
+                        style={{ width: '70px', padding: '6px 8px', borderRadius: '4px', border: '1px solid var(--outline-variant)', fontSize: '13px' }}
+                      />
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={stain.inStock}
+                          onChange={e => {
+                            const next = [...editStains];
+                            next[i] = { ...next[i], inStock: e.target.checked };
+                            setEditStains(next);
+                          }}
+                        />
+                        In Stock
+                      </label>
+                      <div style={{ flex: 1 }} />
+                      {selectedStain !== stain.name && (
+                        <button
+                          onClick={() => { setSelectedCrib(selectedCrib); setSelectedWood(selectedWood); setSelectedStain(stain.name); }}
+                          className="icon-btn" title="View images for this stain"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>visibility</span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -705,8 +822,9 @@ export default function ImageManager() {
                   position: 'relative',
                   borderRadius: '10px',
                   overflow: 'hidden',
-                  backgroundColor: 'var(--surface-container-low)',
+                  backgroundColor: 'var(--surface)',
                   border: selectedIds.has(img._id) ? '2px solid var(--primary)' : '1px solid var(--outline-variant)',
+                  boxShadow: selectedIds.has(img._id) ? 'var(--shadow-hard)' : 'var(--shadow-ambient)',
                   transition: 'all 0.2s',
                 }}>
                   <div
