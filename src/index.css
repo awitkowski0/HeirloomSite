@@ -213,8 +213,8 @@ main {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  padding-bottom: var(--spacing-lg);
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
 }
 
 @media (min-width: 1024px) {
@@ -1368,7 +1368,7 @@ main {
   }
 
   .app-header {
-    padding: 0 16px;
+    padding: 0 8px;
     height: 64px;
     position: static;
   }

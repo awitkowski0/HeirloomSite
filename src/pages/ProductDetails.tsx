@@ -174,10 +174,6 @@ export default function ProductDetails() {
             ) : (
               <div style={{ padding: '48px', textAlign: 'center', color: 'var(--error)' }}>Out of Stock</div>
             )}
-            <div className="badges">
-              <span className="badge badge-outline">Handcrafted</span>
-              <span className="badge badge-filled">Customizable</span>
-            </div>
           </div>
 
           {galleryImages.length > 1 && (
