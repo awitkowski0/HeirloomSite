@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useQuery } from "convex/react";
@@ -18,6 +18,25 @@ export default function ProductDetails() {
   const [showCartPopup, setShowCartPopup] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showWoodPicker, setShowWoodPicker] = useState(false);
+
+  const touchStartY = useRef(0);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaY) < 50) return;
+    const available = currentConfig.stains.filter((s: any) => s.inStock);
+    const idx = available.findIndex((s: any) => s.name === selectedStain);
+    if (deltaY < 0 && idx < available.length - 1) {
+      setSelectedStain(available[idx + 1].name);
+    } else if (deltaY > 0 && idx > 0) {
+      setSelectedStain(available[idx - 1].name);
+    }
+  };
 
   const decodedId = decodeURIComponent(id || '');
   const productConfigurations = inventory.filter((i: any) => (i.productName ?? i.cribName) === decodedId);
@@ -58,6 +77,7 @@ export default function ProductDetails() {
 
   const handleWoodChange = (wood: string) => {
     setSelectedWood(wood);
+    setShowWoodPicker(false);
     const newConfig = productConfigurations.find(c => c.wood === wood);
     if (newConfig) {
        const stainStillValid = newConfig.stains.find((s: any) => s.name === selectedStain && s.inStock);
@@ -103,9 +123,20 @@ export default function ProductDetails() {
 
   return (
     <div className="container">
+      {currentConfig && (
+        <h2 className="headline-xl product-title">
+          {currentConfig.productName ?? currentConfig.cribName}
+        </h2>
+      )}
+
       <div className="grid-layout">
         <div className="product-showcase">
-          <div className="image-container product-image" style={{ backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '500px', flexDirection: 'column', position: 'relative' }}>
+          <div
+            className="image-container product-image"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            style={{ backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '500px', flexDirection: 'column', position: 'relative' }}
+          >
             {galleryImages.length > 0 ? (
               <>
                 <img
@@ -174,57 +205,59 @@ export default function ProductDetails() {
           )}
         </div>
 
-        <div className="configuration-panel">
-          <section className="pricing-section">
-            <div>
-              <h2 className="headline-xl">
-                {currentConfig.productName ?? currentConfig.cribName}
-              </h2>
-              <p className="body-lg subtitle" style={{ marginTop: '12px', color: 'var(--on-surface-variant)' }}>
-                {currentConfig.description || "A legacy piece for the modern nursery."}
-              </p>
-            </div>
-            <div className="price-row">
-              <div style={{ display: 'flex', alignItems: 'baseline' }}>
-                <span className="headline-lg price-current">$</span>
-                <span className="headline-lg price-current" style={{ minWidth: '60px' }}>
-                  {totalPrice.toLocaleString()}
-                </span>
-                <span className="headline-lg price-current">.00</span>
+        <div className="stain-strip-mobile">
+          {currentConfig.stains.map((stain: any) => (
+            <button
+              key={stain.name}
+              disabled={!stain.inStock}
+              className={`stain-strip-swatch ${selectedStain === stain.name ? 'selected' : ''}`}
+              onClick={() => setSelectedStain(stain.name)}
+              style={{ opacity: stain.inStock ? 1 : 0.5 }}
+            >
+              <div className="stain-swatch" style={{backgroundColor: getStainColor(stain.name), overflow: 'hidden', position: 'relative'}}>
+                {(stain.image || stain.gallery?.[0]?.url) ? (
+                  <img src={stain.image || stain.gallery[0].url} alt={stain.name} style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0}} />
+                ) : null}
               </div>
-              <span className="body-md price-old">${(totalPrice + 350).toLocaleString()}.00</span>
-            </div>
-          </section>
+            </button>
+          ))}
+        </div>
 
+        <div className="configuration-panel">
           <section className="config-section">
             <div className="config-header">
               <h3 className="label-caps">01. Select Wood Species</h3>
-              <span className="body-md">{selectedWood.replace(/([A-Z])/g, ' $1').trim()} (Base: ${basePrice})</span>
             </div>
-            <div className="wood-grid">
-              {productConfigurations.map(config => {
-                const isAvailable = config.stains.some((s: any) => s.inStock);
-                return (
-                  <button 
-                    key={config.wood}
-                    disabled={!isAvailable}
-                    style={{ opacity: isAvailable ? 1 : 0.5, cursor: isAvailable ? 'pointer' : 'not-allowed' }}
-                    className={`wood-button ${selectedWood === config.wood ? 'selected' : ''}`}
-                    onClick={() => handleWoodChange(config.wood)}
-                  >
-                    <div className="wood-swatch" style={{ backgroundColor: config.wood === 'RedOak' ? '#D2B48C' : config.wood === 'BrownMaple' ? '#DEB887' : '#8B4513' }}>
-                    </div>
-                    <p className="label-caps wood-label">
+            {showWoodPicker ? (
+              <div className="wood-grid">
+                {productConfigurations.map(config => {
+                  const isAvailable = config.stains.some((s: any) => s.inStock);
+                  return (
+                    <button 
+                      key={config.wood}
+                      disabled={!isAvailable}
+                      style={{ opacity: isAvailable ? 1 : 0.5, cursor: isAvailable ? 'pointer' : 'not-allowed' }}
+                      className={`wood-chip ${selectedWood === config.wood ? 'selected' : ''}`}
+                      onClick={() => handleWoodChange(config.wood)}
+                    >
                       {config.wood.replace(/([A-Z])/g, ' $1').trim()}
-                      {!isAvailable && <span style={{ display: 'block', fontSize: '10px', color: 'var(--error)', marginTop: '4px' }}>Sold Out</span>}
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
+                      {!isAvailable && <span style={{ fontSize: '9px', color: 'var(--error)', marginLeft: '4px' }}>Sold Out</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <button className="wood-chip selected" onClick={() => setShowWoodPicker(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                  {selectedWood.replace(/([A-Z])/g, ' $1').trim()}
+                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>expand_more</span>
+                </button>
+                <span className="body-md" style={{ color: 'var(--on-surface-variant)' }}>Base: ${basePrice}</span>
+              </div>
+            )}
           </section>
 
-          <section className="config-section">
+          <section className="config-section desktop-only">
             <div className="config-header">
               <h3 className="label-caps">02. Choose Stain Finish</h3>
               <span className="body-md">{selectedStain} {addition > 0 ? `(+ $${addition})` : '(Included)'}</span>
@@ -240,7 +273,11 @@ export default function ProductDetails() {
                     className={`stain-button ${selectedStain === stain.name ? 'selected' : ''}`}
                     onClick={() => setSelectedStain(stain.name)}
                   >
-                    <div className="stain-swatch" style={{backgroundColor: getStainColor(stain.name)}}></div>
+                    <div className="stain-swatch" style={{backgroundColor: getStainColor(stain.name), overflow: 'hidden', position: 'relative'}}>
+                      {(stain.image || stain.gallery?.[0]?.url) ? (
+                        <img src={stain.image || stain.gallery[0].url} alt={stain.name} style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0}} />
+                      ) : null}
+                    </div>
                     <div className="stain-info">
                       <p className="body-md stain-name">
                         {stain.name} {stainAddition > 0 && <span style={{ color: 'var(--secondary)'}}>(+${stainAddition})</span>}
@@ -252,6 +289,22 @@ export default function ProductDetails() {
                   </button>
                 );
               })}
+            </div>
+          </section>
+
+          <section className="pricing-section">
+            <p className="body-lg subtitle" style={{ margin: '0', color: 'var(--on-surface-variant)' }}>
+              {currentConfig.description || "A legacy piece for the modern nursery."}
+            </p>
+            <div className="price-row">
+              <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                <span className="headline-lg price-current">$</span>
+                <span className="headline-lg price-current" style={{ minWidth: '60px' }}>
+                  {totalPrice.toLocaleString()}
+                </span>
+                <span className="headline-lg price-current">.00</span>
+              </div>
+              <span className="body-md price-old">${(totalPrice + 350).toLocaleString()}.00</span>
             </div>
           </section>
 

@@ -277,6 +277,42 @@ export default function Gallery() {
             );
           })}
         </div>
+
+        {/* Mobile swipeable carousel */}
+        <div className="gallery-carousel-mobile">
+          {products.map(p => {
+            const { config, stain } = getDisplayConfig(p.name);
+            const displayImage = stain?.image || p.img;
+            const displayPrice = config ? config.basePrice + (stain?.priceAddition || 0) : p.minPrice;
+            const hasActiveSelection = selectedWood !== 'All Collections' || selectedStain !== 'All Stains';
+            return (
+              <div key={p.id} className="gallery-carousel-slide">
+                <div className="carousel-slide-img">
+                  {displayImage ? (
+                    <img key={selectedWood + selectedStain} src={displayImage} alt={p.name} />
+                  ) : (
+                    <div style={{ color: 'var(--outline-variant)' }}>Image Unavailable</div>
+                  )}
+                </div>
+                <div className="carousel-slide-info">
+                  <h3 className="headline-md" style={{ color: 'var(--primary)', marginBottom: '4px' }}>{p.name}</h3>
+                  <p className="body-lg" style={{ color: 'var(--primary)', fontWeight: '600' }}>
+                    {hasActiveSelection ? `$${displayPrice.toLocaleString()}` : `From $${p.minPrice.toLocaleString()}`}
+                  </p>
+                  <button className="carousel-slide-btn" onClick={() => {
+                    posthog.capture('product_click', { productName: p.name, wood: selectedWood, stain: selectedStain, source: 'carousel' });
+                    const params = new URLSearchParams();
+                    if (selectedWood !== 'All Collections') params.set('wood', selectedWood);
+                    if (selectedStain !== 'All Stains') params.set('stain', selectedStain);
+                    navigate(`/product/${p.id}${params.toString() ? `?${params.toString()}` : ''}`);
+                  }}>
+                    View Details
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

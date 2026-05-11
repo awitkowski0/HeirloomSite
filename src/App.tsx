@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import Header from './components/Header';
 import Gallery from './pages/Gallery';
 import Products from './pages/Products';
@@ -13,12 +13,13 @@ import Admin from './pages/Admin';
 
 import { CartProvider } from './context/CartContext';
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const isProductPage = location.pathname.startsWith('/product/');
   return (
     <CartProvider>
-      <Router>
       <Header />
-      <main style={{ paddingTop: '80px' }}>
+      <main style={{ paddingTop: isProductPage ? '0' : '80px' }}>
         <Routes>
           <Route path="/" element={<Showroom />} />
           <Route path="/products" element={<Products />} />
@@ -87,8 +88,15 @@ function App() {
              </div>
          </div>
       </footer>
-      </Router>
     </CartProvider>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
