@@ -1317,11 +1317,17 @@ main {
   }
 
   .app-header {
+    padding: 0 16px;
+    height: 64px;
+    position: static;
+  }
+
+  .app-header .nav-links {
     display: none;
   }
 
-  main {
-    padding-top: 0;
+  .app-header .header-right form {
+    display: none;
   }
 
   .container {
@@ -1329,16 +1335,21 @@ main {
   }
 
   main {
-    padding-top: 64px;
+    padding-top: 0;
+    padding-bottom: 80px;
+  }
+
+  .container {
+    padding: 0 16px;
+  }
+
+  main {
+    padding-top: 0;
     padding-bottom: 80px;
   }
 
   .bottom-nav {
     display: flex;
-  }
-
-  .app-header .nav-links {
-    display: none;
   }
 }
 
