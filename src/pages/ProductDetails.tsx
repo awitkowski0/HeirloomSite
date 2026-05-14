@@ -149,22 +149,22 @@ export default function ProductDetails() {
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }}
-                      style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                      className="gallery-nav-btn gallery-nav-prev"
                     >
                       <span className="material-symbols-outlined">chevron_left</span>
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }}
-                      style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(255,255,255,0.8)', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}
+                      className="gallery-nav-btn gallery-nav-next"
                     >
                       <span className="material-symbols-outlined">chevron_right</span>
                     </button>
-                    <div style={{ position: 'absolute', bottom: '12px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '6px', zIndex: 2 }}>
+                    <div className="gallery-pagination">
                       {galleryImages.map((_, i) => (
                         <button
                           key={i}
                           onClick={(e) => { e.stopPropagation(); setGalleryIndex(i); }}
-                          style={{ width: i === galleryIndex ? '20px' : '8px', height: '8px', borderRadius: '4px', border: 'none', backgroundColor: i === galleryIndex ? 'var(--primary)' : 'var(--outline-variant)', cursor: 'pointer', transition: 'all 0.2s' }}
+                          className={`gallery-dot ${i === galleryIndex ? 'active' : ''}`}
                         />
                       ))}
                     </div>
@@ -330,8 +330,8 @@ export default function ProductDetails() {
           </section>
 
           {showCartPopup && (
-            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => setShowCartPopup(false)}>
-              <div style={{ backgroundColor: 'var(--surface)', borderRadius: '16px', padding: '40px', maxWidth: '420px', width: '90%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }} onClick={e => e.stopPropagation()}>
+            <div className="cart-popup-overlay" onClick={() => setShowCartPopup(false)}>
+              <div className="cart-popup-content" onClick={e => e.stopPropagation()}>
                 <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--primary)', marginBottom: '16px' }}>check_circle</span>
                 <h2 className="headline-md" style={{ marginBottom: '8px' }}>Added to Cart!</h2>
                 <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>{currentConfig.productName ?? currentConfig.cribName} — {selectedWood.replace(/([A-Z])/g, ' $1').trim()} / {selectedStain}</p>
@@ -346,17 +346,17 @@ export default function ProductDetails() {
       </div>
 
       {lightboxOpen && galleryImages.length > 0 && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} onClick={() => setLightboxOpen(false)}>
-          <button onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} style={{ position: 'absolute', top: '24px', right: '24px', background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
+        <div className="lightbox-overlay" onClick={() => setLightboxOpen(false)}>
+          <button onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} className="lightbox-close-btn">
             <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>close</span>
           </button>
-          <img src={galleryImages[galleryIndex]} alt="" style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain' }} onClick={e => e.stopPropagation()} />
+          <img src={galleryImages[galleryIndex]} alt="" className="lightbox-img" onClick={e => e.stopPropagation()} />
           {galleryImages.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} style={{ position: 'absolute', left: '24px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '48px', height: '48px', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-prev">
                 <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_left</span>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} style={{ position: 'absolute', right: '24px', top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: '50%', width: '48px', height: '48px', cursor: 'pointer', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-next">
                 <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_right</span>
               </button>
             </>
