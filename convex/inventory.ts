@@ -62,7 +62,7 @@ export const save = mutation({
     inventory: v.array(v.any())
   },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     
     const existing = await ctx.db.query("inventory_staged" as any).collect();
     for (const doc of existing) {
@@ -110,7 +110,7 @@ export const save = mutation({
 export const generateUploadUrl = mutation({
   args: { password: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     return await ctx.storage.generateUploadUrl();
   }
 });
@@ -118,7 +118,7 @@ export const generateUploadUrl = mutation({
 export const publish = mutation({
   args: { password: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     
     const live = await ctx.db.query("inventory").collect();
     for (const doc of live) await ctx.db.delete(doc._id);
@@ -149,7 +149,7 @@ export const publish = mutation({
 export const updateCribName = mutation({
   args: { password: v.string(), oldName: v.string(), newName: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     const items = await ctx.db.query("inventory_staged" as any).filter((q: any) => q.eq(q.field("cribName"), args.oldName)).collect();
     for (const item of items) {
       await ctx.db.patch(item._id, { cribName: args.newName, productName: args.newName });
@@ -165,7 +165,7 @@ export const updateCribName = mutation({
 export const deleteCrib = mutation({
   args: { password: v.string(), cribName: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     const stagedItems = await ctx.db.query("inventory_staged" as any).filter((q: any) => q.eq(q.field("cribName"), args.cribName)).collect();
     for (const item of stagedItems) {
@@ -183,7 +183,7 @@ export const deleteCrib = mutation({
 export const deleteWood = mutation({
   args: { password: v.string(), cribName: v.string(), wood: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     const stagedItems = await ctx.db.query("inventory_staged" as any)
       .filter((q: any) => q.eq(q.field("cribName"), args.cribName))
@@ -204,7 +204,7 @@ export const deleteWood = mutation({
 export const updateBasePrice = mutation({
   args: { password: v.string(), cribName: v.string(), wood: v.string(), newPrice: v.number() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     const items = await ctx.db.query("inventory_staged" as any)
       .filter((q: any) => q.eq(q.field("cribName"), args.cribName))
       .filter((q: any) => q.eq(q.field("wood"), args.wood))
@@ -218,7 +218,7 @@ export const updateBasePrice = mutation({
 export const backfillImages = mutation({
   args: { password: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     const inventories = [
       ...await ctx.db.query("inventory").collect(),
@@ -265,7 +265,7 @@ export const backfillImages = mutation({
 export const reorderCribs = mutation({
   args: { password: v.string(), cribName: v.string(), newOrder: v.number() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     const items = await ctx.db.query("inventory_staged" as any).filter((q: any) => q.eq(q.field("cribName"), args.cribName)).collect();
     for (const item of items) {
       await ctx.db.patch(item._id, { order: args.newOrder });
@@ -276,7 +276,7 @@ export const reorderCribs = mutation({
 export const reorderWoods = mutation({
   args: { password: v.string(), cribName: v.string(), wood: v.string(), newOrder: v.number() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     const items = await ctx.db.query("inventory_staged" as any)
       .filter((q: any) => q.eq(q.field("cribName"), args.cribName))
       .filter((q: any) => q.eq(q.field("wood"), args.wood))

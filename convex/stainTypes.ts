@@ -24,7 +24,7 @@ export const save = mutation({
     defaultPriceAddition: v.number(),
   },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     const existing = await ctx.db.query("stain_types").withIndex("by_name", q => q.eq("name", args.name)).first();
     if (existing) {
@@ -50,7 +50,7 @@ export const remove = mutation({
     id: v.id("stain_types"),
   },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     await ctx.db.delete(args.id);
   },
 });
@@ -58,7 +58,7 @@ export const remove = mutation({
 export const autoDiscover = mutation({
   args: { password: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     const items = await ctx.db.query("inventory").collect();
     const stainNames = new Set<string>();
@@ -87,7 +87,7 @@ export const autoDiscover = mutation({
 export const populateFromInventory = mutation({
   args: { password: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     const items = await ctx.db.query("inventory").collect();
     const existingTypes = await ctx.db.query("stain_types").collect();
