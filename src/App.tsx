@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Header from './components/Header';
 import Gallery from './pages/Gallery';
 import Products from './pages/Products';
@@ -14,12 +14,10 @@ import Admin from './pages/Admin';
 import { CartProvider } from './context/CartContext';
 
 function AppContent() {
-  const location = useLocation();
-  const isProductPage = location.pathname.startsWith('/product/');
   return (
     <CartProvider>
       <Header />
-      <main style={{ paddingTop: '80px' }} className={isProductPage ? 'main--product' : ''}>
+      <main>
         <Routes>
           <Route path="/" element={<Showroom />} />
           <Route path="/products" element={<Products />} />

@@ -1368,17 +1368,33 @@ main {
   }
 
   .app-header {
-    padding: 0 8px;
-    height: 64px;
-    position: static;
+    height: 32px;
+    padding: 4px 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: #FDFCFB;
+    border-bottom: 1px solid #f5f5f4;
   }
-
   .app-header .nav-links {
-    display: none;
+    display: none !important;
   }
-
   .app-header .header-right form {
-    display: none;
+    display: none !important;
+  }
+  .app-header .header-left > *:not(.brand-title) {
+    display: none !important;
+  }
+  .app-header .header-left {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+  }
+  .app-header .brand-title img {
+    height: 18px !important;
   }
 
   .container {
@@ -1386,30 +1402,12 @@ main {
   }
 
   main {
-    padding-top: 0;
-    padding-bottom: 80px;
-  }
-
-  .container {
-    padding: 0 16px;
-  }
-
-  main {
-    padding-top: 0;
+    padding-top: 32px;
     padding-bottom: 80px;
   }
 
   .bottom-nav {
     display: flex;
-  }
-}
-
-@media (max-width: 767px) {
-  .app-header--product {
-    display: none !important;
-  }
-  .main--product {
-    padding-top: 0 !important;
   }
 }
 

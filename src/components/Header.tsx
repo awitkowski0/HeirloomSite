@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
 export default function Header() {
   const { totalItems } = useCart();
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -18,7 +17,7 @@ export default function Header() {
   };
 
   return (
-    <header className={`app-header${location.pathname.startsWith('/product/') ? ' app-header--product' : ''}`}>
+    <header className="app-header">
       <div className="header-left">
         <Link to="/" className="brand-title">
           <img src="/logo-wide.png" alt="Heirloom Cribs and More" style={{ height: '36px', width: 'auto', display: 'block' }} />
