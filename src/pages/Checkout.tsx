@@ -113,12 +113,14 @@ export default function Checkout() {
         state,
         zip,
         items: cart.map(item => ({
+          productName: item.productName,
           cribName: item.cribName,
           wood: item.wood,
           stainName: item.stainName,
           price: item.price,
           image: item.image,
           quantity: item.quantity,
+          addons: item.addons,
         })),
         subtotal: cartSubtotal,
         shipping,
@@ -292,9 +294,19 @@ export default function Checkout() {
                          <p className="label-caps text-on-surface-variant" style={{ fontSize: '10px' }}>
                            {item.wood.replace(/([A-Z])/g, ' $1').trim()} • {item.stainName}
                          </p>
-                         <p className="body-md" style={{ marginTop: '4px' }}>${item.price.toLocaleString()}.00 x {item.quantity}</p>
-                      </div>
-                      <button
+                          <p className="body-md" style={{ marginTop: '4px' }}>${item.price.toLocaleString()}.00 x {item.quantity}</p>
+                          {item.addons && item.addons.length > 0 && (
+                            <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              {item.addons.map((addon, ai) => (
+                                <div key={ai} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--on-surface-variant)' }}>
+                                  <span>{addon.name}{addon.stainName ? ` (${addon.stainName})` : ''}</span>
+                                  <span>+${addon.price.toLocaleString()}.00</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                       </div>
+                       <button
                         onClick={() => removeFromCart(item.id)}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--on-surface-variant)', fontSize: '18px', lineHeight: 1 }}
                         title="Remove item"

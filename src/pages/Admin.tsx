@@ -85,7 +85,14 @@ export default function Admin() {
   const [editDimensions, setEditDimensions] = useState<string>('');
   const [editWeight, setEditWeight] = useState<number>(0);
   const [editStains, setEditStains] = useState<any[]>([]);
+  const [editAddons, setEditAddons] = useState<any[]>([]);
   const [tagInput, setTagInput] = useState('');
+  const [newAddonName, setNewAddonName] = useState('');
+  const [newAddonDescription, setNewAddonDescription] = useState('');
+  const [newAddonPrice, setNewAddonPrice] = useState(0);
+  const [newAddonPriceStained, setNewAddonPriceStained] = useState(0);
+  const [newAddonCategory, setNewAddonCategory] = useState('conversion');
+  const [newAddonStainable, setNewAddonStainable] = useState(false);
 
   // Stain type manager
   const [showStainManager, setShowStainManager] = useState(false);
@@ -155,6 +162,7 @@ export default function Admin() {
       setEditDimensions(currentConfig.dimensions || '');
       setEditWeight(currentConfig.weight ?? 0);
       setEditStains(currentConfig.stains.map((s: any) => ({ ...s })));
+      setEditAddons(currentConfig.addons ? currentConfig.addons.map((a: any) => ({ ...a })) : []);
     }
   }, [selectedCrib, selectedWood, currentConfig]);
 
@@ -759,7 +767,7 @@ export default function Admin() {
                   <button onClick={async () => {
                     if (!inventory) return;
                     const updated = inventory.map(item => {
-                      if (item.cribName === selectedCrib && item.wood === selectedWood) return { ...item, basePrice: editBasePrice, description: editDescription, extendedDescription: editExtendedDescription, tags: editTags, sku: editSku, slug: editSlug, dimensions: editDimensions, weight: editWeight, stains: editStains };
+                      if (item.cribName === selectedCrib && item.wood === selectedWood) return { ...item, basePrice: editBasePrice, description: editDescription, extendedDescription: editExtendedDescription, tags: editTags, addons: editAddons, sku: editSku, slug: editSlug, dimensions: editDimensions, weight: editWeight, stains: editStains };
                       return item;
                     });
                     await saveInventoryMutation({ password: adminPassword, inventory: updated });
@@ -808,6 +816,49 @@ export default function Admin() {
                     <input type="text" value={tagInput} onChange={e => setTagInput(e.target.value)}
                       onKeyDown={e => { if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) { e.preventDefault(); setEditTags([...editTags, tagInput.trim()]); setTagInput(''); } }}
                       placeholder="Add tag..." style={{ border: 'none', outline: 'none', fontSize: '12px', flex: 1, minWidth: '80px', background: 'none' }} />
+                  </div>
+                </div>
+
+                {/* Addon editor */}
+                <div style={{ marginBottom: '12px' }}>
+                  <label className="label-caps" style={{ fontSize: '10px', marginBottom: '8px', display: 'block' }}>ADDONS</label>
+                  {editAddons.map((addon, ai) => (
+                    <div key={ai} style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px', padding: '8px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', flexWrap: 'wrap' }}>
+                      <input type="text" value={addon.name} onChange={e => { const a = [...editAddons]; a[ai] = { ...a[ai], name: e.target.value }; setEditAddons(a); }}
+                        placeholder="Name" style={{ width: '140px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--outline-variant)', fontSize: '12px' }} />
+                      <input type="text" value={addon.description || ''} onChange={e => { const a = [...editAddons]; a[ai] = { ...a[ai], description: e.target.value }; setEditAddons(a); }}
+                        placeholder="Description" style={{ width: '140px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--outline-variant)', fontSize: '12px' }} />
+                      <span style={{ fontSize: '11px', color: 'var(--on-surface-variant)' }}>$</span>
+                      <input type="number" value={addon.price} onChange={e => { const a = [...editAddons]; a[ai] = { ...a[ai], price: Number(e.target.value) }; setEditAddons(a); }}
+                        placeholder="Price" style={{ width: '60px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--outline-variant)', fontSize: '12px' }} />
+                      <span style={{ fontSize: '11px', color: 'var(--on-surface-variant)' }}>$ stained</span>
+                      <input type="number" value={addon.priceStained} onChange={e => { const a = [...editAddons]; a[ai] = { ...a[ai], priceStained: Number(e.target.value) }; setEditAddons(a); }}
+                        placeholder="Stained" style={{ width: '60px', padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--outline-variant)', fontSize: '12px' }} />
+                      <select value={addon.category || 'conversion'} onChange={e => { const a = [...editAddons]; a[ai] = { ...a[ai], category: e.target.value }; setEditAddons(a); }}
+                        style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid var(--outline-variant)', fontSize: '11px' }}>
+                        <option value="conversion">Conversion</option>
+                        <option value="mattress">Mattress</option>
+                        <option value="matching_furniture">Furniture</option>
+                      </select>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={addon.stainable} onChange={e => { const a = [...editAddons]; a[ai] = { ...a[ai], stainable: e.target.checked }; setEditAddons(a); }} />
+                        Stainable
+                      </label>
+                      <span onClick={() => setEditAddons(editAddons.filter((_, i) => i !== ai))} style={{ cursor: 'pointer', color: 'var(--error)', fontSize: '16px', lineHeight: '16px', opacity: 0.6 }}>×</span>
+                    </div>
+                  ))}
+                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <input type="text" value={newAddonName} onChange={e => setNewAddonName(e.target.value)} placeholder="Addon name" style={{ width: '120px', padding: '4px 6px', borderRadius: '4px', border: '1px dashed var(--outline-variant)', fontSize: '12px', background: 'none' }} />
+                    <select value={newAddonCategory} onChange={e => setNewAddonCategory(e.target.value)} style={{ padding: '4px 6px', borderRadius: '4px', border: '1px dashed var(--outline-variant)', fontSize: '11px', background: 'none' }}>
+                      <option value="conversion">Conversion</option>
+                      <option value="mattress">Mattress</option>
+                      <option value="matching_furniture">Furniture</option>
+                    </select>
+                    <button onClick={() => {
+                      if (!newAddonName.trim()) return;
+                      setEditAddons([...editAddons, { name: newAddonName.trim(), description: newAddonDescription, price: newAddonPrice, priceStained: newAddonPriceStained, category: newAddonCategory, stainable: newAddonStainable, image: undefined }]);
+                      setNewAddonName(''); setNewAddonDescription(''); setNewAddonPrice(0); setNewAddonPriceStained(0); setNewAddonCategory('conversion'); setNewAddonStainable(false);
+                    }} className="filter-btn" style={{ padding: '4px 10px', fontSize: '11px' }}>+ Add</button>
                   </div>
                 </div>
               </div>

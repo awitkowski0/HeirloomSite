@@ -18,6 +18,11 @@ export const save = mutation({
       price: v.number(),
       image: v.string(),
       quantity: v.number(),
+      addons: v.optional(v.array(v.object({
+        name: v.string(),
+        price: v.number(),
+        stainName: v.optional(v.string()),
+      }))),
     })),
     subtotal: v.number(),
     shipping: v.number(),
@@ -35,6 +40,7 @@ export const save = mutation({
       price: item.price,
       image: item.image,
       quantity: item.quantity,
+      addons: item.addons,
     }));
     const orderId = await ctx.db.insert("orders", {
       email: args.email,

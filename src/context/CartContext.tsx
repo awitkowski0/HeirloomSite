@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+export interface CartAddon {
+  name: string;
+  price: number;
+  stainName?: string;
+}
+
 export interface CartItem {
   id: string;
   productName: string;
@@ -9,6 +15,15 @@ export interface CartItem {
   price: number;
   image: string;
   quantity: number;
+  addons?: CartAddon[];
+}
+
+function itemKey(item: CartItem): string {
+  const addonKey = (item.addons || [])
+    .map(a => `${a.name}:${a.price}:${a.stainName || ''}`)
+    .sort()
+    .join('|');
+  return `${item.productName}|${item.wood}|${item.stainName}|${addonKey}`;
 }
 
 interface CartContextType {
@@ -40,13 +55,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (item: CartItem) => {
     setCart(prev => {
-      const existing = prev.find(i => 
-        i.productName === item.productName && 
-        i.wood === item.wood && 
-        i.stainName === item.stainName
-      );
+      const key = itemKey(item);
+      const existing = prev.find(i => itemKey(i) === key);
       if (existing) {
-        return prev.map(i => i === existing ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i => itemKey(i) === key ? { ...i, quantity: i.quantity + 1 } : i);
       }
       return [...prev, { ...item, quantity: 1 }];
     });

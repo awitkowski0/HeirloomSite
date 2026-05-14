@@ -16,6 +16,15 @@ export default defineSchema({
     slug: v.optional(v.string()),
     dimensions: v.optional(v.string()),
     weight: v.optional(v.number()),
+    addons: v.optional(v.array(v.object({
+      name: v.string(),
+      description: v.optional(v.string()),
+      price: v.number(),
+      priceStained: v.number(),
+      image: v.optional(v.string()),
+      category: v.optional(v.string()),
+      stainable: v.boolean(),
+    }))),
     stains: v.array(v.object({
       name: v.string(),
       inStock: v.boolean(),
@@ -54,6 +63,11 @@ export default defineSchema({
       price: v.number(),
       image: v.string(),
       quantity: v.number(),
+      addons: v.optional(v.array(v.object({
+        name: v.string(),
+        price: v.number(),
+        stainName: v.optional(v.string()),
+      }))),
     })),
     subtotal: v.number(),
     shipping: v.number(),
