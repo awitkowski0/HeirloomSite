@@ -4,6 +4,39 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import posthog from 'posthog-js';
 
+const STAIN_COLORS: Record<string, string> = {
+  natural: '#D2B48C',
+  espresso: '#3E2723',
+  white: '#F5F5F0',
+  grey: '#9E9E9E',
+  gray: '#9E9E9E',
+  walnut: '#5D4037',
+  cherry: '#8B4513',
+  maple: '#F5DEB3',
+  oak: '#C4A882',
+  black: '#212121',
+  navy: '#1A237E',
+  antique: '#8B7355',
+  driftwood: '#A68B6B',
+  weathered: '#8B8378',
+  pearl: '#F8F8F6',
+  cream: '#FFFDD0',
+  sage: '#9CAF88',
+  charcoal: '#36454F',
+  cognac: '#9A4B2E',
+  rust: '#8B3A2E',
+  honey: '#D4956A',
+  mocha: '#6B3A2E',
+};
+
+function getStainColor(name: string): string {
+  const n = name.toLowerCase();
+  for (const [key, color] of Object.entries(STAIN_COLORS)) {
+    if (n.includes(key)) return color;
+  }
+  return '#8B4513';
+}
+
 export default function Gallery() {
   const navigate = useNavigate();
   const inventoryData = useQuery(api.inventory.get as any, {});
@@ -13,6 +46,9 @@ export default function Gallery() {
   const [selectedWood, setSelectedWood] = useState<string>('All Collections');
   const [selectedStain, setSelectedStain] = useState<string>('All Stains');
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
+  const [carouselProduct, setCarouselProduct] = useState<string | null>(null);
+  const [carouselWood, setCarouselWood] = useState<string>('');
+  const [carouselStainIndex, setCarouselStainIndex] = useState<number>(0);
 
   if (loading) return (
     <div className="container" style={{ padding: '120px 24px', textAlign: 'center', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -30,18 +66,28 @@ export default function Gallery() {
     const pName = item.productName ?? item.cribName;
     const cribId = encodeURIComponent(pName);
     if (!uniqueCribsMap.has(pName)) {
+      const woodStains: Record<string, any[]> = {};
+      woodStains[item.wood] = item.stains.map((s: any) => ({
+        name: s.name, image: s.image, priceAddition: s.priceAddition, inStock: s.inStock,
+      }));
       uniqueCribsMap.set(pName, {
         id: cribId,
         name: pName,
         minPrice: item.basePrice,
         material: item.wood.replace(/([A-Z])/g, ' $1').trim(),
         img: item.stains[0]?.image,
-        woods: [item.wood]
+        woods: [item.wood],
+        woodStains,
       });
     } else {
       const existing = uniqueCribsMap.get(pName);
       if (item.basePrice < existing.minPrice) existing.minPrice = item.basePrice;
       if (!existing.woods.includes(item.wood)) existing.woods.push(item.wood);
+      if (!existing.woodStains[item.wood]) {
+        existing.woodStains[item.wood] = item.stains.map((s: any) => ({
+          name: s.name, image: s.image, priceAddition: s.priceAddition, inStock: s.inStock,
+        }));
+      }
     }
   });
 
@@ -68,9 +114,20 @@ export default function Gallery() {
     return { config, stain };
   };
 
+  // Carousel helpers
+  const carouselProductData = carouselProduct ? products.find(p => p.id === carouselProduct) : null;
+  const carouselConfigs = carouselProductData
+    ? inventory.filter((i: any) => encodeURIComponent(i.productName ?? i.cribName) === carouselProduct)
+    : [];
+  const effectiveCarouselWood = carouselWood || (carouselProductData?.woods[0] ?? '');
+  const carouselStains = carouselProductData?.woodStains?.[effectiveCarouselWood] || [];
+  const effectiveCarouselStain = carouselStains[carouselStainIndex] || carouselStains[0] || {};
+  const carouselConfig = carouselConfigs.find((c: any) => c.wood === effectiveCarouselWood) || carouselConfigs[0] || {};
+  const carouselPrice = (Number(carouselConfig.basePrice) || 0) + (Number(effectiveCarouselStain.priceAddition) || 0);
+
   return (
-    <div style={{ backgroundColor: 'var(--surface-bright)', minHeight: '100vh', paddingBottom: '120px' }}>
-      <div className="container" style={{ paddingTop: '20px', paddingBottom: '48px' }}>
+    <div style={{ backgroundColor: 'var(--surface-bright)', minHeight: '100vh' }}>
+      <div className="container gallery-header" style={{ paddingTop: '8px', paddingBottom: '48px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           <div className="filter-pills">
             <button 
@@ -175,6 +232,11 @@ export default function Gallery() {
                     setExpandedProduct(p.id);
                     return;
                   }
+                  setExpandedProduct(null);
+                  setCarouselProduct(p.id);
+                  setCarouselWood(displayWood);
+                  setCarouselStainIndex(0);
+                  return;
                 }
                 posthog.capture('product_click', { productName: p.name, wood: selectedWood, stain: selectedStain, source: 'card' });
                 const params = new URLSearchParams();
@@ -208,6 +270,41 @@ export default function Gallery() {
                   <p className="body-md" style={{ color: 'var(--on-surface-variant)', fontWeight: '500' }}>
                     {hasActiveSelection ? `$${displayPrice.toLocaleString()}` : `From $${p.minPrice.toLocaleString()}`}
                   </p>
+                  {isExpanded && (
+                    <div className="gallery-card-details" style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                        {p.woods.slice(0, 4).map((w: string) => (
+                          <span key={w} style={{
+                            fontSize: '9px',
+                            fontFamily: 'var(--font-label)',
+                            letterSpacing: '0.05em',
+                            textTransform: 'uppercase',
+                            color: 'var(--on-surface-variant)',
+                            padding: '2px 8px',
+                            border: '1px solid var(--outline-variant)',
+                            borderRadius: '4px',
+                          }}>
+                            {w.replace(/([A-Z])/g, ' $1').trim()}
+                          </span>
+                        ))}
+                        {p.woods.length > 4 && <span style={{ fontSize: '9px', color: 'var(--outline)' }}>+{p.woods.length - 4}</span>}
+                      </div>
+                      {p.woodStains && p.woods.length > 0 && (
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                          {(p.woodStains[p.woods[0]] || []).slice(0, 6).map((s: any) => (
+                            <div key={s.name} style={{
+                              width: '14px',
+                              height: '14px',
+                              borderRadius: '50%',
+                              backgroundColor: getStainColor(s.name),
+                              border: '1px solid var(--outline-variant)',
+                              flexShrink: 0,
+                            }} title={s.name} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Floating View Details Button */}
@@ -277,9 +374,130 @@ export default function Gallery() {
             );
           })}
         </div>
-
-
       </div>
+
+      {/* Mobile Carousel Overlay */}
+      {carouselProduct && carouselProductData && (
+        <div className="gallery-carousel-overlay" onClick={() => setCarouselProduct(null)}>
+          <div className="gallery-carousel-content" onClick={(e) => e.stopPropagation()}>
+            {/* Close */}
+            <button className="gallery-carousel-close" onClick={() => setCarouselProduct(null)}>
+              <span className="material-symbols-outlined">close</span>
+            </button>
+
+            {/* Image */}
+            <div className="gallery-carousel-image-wrap">
+              {effectiveCarouselStain?.image ? (
+                <img
+                  key={effectiveCarouselWood + (effectiveCarouselStain?.name || '')}
+                  src={effectiveCarouselStain.image}
+                  alt={carouselProductData.name}
+                />
+              ) : (
+                <div style={{ color: 'var(--outline-variant)', fontSize: '14px' }}>Image Unavailable</div>
+              )}
+
+              {carouselStains.length > 1 && (
+                <>
+                  <button
+                    className="gallery-carousel-arrow left"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCarouselStainIndex(i => (i - 1 + carouselStains.length) % carouselStains.length);
+                    }}
+                  >
+                    <span className="material-symbols-outlined">chevron_left</span>
+                  </button>
+                  <button
+                    className="gallery-carousel-arrow right"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCarouselStainIndex(i => (i + 1) % carouselStains.length);
+                    }}
+                  >
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                </>
+              )}
+
+              {/* Stain dots indicator */}
+              {carouselStains.length > 1 && (
+                <div className="gallery-carousel-dots">
+                  {carouselStains.map((_: any, i: number) => (
+                    <div key={i} className={`dot ${i === carouselStainIndex ? 'active' : ''}`} />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Controls */}
+            <div className="gallery-carousel-controls">
+              <h2 className="headline-md" style={{ color: 'var(--primary)', marginBottom: '4px' }}>
+                {carouselProductData.name}
+              </h2>
+              <p className="body-lg" style={{ color: 'var(--on-surface-variant)', fontWeight: '500', marginBottom: '12px' }}>
+                ${carouselPrice.toLocaleString()}
+              </p>
+
+              {/* Wood chips */}
+              {carouselProductData.woods.length > 1 && (
+                <div style={{ marginBottom: '12px' }}>
+                  <p className="label-caps" style={{ color: 'var(--outline)', marginBottom: '6px' }}>Wood</p>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    {carouselProductData.woods.map((w: string) => (
+                      <button
+                        key={w}
+                        className={`wood-chip ${w === effectiveCarouselWood ? 'selected' : ''}`}
+                        onClick={() => {
+                          setCarouselWood(w);
+                          setCarouselStainIndex(0);
+                        }}
+                      >
+                        {w.replace(/([A-Z])/g, ' $1').trim()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Stain swatches */}
+              {carouselStains.length > 1 && (
+                <div style={{ marginBottom: '16px' }}>
+                  <p className="label-caps" style={{ color: 'var(--outline)', marginBottom: '6px' }}>Stain</p>
+                  <div className="stain-strip-mobile" style={{ display: 'flex' }}>
+                    {carouselStains.map((s: any, i: number) => (
+                      <button
+                        key={s.name}
+                        className={`stain-strip-swatch ${i === carouselStainIndex ? 'selected' : ''}`}
+                        onClick={() => setCarouselStainIndex(i)}
+                      >
+                        <div className="stain-swatch" style={{ backgroundColor: getStainColor(s.name) }} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* View Details */}
+              <button
+                className="gallery-carousel-cta"
+                onClick={() => {
+                  posthog.capture('product_click', { productName: carouselProductData.name, wood: effectiveCarouselWood, stain: effectiveCarouselStain?.name, source: 'carousel_cta' });
+                  const params = new URLSearchParams();
+                  if (effectiveCarouselWood) params.set('wood', effectiveCarouselWood);
+                  if (effectiveCarouselStain?.name) params.set('stain', effectiveCarouselStain.name);
+                  const qs = params.toString();
+                  setCarouselProduct(null);
+                  navigate(`/product/${carouselProductData.id}${qs ? `?${qs}` : ''}`);
+                }}
+              >
+                <span className="label-caps">View Details</span>
+                <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

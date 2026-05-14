@@ -73,7 +73,7 @@ export default function Products() {
         <meta property="og:title" content={`${searchQuery ? `Search: ${searchQuery}` : selectedCategory === 'All' ? 'All Products' : selectedCategory} | Heirloom Cribs and More`} />
         <meta property="og:description" content="Handcrafted heirloom-quality cribs and nursery furniture." />
       </Helmet>
-      <div className="container" style={{ padding: '40px 24px' }}>
+      <div className="container products-page" style={{ paddingTop: '40px', paddingBottom: '40px' }}>
         <header style={{ marginBottom: '40px' }}>
           <h1 className="headline-lg text-primary" style={{ fontSize: '32px', marginBottom: '8px' }}>
             {searchQuery ? `Search: "${searchQuery}"` : selectedCategory === 'All' ? 'Our Collections' : selectedCategory}
