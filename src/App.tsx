@@ -12,9 +12,11 @@ import RegistryView from './pages/RegistryView';
 import Admin from './pages/Admin';
 
 import { CartProvider } from './context/CartContext';
+import { AdminAuthProvider } from './context/AdminAuthContext';
 
 function AppContent() {
   return (
+    <AdminAuthProvider>
     <CartProvider>
       <Header />
       <main>
@@ -87,6 +89,7 @@ function AppContent() {
          </div>
       </footer>
     </CartProvider>
+    </AdminAuthProvider>
   );
 }
 
