@@ -65,13 +65,13 @@ export const save = mutation({
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
     
     const existing = await ctx.db.query("inventory_staged" as any).collect();
-    for (const doc of existing) {
-      await ctx.db.delete(doc._id);
-    }
+    // ⚡ Bolt: Parallelize DB deletes to reduce transaction latency
+    await Promise.all(existing.map((doc: any) => ctx.db.delete(doc._id)));
     
-    for (const item of args.inventory) {
+    // ⚡ Bolt: Parallelize DB inserts to reduce transaction latency
+    await Promise.all(args.inventory.map(async (item: any) => {
       const productName = item.productName ?? item.cribName;
-      if (!productName || !item.wood) continue;
+      if (!productName || !item.wood) return;
       
       await ctx.db.insert("inventory_staged" as any, {
         productName: String(productName),
@@ -103,7 +103,7 @@ export const save = mutation({
           image: s.image ? String(s.image) : undefined
         })),
       });
-    }
+    }));
   },
 });
 
@@ -121,11 +121,13 @@ export const publish = mutation({
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
     
     const live = await ctx.db.query("inventory").collect();
-    for (const doc of live) await ctx.db.delete(doc._id);
+    // ⚡ Bolt: Parallelize DB deletes to reduce transaction latency
+    await Promise.all(live.map((doc: any) => ctx.db.delete(doc._id)));
     
     const staged = await ctx.db.query("inventory_staged" as any).collect();
-    for (const item of staged) {
-      await ctx.db.insert("inventory", {
+    // ⚡ Bolt: Parallelize DB inserts to reduce transaction latency
+    await Promise.all(staged.map((item: any) =>
+      ctx.db.insert("inventory", {
         productName: item.productName ?? item.cribName,
         cribName: item.cribName,
         wood: item.wood,
@@ -141,8 +143,8 @@ export const publish = mutation({
         dimensions: item.dimensions,
         weight: item.weight,
         stains: item.stains,
-      });
-    }
+      })
+    ));
   }
 });
 
@@ -151,14 +153,12 @@ export const updateCribName = mutation({
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
     const items = await ctx.db.query("inventory_staged" as any).filter((q: any) => q.eq(q.field("cribName"), args.oldName)).collect();
-    for (const item of items) {
-      await ctx.db.patch(item._id, { cribName: args.newName, productName: args.newName });
-    }
+    // ⚡ Bolt: Parallelize DB patches to reduce transaction latency
+    await Promise.all(items.map((item: any) => ctx.db.patch(item._id, { cribName: args.newName, productName: args.newName })));
 
     const images = await ctx.db.query("images").withIndex("by_crib", (q: any) => q.eq("cribName", args.oldName)).collect();
-    for (const img of images) {
-      await ctx.db.patch(img._id, { cribName: args.newName, productName: args.newName });
-    }
+    // ⚡ Bolt: Parallelize DB patches to reduce transaction latency
+    await Promise.all(images.map((img: any) => ctx.db.patch(img._id, { cribName: args.newName, productName: args.newName })));
   }
 });
 
@@ -168,15 +168,15 @@ export const deleteCrib = mutation({
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
 
     const stagedItems = await ctx.db.query("inventory_staged" as any).filter((q: any) => q.eq(q.field("cribName"), args.cribName)).collect();
-    for (const item of stagedItems) {
-      await ctx.db.delete(item._id);
-    }
+    // ⚡ Bolt: Parallelize DB deletes to reduce transaction latency
+    await Promise.all(stagedItems.map((item: any) => ctx.db.delete(item._id)));
 
     const images = await ctx.db.query("images").withIndex("by_crib", (q: any) => q.eq("cribName", args.cribName)).collect();
-    for (const img of images) {
+    // ⚡ Bolt: Parallelize DB storage and deletes to reduce transaction latency
+    await Promise.all(images.map(async (img: any) => {
       await ctx.storage.delete(img.storageId as any);
       await ctx.db.delete(img._id);
-    }
+    }));
   }
 });
 
@@ -189,15 +189,15 @@ export const deleteWood = mutation({
       .filter((q: any) => q.eq(q.field("cribName"), args.cribName))
       .filter((q: any) => q.eq(q.field("wood"), args.wood))
       .collect();
-    for (const item of stagedItems) {
-      await ctx.db.delete(item._id);
-    }
+    // ⚡ Bolt: Parallelize DB deletes to reduce transaction latency
+    await Promise.all(stagedItems.map((item: any) => ctx.db.delete(item._id)));
 
     const images = await ctx.db.query("images").withIndex("by_path", (q: any) => q.eq("cribName", args.cribName).eq("wood", args.wood)).collect();
-    for (const img of images) {
+    // ⚡ Bolt: Parallelize DB storage and deletes to reduce transaction latency
+    await Promise.all(images.map(async (img: any) => {
       await ctx.storage.delete(img.storageId as any);
       await ctx.db.delete(img._id);
-    }
+    }));
   }
 });
 
@@ -209,9 +209,8 @@ export const updateBasePrice = mutation({
       .filter((q: any) => q.eq(q.field("cribName"), args.cribName))
       .filter((q: any) => q.eq(q.field("wood"), args.wood))
       .collect();
-    for (const item of items) {
-      await ctx.db.patch(item._id, { basePrice: args.newPrice });
-    }
+    // ⚡ Bolt: Parallelize DB patches to reduce transaction latency
+    await Promise.all(items.map((item: any) => ctx.db.patch(item._id, { basePrice: args.newPrice })));
   }
 });
 
@@ -267,9 +266,8 @@ export const reorderCribs = mutation({
   handler: async (ctx, args) => {
     if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
     const items = await ctx.db.query("inventory_staged" as any).filter((q: any) => q.eq(q.field("cribName"), args.cribName)).collect();
-    for (const item of items) {
-      await ctx.db.patch(item._id, { order: args.newOrder });
-    }
+    // ⚡ Bolt: Parallelize DB patches to reduce transaction latency
+    await Promise.all(items.map((item: any) => ctx.db.patch(item._id, { order: args.newOrder })));
   }
 });
 
@@ -281,8 +279,7 @@ export const reorderWoods = mutation({
       .filter((q: any) => q.eq(q.field("cribName"), args.cribName))
       .filter((q: any) => q.eq(q.field("wood"), args.wood))
       .collect();
-    for (const item of items) {
-      await ctx.db.patch(item._id, { order: args.newOrder });
-    }
+    // ⚡ Bolt: Parallelize DB patches to reduce transaction latency
+    await Promise.all(items.map((item: any) => ctx.db.patch(item._id, { order: args.newOrder })));
   }
 });
