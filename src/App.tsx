@@ -19,7 +19,7 @@ function AppContent() {
   return (
     <CartProvider>
       <Header />
-      <main style={{ paddingTop: isProductPage ? '0' : '80px' }}>
+      <main style={{ paddingTop: '80px' }} className={isProductPage ? 'main--product' : ''}>
         <Routes>
           <Route path="/" element={<Showroom />} />
           <Route path="/products" element={<Products />} />

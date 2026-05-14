@@ -78,6 +78,7 @@ export default function Admin() {
   // Edit panel state
   const [editBasePrice, setEditBasePrice] = useState<number>(0);
   const [editDescription, setEditDescription] = useState<string>('');
+  const [editExtendedDescription, setEditExtendedDescription] = useState<string>('');
   const [editTags, setEditTags] = useState<string[]>([]);
   const [editSku, setEditSku] = useState<string>('');
   const [editSlug, setEditSlug] = useState<string>('');
@@ -147,6 +148,7 @@ export default function Admin() {
     if (selectedCrib && selectedWood && currentConfig) {
       setEditBasePrice(currentConfig.basePrice);
       setEditDescription(currentConfig.description || '');
+      setEditExtendedDescription(currentConfig.extendedDescription || '');
       setEditTags(currentConfig.tags || []);
       setEditSku(currentConfig.sku || '');
       setEditSlug(currentConfig.slug || '');
@@ -757,7 +759,7 @@ export default function Admin() {
                   <button onClick={async () => {
                     if (!inventory) return;
                     const updated = inventory.map(item => {
-                      if (item.cribName === selectedCrib && item.wood === selectedWood) return { ...item, basePrice: editBasePrice, description: editDescription, tags: editTags, sku: editSku, slug: editSlug, dimensions: editDimensions, weight: editWeight, stains: editStains };
+                      if (item.cribName === selectedCrib && item.wood === selectedWood) return { ...item, basePrice: editBasePrice, description: editDescription, extendedDescription: editExtendedDescription, tags: editTags, sku: editSku, slug: editSlug, dimensions: editDimensions, weight: editWeight, stains: editStains };
                       return item;
                     });
                     await saveInventoryMutation({ password: adminPassword, inventory: updated });
@@ -780,6 +782,10 @@ export default function Admin() {
                   <div>
                     <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>DESCRIPTION</label>
                     <input type="text" value={editDescription} onChange={e => setEditDescription(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px' }} />
+                  </div>
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>EXTENDED DESCRIPTION</label>
+                    <textarea rows={4} value={editExtendedDescription} onChange={e => setEditExtendedDescription(e.target.value)} style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--outline-variant)', fontSize: '13px', resize: 'vertical', fontFamily: 'inherit' }} />
                   </div>
                   <div>
                     <label className="label-caps" style={{ fontSize: '10px', marginBottom: '4px', display: 'block' }}>DIMENSIONS</label>

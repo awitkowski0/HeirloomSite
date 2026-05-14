@@ -8,6 +8,7 @@ export default defineSchema({
     wood: v.string(),
     category: v.optional(v.string()),
     description: v.optional(v.string()),
+    extendedDescription: v.optional(v.string()),
     basePrice: v.number(),
     order: v.optional(v.number()),
     tags: v.optional(v.array(v.string())),
