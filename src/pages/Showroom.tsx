@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useNavigate } from 'react-router-dom';
+import { useAdminAuth } from '../context/AdminAuthContext';
 
 export default function Showroom() {
   const navigate = useNavigate();
   const isStaged = new URLSearchParams(window.location.search).get('mode') === 'staging';
-  const adminPassword = localStorage.getItem('adminPassword');
-  const isAdmin = !!adminPassword;
+  const { adminPassword, isAuthenticated: isAdmin } = useAdminAuth();
   const isEditMode = isAdmin && isStaged;
 
   const showroomData = useQuery(api.showroom.get, {});

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { PublicClientApplication, InteractionRequiredAuthError } from "@azure/msal-browser";
+import { useAdminAuth } from '../context/AdminAuthContext';
 
 const STAIN_SWATCH_COLORS: Record<string, string> = {
   natural: '#DEB887',
@@ -108,8 +109,8 @@ interface OneDriveFile {
 }
 
 export default function ImageManager() {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('adminPassword'));
-  const [adminPassword, setAdminPassword] = useState(localStorage.getItem('adminPassword') || '');
+  const { adminPassword, isAuthenticated, login, logout } = useAdminAuth();
+  const [passwordInput, setPasswordInput] = useState('');
   const [selectedCrib, setSelectedCrib] = useState<string | null>(null);
   const [selectedWood, setSelectedWood] = useState<string | null>(null);
   const [selectedStain, setSelectedStain] = useState<string | null>(null);
@@ -207,14 +208,12 @@ export default function ImageManager() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const ok = await verifyPassword({ password: adminPassword });
+      const ok = await verifyPassword({ password: passwordInput });
       if (ok) {
-        setIsAuthenticated(true);
-        localStorage.setItem('adminPassword', adminPassword);
+        login(passwordInput);
       } else {
         alert('Incorrect password');
-        setAdminPassword('');
-        localStorage.removeItem('adminPassword');
+        setPasswordInput('');
       }
     } catch {
       alert('Error verifying password');
@@ -510,7 +509,7 @@ export default function ImageManager() {
         <h1 className="headline-md text-primary" style={{ marginBottom: '8px' }}>Image Manager Access</h1>
         <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>Enter admin password.</p>
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Enter Password" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textAlign: 'center', letterSpacing: '0.2em' }} required />
+          <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Enter Password" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textAlign: 'center', letterSpacing: '0.2em' }} required />
           <button type="submit" className="add-to-cart" style={{ width: '100%' }}>Authenticate</button>
         </form>
       </div>
@@ -533,7 +532,7 @@ export default function ImageManager() {
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <a href="/admin" style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textDecoration: 'none', color: 'var(--on-surface)', fontSize: '13px', fontWeight: 600 }}>Back to Admin</a>
-            <button onClick={() => { localStorage.removeItem('adminPassword'); setIsAuthenticated(false); }} className="icon-btn" title="Logout">
+            <button onClick={() => logout()} className="icon-btn" title="Logout">
               <span className="material-symbols-outlined">logout</span>
             </button>
           </div>

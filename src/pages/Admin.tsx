@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useAdminAuth } from '../context/AdminAuthContext';
 
 const STAIN_SWATCH_COLORS: Record<string, string> = {
   natural: '#DEB887', slate: '#5A6064', smoke: '#3b3c36', cherry: '#651c14',
@@ -60,8 +61,8 @@ function TreeFolder({ label, count, selected, hasChildren, defaultOpen, onSelect
 }
 
 export default function Admin() {
-  const [adminPassword, setAdminPassword] = useState(localStorage.getItem('adminPassword') || '');
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('adminPassword'));
+  const { adminPassword, isAuthenticated, login, logout } = useAdminAuth();
+  const [passwordInput, setPasswordInput] = useState('');
 
   // File explorer state
   const [selectedCrib, setSelectedCrib] = useState<string | null>(null);
@@ -180,9 +181,9 @@ export default function Admin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const ok = await verifyPassword({ password: adminPassword });
-      if (ok) { setIsAuthenticated(true); localStorage.setItem('adminPassword', adminPassword); }
-      else { alert('Incorrect password'); setAdminPassword(''); localStorage.removeItem('adminPassword'); }
+      const ok = await verifyPassword({ password: passwordInput });
+      if (ok) { login(passwordInput); }
+      else { alert('Incorrect password'); setPasswordInput(''); }
     } catch { alert('Error verifying password'); }
   };
 
@@ -387,7 +388,7 @@ export default function Admin() {
         <h1 className="headline-md text-primary" style={{ marginBottom: '8px' }}>Admin Access</h1>
         <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>Enter admin password.</p>
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Password" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textAlign: 'center', letterSpacing: '0.2em' }} required />
+          <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Password" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textAlign: 'center', letterSpacing: '0.2em' }} required />
           <button type="submit" className="add-to-cart" style={{ width: '100%' }}>Authenticate</button>
         </form>
       </div>
@@ -428,7 +429,7 @@ export default function Admin() {
               className="filter-btn" style={{ padding: '8px 16px', fontSize: '12px' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '16px', verticalAlign: 'middle' }}>store</span> Showroom
             </button>
-            <button onClick={() => { localStorage.removeItem('adminPassword'); setIsAuthenticated(false); }} className="icon-btn" title="Logout">
+            <button onClick={() => logout()} className="icon-btn" title="Logout">
               <span className="material-symbols-outlined">logout</span>
             </button>
           </div>
