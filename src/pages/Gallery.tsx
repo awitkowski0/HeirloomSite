@@ -381,7 +381,7 @@ export default function Gallery() {
         <div className="gallery-carousel-overlay" onClick={() => setCarouselProduct(null)}>
           <div className="gallery-carousel-content" onClick={(e) => e.stopPropagation()}>
             {/* Close */}
-            <button className="gallery-carousel-close" onClick={() => setCarouselProduct(null)}>
+            <button className="gallery-carousel-close" aria-label="Close gallery" onClick={() => setCarouselProduct(null)}>
               <span className="material-symbols-outlined">close</span>
             </button>
 
@@ -401,6 +401,7 @@ export default function Gallery() {
                 <>
                   <button
                     className="gallery-carousel-arrow left"
+                    aria-label="Previous stain"
                     onClick={(e) => {
                       e.stopPropagation();
                       setCarouselStainIndex(i => (i - 1 + carouselStains.length) % carouselStains.length);
@@ -410,6 +411,7 @@ export default function Gallery() {
                   </button>
                   <button
                     className="gallery-carousel-arrow right"
+                    aria-label="Next stain"
                     onClick={(e) => {
                       e.stopPropagation();
                       setCarouselStainIndex(i => (i + 1) % carouselStains.length);
