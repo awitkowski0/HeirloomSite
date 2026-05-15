@@ -34,22 +34,23 @@ export default function Header() {
         <form onSubmit={handleSearch} role="search" style={{ display: 'flex', alignItems: 'center' }}>
           {searchOpen && (
             <input type="search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search products..." autoFocus
+              aria-label="Search products"
               style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', fontSize: '13px', width: '200px', outline: 'none' }}
               onBlur={() => { if (!searchQuery) setSearchOpen(false); }} />
           )}
           <button type={searchOpen ? 'submit' : 'button'} onClick={() => { if (!searchOpen) setSearchOpen(true); }}
-            className="icon-btn" aria-label="Search" style={{ padding: '6px' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>{searchOpen ? 'search' : 'search'}</span>
+            className="icon-btn" aria-label={searchOpen ? 'Submit search' : 'Open search'} style={{ padding: '6px' }}>
+            <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '20px' }}>search</span>
           </button>
         </form>
-        <Link to="/checkout" className="icon-btn" style={{ position: 'relative' }} aria-label="Shopping cart">
-          <span className="material-symbols-outlined">shopping_bag</span>
+        <Link to="/checkout" className="icon-btn" style={{ position: 'relative' }} aria-label={totalItems === 0 ? "Shopping cart, empty" : `Shopping cart, ${totalItems} item${totalItems === 1 ? '' : 's'}`}>
+          <span className="material-symbols-outlined" aria-hidden="true">shopping_bag</span>
           {totalItems > 0 && (
             <span style={{ 
               position: 'absolute', top: '-4px', right: '-4px', backgroundColor: 'var(--primary)', color: 'white',
               borderRadius: '50%', width: '18px', height: '18px', fontSize: '10px', display: 'flex',
               alignItems: 'center', justifyContent: 'center', fontWeight: 'bold'
-            }}>
+            }} aria-hidden="true">
               {totalItems}
             </span>
           )}
