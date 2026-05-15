@@ -12,7 +12,7 @@ export const get = query({
 export const save = mutation({
   args: { password: v.string(), paymentProvider: v.string() },
   handler: async (ctx, args) => {
-    if (args.password !== (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024')) throw new Error("Unauthorized");
+    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
     const existing = await ctx.db.query("settings").first();
     if (existing) {
       await ctx.db.patch(existing._id, { paymentProvider: args.paymentProvider });
@@ -25,6 +25,6 @@ export const save = mutation({
 export const verifyPassword = mutation({
   args: { password: v.string() },
   handler: async (_ctx, args) => {
-    return args.password === (process.env.VITE_ADMIN_PASSWORD || 'heirloom2024');
+    return !!process.env.VITE_ADMIN_PASSWORD && args.password === process.env.VITE_ADMIN_PASSWORD;
   }
 });
