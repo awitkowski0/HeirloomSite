@@ -347,17 +347,17 @@ export default function ProductDetails() {
 
       {lightboxOpen && galleryImages.length > 0 && (
         <div className="lightbox-overlay" onClick={() => setLightboxOpen(false)}>
-          <button onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} className="lightbox-close-btn">
-            <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>close</span>
+          <button aria-label="Close lightbox" onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} className="lightbox-close-btn">
+            <span aria-hidden="true" className="material-symbols-outlined" style={{ fontSize: '36px' }}>close</span>
           </button>
-          <img src={galleryImages[galleryIndex]} alt="" className="lightbox-img" onClick={e => e.stopPropagation()} />
+          <img src={galleryImages[galleryIndex]} alt={`Product view ${galleryIndex + 1}`} className="lightbox-img" onClick={e => e.stopPropagation()} />
           {galleryImages.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-prev">
-                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_left</span>
+              <button aria-label="Previous image" onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-prev">
+                <span aria-hidden="true" className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_left</span>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-next">
-                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_right</span>
+              <button aria-label="Next image" onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-next">
+                <span aria-hidden="true" className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_right</span>
               </button>
             </>
           )}
