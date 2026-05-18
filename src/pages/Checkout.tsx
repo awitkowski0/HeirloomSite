@@ -309,9 +309,10 @@ export default function Checkout() {
                        <button
                         onClick={() => removeFromCart(item.id)}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--on-surface-variant)', fontSize: '18px', lineHeight: 1 }}
+                        aria-label={`Remove ${item.cribName} from cart`}
                         title="Remove item"
                       >
-                        <span className="material-symbols-outlined">close</span>
+                        <span className="material-symbols-outlined" aria-hidden="true">close</span>
                       </button>
                    </div>
                  ))}
