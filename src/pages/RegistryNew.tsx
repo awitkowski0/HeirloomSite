@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from "convex/react";
@@ -17,17 +17,30 @@ export default function RegistryNew() {
   const [creating, setCreating] = useState(false);
   const [slug, setSlug] = useState('');
 
-  const products = inventory.reduce((acc: any[], item: any) => {
-    const pName = item.productName ?? item.cribName;
-    if (!acc.find(p => p.productName === pName)) {
-      acc.push({
-        productName: pName,
-        woods: [...new Set(inventory.filter((i: any) => (i.productName ?? i.cribName) === pName).map((i: any) => i.wood))],
-        stains: item.stains || [],
-      });
+  const products = useMemo(() => {
+    const map = new Map<string, { productName: string; woods: Set<string>; stains: any[] }>();
+    for (const item of inventory) {
+      const pName = item.productName ?? item.cribName;
+      if (!pName) continue;
+
+      let entry = map.get(pName);
+      if (!entry) {
+        entry = {
+          productName: pName,
+          woods: new Set<string>(),
+          stains: item.stains || [],
+        };
+        map.set(pName, entry);
+      }
+      if (item.wood) {
+        entry.woods.add(item.wood);
+      }
     }
-    return acc;
-  }, []);
+    return Array.from(map.values()).map(entry => ({
+      ...entry,
+      woods: Array.from(entry.woods)
+    }));
+  }, [inventory]);
 
   const toggleItem = (productName: string) => {
     const item = inventory.find((i: any) => (i.productName ?? i.cribName) === productName);

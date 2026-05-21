@@ -1,0 +1,3 @@
+## 2024-05-14 - Expensive Aggregations During Render Triggered by Form State
+**Learning:** In a component with local form state (e.g. typing in a text input), avoid performing expensive operations directly in the render function. Specifically, an O(N²) calculation (like `.reduce` with an inner `.find` and `.filter`) to aggregate a flat backend inventory array into a grouped format caused main thread lag on every keystroke because it ran synchronously during every state update.
+**Action:** Always wrap expensive aggregations or data transformations derived from props/external sources in a `useMemo` block with appropriate dependencies (e.g., `[inventory]`), and refactor O(N²) array operations to O(N) using `Map` or `Set` when grouping data.
