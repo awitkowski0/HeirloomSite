@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
@@ -108,9 +108,9 @@ export default function Products() {
           <section aria-label="Product grid">
             <div className="featured-grid">
               {products.map(p => (
-                <article key={p.id} onClick={() => navigate(`/product/${p.id}`)}
-                  className="featured-card">
-                  <div className="featured-card-img">
+                <Link to={`/product/${p.id}`} key={p.id} style={{ textDecoration: 'none', display: 'block', color: 'inherit' }}>
+                  <article className="featured-card">
+                    <div className="featured-card-img">
                     {p.img ? (
                       <img src={p.img} alt={p.name} loading="lazy" />
                     ) : (
@@ -120,9 +120,10 @@ export default function Products() {
                   <div className="featured-card-body">
                     <span style={{ fontSize: '10px', fontFamily: 'var(--font-label)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary)' }}>{p.category || 'Crib'}</span>
                     <h3>{p.name}</h3>
-                    <p className="price">From ${p.minPrice.toLocaleString()}</p>
-                  </div>
-                </article>
+                      <p className="price">From ${p.minPrice.toLocaleString()}</p>
+                    </div>
+                  </article>
+                </Link>
               ))}
             </div>
           </section>
