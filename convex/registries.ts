@@ -16,7 +16,9 @@ export const create = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const slug = args.creatorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).substring(2, 6);
+    // SECURITY CONCERN: Math.random() is weak and predictable.
+    // Replaced with crypto.randomUUID() for secure token generation
+    const slug = args.creatorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + crypto.randomUUID().split('-')[0];
     const items = args.items.map(item => ({
       productName: item.productName ?? item.cribName,
       cribName: item.cribName ?? item.productName,
