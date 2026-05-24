@@ -190,15 +190,23 @@ export default function Showroom() {
 
           {slides.length > 1 && (
             <>
-              <button className="showroom-slideshow-arrow prev" onClick={goToPrev}>
-                <span className="material-symbols-outlined">chevron_left</span>
+              <button className="showroom-slideshow-arrow prev" onClick={goToPrev} aria-label="Previous slide">
+                <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
               </button>
-              <button className="showroom-slideshow-arrow next" onClick={goToNext}>
-                <span className="material-symbols-outlined">chevron_right</span>
+              <button className="showroom-slideshow-arrow next" onClick={goToNext} aria-label="Next slide">
+                <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
               </button>
-              <div className="showroom-slideshow-dots">
+              <div className="showroom-slideshow-dots" role="tablist" aria-label="Slideshow controls">
                 {slides.map((_: any, i: number) => (
-                  <button key={i} className={i === slideIndex ? 'active' : ''} onClick={() => goToSlide(i)} />
+                  <button
+                    key={i}
+                    className={i === slideIndex ? 'active' : ''}
+                    onClick={() => goToSlide(i)}
+                    aria-label={`Go to slide ${i + 1}`}
+                    aria-current={i === slideIndex ? "true" : undefined}
+                    role="tab"
+                    aria-selected={i === slideIndex}
+                  />
                 ))}
               </div>
             </>
