@@ -139,30 +139,40 @@ export default function ProductDetails() {
           >
             {galleryImages.length > 0 ? (
               <>
-                <img
-                  src={galleryImages[galleryIndex]}
-                  alt={currentConfig.productName ?? currentConfig.cribName}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer', position: 'absolute', inset: 0 }}
+                <button
+                  aria-label="Open fullscreen gallery"
                   onClick={() => setLightboxOpen(true)}
-                />
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', background: 'transparent', cursor: 'pointer', padding: 0 }}
+                >
+                  <img
+                    src={galleryImages[galleryIndex]}
+                    alt={currentConfig.productName ?? currentConfig.cribName}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                  />
+                </button>
                 {galleryImages.length > 1 && (
                   <>
                     <button
+                      aria-label="Previous image"
                       onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }}
                       className="gallery-nav-btn gallery-nav-prev"
                     >
-                      <span className="material-symbols-outlined">chevron_left</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
                     </button>
                     <button
+                      aria-label="Next image"
                       onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }}
                       className="gallery-nav-btn gallery-nav-next"
                     >
-                      <span className="material-symbols-outlined">chevron_right</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
                     </button>
-                    <div className="gallery-pagination">
+                    <div className="gallery-pagination" role="tablist">
                       {galleryImages.map((_, i) => (
                         <button
                           key={i}
+                          role="tab"
+                          aria-selected={i === galleryIndex}
+                          aria-label={`View image ${i + 1} of ${galleryImages.length}`}
                           onClick={(e) => { e.stopPropagation(); setGalleryIndex(i); }}
                           className={`gallery-dot ${i === galleryIndex ? 'active' : ''}`}
                         />
@@ -177,25 +187,38 @@ export default function ProductDetails() {
           </div>
 
           {galleryImages.length > 1 && (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+            <div role="tablist" aria-label="Product thumbnails" style={{ display: 'flex', gap: '8px', marginTop: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
               {galleryImages.map((url, i) => (
-                <img
+                <button
                   key={i}
-                  src={url}
-                  alt=""
+                  role="tab"
+                  aria-selected={i === galleryIndex}
+                  aria-label={`Thumbnail ${i + 1} of ${galleryImages.length}`}
                   onClick={() => setGalleryIndex(i)}
                   style={{
                     width: '72px',
                     height: '72px',
-                    objectFit: 'cover',
+                    padding: 0,
                     borderRadius: '8px',
                     cursor: 'pointer',
                     border: i === galleryIndex ? '2px solid var(--primary)' : '2px solid transparent',
                     opacity: i === galleryIndex ? 1 : 0.6,
                     transition: 'all 0.2s',
                     flexShrink: 0,
+                    overflow: 'hidden',
+                    background: 'transparent'
                   }}
-                />
+                >
+                  <img
+                    src={url}
+                    alt=""
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                    }}
+                  />
+                </button>
               ))}
             </div>
           )}
