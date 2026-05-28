@@ -532,8 +532,8 @@ export default function ImageManager() {
           </div>
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             <a href="/admin" style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textDecoration: 'none', color: 'var(--on-surface)', fontSize: '13px', fontWeight: 600 }}>Back to Admin</a>
-            <button onClick={() => logout()} className="icon-btn" title="Logout">
-              <span className="material-symbols-outlined">logout</span>
+            <button onClick={() => logout()} className="icon-btn" title="Logout" aria-label="Logout">
+              <span className="material-symbols-outlined" aria-hidden="true">logout</span>
             </button>
           </div>
         </div>
@@ -639,8 +639,8 @@ export default function ImageManager() {
                 <input type="checkbox" checked={autoLink} onChange={e => setAutoLink(e.target.checked)} />
                 Auto-link stains
               </label>
-              <button onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')} className="icon-btn" title="Toggle view">
-                <span className="material-symbols-outlined">{viewMode === 'grid' ? 'view_list' : 'grid_view'}</span>
+              <button onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')} className="icon-btn" title="Toggle view" aria-label="Toggle view mode">
+                <span className="material-symbols-outlined" aria-hidden="true">{viewMode === 'grid' ? 'view_list' : 'grid_view'}</span>
               </button>
             </div>
           </div>
@@ -936,8 +936,8 @@ export default function ImageManager() {
                   ) : (
                     <span style={{ fontSize: '11px', padding: '2px 8px', backgroundColor: 'var(--surface-container-highest)', color: 'var(--on-surface-variant)', borderRadius: '4px' }}>Unlinked</span>
                   )}
-                  <button onClick={(e) => { e.stopPropagation(); handleDeleteImage(img._id); }} className="icon-btn" title="Delete">
-                    <span className="material-symbols-outlined" style={{ fontSize: '18px', color: 'var(--error, #b3261e)' }}>delete</span>
+                  <button onClick={(e) => { e.stopPropagation(); handleDeleteImage(img._id); }} className="icon-btn" title="Delete" aria-label="Delete image">
+                    <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '18px', color: 'var(--error, #b3261e)' }}>delete</span>
                   </button>
                 </div>
               ))}
@@ -955,8 +955,8 @@ export default function ImageManager() {
                 <h2 className="headline-md" style={{ marginBottom: '4px' }}>Import from OneDrive</h2>
                 <p className="body-sm text-on-surface-variant">Select images to import. Files will be downloaded and uploaded to your selected folder.</p>
               </div>
-              <button onClick={() => setShowOneDrive(false)} className="icon-btn">
-                <span className="material-symbols-outlined">close</span>
+              <button onClick={() => setShowOneDrive(false)} className="icon-btn" aria-label="Close">
+                <span className="material-symbols-outlined" aria-hidden="true">close</span>
               </button>
             </div>
 
@@ -967,8 +967,8 @@ export default function ImageManager() {
             )}
 
             <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--outline-variant)', display: 'flex', alignItems: 'center', gap: '12px', fontSize: '13px' }}>
-              <button onClick={goBackOneDrive} disabled={oneDrivePath === '/'} className="icon-btn" title="Go back">
-                <span className="material-symbols-outlined">arrow_back</span>
+              <button onClick={goBackOneDrive} disabled={oneDrivePath === '/'} className="icon-btn" title="Go back" aria-label="Go back">
+                <span className="material-symbols-outlined" aria-hidden="true">arrow_back</span>
               </button>
               <span style={{ fontWeight: 600 }}>OneDrive{oneDrivePath !== '/' ? oneDrivePath : ' /'}</span>
               <span style={{ flex: 1 }} />
