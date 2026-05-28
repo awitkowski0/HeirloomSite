@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -61,45 +61,47 @@ export default function Gallery() {
   );
 
   // Aggregate by product name
-  const uniqueCribsMap = new Map();
-  inventory.forEach(item => {
-    const pName = item.productName ?? item.cribName;
-    const cribId = encodeURIComponent(pName);
-    if (!uniqueCribsMap.has(pName)) {
-      const woodStains: Record<string, any[]> = {};
-      woodStains[item.wood] = item.stains.map((s: any) => ({
-        name: s.name, image: s.image, priceAddition: s.priceAddition, inStock: s.inStock,
-      }));
-      uniqueCribsMap.set(pName, {
-        id: cribId,
-        name: pName,
-        minPrice: item.basePrice,
-        material: item.wood.replace(/([A-Z])/g, ' $1').trim(),
-        img: item.stains[0]?.image,
-        woods: [item.wood],
-        woodStains,
-      });
-    } else {
-      const existing = uniqueCribsMap.get(pName);
-      if (item.basePrice < existing.minPrice) existing.minPrice = item.basePrice;
-      if (!existing.woods.includes(item.wood)) existing.woods.push(item.wood);
-      if (!existing.woodStains[item.wood]) {
-        existing.woodStains[item.wood] = item.stains.map((s: any) => ({
+  const products = useMemo(() => {
+    const uniqueCribsMap = new Map();
+    inventory.forEach(item => {
+      const pName = item.productName ?? item.cribName;
+      const cribId = encodeURIComponent(pName);
+      if (!uniqueCribsMap.has(pName)) {
+        const woodStains: Record<string, any[]> = {};
+        woodStains[item.wood] = item.stains.map((s: any) => ({
           name: s.name, image: s.image, priceAddition: s.priceAddition, inStock: s.inStock,
         }));
+        uniqueCribsMap.set(pName, {
+          id: cribId,
+          name: pName,
+          minPrice: item.basePrice,
+          material: item.wood.replace(/([A-Z])/g, ' $1').trim(),
+          img: item.stains[0]?.image,
+          woods: [item.wood],
+          woodStains,
+        });
+      } else {
+        const existing = uniqueCribsMap.get(pName);
+        if (item.basePrice < existing.minPrice) existing.minPrice = item.basePrice;
+        if (!existing.woods.includes(item.wood)) existing.woods.push(item.wood);
+        if (!existing.woodStains[item.wood]) {
+          existing.woodStains[item.wood] = item.stains.map((s: any) => ({
+            name: s.name, image: s.image, priceAddition: s.priceAddition, inStock: s.inStock,
+          }));
+        }
       }
-    }
-  });
+    });
+    return Array.from(uniqueCribsMap.values());
+  }, [inventory]);
 
-  const products = Array.from(uniqueCribsMap.values());
-  const allWoods = Array.from(new Set(inventory.map(i => i.wood)));
+  const allWoods = useMemo(() => Array.from(new Set(inventory.map(i => i.wood))), [inventory]);
 
-  const allStains = (() => {
+  const allStains = useMemo(() => {
     const pool = selectedWood === 'All Collections' ? inventory : inventory.filter(i => i.wood === selectedWood);
     const names = new Set<string>();
     pool.forEach(i => i.stains.forEach((s: any) => names.add(s.name)));
     return Array.from(names);
-  })();
+  }, [inventory, selectedWood]);
 
   const getDisplayConfig = (productName: string) => {
     const configs = inventory.filter((i: any) => (i.productName ?? i.cribName) === productName);
