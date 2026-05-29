@@ -150,8 +150,8 @@ export default function Checkout() {
             <section>
                <h2 className="headline-md" style={{ marginBottom: '24px' }}>Contact Information</h2>
                <div>
-                  <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>EMAIL ADDRESS</label>
-                   <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                  <label htmlFor="email" className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>EMAIL ADDRESS <span className="text-red-500">*</span></label>
+                   <input id="email" type="email" required placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                </div>
             </section>
 
@@ -159,29 +159,29 @@ export default function Checkout() {
                <h2 className="headline-md" style={{ marginBottom: '24px' }}>Shipping Destination</h2>
                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                  <div>
-                    <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>FIRST NAME</label>
-                     <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                    <label htmlFor="firstName" className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>FIRST NAME <span className="text-red-500">*</span></label>
+                     <input id="firstName" type="text" required value={firstName} onChange={e => setFirstName(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                   </div>
                   <div>
-                     <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>LAST NAME</label>
-                     <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                     <label htmlFor="lastName" className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>LAST NAME <span className="text-red-500">*</span></label>
+                     <input id="lastName" type="text" required value={lastName} onChange={e => setLastName(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                  </div>
                  <div style={{ gridColumn: 'span 2' }}>
-                    <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>ADDRESS</label>
-                     <input type="text" placeholder="123 Heritage Lane" value={address} onChange={e => setAddress(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                    <label htmlFor="address" className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>ADDRESS <span className="text-red-500">*</span></label>
+                     <input id="address" type="text" required placeholder="123 Heritage Lane" value={address} onChange={e => setAddress(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                  </div>
                  <div>
-                    <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>CITY</label>
-                     <input type="text" value={city} onChange={e => setCity(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                    <label htmlFor="city" className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>CITY <span className="text-red-500">*</span></label>
+                     <input id="city" type="text" required value={city} onChange={e => setCity(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                      <div>
-                         <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>STATE</label>
-                         <input type="text" value={state} onChange={e => setState(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                         <label htmlFor="state" className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>STATE <span className="text-red-500">*</span></label>
+                         <input id="state" type="text" required value={state} onChange={e => setState(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                      </div>
                      <div>
-                         <label className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>ZIP CODE</label>
-                         <input type="text" value={zip} onChange={e => setZip(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
+                         <label htmlFor="zip" className="label-caps text-on-surface-variant" style={{ display: 'block', marginBottom: '8px' }}>ZIP CODE <span className="text-red-500">*</span></label>
+                         <input id="zip" type="text" required value={zip} onChange={e => setZip(e.target.value)} style={{ width: '100%', backgroundColor: 'var(--surface-container-low)', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '12px 16px', outline: 'none' }} />
                     </div>
                  </div>
                </div>
