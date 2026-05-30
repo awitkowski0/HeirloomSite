@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
@@ -88,6 +88,7 @@ export default function Products() {
         <nav aria-label="Product category filter" style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '40px' }}>
           {CATEGORIES.map(cat => (
             <button key={cat} onClick={() => setCategory(cat)}
+              aria-pressed={selectedCategory === cat}
               style={{
                 padding: '8px 20px', borderRadius: '100px', border: 'none', cursor: 'pointer',
                 background: selectedCategory === cat ? 'var(--primary)' : 'transparent',
@@ -108,21 +109,23 @@ export default function Products() {
           <section aria-label="Product grid">
             <div className="featured-grid">
               {products.map(p => (
-                <article key={p.id} onClick={() => navigate(`/product/${p.id}`)}
-                  className="featured-card">
-                  <div className="featured-card-img">
-                    {p.img ? (
-                      <img src={p.img} alt={p.name} loading="lazy" />
-                    ) : (
-                      <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--outline-variant)' }}>crib</span>
-                    )}
-                  </div>
-                  <div className="featured-card-body">
-                    <span style={{ fontSize: '10px', fontFamily: 'var(--font-label)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary)' }}>{p.category || 'Crib'}</span>
-                    <h3>{p.name}</h3>
-                    <p className="price">From ${p.minPrice.toLocaleString()}</p>
-                  </div>
-                </article>
+                <Link key={p.id} to={`/product/${p.id}`}
+                  className="featured-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                  <article>
+                    <div className="featured-card-img">
+                      {p.img ? (
+                        <img src={p.img} alt={p.name} loading="lazy" />
+                      ) : (
+                        <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--outline-variant)' }}>crib</span>
+                      )}
+                    </div>
+                    <div className="featured-card-body">
+                      <span style={{ fontSize: '10px', fontFamily: 'var(--font-label)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary)' }}>{p.category || 'Crib'}</span>
+                      <h3>{p.name}</h3>
+                      <p className="price">From ${p.minPrice.toLocaleString()}</p>
+                    </div>
+                  </article>
+                </Link>
               ))}
             </div>
           </section>
