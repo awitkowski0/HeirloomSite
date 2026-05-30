@@ -16,7 +16,8 @@ export const create = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const slug = args.creatorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Math.random().toString(36).substring(2, 6);
+    // Use crypto.randomUUID() instead of Math.random() for secure slug generation, keeping the entropy high by using 8 hex characters instead of 4
+    const slug = args.creatorName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + crypto.randomUUID().substring(0, 8);
     const items = args.items.map(item => ({
       productName: item.productName ?? item.cribName,
       cribName: item.cribName ?? item.productName,
