@@ -1,0 +1,3 @@
+## 2025-02-23 - Accessibility of Navigation Elements
+**Learning:** Wrapping non-interactive semantic elements like `<article>` with `<Link>` components instead of attaching `onClick` handlers directly ensures better keyboard and screen reader accessibility for primary navigation such as product cards.
+**Action:** When building interactive cards meant for navigation, always use standard `<a>` or React Router `<Link>` tags to wrap the content and remove `onClick` handlers from non-interactive tags like `<div>` or `<article>`. Use CSS resets on the wrapper to maintain visual consistency (e.g., `textDecoration: 'none'`, `display: 'block'`, `color: 'inherit'`).

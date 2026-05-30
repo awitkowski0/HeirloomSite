@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
@@ -108,8 +108,8 @@ export default function Products() {
           <section aria-label="Product grid">
             <div className="featured-grid">
               {products.map(p => (
-                <article key={p.id} onClick={() => navigate(`/product/${p.id}`)}
-                  className="featured-card">
+                <Link to={`/product/${p.id}`} key={p.id} style={{ textDecoration: 'none', display: 'block', color: 'inherit' }}>
+                <article className="featured-card">
                   <div className="featured-card-img">
                     {p.img ? (
                       <img src={p.img} alt={p.name} loading="lazy" />
@@ -123,6 +123,7 @@ export default function Products() {
                     <p className="price">From ${p.minPrice.toLocaleString()}</p>
                   </div>
                 </article>
+                </Link>
               ))}
             </div>
           </section>

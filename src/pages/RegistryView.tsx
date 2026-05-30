@@ -1,12 +1,11 @@
 import { useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 
 export default function RegistryView() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
   const registryData = useQuery(api.registries.get, { slug: slug || '' });
   const inventoryData = useQuery(api.inventory.get as any, {});
   const inventory: any[] = inventoryData || [];
@@ -56,7 +55,8 @@ export default function RegistryView() {
               const stain = config?.stains?.find((s: any) => s.name === item.stainName);
               const price = config ? config.basePrice + (stain?.priceAddition || 0) : 0;
               return (
-                <article key={idx} onClick={() => navigate(`/product/${encodeURIComponent(pName)}?wood=${encodeURIComponent(item.wood)}&stain=${encodeURIComponent(item.stainName)}`)}
+                <Link to={`/product/${encodeURIComponent(pName)}?wood=${encodeURIComponent(item.wood)}&stain=${encodeURIComponent(item.stainName)}`} key={idx} style={{ textDecoration: 'none', display: 'block', color: 'inherit' }}>
+                <article
                   style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px 20px', borderRadius: '12px', backgroundColor: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)', cursor: 'pointer', boxShadow: 'var(--shadow-ambient)' }}>
                   <div style={{ width: '80px', height: '80px', borderRadius: '8px', backgroundColor: 'var(--surface-container-highest)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     {stain?.image ? (
@@ -72,6 +72,7 @@ export default function RegistryView() {
                   </div>
                   <span className="material-symbols-outlined" style={{ color: 'var(--primary)', fontSize: '20px' }}>arrow_forward</span>
                 </article>
+                </Link>
               );
             })}
           </div>
