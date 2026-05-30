@@ -7,3 +7,6 @@
 ## 2025-05-18 - Semantic Links vs Clickable Articles
 **Learning:** Using `onClick` directly on a non-interactive semantic element like `<article>` for primary navigation (like product cards) completely hides it from keyboard users and screen readers, and prevents standard link behaviors like "Open in new tab".
 **Action:** Always wrap card elements that function as navigation in standard `<Link>` or `<a>` tags. Apply `display: block`, `textDecoration: none`, and `color: inherit` to the link to preserve the card's visual design while maintaining full accessibility.
+## 2024-05-19 - Checkout Form Accessibility Improvements
+**Learning:** Adding `htmlFor` to labels and matching `id`s to inputs in the checkout form ensures proper accessibility mapping and makes the labels clickable to focus inputs, heavily improving UX for all users.
+**Action:** Always verify form inputs have linked labels with `htmlFor` and `id` tags in the future, particularly when designing forms.
