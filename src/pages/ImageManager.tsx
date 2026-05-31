@@ -507,9 +507,9 @@ export default function ImageManager() {
       <div style={{ backgroundColor: 'var(--surface-container-lowest)', padding: '48px', borderRadius: '16px', boxShadow: 'var(--shadow-ambient)', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
         <span className="material-symbols-outlined text-primary" style={{ fontSize: '48px', marginBottom: '16px' }}>lock</span>
         <h1 className="headline-md text-primary" style={{ marginBottom: '8px' }}>Image Manager Access</h1>
-        <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>Enter admin password.</p>
+        <label htmlFor="admin-password" className="body-md text-on-surface-variant" style={{ display: 'block', marginBottom: '32px', cursor: 'pointer' }}>Enter admin password.</label>
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <input type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Enter Password" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textAlign: 'center', letterSpacing: '0.2em' }} required />
+          <input id="admin-password" type="password" value={passwordInput} onChange={e => setPasswordInput(e.target.value)} placeholder="Enter Password" style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--outline-variant)', textAlign: 'center', letterSpacing: '0.2em' }} required />
           <button type="submit" className="add-to-cart" style={{ width: '100%' }}>Authenticate</button>
         </form>
       </div>
