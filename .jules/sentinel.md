@@ -7,3 +7,7 @@
 **Vulnerability:** Used `Math.random()` to generate a random 4-character suffix for registry URL slugs, which is predictable and not cryptographically secure.
 **Learning:** `Math.random()` should never be used for security-sensitive operations or generating unique identifiers, as it relies on a pseudo-random number generator that can be reverse-engineered.
 **Prevention:** Replaced `Math.random()` with `crypto.randomUUID()` to generate cryptographically secure, unpredictable unique identifiers for URL slugs.
+## 2025-06-02 - Secure Admin Password Environment Variable
+**Vulnerability:** Admin password was exposed to the frontend bundle because it used the `VITE_` prefix (`VITE_ADMIN_PASSWORD`).
+**Learning:** Vite exposes any environment variable prefixed with `VITE_` to the client-side bundle. This is a critical security vulnerability for sensitive variables like admin passwords.
+**Prevention:** Avoid using the `VITE_` prefix for sensitive, server-only environment variables. Renamed `VITE_ADMIN_PASSWORD` to `ADMIN_PASSWORD` to keep it secure on the server.

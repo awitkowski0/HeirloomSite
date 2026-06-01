@@ -50,7 +50,7 @@ export const save = mutation({
     }))),
   },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     const existing = await ctx.db.query("showroom").first();
     const update: any = {};

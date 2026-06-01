@@ -5,7 +5,7 @@ A premium, full-stack React and Express application built to showcase and manage
 ## Core Features
 - **Dynamic Interactive Showroom**: An animated, immersive shopping experience.
 - **Automated Inventory System**: A custom Express API manages base prices, stain multipliers, and available woods.
-- **Admin Dashboard**: Located at `/admin` (Password configured via `VITE_ADMIN_PASSWORD`). Dropdown-driven configuration allows easy addition of new lines, new wood variants, and pricing adjustments.
+- **Admin Dashboard**: Located at `/admin` (Password configured via `ADMIN_PASSWORD`). Dropdown-driven configuration allows easy addition of new lines, new wood variants, and pricing adjustments.
 - **PayPal Integration**: Ready-to-go Smart Payment Buttons.
 - **Vercel Cloud Support**: The backend conditionally supports **Upstash Redis** and **Vercel Blob** for seamless deployment without losing data.
 
@@ -30,7 +30,7 @@ UPSTASH_REDIS_REST_TOKEN=your_token
 BLOB_READ_WRITE_TOKEN=your_token
 
 # Admin Dashboard Password
-VITE_ADMIN_PASSWORD=your_secure_password
+ADMIN_PASSWORD=your_secure_password
 
 # Stripe
 VITE_STRIPE_PUBLIC_KEY=pk_test_...
@@ -73,7 +73,7 @@ Once deployed, navigate to your Project Dashboard on Vercel.
 
 ### Step 3: Add External Environment Variables
 Go to **Settings > Environment Variables** and add the following keys:
-- `VITE_ADMIN_PASSWORD`: Your secure password for the `/admin` portal.
+- `ADMIN_PASSWORD`: Your secure password for the `/admin` portal.
 - `VITE_STRIPE_PUBLIC_KEY`: Your Stripe publishable key (starts with `pk_...`).
 - `STRIPE_SECRET_KEY`: Your Stripe secret key (starts with `sk_...`).
 

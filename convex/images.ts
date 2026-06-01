@@ -97,7 +97,7 @@ export const getOrphanCount = query({
 export const generateUploadUrl = mutation({
   args: { password: v.string() },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
     return await ctx.storage.generateUploadUrl();
   }
 });
@@ -135,7 +135,7 @@ export const saveImageRecord = mutation({
     autoLink: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     let stainName = args.stainName;
 
@@ -173,7 +173,7 @@ export const linkImage = mutation({
     stainName: v.string(),
   },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
     await ctx.db.patch(args.imageId, { stainName: args.stainName });
   },
 });
@@ -184,7 +184,7 @@ export const unlinkImage = mutation({
     imageId: v.id("images"),
   },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
     await ctx.db.patch(args.imageId, { stainName: undefined });
   },
 });
@@ -195,7 +195,7 @@ export const deleteImage = mutation({
     imageId: v.id("images"),
   },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
     const img = await ctx.db.get(args.imageId);
     if (!img) throw new Error("Image not found");
     await ctx.storage.delete(img.storageId as any);
@@ -209,7 +209,7 @@ export const reorderImages = mutation({
     imageIds: v.array(v.id("images")),
   },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
     for (let i = 0; i < args.imageIds.length; i++) {
       await ctx.db.patch(args.imageIds[i], { order: i });
     }
@@ -230,7 +230,7 @@ export const bulkUpload = mutation({
     autoLink: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    if (!process.env.VITE_ADMIN_PASSWORD || args.password !== process.env.VITE_ADMIN_PASSWORD) throw new Error("Unauthorized");
+    if (!process.env.ADMIN_PASSWORD || args.password !== process.env.ADMIN_PASSWORD) throw new Error("Unauthorized");
 
     let knownStains: string[] = [];
     if (args.autoLink) {

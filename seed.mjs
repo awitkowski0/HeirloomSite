@@ -10,7 +10,7 @@ dotenv.config({ path: ".env.local" });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const inventoryDir = path.join(__dirname, "public", "assets", "inventory");
-const adminPassword = process.env.VITE_ADMIN_PASSWORD || "heirloom2024";
+const adminPassword = process.env.ADMIN_PASSWORD || "heirloom2024";
 const convexUrl = process.env.VITE_CONVEX_URL;
 
 if (!convexUrl) {
