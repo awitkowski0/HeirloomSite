@@ -610,7 +610,7 @@
   {
     "productName": "Bloomington",
     "wood": "BrownMaple",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Bloomington features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -686,7 +686,7 @@
   {
     "productName": "Bloomington",
     "wood": "CherryWood",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Bloomington features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -762,7 +762,7 @@
   {
     "productName": "Bloomington",
     "wood": "RedOak",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Bloomington features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -1048,7 +1048,7 @@
   {
     "productName": "Darlington",
     "wood": "BrownMaple",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Darlington features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -1124,7 +1124,7 @@
   {
     "productName": "Darlington",
     "wood": "CherryWood",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Darlington features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -1200,7 +1200,7 @@
   {
     "productName": "Darlington",
     "wood": "RedOak",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Darlington features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -1996,7 +1996,7 @@
   {
     "productName": "Hudson",
     "wood": "BrownMaple",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Hudson features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -2072,7 +2072,7 @@
   {
     "productName": "Hudson",
     "wood": "CherryWood",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Hudson features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -2148,7 +2148,7 @@
   {
     "productName": "Hudson",
     "wood": "RedOak",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Hudson features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -3552,7 +3552,7 @@
   {
     "productName": "Mission",
     "wood": "BrownMaple",
-    "category": "General",
+    "category": "Cribs",
     "description": "The Mission Style Crib draws inspiration from the early 20th-century Arts and Crafts movement, a design era known for its emphasis on craftsmanship and simplicity. Characterized by clean geometric lines, vertical slats, rectilinear forms, and bold square posts, it celebrates the honest beauty of natural hardwood. Free from ornate embellishments, the evenly spaced spindles and honest craftsmanship create an open, architectural presence that feels both timeless and refreshingly modern style making it an ideal choice for the nursery.",
     "basePrice": 2499,
     "tags": [],
@@ -3628,7 +3628,7 @@
   {
     "productName": "Mission",
     "wood": "CherryWood",
-    "category": "General",
+    "category": "Cribs",
     "description": "The Mission Style Crib draws inspiration from the early 20th-century Arts and Crafts movement, a design era known for its emphasis on craftsmanship and simplicity. Characterized by clean geometric lines, vertical slats, rectilinear forms, and bold square posts, it celebrates the honest beauty of natural hardwood. Free from ornate embellishments, the evenly spaced spindles and honest craftsmanship create an open, architectural presence that feels both timeless and refreshingly modern style making it an ideal choice for the nursery.",
     "basePrice": 2499,
     "tags": [],
@@ -3704,7 +3704,7 @@
   {
     "productName": "Mission",
     "wood": "RedOak",
-    "category": "General",
+    "category": "Cribs",
     "description": "The Mission Style Crib draws inspiration from the early 20th-century Arts and Crafts movement, a design era known for its emphasis on craftsmanship and simplicity. Characterized by clean geometric lines, vertical slats, rectilinear forms, and bold square posts, it celebrates the honest beauty of natural hardwood. Free from ornate embellishments, the evenly spaced spindles and honest craftsmanship create an open, architectural presence that feels both timeless and refreshingly modern style making it an ideal choice for the nursery.",
     "basePrice": 2499,
     "tags": [],
@@ -3956,7 +3956,7 @@
   {
     "productName": "Moyerton",
     "wood": "BrownMaple",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Moyerton features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -4032,7 +4032,7 @@
   {
     "productName": "Moyerton",
     "wood": "CherryWood",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Moyerton features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -4108,7 +4108,7 @@
   {
     "productName": "Moyerton",
     "wood": "RedOak",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Moyerton features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -4618,7 +4618,7 @@
   {
     "productName": "Princeton",
     "wood": "BrownMaple",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Princeton features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -4694,7 +4694,7 @@
   {
     "productName": "Princeton",
     "wood": "CherryWood",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Princeton features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],
@@ -4770,7 +4770,7 @@
   {
     "productName": "Princeton",
     "wood": "RedOak",
-    "category": "General",
+    "category": "Cribs",
     "description": "The The Princeton features exquisite Amish craftsmanship and timeless design.",
     "basePrice": 2499,
     "tags": [],

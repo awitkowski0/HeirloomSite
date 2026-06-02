@@ -61,7 +61,7 @@
   },
   {
     "productName": "Bloomington",
-    "category": "General",
+    "category": "Cribs",
     "minPrice": 2499,
     "defaultImage": "/data/products/Bloomington/bloomington_0.jpg"
   },
@@ -85,7 +85,7 @@
   },
   {
     "productName": "Darlington",
-    "category": "General",
+    "category": "Cribs",
     "minPrice": 2499,
     "defaultImage": "/data/products/Darlington/darlington_0.jpg"
   },
@@ -193,7 +193,7 @@
   },
   {
     "productName": "Hudson",
-    "category": "General",
+    "category": "Cribs",
     "minPrice": 2499,
     "defaultImage": "/data/products/Hudson/hudson_0.jpg"
   },
@@ -295,7 +295,7 @@
   },
   {
     "productName": "Mission",
-    "category": "General",
+    "category": "Cribs",
     "minPrice": 2499,
     "defaultImage": "/data/products/Mission/mission_0.jpg"
   },
@@ -307,7 +307,7 @@
   },
   {
     "productName": "Moyerton",
-    "category": "General",
+    "category": "Cribs",
     "minPrice": 2499,
     "defaultImage": "/data/products/Moyerton/moyerton_0.jpg"
   },
@@ -361,7 +361,7 @@
   },
   {
     "productName": "Princeton",
-    "category": "General",
+    "category": "Cribs",
     "minPrice": 2499,
     "defaultImage": "/data/products/Princeton/princeton_0.jpg"
   },

@@ -112,8 +112,6 @@ export default function ProductDetails() {
 
   return (
     <div className="container">
-      <h2 className="headline-xl product-title">{currentConfig.productName}</h2>
-
       <div className="grid-layout">
         <div className="product-showcase">
           <ProductGallery images={galleryImages} productName={currentConfig.productName} />
@@ -124,6 +122,7 @@ export default function ProductDetails() {
         )}
 
         <div className="configuration-panel">
+          <h2 className="headline-xl" style={{ marginBottom: '24px' }}>{currentConfig.productName}</h2>
           {variantLabel && (
             <WoodSelector
               woods={woods}

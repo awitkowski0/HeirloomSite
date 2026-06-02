@@ -1,61 +1,90 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "fs";
-import { join, dirname, extname } from "path";
+import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
 const PRODUCTS = join(root, "public", "data", "products");
-const BASE = "https://cdn.shopify.com/s/files/1/0745/0024/3630/files";
+const SHOPIFY_DIR = join(root, "public", "images", "shopify");
 
-// Map of product image IDs to their Shopify product handles
-const IMAGE_MAP = {
-  // Tala Rugged Muse Portable Lamp
-  "44209041047726": "tala-rugged-muse-portable-lamp",
-  // Lorena Canals Silhouette
-  "44209603510446": "lorena-canals-woolable-silhouette-washable-area-rug",
-  // Livabliss Lillian 31352
-  "44209044783278": "livabliss-lillian-31352-ivory-orange-blue-mdfst",
-  // Livabliss Lillian 31354
-  "44209047994542": "livabliss-lillian-31354-ivory-grey-mdfst",
-  // Africa Enkang
-  "44209599381678": "lorena-canals-woolable-africa-enkang-washable-area-rug",
-  // Free Your Soul
-  "44209600954542": "lorena-canals-woolable-free-your-soul-autumn-breeze-washable-area-rug",
-  // Sheep of the World Dunes
-  "44287094292654": "lorena-canals-woolable-sheep-of-the-world-dunes-washable-area-rug",
-  // Sheep of the World Tundra
-  "44209067262126": "woolable-sheep-of-the-world-tundra-washable-wool-hand-tufted-non-slip-backing-area-rug",
-};
+const SHOP_URL = "https://heirloomcribsandmore.com";
+const PASSWORD = "deajay";
+
+async function login() {
+  const resp = await fetch(`${SHOP_URL}/password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ form_type: "storefront_password", utf8: "✓", password: PASSWORD }),
+    redirect: "manual",
+  });
+  const cookies = resp.headers.getSetCookie?.() || [];
+  return cookies.map(c => c.split(";")[0]).join("; ");
+}
 
 async function download(url, dest) {
   mkdirSync(dirname(dest), { recursive: true });
   try {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const buf = Buffer.from(await resp.arrayBuffer());
-    writeFileSync(dest, buf);
+    writeFileSync(dest, Buffer.from(await resp.arrayBuffer()));
     return true;
   } catch (e) {
-    console.error(`  Failed: ${e.message}`);
+    console.error(`  FAILED: ${e.message}`);
     return false;
   }
 }
 
-// Find missing images and try to download from Shopify
+function slug(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "");
+}
+
+// Login and get products
+console.log("Logging in...");
+const cookie = await login();
+
+console.log("Fetching products...");
+const resp = await fetch(`${SHOP_URL}/products.json?limit=250`, { headers: { Cookie: cookie } });
+const { products } = await resp.json();
+console.log(`  ${products.length} products`);
+
+// Build lookup: product title → images
+const titleToImages = {};
+for (const p of products) {
+  titleToImages[p.title] = p.images;
+}
+
+// Find all missing images in media.json
 const dirs = readdirSync(PRODUCTS).filter(d => existsSync(join(PRODUCTS, d, "media.json")));
-let count = 0;
+let downloaded = 0;
+let skipped = 0;
+let notFound = 0;
 
 for (const dir of dirs) {
+  const meta = JSON.parse(readFileSync(join(PRODUCTS, dir, "product.json"), "utf-8"));
   const media = JSON.parse(readFileSync(join(PRODUCTS, dir, "media.json"), "utf-8"));
-  for (const paths of Object.values(media)) {
+  const images = titleToImages[meta.productName] || [];
+  const baseName = slug(meta.productName || dir);
+
+  let idx = 0;
+  for (const [, paths] of Object.entries(media)) {
     for (const p of paths) {
       const filePath = join(PRODUCTS, dir, p);
-      if (existsSync(filePath) || p.startsWith("http")) continue;
+      if (existsSync(filePath) || p.startsWith("http")) {
+        skipped++;
+        continue;
+      }
 
-      // Try to guess the Shopify URL from the filename
-      console.log(`Missing: ${dir} / ${p}`);
+      // Try to download from Shopify CDN using product images
+      const shopifyImg = images[idx] || images[0];
+      if (shopifyImg) {
+        console.log(`  ${meta.productName}: downloading image ${idx}...`);
+        const ok = await download(shopifyImg.src, filePath);
+        if (ok) downloaded++;
+        else notFound++;
+      }
+      idx++;
     }
   }
 }
 
-console.log(`\nSkipping download — missing images need manual Shopify URL mapping`);
+console.log(`\nDownloaded: ${downloaded}, Skipped: ${skipped}, Failed: ${notFound}`);
