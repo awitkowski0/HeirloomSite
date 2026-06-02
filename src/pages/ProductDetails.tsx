@@ -150,21 +150,27 @@ export default function ProductDetails() {
                     <button
                       onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }}
                       className="gallery-nav-btn gallery-nav-prev"
+                      aria-label="Previous image"
                     >
-                      <span className="material-symbols-outlined">chevron_left</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }}
                       className="gallery-nav-btn gallery-nav-next"
+                      aria-label="Next image"
                     >
-                      <span className="material-symbols-outlined">chevron_right</span>
+                      <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
                     </button>
-                    <div className="gallery-pagination">
+                    <div className="gallery-pagination" role="tablist" aria-label="Image gallery pagination">
                       {galleryImages.map((_, i) => (
                         <button
                           key={i}
                           onClick={(e) => { e.stopPropagation(); setGalleryIndex(i); }}
                           className={`gallery-dot ${i === galleryIndex ? 'active' : ''}`}
+                          aria-label={`Go to image ${i + 1}`}
+                          aria-current={i === galleryIndex ? 'true' : undefined}
+                          role="tab"
+                          aria-selected={i === galleryIndex}
                         />
                       ))}
                     </div>
