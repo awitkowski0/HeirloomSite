@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import { useContent } from '../useContent';
@@ -8,7 +8,7 @@ import WoodSelector from '../components/product/WoodSelector';
 import StainSelector from '../components/product/StainSelector';
 import StainStripMobile from '../components/product/StainStripMobile';
 import CartPopup from '../components/product/CartPopup';
-import type { InventoryItem } from '../types';
+import type { InventoryItem, Stain } from '../types';
 
 function getInitialSelection(productConfigurations: InventoryItem[]) {
   if (productConfigurations.length === 0) return { wood: '', stain: '' };
@@ -18,8 +18,21 @@ function getInitialSelection(productConfigurations: InventoryItem[]) {
   const woods = productConfigurations.map(c => c.wood);
   const targetWood = woodParam && woods.includes(woodParam) ? woodParam : productConfigurations[0].wood;
   const targetConfig = productConfigurations.find(c => c.wood === targetWood) || productConfigurations[0];
-  const firstStain = targetConfig.stains.find(s => s.name === stainParam && s.inStock) || targetConfig.stains.find(s => s.inStock);
+  const firstStain = targetConfig.stains.find((s: Stain) => s.name === stainParam && s.inStock) || targetConfig.stains.find((s: Stain) => s.inStock);
   return { wood: targetWood, stain: firstStain?.name || '' };
+}
+
+const WOOD_SPECIES = ['brownmaple', 'cherrywood', 'redoak'];
+
+function getVariantLabel(woods: string[]): string | null {
+  if (woods.length <= 1 && woods[0] === 'Default Title') return null;
+  if (woods.some(w => WOOD_SPECIES.includes(w.toLowerCase().replace(/\s/g, '')))) return 'Select Wood Species';
+  if (woods.some(w => w.includes('"') || w.includes('x ') || w.includes('FT') || w.toLowerCase().includes('feet'))) return 'Select Size';
+  return 'Select Option';
+}
+
+function isHandcraftedWood(woods: string[]): boolean {
+  return woods.some(w => WOOD_SPECIES.includes(w.toLowerCase().replace(/\s/g, '')));
 }
 
 export default function ProductDetails() {
@@ -28,8 +41,11 @@ export default function ProductDetails() {
   const { inventory, loading } = useContent();
 
   const decodedId = decodeURIComponent(id || '');
-  const productConfigurations = inventory.filter(i => i.productName === decodedId);
+  const productConfigurations = inventory.filter((i: any) => i.productName === decodedId);
   const woods = productConfigurations.map(c => c.wood);
+  const variantLabel = getVariantLabel(woods);
+  const showStainStep = variantLabel === 'Select Wood Species';
+  const showDeliveryMessage = isHandcraftedWood(woods);
 
   const [userWood, setUserWood] = useState<string | null>(null);
   const [userStain, setUserStain] = useState<string | null>(null);
@@ -38,23 +54,23 @@ export default function ProductDetails() {
   const selection = useMemo(() => {
     if (productConfigurations.length === 0) return { wood: '', stain: '' };
     if (userWood) {
-      const config = productConfigurations.find(c => c.wood === userWood);
+      const config = productConfigurations.find((c: any) => c.wood === userWood);
       if (config) {
-        const validStain = userStain && config.stains.some(s => s.name === userStain && s.inStock)
+        const validStain = userStain && config.stains.some((s: any) => s.name === userStain && s.inStock)
           ? userStain
-          : config.stains.find(s => s.inStock)?.name || '';
+          : config.stains.find((s: any) => s.inStock)?.name || '';
         return { wood: userWood, stain: validStain };
       }
     }
     return getInitialSelection(productConfigurations);
   }, [productConfigurations, userWood, userStain]);
 
-  const currentConfig = productConfigurations.find(c => c.wood === selection.wood) || productConfigurations[0];
-  const currentStainData = currentConfig?.stains.find(s => s.name === selection.stain);
+  const currentConfig = productConfigurations.find((c: any) => c.wood === selection.wood) || productConfigurations[0];
+  const currentStainData = currentConfig?.stains.find((s: any) => s.name === selection.stain);
 
   const galleryImages: string[] = [];
   if (currentStainData?.gallery?.length) {
-    currentStainData.gallery.forEach(g => { if (g.url) galleryImages.push(g.url); });
+    currentStainData.gallery.forEach((g: any) => { if (g.url) galleryImages.push(g.url); });
   } else if (currentStainData?.image) {
     galleryImages.push(currentStainData.image);
   } else if (currentConfig?.stains[0]?.image) {
@@ -75,16 +91,16 @@ export default function ProductDetails() {
   const handleWoodChange = (wood: string) => {
     setUserWood(wood);
     setUserStain(null);
-    const newConfig = productConfigurations.find(c => c.wood === wood);
+    const newConfig = productConfigurations.find((c: any) => c.wood === wood);
     if (newConfig) {
-      const firstAvailable = newConfig.stains.find(s => s.inStock);
+      const firstAvailable = newConfig.stains.find((s: any) => s.inStock);
       if (firstAvailable) setUserStain(firstAvailable.name);
     }
   };
 
   const isWoodSoldOut = (wood: string) => {
-    const config = productConfigurations.find(c => c.wood === wood);
-    return config ? !config.stains.some(s => s.inStock) : true;
+    const config = productConfigurations.find((c: any) => c.wood === wood);
+    return config ? !config.stains.some((s: any) => s.inStock) : true;
   };
 
   if (loading) return <div className="container" style={{ padding: '80px 24px' }}>Loading...</div>;
@@ -103,23 +119,40 @@ export default function ProductDetails() {
           <ProductGallery images={galleryImages} productName={currentConfig.productName} />
         </div>
 
-        <StainStripMobile stains={currentConfig.stains} selected={selection.stain} onSelect={setUserStain} />
+        {showStainStep && (
+          <StainStripMobile stains={currentConfig.stains} selected={selection.stain} onSelect={setUserStain} />
+        )}
 
         <div className="configuration-panel">
-          <WoodSelector woods={woods} selected={selection.wood} onSelect={handleWoodChange} disabled={isWoodSoldOut} />
-          <StainSelector stains={currentConfig.stains} selected={selection.stain} onSelect={setUserStain} />
+          {variantLabel && (
+            <WoodSelector
+              woods={woods}
+              selected={selection.wood}
+              onSelect={handleWoodChange}
+              disabled={isWoodSoldOut}
+              label={variantLabel}
+            />
+          )}
+
+          {showStainStep && (
+            <StainSelector stains={currentConfig.stains} selected={selection.stain} onSelect={setUserStain} />
+          )}
 
           <section className="pricing-section">
-            <p className="body-lg subtitle" style={{ margin: '0', color: 'var(--on-surface-variant)' }}>
-              {currentConfig.description || "A legacy piece for the modern nursery."}
-            </p>
+            {currentConfig.description && (
+              <p className="body-lg subtitle" style={{ margin: '0', color: 'var(--on-surface-variant)' }}>
+                {currentConfig.description}
+              </p>
+            )}
             <div className="price-row">
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
                 <span className="headline-lg price-current">$</span>
                 <span className="headline-lg price-current" style={{ minWidth: '60px' }}>{totalPrice.toLocaleString()}</span>
                 <span className="headline-lg price-current">.00</span>
               </div>
-              <span className="body-md price-old">${(totalPrice + 350).toLocaleString()}.00</span>
+              {currentConfig.stains?.[0]?.priceAddition === 0 && (
+                <span className="body-md price-old">${(totalPrice + 350).toLocaleString()}.00</span>
+              )}
             </div>
           </section>
 
@@ -168,7 +201,9 @@ export default function ProductDetails() {
               Add to Babylist
             </button>
 
-            <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • Handcrafted for you</p>
+            {showDeliveryMessage && (
+              <p className="label-caps delivery-info">Expected delivery: 6-8 weeks &bull; Handcrafted for you</p>
+            )}
           </section>
         </div>
       </div>

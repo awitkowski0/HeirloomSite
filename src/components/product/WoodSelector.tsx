@@ -3,13 +3,14 @@ interface Props {
   selected: string;
   onSelect: (wood: string) => void;
   disabled: (wood: string) => boolean;
+  label?: string;
 }
 
-export default function WoodSelector({ woods, selected, onSelect, disabled }: Props) {
+export default function WoodSelector({ woods, selected, onSelect, disabled, label = 'Select Option' }: Props) {
   return (
     <section className="config-section">
       <div className="config-header">
-        <h3 className="label-caps">01. Select Wood Species</h3>
+        <h3 className="label-caps">01. {label}</h3>
       </div>
       <div className="wood-grid">
         {woods.map(wood => {

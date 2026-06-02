@@ -2,14 +2,13 @@ import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useContent } from '../useContent';
+import { searchProducts } from '../lib/search';
 import CategoryFilter from '../components/products/CategoryFilter';
 import ProductCard from '../components/products/ProductCard';
 
 const CATEGORIES = ['All', 'Cribs', 'Bassinets', 'Mattresses', 'Bedding', 'Furniture', 'Décor', 'Gear'];
 
 function getDefaultImage(stains: Array<{ name: string; priceAddition: number; image?: string }>): string {
-  const natural = stains.find(s => s.name.toLowerCase() === 'natural');
-  if (natural?.image) return natural.image;
   const base = stains.find(s => Number(s.priceAddition) === 0);
   if (base?.image) return base.image;
   return stains?.[0]?.image || '';
@@ -26,13 +25,17 @@ export default function Products() {
     paramCategory ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) : 'All'
   );
 
+  const searched = useMemo(() => {
+    if (!searchQuery) return inventory;
+    return searchProducts(searchQuery, inventory);
+  }, [searchQuery, inventory]);
+
   const products = useMemo(() => {
     const map = new Map<string, { id: string; name: string; category: string; minPrice: number; img: string }>();
-    inventory.forEach(item => {
+    searched.forEach(item => {
       const cat = item.category || 'Cribs';
       if (selectedCategory !== 'All' && cat !== selectedCategory) return;
       const pName = item.productName;
-      if (searchQuery && !pName.toLowerCase().includes(searchQuery.toLowerCase())) return;
       const key = pName;
       const existing = map.get(key);
       if (existing) {
@@ -48,7 +51,7 @@ export default function Products() {
       }
     });
     return Array.from(map.values());
-  }, [inventory, selectedCategory, searchQuery]);
+  }, [searched, selectedCategory]);
 
   const handleCategory = (cat: string) => {
     setSelectedCategory(cat);
@@ -73,7 +76,7 @@ export default function Products() {
       <div className="container products-page" style={{ paddingTop: '40px', paddingBottom: '40px' }}>
         <header style={{ marginBottom: '40px' }}>
           <h1 className="headline-lg text-primary" style={{ fontSize: '32px', marginBottom: '8px' }}>
-            {searchQuery ? `Search: "${searchQuery}"` : selectedCategory === 'All' ? 'Our Collections' : selectedCategory}
+            {searchQuery ? `Search: "${searchQuery}" (${products.length})` : selectedCategory === 'All' ? 'Our Collections' : selectedCategory}
           </h1>
         </header>
 
@@ -81,7 +84,7 @@ export default function Products() {
 
         {products.length === 0 ? (
           <section style={{ padding: '60px 0', textAlign: 'center' }}>
-            <p className="body-lg text-on-surface-variant">No products found in this category.</p>
+            <p className="body-lg text-on-surface-variant">No products found{searchQuery ? ` for "${searchQuery}"` : ''}.</p>
           </section>
         ) : (
           <section aria-label="Product grid">

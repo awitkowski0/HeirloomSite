@@ -8,6 +8,7 @@ import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
 import Contact from './pages/Contact';
 import { CartProvider } from './context/CartContext';
+import MobileSearch from './components/MobileSearch';
 
 function AppContent() {
   return (
@@ -39,6 +40,7 @@ function AppContent() {
           <span className="material-symbols-outlined">collections_bookmark</span>
           <span className="nav-label">Products</span>
         </Link>
+        <MobileSearch />
         <Link to="/contact" className="nav-item">
           <span className="material-symbols-outlined">mail</span>
           <span className="nav-label">Contact</span>

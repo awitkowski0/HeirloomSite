@@ -12,13 +12,21 @@ export default function Gallery() {
   const [expandedProduct, setExpandedProduct] = useState<string | null>(null);
   const [carouselProduct, setCarouselProduct] = useState<string | null>(null);
 
+  const galleryInventory = useMemo(
+    () => inventory.filter(i => {
+      const realWoods = ['BrownMaple', 'CherryWood', 'RedOak'];
+      return realWoods.includes(i.wood);
+    }),
+    [inventory]
+  );
+
   const { products, allWoods, allStains } = useMemo(() => {
     const uniqueMap = new Map<string, {
       id: string; name: string; minPrice: number; woods: string[];
       woodStains: Record<string, Array<{ name: string; image?: string; priceAddition: number; inStock: boolean }>>;
     }>();
 
-    inventory.forEach(item => {
+    galleryInventory.forEach(item => {
       const pName = item.productName;
       const existing = uniqueMap.get(pName);
       if (existing) {
@@ -40,8 +48,8 @@ export default function Gallery() {
       }
     });
 
-    const woodSet = new Set(inventory.map(i => i.wood));
-    const stainPool = selectedWood === 'All Collections' ? inventory : inventory.filter(i => i.wood === selectedWood);
+    const woodSet = new Set(galleryInventory.map(i => i.wood));
+    const stainPool = selectedWood === 'All Collections' ? galleryInventory : galleryInventory.filter(i => i.wood === selectedWood);
     const stainSet = new Set<string>();
     stainPool.forEach(i => i.stains.forEach(s => stainSet.add(s.name)));
 
@@ -50,14 +58,14 @@ export default function Gallery() {
       allWoods: Array.from(woodSet),
       allStains: Array.from(stainSet),
     };
-  }, [inventory, selectedWood]);
+  }, [galleryInventory, selectedWood]);
 
   const carouselProductData = carouselProduct
     ? products.find(p => p.id === carouselProduct) ?? null
     : null;
 
   const getDisplayConfig = (productName: string) => {
-    const configs = inventory.filter(i => i.productName === productName);
+    const configs = galleryInventory.filter(i => i.productName === productName);
     let config = configs[0];
     if (selectedWood !== 'All Collections') {
       config = configs.find(c => c.wood === selectedWood) || config;
