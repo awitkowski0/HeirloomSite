@@ -1,22 +1,25 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
+import { useState, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { useCart } from '../context/useCart';
 import { useContent } from '../useContent';
 import posthog from 'posthog-js';
+import ProductGallery from '../components/product/ProductGallery';
+import WoodSelector from '../components/product/WoodSelector';
+import StainSelector from '../components/product/StainSelector';
+import StainStripMobile from '../components/product/StainStripMobile';
+import CartPopup from '../components/product/CartPopup';
+import type { InventoryItem } from '../types';
 
-const STAIN_COLORS: Record<string, string> = {
-  natural: '#DEB887', slate: '#5A6064', smoke: '#3b3c36', cherry: '#651c14',
-  driftwood: '#a39887', walnut: '#5C4033', ebony: '#3B3B3B', mahogany: '#4A2C2A',
-  oak: '#B89B72', maple: '#DEB887', espresso: '#2C1E16', white: '#F5F5F0',
-  grey: '#8C8C8C', gray: '#8C8C8C', black: '#2D2D2D', custom: '#8B4513',
-};
-
-function getStainColor(name: string): string {
-  const n = name.toLowerCase();
-  for (const [key, color] of Object.entries(STAIN_COLORS)) {
-    if (n.includes(key)) return color;
-  }
-  return '#DEB887';
+function getInitialSelection(productConfigurations: InventoryItem[]) {
+  if (productConfigurations.length === 0) return { wood: '', stain: '' };
+  const params = new URLSearchParams(window.location.search);
+  const woodParam = params.get('wood');
+  const stainParam = params.get('stain');
+  const woods = productConfigurations.map(c => c.wood);
+  const targetWood = woodParam && woods.includes(woodParam) ? woodParam : productConfigurations[0].wood;
+  const targetConfig = productConfigurations.find(c => c.wood === targetWood) || productConfigurations[0];
+  const firstStain = targetConfig.stains.find(s => s.name === stainParam && s.inStock) || targetConfig.stains.find(s => s.inStock);
+  return { wood: targetWood, stain: firstStain?.name || '' };
 }
 
 export default function ProductDetails() {
@@ -24,95 +27,68 @@ export default function ProductDetails() {
   const { addToCart } = useCart();
   const { inventory, loading } = useContent();
 
-  const [selectedWood, setSelectedWood] = useState('');
-  const [selectedStain, setSelectedStain] = useState('');
-  const [showCartPopup, setShowCartPopup] = useState(false);
-  const [galleryIndex, setGalleryIndex] = useState(0);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-  const touchStartY = useRef(0);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-    if (Math.abs(deltaY) < 50) return;
-    if (!currentConfig) return;
-    const available = currentConfig.stains.filter((s: any) => s.inStock);
-    const idx = available.findIndex((s: any) => s.name === selectedStain);
-    if (deltaY < 0 && idx < available.length - 1) {
-      setSelectedStain(available[idx + 1].name);
-    } else if (deltaY > 0 && idx > 0) {
-      setSelectedStain(available[idx - 1].name);
-    }
-  };
-
   const decodedId = decodeURIComponent(id || '');
-  const productConfigurations = inventory.filter((i: any) => (i.productName ?? i.cribName) === decodedId);
-  const currentConfig = productConfigurations.find((c: any) => c.wood === selectedWood) || productConfigurations[0];
+  const productConfigurations = inventory.filter(i => i.productName === decodedId);
+  const woods = productConfigurations.map(c => c.wood);
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const woodParam = params.get('wood');
-    const stainParam = params.get('stain');
-    if (productConfigurations.length === 0) return;
-    const targetWood = woodParam && productConfigurations.find((c: any) => c.wood === woodParam) ? woodParam : productConfigurations[0].wood;
-    setSelectedWood(targetWood);
-    const targetConfig = productConfigurations.find((c: any) => c.wood === targetWood) || productConfigurations[0];
-    if (stainParam && targetConfig.stains.find((s: any) => s.name === stainParam && s.inStock)) {
-      setSelectedStain(stainParam);
-    } else {
-      const firstAvailable = targetConfig.stains.find((s: any) => s.inStock);
-      if (firstAvailable) setSelectedStain(firstAvailable.name);
+  const [userWood, setUserWood] = useState<string | null>(null);
+  const [userStain, setUserStain] = useState<string | null>(null);
+  const [showCartPopup, setShowCartPopup] = useState(false);
+
+  const selection = useMemo(() => {
+    if (productConfigurations.length === 0) return { wood: '', stain: '' };
+    if (userWood) {
+      const config = productConfigurations.find(c => c.wood === userWood);
+      if (config) {
+        const validStain = userStain && config.stains.some(s => s.name === userStain && s.inStock)
+          ? userStain
+          : config.stains.find(s => s.inStock)?.name || '';
+        return { wood: userWood, stain: validStain };
+      }
     }
-  }, [productConfigurations.length]);
+    return getInitialSelection(productConfigurations);
+  }, [productConfigurations, userWood, userStain]);
+
+  const currentConfig = productConfigurations.find(c => c.wood === selection.wood) || productConfigurations[0];
+  const currentStainData = currentConfig?.stains.find(s => s.name === selection.stain);
+
+  const galleryImages: string[] = [];
+  if (currentStainData?.gallery?.length) {
+    currentStainData.gallery.forEach(g => { if (g.url) galleryImages.push(g.url); });
+  } else if (currentStainData?.image) {
+    galleryImages.push(currentStainData.image);
+  } else if (currentConfig?.stains[0]?.image) {
+    galleryImages.push(currentConfig.stains[0].image);
+  }
 
   useEffect(() => {
-    setGalleryIndex(0);
-  }, [selectedWood, selectedStain]);
-
-  useEffect(() => {
-    if (currentConfig && selectedStain) {
+    if (currentConfig && selection.stain) {
       posthog.capture('product_view', {
-        productName: currentConfig.productName ?? currentConfig.cribName,
-        wood: selectedWood,
-        stain: selectedStain,
+        productName: currentConfig.productName,
+        wood: selection.wood,
+        stain: selection.stain,
         productId: id,
       });
     }
-  }, [currentConfig, selectedWood, selectedStain, id]);
+  }, [currentConfig?.productName, selection.wood, selection.stain, id]);
 
   const handleWoodChange = (wood: string) => {
-    setSelectedWood(wood);
-    const newConfig = productConfigurations.find((c: any) => c.wood === wood);
+    setUserWood(wood);
+    setUserStain(null);
+    const newConfig = productConfigurations.find(c => c.wood === wood);
     if (newConfig) {
-       const stainStillValid = newConfig.stains.find((s: any) => s.name === selectedStain && s.inStock);
-       if (!stainStillValid) {
-         const firstAvailable = newConfig.stains.find((s: any) => s.inStock);
-         if (firstAvailable) setSelectedStain(firstAvailable.name);
-         else setSelectedStain('');
-       }
+      const firstAvailable = newConfig.stains.find(s => s.inStock);
+      if (firstAvailable) setUserStain(firstAvailable.name);
     }
+  };
+
+  const isWoodSoldOut = (wood: string) => {
+    const config = productConfigurations.find(c => c.wood === wood);
+    return config ? !config.stains.some(s => s.inStock) : true;
   };
 
   if (loading) return <div className="container" style={{ padding: '80px 24px' }}>Loading...</div>;
   if (!currentConfig) return <div className="container" style={{ padding: '80px 24px' }}>Product not found.</div>;
-
-  const currentStainData = currentConfig.stains.find((s: any) => s.name === selectedStain);
-
-  const galleryImages: string[] = [];
-  if (currentStainData) {
-    if (currentStainData.gallery && currentStainData.gallery.length > 0) {
-      currentStainData.gallery.forEach((g: any) => {
-        if (g.url) galleryImages.push(g.url);
-      });
-    } else if (currentStainData.image) {
-      galleryImages.push(currentStainData.image);
-    }
-  } else if (currentConfig.stains[0]?.image) {
-    galleryImages.push(currentConfig.stains[0].image);
-  }
 
   const basePrice = Number(currentConfig.basePrice) || 0;
   const addition = Number(currentStainData?.priceAddition) || 0;
@@ -120,159 +96,18 @@ export default function ProductDetails() {
 
   return (
     <div className="container">
-      {currentConfig && (
-        <h2 className="headline-xl product-title">
-          {currentConfig.productName ?? currentConfig.cribName}
-        </h2>
-      )}
+      <h2 className="headline-xl product-title">{currentConfig.productName}</h2>
 
       <div className="grid-layout">
         <div className="product-showcase">
-          <div
-            className="image-container product-image"
-            onTouchStart={handleTouchStart}
-            onTouchEnd={handleTouchEnd}
-            style={{ backgroundColor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '500px', flexDirection: 'column', position: 'relative' }}
-          >
-            {galleryImages.length > 0 ? (
-              <>
-                <img
-                  src={galleryImages[galleryIndex]}
-                  alt={currentConfig.productName ?? currentConfig.cribName}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', cursor: 'pointer', position: 'absolute', inset: 0 }}
-                  onClick={() => setLightboxOpen(true)}
-                />
-                {galleryImages.length > 1 && (
-                  <>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }}
-                      className="gallery-nav-btn gallery-nav-prev"
-                    >
-                      <span className="material-symbols-outlined">chevron_left</span>
-                    </button>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }}
-                      className="gallery-nav-btn gallery-nav-next"
-                    >
-                      <span className="material-symbols-outlined">chevron_right</span>
-                    </button>
-                    <div className="gallery-pagination">
-                      {galleryImages.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={(e) => { e.stopPropagation(); setGalleryIndex(i); }}
-                          className={`gallery-dot ${i === galleryIndex ? 'active' : ''}`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </>
-            ) : (
-              <div style={{ padding: '48px', textAlign: 'center', color: 'var(--error)' }}>Out of Stock</div>
-            )}
-          </div>
-
-          {galleryImages.length > 1 && (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
-              {galleryImages.map((url, i) => (
-                <img
-                  key={i}
-                  src={url}
-                  alt=""
-                  onClick={() => setGalleryIndex(i)}
-                  style={{
-                    width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer',
-                    border: i === galleryIndex ? '2px solid var(--primary)' : '2px solid transparent',
-                    opacity: i === galleryIndex ? 1 : 0.6, transition: 'all 0.2s', flexShrink: 0,
-                  }}
-                />
-              ))}
-            </div>
-          )}
+          <ProductGallery images={galleryImages} productName={currentConfig.productName} />
         </div>
 
-        <div className="stain-strip-mobile" role="group" aria-label="Select Stain Finish">
-          {currentConfig.stains.map((stain: any) => (
-            <button
-              key={stain.name}
-              disabled={!stain.inStock}
-              className={`stain-strip-swatch ${selectedStain === stain.name ? 'selected' : ''}`}
-              onClick={() => setSelectedStain(stain.name)}
-              style={{ opacity: stain.inStock ? 1 : 0.5 }}
-              aria-pressed={selectedStain === stain.name}
-              aria-label={`${stain.name} finish${!stain.inStock ? ' (Out of stock)' : ''}`}
-            >
-              <div className="stain-swatch" style={{backgroundColor: getStainColor(stain.name), overflow: 'hidden', position: 'relative'}}>
-                {(stain.image || stain.gallery?.[0]?.url) ? (
-                  <img src={stain.image || stain.gallery[0].url} alt="" aria-hidden="true" style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0}} />
-                ) : null}
-              </div>
-            </button>
-          ))}
-        </div>
+        <StainStripMobile stains={currentConfig.stains} selected={selection.stain} onSelect={setUserStain} />
 
         <div className="configuration-panel">
-          <section className="config-section">
-            <div className="config-header">
-              <h3 className="label-caps">01. Select Wood Species</h3>
-            </div>
-            {(
-                <div className="wood-grid">
-                  {productConfigurations.map((config: any) => {
-                    const isAvailable = config.stains.some((s: any) => s.inStock);
-                    return (
-                        <button
-                            key={config.wood}
-                            disabled={!isAvailable}
-                            style={{opacity: isAvailable ? 1 : 0.5, cursor: isAvailable ? 'pointer' : 'not-allowed'}}
-                            className={`wood-chip ${selectedWood === config.wood ? 'selected' : ''}`}
-                            onClick={() => handleWoodChange(config.wood)}
-                        >
-                          {config.wood.replace(/([A-Z])/g, ' $1').trim()}
-                          {!isAvailable &&
-                              <span style={{fontSize: '9px', color: 'var(--error)', marginLeft: '4px'}}>Sold Out</span>}
-                        </button>
-                    );
-                  })}
-                </div>
-            )}
-          </section>
-
-          <section className="config-section desktop-only">
-            <div className="config-header">
-              <h3 className="label-caps">02. Choose Stain Finish</h3>
-              <span className="body-md">{selectedStain} {addition > 0 ? `(+ $${addition})` : '(Included)'}</span>
-            </div>
-            <div className="stain-list" style={{ maxHeight: '300px', overflowY: 'auto', paddingRight: '8px' }}>
-              {currentConfig.stains.map((stain: any) => {
-                const stainAddition = Number(stain.priceAddition) || 0;
-                return (
-                  <button 
-                    key={stain.name}
-                    disabled={!stain.inStock}
-                    style={{ opacity: stain.inStock ? 1 : 0.5, cursor: stain.inStock ? 'pointer' : 'not-allowed' }}
-                    className={`stain-button ${selectedStain === stain.name ? 'selected' : ''}`}
-                    onClick={() => setSelectedStain(stain.name)}
-                  >
-                    <div className="stain-swatch" style={{backgroundColor: getStainColor(stain.name), overflow: 'hidden', position: 'relative'}}>
-                      {(stain.image || stain.gallery?.[0]?.url) ? (
-                        <img src={stain.image || stain.gallery[0].url} alt={stain.name} style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0}} />
-                      ) : null}
-                    </div>
-                    <div className="stain-info">
-                      <p className="body-md stain-name">
-                        {stain.name} {stainAddition > 0 && <span style={{ color: 'var(--secondary)'}}>(+${stainAddition})</span>}
-                        {!stain.inStock && <span style={{ color: 'var(--error)', fontSize: '12px', marginLeft: '8px' }}>[Out of Stock]</span>}
-                      </p>
-                      <p className="label-caps stain-desc">{stain.name.includes('Natural') ? "Enhances the wood's inherent character" : "Sophisticated artisan pigment"}</p>
-                    </div>
-                    {selectedStain === stain.name && <span className="material-symbols-outlined stain-check">check_circle</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          <WoodSelector woods={woods} selected={selection.wood} onSelect={handleWoodChange} disabled={isWoodSoldOut} />
+          <StainSelector stains={currentConfig.stains} selected={selection.stain} onSelect={setUserStain} />
 
           <section className="pricing-section">
             <p className="body-lg subtitle" style={{ margin: '0', color: 'var(--on-surface-variant)' }}>
@@ -281,9 +116,7 @@ export default function ProductDetails() {
             <div className="price-row">
               <div style={{ display: 'flex', alignItems: 'baseline' }}>
                 <span className="headline-lg price-current">$</span>
-                <span className="headline-lg price-current" style={{ minWidth: '60px' }}>
-                  {totalPrice.toLocaleString()}
-                </span>
+                <span className="headline-lg price-current" style={{ minWidth: '60px' }}>{totalPrice.toLocaleString()}</span>
                 <span className="headline-lg price-current">.00</span>
               </div>
               <span className="body-md price-old">${(totalPrice + 350).toLocaleString()}.00</span>
@@ -291,82 +124,62 @@ export default function ProductDetails() {
           </section>
 
           <section className="action-section">
-            <button 
-              className="add-to-cart" 
-              disabled={!selectedStain}
-              style={{ opacity: selectedStain ? 1 : 0.5, cursor: selectedStain ? 'pointer' : 'not-allowed' }}
+            <button
+              className="add-to-cart"
+              disabled={!selection.stain}
+              style={{ opacity: selection.stain ? 1 : 0.5, cursor: selection.stain ? 'pointer' : 'not-allowed' }}
               onClick={() => {
-                const productName = currentConfig.productName ?? currentConfig.cribName;
-                posthog.capture('add_to_cart', { productName, wood: selectedWood, stain: selectedStain, price: currentConfig.basePrice + (currentStainData?.priceAddition || 0) });
+                posthog.capture('add_to_cart', {
+                  productName: currentConfig.productName,
+                  wood: selection.wood,
+                  stain: selection.stain,
+                  price: basePrice + addition,
+                });
                 addToCart({
-                  id: `${productName}-${selectedWood}-${selectedStain}`,
-                  productName,
-                  wood: selectedWood,
-                  stainName: selectedStain,
+                  id: `${currentConfig.productName}-${selection.wood}-${selection.stain}`,
+                  productName: currentConfig.productName,
+                  wood: selection.wood,
+                  stainName: selection.stain,
                   price: basePrice + addition,
                   image: galleryImages[0] || '',
-                  quantity: 1
+                  quantity: 1,
                 });
                 setShowCartPopup(true);
               }}
             >
-              {selectedStain ? "ADD TO CART" : "OUT OF STOCK"}
+              {selection.stain ? "ADD TO CART" : "OUT OF STOCK"}
             </button>
+
             <button
               className="babylist-btn"
               style={{ background: 'none', width: '100%', padding: '14px 0', textAlign: 'center', textDecoration: 'none', border: '1px solid var(--outline-variant)', borderRadius: '8px', cursor: 'pointer', color: 'var(--on-surface)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.08em', marginTop: '12px', display: 'block', boxSizing: 'border-box' }}
-              onClick={(e) => {
-                e.preventDefault();
-                // @ts-ignore
-                if (window.bl && window.bl.addToRegistry) {
-                  // @ts-ignore
-                  window.bl.addToRegistry({
+              onClick={() => {
+                const bl = (window as typeof window & { bl?: { addToRegistry: (d: Record<string, string>) => void } }).bl;
+                if (bl?.addToRegistry) {
+                  bl.addToRegistry({
                     images: galleryImages[0] || '',
                     price: String(totalPrice),
-                    title: currentConfig.productName ?? currentConfig.cribName,
-                    url: window.location.href
+                    title: currentConfig.productName,
+                    url: window.location.href,
                   });
                 }
               }}
             >
               Add to Babylist
             </button>
+
             <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • Handcrafted for you</p>
           </section>
-
-          {showCartPopup && (
-            <div className="cart-popup-overlay" onClick={() => setShowCartPopup(false)}>
-              <div className="cart-popup-content" onClick={e => e.stopPropagation()}>
-                <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--primary)', marginBottom: '16px' }}>check_circle</span>
-                <h2 className="headline-md" style={{ marginBottom: '8px' }}>Added to Cart!</h2>
-                <p className="body-md text-on-surface-variant" style={{ marginBottom: '32px' }}>{currentConfig.productName ?? currentConfig.cribName} — {selectedWood.replace(/([A-Z])/g, ' $1').trim()} / {selectedStain}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <Link to="/checkout" className="add-to-cart" style={{ width: '100%', padding: '14px 0', textAlign: 'center', textDecoration: 'none' }}>Go to Cart</Link>
-                  <button onClick={() => setShowCartPopup(false)} style={{ background: 'none', border: '1px solid var(--outline-variant)', borderRadius: '8px', padding: '14px', cursor: 'pointer', color: 'var(--on-surface)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.08em' }}>Continue Shopping</button>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {lightboxOpen && galleryImages.length > 0 && (
-        <div className="lightbox-overlay" onClick={() => setLightboxOpen(false)} role="dialog" aria-label="Image gallery fullscreen view">
-          <button onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} className="lightbox-close-btn" aria-label="Close image gallery">
-            <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '36px' }}>close</span>
-          </button>
-          <img src={galleryImages[galleryIndex]} alt={`Gallery image ${galleryIndex + 1} of ${galleryImages.length}`} className="lightbox-img" onClick={e => e.stopPropagation()} />
-          {galleryImages.length > 1 && (
-            <>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-prev" aria-label="Previous image">
-                <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '28px' }}>chevron_left</span>
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-next" aria-label="Next image">
-                <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '28px' }}>chevron_right</span>
-              </button>
-            </>
-          )}
-        </div>
+      {showCartPopup && (
+        <CartPopup
+          productName={currentConfig.productName}
+          wood={selection.wood}
+          stain={selection.stain}
+          onClose={() => setShowCartPopup(false)}
+        />
       )}
     </div>
   );

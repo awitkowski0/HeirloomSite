@@ -1,11 +1,12 @@
 import { createContext, useContext } from 'react';
+import type { InventoryItem, ImageRecord, ShowroomData, StainType, AppSettings } from './types';
 
 export interface ContentData {
-  inventory: any[];
-  images: any[];
-  showroom: any;
-  stainTypes: any[];
-  settings: any;
+  inventory: InventoryItem[];
+  images: ImageRecord[];
+  showroom: ShowroomData | null;
+  stainTypes: StainType[];
+  settings: AppSettings | null;
   loading: boolean;
 }
 

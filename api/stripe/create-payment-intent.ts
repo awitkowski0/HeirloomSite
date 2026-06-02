@@ -7,21 +7,25 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia" as any,
 });
 
-function calculateCartTotal(cart: any[], inventory: any[]) {
-  let subtotal = 0;
-  for (const item of cart) {
+function lookupPrices(cart: any[], inventory: any[]) {
+  return cart.map((item: any) => {
     const config = inventory.find(
       (i: any) => (i.productName ?? i.cribName) === item.productName && i.wood === item.wood
     );
     if (!config) throw new Error(`Product not found: ${item.productName} / ${item.wood}`);
     const stain = config.stains.find((s: any) => s.name === item.stainName);
     if (!stain) throw new Error(`Stain not found: ${item.stainName}`);
-    const itemPrice = (config.basePrice || 0) + (stain.priceAddition || 0);
-    subtotal += itemPrice * (item.quantity || 1);
-  }
+    const price = (config.basePrice || 0) + (stain.priceAddition || 0);
+    return { price, quantity: item.quantity || 1 };
+  });
+}
+
+function calculateCartTotal(cart: any[], inventory: any[]) {
+  const priced = lookupPrices(cart, inventory);
+  const subtotal = priced.reduce((sum: number, p: any) => sum + p.price * p.quantity, 0);
   const shipping = 150;
   const tax = Math.round(subtotal * 0.08);
-  return { subtotal, shipping, tax, total: subtotal + shipping + tax };
+  return { priced, subtotal, shipping, tax, total: subtotal + shipping + tax };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -30,9 +34,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { cart } = req.body;
+    const { cart, email, firstName, lastName, address, city, state, zip } = req.body;
+
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       return res.status(400).json({ error: "Cart is required" });
+    }
+    if (!email || !firstName || !lastName || !address || !city || !state || !zip) {
+      return res.status(400).json({ error: "Shipping information is required" });
     }
 
     const inventoryPath = join(process.cwd(), "data", "inventory.json");
@@ -42,15 +50,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch {
       inventory = [];
     }
-    const { total } = calculateCartTotal(cart, inventory);
+    const { priced, subtotal, shipping, tax, total } = calculateCartTotal(cart, inventory);
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: total * 100,
       currency: "usd",
       automatic_payment_methods: { enabled: true },
+      metadata: {
+        email,
+        firstName,
+        lastName,
+        address,
+        city,
+        state,
+        zip,
+        subtotal: String(subtotal),
+        shipping: String(shipping),
+        tax: String(tax),
+        total: String(total),
+        items: JSON.stringify(cart.map((item: any, i: number) => ({
+          productName: item.productName,
+          wood: item.wood,
+          stainName: item.stainName,
+          price: priced[i]?.price || item.price,
+          image: item.image,
+          quantity: priced[i]?.quantity || item.quantity,
+          addons: item.addons || [],
+        }))),
+      },
     });
 
-    return res.status(200).json({ clientSecret: paymentIntent.client_secret });
+    return res.status(200).json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+    });
   } catch (err: any) {
     console.error("createPaymentIntent error:", err);
     return res.status(500).json({ error: err.message || "Internal server error" });
