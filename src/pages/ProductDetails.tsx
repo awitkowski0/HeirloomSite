@@ -328,6 +328,25 @@ export default function ProductDetails() {
             >
               {selectedStain ? "ADD TO CART" : "OUT OF STOCK"}
             </button>
+            <button
+              className="babylist-btn"
+              style={{ background: 'none', width: '100%', padding: '14px 0', textAlign: 'center', textDecoration: 'none', border: '1px solid var(--outline-variant)', borderRadius: '8px', cursor: 'pointer', color: 'var(--on-surface)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.08em', marginTop: '12px', display: 'block', boxSizing: 'border-box' }}
+              onClick={(e) => {
+                e.preventDefault();
+                // @ts-ignore
+                if (window.bl && window.bl.addToRegistry) {
+                  // @ts-ignore
+                  window.bl.addToRegistry({
+                    images: galleryImages[0] || '',
+                    price: String(totalPrice),
+                    title: currentConfig.productName ?? currentConfig.cribName,
+                    url: window.location.href
+                  });
+                }
+              }}
+            >
+              Add to Babylist
+            </button>
             <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • Handcrafted for you</p>
           </section>
 
