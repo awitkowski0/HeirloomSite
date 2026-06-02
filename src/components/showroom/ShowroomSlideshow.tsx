@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { InventoryItem, ShowroomSlide } from '../../types';
 
 interface Props {
@@ -60,9 +60,18 @@ export default function ShowroomSlideshow({ slides, inventory }: Props) {
             <div className="showroom-slide-info">
               <p className="label-caps">FEATURED COLLECTION</p>
               <h2>{slide.productId}</h2>
-              <p>Click to explore this handcrafted piece</p>
             </div>
           )}
+          <div className="showroom-slide-actions">
+            {slide.productId && (
+              <Link to={`/product/${encodeURIComponent(slide.productId)}`} className="showroom-action-primary">
+                Shop this room
+              </Link>
+            )}
+            <Link to="/products" className="showroom-action-secondary">
+              See our cribs
+            </Link>
+          </div>
         </div>
       ))}
 
