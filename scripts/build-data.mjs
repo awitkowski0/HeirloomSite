@@ -16,7 +16,7 @@ function getProductDirs() {
   if (!existsSync(PRODUCTS)) return [];
   return readdirSync(PRODUCTS).filter(name => {
     const dir = join(PRODUCTS, name);
-    return statSync(dir).isDirectory() && existsSync(join(dir, "product.json"));
+    return statSync(dir).isDirectory() && existsSync(join(dir, "product.json")) && name !== "showroom";
   });
 }
 
@@ -62,8 +62,11 @@ for (const dirName of productDirs) {
       wood: v.variant,
       category: meta.category || null,
       description: meta.description || null,
+      title: meta.title || null,
+      metaDescription: meta.metaDescription || null,
       basePrice: bp,
       tags: meta.tags || [],
+      slug: meta.slug || null,
       stains,
     });
   }
@@ -74,6 +77,7 @@ for (const dirName of productDirs) {
 
   productIndex.push({
     productName,
+    slug: meta.slug || null,
     category: meta.category || null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,

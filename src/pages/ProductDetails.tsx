@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useCart } from '../context/useCart';
 import { useContent } from '../useContent';
 import posthog from 'posthog-js';
@@ -40,8 +41,9 @@ export default function ProductDetails() {
   const { addToCart } = useCart();
   const { inventory, loading } = useContent();
 
-  const decodedId = decodeURIComponent(id || '');
-  const productConfigurations = inventory.filter((i: any) => i.productName === decodedId);
+  const decodedSlug = id || '';
+  const item = inventory.find((i: any) => i.slug === decodedSlug);
+  const productConfigurations = item ? inventory.filter((i: any) => i.productName === item.productName) : [];
   const woods = productConfigurations.map(c => c.wood);
   const variantLabel = getVariantLabel(woods);
   const showStainStep = variantLabel === 'Select Wood Species';
@@ -111,7 +113,14 @@ export default function ProductDetails() {
   const totalPrice = basePrice + addition;
 
   return (
-    <div className="container">
+    <>
+      <Helmet>
+        <title>{currentConfig.title || currentConfig.productName} | Heirloom Cribs and More</title>
+        <meta name="description" content={currentConfig.metaDescription || currentConfig.description || ''} />
+        <meta property="og:title" content={currentConfig.title || currentConfig.productName} />
+        <meta property="og:description" content={currentConfig.metaDescription || currentConfig.description || ''} />
+      </Helmet>
+      <div className="container">
       <div className="grid-layout">
         <div className="product-showcase">
           <ProductGallery images={galleryImages} productName={currentConfig.productName} />
@@ -216,5 +225,6 @@ export default function ProductDetails() {
         />
       )}
     </div>
+    </>
   );
 }

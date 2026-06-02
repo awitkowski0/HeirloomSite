@@ -10,7 +10,7 @@ export default function Showroom() {
 
   return (
     <div>
-      <ShowroomSlideshow slides={showroom?.slides || []} />
+      <ShowroomSlideshow slides={showroom?.slides || []} inventory={inventory} />
       <FeaturedGrid
         featured={showroom?.featured || []}
         inventory={inventory}

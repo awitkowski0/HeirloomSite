@@ -47,7 +47,7 @@ export default function Products() {
         if (item.basePrice < existing.minPrice) existing.minPrice = item.basePrice;
       } else {
         map.set(key, {
-          id: encodeURIComponent(key),
+          id: item.slug || encodeURIComponent(key),
           name: key,
           category: cat,
           minPrice: item.basePrice,

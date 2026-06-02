@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 function lookupPrices(cart: any[], inventory: any[]) {
   return cart.map((item: any) => {
     const config = inventory.find(
-      (i: any) => (i.productName ?? i.cribName) === item.productName && i.wood === item.wood
+      (i: any) => i.productName === item.productName && i.wood === item.wood
     );
     if (!config) throw new Error(`Product not found: ${item.productName} / ${item.wood}`);
     const stain = config.stains.find((s: any) => s.name === item.stainName);
@@ -43,7 +43,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: "Shipping information is required" });
     }
 
-    const inventoryPath = join(process.cwd(), "data", "inventory.json");
+    const inventoryPath = join(process.cwd(), "public", "data", "inventory.json");
     let inventory: any[];
     try {
       inventory = JSON.parse(readFileSync(inventoryPath, "utf-8"));
@@ -72,9 +72,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           productName: item.productName,
           wood: item.wood,
           stainName: item.stainName,
-          price: priced[i]?.price || item.price,
+          price: priced[i].price,
           image: item.image,
-          quantity: priced[i]?.quantity || item.quantity,
+          quantity: priced[i].quantity,
           addons: item.addons || [],
         }))),
       },

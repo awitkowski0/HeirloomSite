@@ -39,7 +39,7 @@ export default function Gallery() {
         }
       } else {
         uniqueMap.set(pName, {
-          id: encodeURIComponent(pName), name: pName, minPrice: item.basePrice,
+          id: item.slug || encodeURIComponent(pName), name: pName, minPrice: item.basePrice,
           woods: [item.wood],
           woodStains: { [item.wood]: item.stains.map(s => ({
             name: s.name, image: s.image, priceAddition: s.priceAddition, inStock: s.inStock,
