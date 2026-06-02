@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/build-data.mjs && tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "data:split": "node scripts/split-data.mjs",
+    "data:build": "node scripts/build-data.mjs"
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^9.2.0",
