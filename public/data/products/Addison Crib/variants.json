@@ -1,0 +1,112 @@
+[
+  {
+    "variant": "Natural",
+    "label": "Natural",
+    "stains": [
+      "Natural"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Natural",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Almond",
+    "label": "Almond",
+    "stains": [
+      "Almond"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Almond",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Asbury-Brown",
+    "label": "Asbury- Brown",
+    "stains": [
+      "Asbury-Brown"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Asbury-Brown",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Carbon",
+    "label": "Carbon",
+    "stains": [
+      "Carbon"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Carbon",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Earthtone",
+    "label": "Earthtone",
+    "stains": [
+      "Earthtone"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Earthtone",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Ebony",
+    "label": "Ebony",
+    "stains": [
+      "Ebony"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Ebony",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Harvest",
+    "label": "Harvest",
+    "stains": [
+      "Harvest"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Harvest",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Manchester",
+    "label": "Manchester",
+    "stains": [
+      "Manchester"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Manchester",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Michaels-Cherry",
+    "label": "Michaels- Cherry",
+    "stains": [
+      "Michaels-Cherry"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Michaels-Cherry",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Sandstone",
+    "label": "Sandstone",
+    "stains": [
+      "Sandstone"
+    ],
+    "basePrice": 2868,
+    "sku": "OTO-1201-BrownMaple_OCS_100_Sandstone",
+    "dimensions": null,
+    "weight": null
+  }
+]

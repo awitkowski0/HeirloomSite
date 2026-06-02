@@ -1,0 +1,112 @@
+[
+  {
+    "variant": "2'3\" x 6'6\"",
+    "label": "2'3\" x 6'6\"",
+    "stains": [
+      "2'3\" x 6'6\""
+    ],
+    "basePrice": 244,
+    "sku": "rdir-150896-2-3-x-6-6",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "2'7\" x 8'2\"",
+    "label": "2'7\" x 8'2\"",
+    "stains": [
+      "2'7\" x 8'2\""
+    ],
+    "basePrice": 348,
+    "sku": "rdir-150896-2-7-x-8-2",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "4'11\" x 5'11\"",
+    "label": "4'11\" x 5'11\"",
+    "stains": [
+      "4'11\" x 5'11\""
+    ],
+    "basePrice": 524,
+    "sku": "rdir-150896-4-11-x-5-11",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "5'11\" x 5'11\"",
+    "label": "5'11\" x 5'11\"",
+    "stains": [
+      "5'11\" x 5'11\""
+    ],
+    "basePrice": 545,
+    "sku": "rdir-150896-5-11-x-5-11",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "5'11\" x 6'7\"",
+    "label": "5'11\" x 6'7\"",
+    "stains": [
+      "5'11\" x 6'7\""
+    ],
+    "basePrice": 612,
+    "sku": "rdir-150896-5-11-x-6-7",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "7'3\" x 9'10\"",
+    "label": "7'3\" x 9'10\"",
+    "stains": [
+      "7'3\" x 9'10\""
+    ],
+    "basePrice": 1231.2,
+    "sku": "rdir-150896-7-3-x-9-10",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "7'10\" x 7'10\"",
+    "label": "7'10\" x 7'10\"",
+    "stains": [
+      "7'10\" x 7'10\""
+    ],
+    "basePrice": 1075,
+    "sku": "rdir-150896-7-10-x-7-10",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "7'10\" x 8'6\"",
+    "label": "7'10\" x 8'6\"",
+    "stains": [
+      "7'10\" x 8'6\""
+    ],
+    "basePrice": 1143.2,
+    "sku": "rdir-150896-7-10-x-8-6",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "9'10\" x 9'10\"",
+    "label": "9'10\" x 9'10\"",
+    "stains": [
+      "9'10\" x 9'10\""
+    ],
+    "basePrice": 1364,
+    "sku": "rdir-150896-9-10-x-9-10",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "9'10\" x 11'2\"",
+    "label": "9'10\" x 11'2\"",
+    "stains": [
+      "9'10\" x 11'2\""
+    ],
+    "basePrice": 1759.2,
+    "sku": "rdir-150896-9-10-x-11-2",
+    "dimensions": null,
+    "weight": null
+  }
+]

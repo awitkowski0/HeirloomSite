@@ -35,7 +35,7 @@ export default function SearchBar() {
     setOpen(false);
     const params = new URLSearchParams();
     if (r.matchedStain) params.set('stain', r.matchedStain);
-    navigate(`/product/${encodeURIComponent(r.productName)}?${params.toString()}`);
+    navigate(`/product/${r.slug}?${params.toString()}`);
   };
 
   const handleSubmit = (e: React.FormEvent) => {

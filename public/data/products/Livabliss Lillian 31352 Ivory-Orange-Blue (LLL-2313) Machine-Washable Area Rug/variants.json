@@ -1,0 +1,101 @@
+[
+  {
+    "variant": "18\" x 18\"",
+    "label": "18\" x 18\"",
+    "stains": [
+      "18\" x 18\""
+    ],
+    "basePrice": 51,
+    "sku": "rdir-146549-18-x-18",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "2' x 2'11\"",
+    "label": "2' x 2'11\"",
+    "stains": [
+      "2' x 2'11\""
+    ],
+    "basePrice": 28.5,
+    "sku": "rdir-146549-2-x-2-11",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "2'2\" x 3'9\"",
+    "label": "2'2\" x 3'9\"",
+    "stains": [
+      "2'2\" x 3'9\""
+    ],
+    "basePrice": 28.5,
+    "sku": "rdir-146549-2-2-x-3-9",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "2'7\" x 7'3\"",
+    "label": "2'7\" x 7'3\"",
+    "stains": [
+      "2'7\" x 7'3\""
+    ],
+    "basePrice": 64.5,
+    "sku": "rdir-146549-2-7-x-7-3",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "5'3\" x 7'",
+    "label": "5'3\" x 7'",
+    "stains": [
+      "5'3\" x 7'"
+    ],
+    "basePrice": 121.5,
+    "sku": "rdir-146549-5-3-x-7",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "6'7\" x 6'7\"",
+    "label": "6'7\" x 6'7\"",
+    "stains": [
+      "6'7\" x 6'7\""
+    ],
+    "basePrice": 141,
+    "sku": "rdir-146549-6-7-x-6-7",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "6'7\" x 9'",
+    "label": "6'7\" x 9'",
+    "stains": [
+      "6'7\" x 9'"
+    ],
+    "basePrice": 193.5,
+    "sku": "rdir-146549-6-7-x-9",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "7'10\" x 10'",
+    "label": "7'10\" x 10'",
+    "stains": [
+      "7'10\" x 10'"
+    ],
+    "basePrice": 225,
+    "sku": "rdir-146549-7-10-x-10",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "9'2\" x 12'4\"",
+    "label": "9'2\" x 12'4\"",
+    "stains": [
+      "9'2\" x 12'4\""
+    ],
+    "basePrice": 382.5,
+    "sku": "rdir-146549-9-2-x-12-4",
+    "dimensions": null,
+    "weight": null
+  }
+]

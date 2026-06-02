@@ -57,7 +57,7 @@ export default function FeaturedGrid({ featured, inventory }: Props) {
                 if (!product) return;
                 const params = new URLSearchParams();
                 if (product.displayStainName) params.set('stain', product.displayStainName);
-                navigate(`/product/${encodeURIComponent(item.productName)}?${params.toString()}`);
+                navigate(`/product/${product.slug || item.productName}?${params.toString()}`);
               }}
               style={!product ? { border: '2px dashed var(--error)', minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}}
             >

@@ -1,0 +1,65 @@
+[
+  {
+    "variant": "BrownMaple",
+    "label": "Brown Maple",
+    "stains": [
+      "Antique Slate",
+      "Driftwood",
+      "Frost",
+      "Fruitwood",
+      "Harvest",
+      "Mx",
+      "Natural",
+      "Provincial",
+      "Seely",
+      "Smoke",
+      "Washington"
+    ],
+    "basePrice": 2499,
+    "sku": null,
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "CherryWood",
+    "label": "Cherry Wood",
+    "stains": [
+      "Antique Slate",
+      "Driftwood",
+      "Frost Cherry",
+      "Fruitwood",
+      "Harvest",
+      "Mx",
+      "Natural",
+      "Provincial",
+      "Seely",
+      "Smoke",
+      "Washington"
+    ],
+    "basePrice": 2499,
+    "sku": null,
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "RedOak",
+    "label": "Red Oak",
+    "stains": [
+      "Antique Slate",
+      "Driftwood",
+      "Frost",
+      "Fruitwood",
+      "Harvest",
+      "Mx",
+      "Natural",
+      "Provincial",
+      "Seely",
+      "Smoke",
+      "Washington"
+    ],
+    "basePrice": 2499,
+    "sku": null,
+    "dimensions": null,
+    "weight": null
+  }
+]

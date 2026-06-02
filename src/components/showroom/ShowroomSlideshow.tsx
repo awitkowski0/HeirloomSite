@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import type { ShowroomSlide } from '../../types';
+import type { InventoryItem, ShowroomSlide } from '../../types';
 
 interface Props {
   slides: ShowroomSlide[];
+  inventory: InventoryItem[];
 }
 
-export default function ShowroomSlideshow({ slides }: Props) {
+export default function ShowroomSlideshow({ slides, inventory }: Props) {
   const navigate = useNavigate();
   const [slideIndex, setSlideIndex] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -43,6 +44,12 @@ export default function ShowroomSlideshow({ slides }: Props) {
         <div
           key={i}
           className={`showroom-slide ${i === slideIndex ? 'active' : ''}`}
+          onClick={() => {
+            if (slide.productId) {
+              const invItem = inventory.find(i => i.productName === slide.productId);
+              navigate(`/product/${invItem?.slug || encodeURIComponent(slide.productId)}`);
+            }
+          }}
         >
           <picture>
             {slide.imageMobile && <source media="(max-width: 767px)" srcSet={slide.imageMobile} />}

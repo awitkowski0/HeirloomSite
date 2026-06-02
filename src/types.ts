@@ -28,6 +28,8 @@ export interface InventoryItem {
   category: string | null;
   description: string | null;
   extendedDescription: string | null;
+  title: string | null;
+  metaDescription: string | null;
   basePrice: number;
   order: number | null;
   tags: string[];

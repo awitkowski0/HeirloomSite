@@ -5,6 +5,7 @@ import { useContent } from '../useContent';
 export interface SearchResult {
   id: string;
   productName: string;
+  slug: string;
   wood: string;
   category: string;
   basePrice: number;
@@ -26,6 +27,7 @@ function buildDocs(inventory: any[]) {
     return {
       id: `${item.productName}||${item.wood}`,
       productName: item.productName,
+      slug: item.slug || '',
       wood: item.wood,
       category: item.category || '',
       stainNames,
@@ -39,7 +41,7 @@ function buildDocs(inventory: any[]) {
 function createSearch() {
   return new MiniSearch({
     fields: ['productName', 'wood', 'category', 'stainNames', 'description'],
-    storeFields: ['productName', 'wood', 'category', 'basePrice', 'stainImages'],
+    storeFields: ['productName', 'slug', 'wood', 'category', 'basePrice', 'stainImages'],
     searchOptions: {
       boost: { productName: 3, wood: 2, stainNames: 2, category: 2, description: 1 },
       prefix: true,
@@ -88,6 +90,7 @@ export function useSearch(query: string): SearchResult[] {
       results.push({
         id: doc.id,
         productName: doc.productName,
+        slug: doc.slug || '',
         wood: doc.wood,
         category: doc.category,
         basePrice: doc.basePrice,

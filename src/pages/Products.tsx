@@ -6,8 +6,6 @@ import { searchProducts } from '../lib/search';
 import CategoryFilter from '../components/products/CategoryFilter';
 import ProductCard from '../components/products/ProductCard';
 
-const CATEGORIES = ['All', 'Cribs', 'Bassinets', 'Mattresses', 'Bedding', 'Furniture', 'Décor', 'Gear'];
-
 function getDefaultImage(stains: Array<{ name: string; priceAddition: number; image?: string }>): string {
   const base = stains.find(s => Number(s.priceAddition) === 0);
   if (base?.image) return base.image;
@@ -21,9 +19,16 @@ export default function Products() {
   const navigate = useNavigate();
   const { inventory, loading } = useContent();
 
-  const [selectedCategory, setSelectedCategory] = useState(
-    paramCategory ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) : 'All'
-  );
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    inventory.forEach(i => { if (i.category) set.add(i.category); });
+    return ['All', ...Array.from(set).sort()];
+  }, [inventory]);
+
+  const normalizedParam = paramCategory ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) : null;
+  const initialCat = normalizedParam && categories.includes(normalizedParam) ? normalizedParam : 'All';
+
+  const [selectedCategory, setSelectedCategory] = useState(initialCat);
 
   const searched = useMemo(() => {
     if (!searchQuery) return inventory;
@@ -42,7 +47,7 @@ export default function Products() {
         if (item.basePrice < existing.minPrice) existing.minPrice = item.basePrice;
       } else {
         map.set(key, {
-          id: encodeURIComponent(key),
+          id: item.slug || encodeURIComponent(key),
           name: key,
           category: cat,
           minPrice: item.basePrice,
@@ -80,7 +85,7 @@ export default function Products() {
           </h1>
         </header>
 
-        <CategoryFilter categories={CATEGORIES} selected={selectedCategory} onSelect={handleCategory} />
+        <CategoryFilter categories={categories} selected={selectedCategory} onSelect={handleCategory} />
 
         {products.length === 0 ? (
           <section style={{ padding: '60px 0', textAlign: 'center' }}>
