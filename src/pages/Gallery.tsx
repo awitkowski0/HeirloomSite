@@ -106,7 +106,7 @@ export default function Gallery() {
   const carouselPrice = (Number(carouselConfig.basePrice) || 0) + (Number(effectiveCarouselStain.priceAddition) || 0);
 
   return (
-    <div style={{ backgroundColor: 'var(--surface-bright)', minHeight: '100vh' }}>
+    <div style={{ backgroundColor: 'var(--white)', minHeight: '100vh' }}>
       <div className="container gallery-header" style={{ paddingTop: '8px', paddingBottom: '48px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           <div className="filter-pills">
@@ -206,7 +206,7 @@ export default function Gallery() {
               <div className="product-card">
                 <div className="product-card-img-wrap">
                   {displayImage ? (
-                    <img key={selectedWood + selectedStain} src={displayImage} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))' }} />
+                    <img key={selectedWood + selectedStain} src={displayImage} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                   ) : (
                     <div style={{ color: 'var(--outline-variant)' }}>Image Unavailable</div>
                   )}
