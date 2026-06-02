@@ -26,7 +26,6 @@ export default function Header() {
           <Link to="/" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Showroom</Link>
           <Link to="/gallery" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Gallery</Link>
           <Link to="/products" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Products</Link>
-          <Link to="/registry/new" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Registry</Link>
           <Link to="/contact" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Contact</Link>
         </nav>
       </div>

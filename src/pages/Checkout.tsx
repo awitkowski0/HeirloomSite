@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
-
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAction, useMutation } from "convex/react";
 import { useCart } from '../context/CartContext';
-import { api } from "../../convex/_generated/api";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_TYooMQauvdEDq54NiTphI7jx');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
 function StripeCheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId: string) => void }) {
   const stripe = useStripe();
@@ -17,13 +14,11 @@ function StripeCheckoutForm({ onSuccess }: { onSuccess: (paymentIntentId: string
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements) return;
-
     setIsProcessing(true);
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       redirect: 'if_required',
     });
-
     if (error) {
       alert(error.message);
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
@@ -52,13 +47,11 @@ export default function Checkout() {
   const { cart, subtotal: cartSubtotal, clearCart, removeFromCart } = useCart();
   const navigate = useNavigate();
 
-  const paymentProvider = 'stripe';
-  
   const [clientSecret, setClientSecret] = useState('');
   const [clientSecretError, setClientSecretError] = useState('');
   const [isLoadingSecret, setIsLoadingSecret] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  
+
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -66,10 +59,8 @@ export default function Checkout() {
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [zip, setZip] = useState('');
-  
-  const createPaymentIntent = useAction(api.stripe.createPaymentIntent);
-  const saveOrder = useMutation(api.orders.save);
-  
+
+  const paymentProvider = 'stripe';
   const shipping = cart.length > 0 ? 150 : 0;
   const tax = Math.round(cartSubtotal * 0.08);
   const finalTotal = cartSubtotal + shipping + tax;
@@ -79,8 +70,24 @@ export default function Checkout() {
       setClientSecret('');
       setClientSecretError('');
       setIsLoadingSecret(true);
-      createPaymentIntent({ amount: finalTotal * 100, currency: 'usd' })
+
+      fetch('/api/stripe/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cart: cart.map(item => ({
+            productName: item.productName,
+            cribName: item.cribName,
+            wood: item.wood,
+            stainName: item.stainName,
+            quantity: item.quantity,
+            addons: item.addons,
+          })),
+        }),
+      })
+      .then(r => r.json())
       .then(data => {
+        if (data.error) throw new Error(data.error);
         setClientSecret(data.clientSecret || '');
         setIsLoadingSecret(false);
       })
@@ -90,7 +97,7 @@ export default function Checkout() {
         setIsLoadingSecret(false);
       });
     }
-  }, [paymentProvider, finalTotal]);
+  }, [paymentProvider, finalTotal, cart]);
 
   if (cart.length === 0) {
     return (
@@ -104,31 +111,35 @@ export default function Checkout() {
 
   const handleSuccess = async (paymentIntentId: string) => {
     try {
-      const orderId = await saveOrder({
-        email,
-        firstName,
-        lastName,
-        address,
-        city,
-        state,
-        zip,
-        items: cart.map(item => ({
-          productName: item.productName,
-          cribName: item.cribName,
-          wood: item.wood,
-          stainName: item.stainName,
-          price: item.price,
-          image: item.image,
-          quantity: item.quantity,
-          addons: item.addons,
-        })),
-        subtotal: cartSubtotal,
-        shipping,
-        tax,
-        total: finalTotal,
-        paymentIntentId,
-        status: 'confirmed',
+      const resp = await fetch('/api/orders/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          firstName,
+          lastName,
+          address,
+          city,
+          state,
+          zip,
+          cart: cart.map(item => ({
+            productName: item.productName,
+            cribName: item.cribName,
+            wood: item.wood,
+            stainName: item.stainName,
+            price: item.price,
+            image: item.image,
+            quantity: item.quantity,
+            addons: item.addons,
+          })),
+          paymentIntentId,
+        }),
       });
+
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'Failed to save order');
+
+      const orderId = data.orderId;
       clearCart();
       navigate(`/order-confirmation/${orderId}`);
     } catch (err) {
@@ -190,43 +201,27 @@ export default function Checkout() {
             <section style={{ padding: '32px', backgroundColor: 'var(--surface-container-lowest)', borderRadius: '12px', boxShadow: 'var(--shadow-ambient)', border: '1px solid var(--surface-container-highest)' }}>
                <h2 className="headline-md" style={{ marginBottom: '24px' }}>Terms & Conditions</h2>
                <div style={{ 
-                 backgroundColor: 'var(--surface-container-highest)', 
-                 padding: '24px', 
-                 borderRadius: '12px', 
-                 marginBottom: '24px',
-                 maxHeight: '200px',
-                 overflowY: 'auto',
-                 fontSize: '13px',
-                 lineHeight: '1.6',
-                 color: 'var(--on-surface-variant)',
-                 border: '1px solid var(--outline-variant)'
+                 backgroundColor: 'var(--surface-container-highest)', padding: '24px', borderRadius: '12px',
+                 marginBottom: '24px', maxHeight: '200px', overflowY: 'auto', fontSize: '13px',
+                 lineHeight: '1.6', color: 'var(--on-surface-variant)', border: '1px solid var(--outline-variant)'
                }}>
                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>1. Refund & Cancellation Policy</p>
                  <p style={{ marginBottom: '16px' }}>Buyer may cancel for a full refund (less any credit-card fees) within 48 hours of the order date by written notice only. After 48 hours, the order is committed and non-cancellable. Any later cancellation results in full forfeiture of the 50% deposit as reasonable liquidated damages (13 Pa.C.S. § 2718).</p>
-                 
                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>2. All Sales Final / No Returns</p>
-                 <p style={{ marginBottom: '16px' }}>Custom orders are built to Buyer’s exact specifications. No cancellations, modifications, returns, exchanges, or refunds after the 48-hour period. (13 Pa.C.S. Article 2 and UTPCPL).</p>
-                 
+                 <p style={{ marginBottom: '16px' }}>Custom orders are built to Buyer's exact specifications. No cancellations, modifications, returns, exchanges, or refunds after the 48-hour period. (13 Pa.C.S. Article 2 and UTPCPL).</p>
                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>3. Deposit Requirement</p>
                  <p style={{ marginBottom: '16px' }}>A minimum 50% non-refundable deposit of the total order price is required to place any custom order. Production begins immediately. Balance due before delivery.</p>
-                 
                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>4. Delivery Terms</p>
                  <p style={{ marginBottom: '16px' }}>Delivery date is estimated only. Seller is not liable for delays beyond control. Risk of loss passes to Buyer upon delivery.</p>
-                 
                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>5. Inspection and Acceptance</p>
                  <p style={{ marginBottom: '16px' }}>Buyer must inspect goods immediately upon delivery. Signing the delivery receipt constitutes acceptance as conforming unless visible damage is expressly noted. Concealed defects must be reported within 5 business days.</p>
-                 
                  <p style={{ fontWeight: 'bold', marginBottom: '8px' }}>6. Limited Warranty</p>
-                 <p>Seller makes no independent warranties. Buyer receives solely any manufacturer’s warranty. Seller expressly disclaims all express and implied warranties to the fullest extent permitted by Pennsylvania law.</p>
+                 <p>Seller makes no independent warranties. Buyer receives solely any manufacturer's warranty. Seller expressly disclaims all express and implied warranties to the fullest extent permitted by Pennsylvania law.</p>
                </div>
 
                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px', cursor: 'pointer', padding: '16px', backgroundColor: agreedToTerms ? 'var(--primary-container)' : 'transparent', borderRadius: '8px', border: '1px solid var(--outline-variant)', transition: 'all 0.2s' }}>
-                 <input 
-                   type="checkbox" 
-                   checked={agreedToTerms} 
-                   onChange={e => setAgreedToTerms(e.target.checked)}
-                   style={{ width: '20px', height: '20px' }}
-                 />
+                 <input type="checkbox" checked={agreedToTerms} onChange={e => setAgreedToTerms(e.target.checked)}
+                   style={{ width: '20px', height: '20px' }} />
                  <span className="label-large" style={{ color: agreedToTerms ? 'var(--on-primary-container)' : 'var(--on-surface)' }}>
                    I have read and agree to the Refund and Cancellation Policy
                  </span>
@@ -297,7 +292,7 @@ export default function Checkout() {
                           <p className="body-md" style={{ marginTop: '4px' }}>${item.price.toLocaleString()}.00 x {item.quantity}</p>
                           {item.addons && item.addons.length > 0 && (
                             <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                              {item.addons.map((addon, ai) => (
+                              {item.addons.map((addon: any, ai: number) => (
                                 <div key={ai} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: 'var(--on-surface-variant)' }}>
                                   <span>{addon.name}{addon.stainName ? ` (${addon.stainName})` : ''}</span>
                                   <span>+${addon.price.toLocaleString()}.00</span>

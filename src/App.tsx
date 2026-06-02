@@ -7,16 +7,10 @@ import Showroom from './pages/Showroom';
 import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
 import Contact from './pages/Contact';
-import RegistryNew from './pages/RegistryNew';
-import RegistryView from './pages/RegistryView';
-import Admin from './pages/Admin';
-
 import { CartProvider } from './context/CartContext';
-import { AdminAuthProvider } from './context/AdminAuthContext';
 
 function AppContent() {
   return (
-    <AdminAuthProvider>
     <CartProvider>
       <Header />
       <main>
@@ -27,15 +21,11 @@ function AppContent() {
           <Route path="/product/:id" element={<ProductDetails />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/contact" element={<Contact />} />
-          <Route path="/registry/new" element={<RegistryNew />} />
-          <Route path="/registry/:slug" element={<RegistryView />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/order-confirmation/:id" element={<OrderConfirmation />} />
-          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
-      
-      {/* Mobile Bottom Navigation */}
+
       <nav className="bottom-nav">
         <Link to="/" className="nav-item">
           <span className="material-symbols-outlined">store</span>
@@ -48,10 +38,6 @@ function AppContent() {
         <Link to="/products" className="nav-item">
           <span className="material-symbols-outlined">collections_bookmark</span>
           <span className="nav-label">Products</span>
-        </Link>
-        <Link to="/registry/new" className="nav-item">
-          <span className="material-symbols-outlined">card_giftcard</span>
-          <span className="nav-label">Registry</span>
         </Link>
         <Link to="/contact" className="nav-item">
           <span className="material-symbols-outlined">mail</span>
@@ -75,7 +61,6 @@ function AppContent() {
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                      <Link to="/products" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>All Products</Link>
                      <Link to="/gallery" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Gallery</Link>
-                     <Link to="/registry/new" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Create Registry</Link>
                    </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
@@ -89,7 +74,6 @@ function AppContent() {
          </div>
       </footer>
     </CartProvider>
-    </AdminAuthProvider>
   );
 }
 

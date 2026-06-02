@@ -1,8 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { useContent } from '../useContent';
 
 const CATEGORIES = ['All', 'Cribs', 'Bassinets', 'Mattresses', 'Bedding', 'Furniture', 'Décor', 'Gear'];
 
@@ -11,9 +10,7 @@ export default function Products() {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const navigate = useNavigate();
-  const inventoryData = useQuery(api.inventory.get as any, {});
-  const loading = inventoryData === undefined;
-  const inventory: any[] = inventoryData || [];
+  const { inventory, loading } = useContent();
 
   const [selectedCategory, setSelectedCategory] = useState(
     paramCategory ? paramCategory.charAt(0).toUpperCase() + paramCategory.slice(1) : 'All'
@@ -29,7 +26,7 @@ export default function Products() {
 
   const products = useMemo(() => {
     const map = new Map();
-    inventory.forEach(item => {
+    inventory.forEach((item: any) => {
       const cat = item.category || 'Cribs';
       if (selectedCategory !== 'All' && cat !== selectedCategory) return;
       const pName = item.productName ?? item.cribName;
@@ -107,7 +104,7 @@ export default function Products() {
         ) : (
           <section aria-label="Product grid">
             <div className="featured-grid">
-              {products.map(p => (
+              {products.map((p: any) => (
                 <article key={p.id} onClick={() => navigate(`/product/${p.id}`)}
                   className="featured-card">
                   <div className="featured-card-img">

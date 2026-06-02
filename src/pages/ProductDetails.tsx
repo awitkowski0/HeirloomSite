@@ -1,25 +1,34 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { useContent } from '../useContent';
 import posthog from 'posthog-js';
+
+const STAIN_COLORS: Record<string, string> = {
+  natural: '#DEB887', slate: '#5A6064', smoke: '#3b3c36', cherry: '#651c14',
+  driftwood: '#a39887', walnut: '#5C4033', ebony: '#3B3B3B', mahogany: '#4A2C2A',
+  oak: '#B89B72', maple: '#DEB887', espresso: '#2C1E16', white: '#F5F5F0',
+  grey: '#8C8C8C', gray: '#8C8C8C', black: '#2D2D2D', custom: '#8B4513',
+};
+
+function getStainColor(name: string): string {
+  const n = name.toLowerCase();
+  for (const [key, color] of Object.entries(STAIN_COLORS)) {
+    if (n.includes(key)) return color;
+  }
+  return '#DEB887';
+}
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const { addToCart } = useCart();
-  
-  const inventoryData = useQuery(api.inventory.get as any, {});
-  const loading = inventoryData === undefined;
-  const inventory: any[] = inventoryData || [];
-  
+  const { inventory, loading } = useContent();
+
   const [selectedWood, setSelectedWood] = useState('');
   const [selectedStain, setSelectedStain] = useState('');
   const [showCartPopup, setShowCartPopup] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [showWoodPicker, setShowWoodPicker] = useState(false);
-
   const touchStartY = useRef(0);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -29,6 +38,7 @@ export default function ProductDetails() {
   const handleTouchEnd = (e: React.TouchEvent) => {
     const deltaY = e.changedTouches[0].clientY - touchStartY.current;
     if (Math.abs(deltaY) < 50) return;
+    if (!currentConfig) return;
     const available = currentConfig.stains.filter((s: any) => s.inStock);
     const idx = available.findIndex((s: any) => s.name === selectedStain);
     if (deltaY < 0 && idx < available.length - 1) {
@@ -40,17 +50,16 @@ export default function ProductDetails() {
 
   const decodedId = decodeURIComponent(id || '');
   const productConfigurations = inventory.filter((i: any) => (i.productName ?? i.cribName) === decodedId);
-  const currentConfig = productConfigurations.find(c => c.wood === selectedWood) || productConfigurations[0];
+  const currentConfig = productConfigurations.find((c: any) => c.wood === selectedWood) || productConfigurations[0];
 
-  // Read preselected wood/stain from gallery query params
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const woodParam = params.get('wood');
     const stainParam = params.get('stain');
     if (productConfigurations.length === 0) return;
-    const targetWood = woodParam && productConfigurations.find(c => c.wood === woodParam) ? woodParam : productConfigurations[0].wood;
+    const targetWood = woodParam && productConfigurations.find((c: any) => c.wood === woodParam) ? woodParam : productConfigurations[0].wood;
     setSelectedWood(targetWood);
-    const targetConfig = productConfigurations.find(c => c.wood === targetWood) || productConfigurations[0];
+    const targetConfig = productConfigurations.find((c: any) => c.wood === targetWood) || productConfigurations[0];
     if (stainParam && targetConfig.stains.find((s: any) => s.name === stainParam && s.inStock)) {
       setSelectedStain(stainParam);
     } else {
@@ -67,7 +76,6 @@ export default function ProductDetails() {
     if (currentConfig && selectedStain) {
       posthog.capture('product_view', {
         productName: currentConfig.productName ?? currentConfig.cribName,
-        cribName: currentConfig.cribName,
         wood: selectedWood,
         stain: selectedStain,
         productId: id,
@@ -77,8 +85,7 @@ export default function ProductDetails() {
 
   const handleWoodChange = (wood: string) => {
     setSelectedWood(wood);
-    setShowWoodPicker(false);
-    const newConfig = productConfigurations.find(c => c.wood === wood);
+    const newConfig = productConfigurations.find((c: any) => c.wood === wood);
     if (newConfig) {
        const stainStillValid = newConfig.stains.find((s: any) => s.name === selectedStain && s.inStock);
        if (!stainStillValid) {
@@ -106,16 +113,6 @@ export default function ProductDetails() {
   } else if (currentConfig.stains[0]?.image) {
     galleryImages.push(currentConfig.stains[0].image);
   }
-
-  const getStainColor = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('natural')) return '#DEB887';
-    if (n.includes('slate')) return '#5A6064';
-    if (n.includes('smoke')) return '#3b3c36';
-    if (n.includes('cherry')) return '#651c14';
-    if (n.includes('driftwood')) return '#a39887';
-    return '#8B4513';
-  };
 
   const basePrice = Number(currentConfig.basePrice) || 0;
   const addition = Number(currentStainData?.priceAddition) || 0;
@@ -185,15 +182,9 @@ export default function ProductDetails() {
                   alt=""
                   onClick={() => setGalleryIndex(i)}
                   style={{
-                    width: '72px',
-                    height: '72px',
-                    objectFit: 'cover',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
+                    width: '72px', height: '72px', objectFit: 'cover', borderRadius: '8px', cursor: 'pointer',
                     border: i === galleryIndex ? '2px solid var(--primary)' : '2px solid transparent',
-                    opacity: i === galleryIndex ? 1 : 0.6,
-                    transition: 'all 0.2s',
-                    flexShrink: 0,
+                    opacity: i === galleryIndex ? 1 : 0.6, transition: 'all 0.2s', flexShrink: 0,
                   }}
                 />
               ))}
@@ -224,32 +215,25 @@ export default function ProductDetails() {
             <div className="config-header">
               <h3 className="label-caps">01. Select Wood Species</h3>
             </div>
-            {showWoodPicker ? (
-              <div className="wood-grid">
-                {productConfigurations.map(config => {
-                  const isAvailable = config.stains.some((s: any) => s.inStock);
-                  return (
-                    <button 
-                      key={config.wood}
-                      disabled={!isAvailable}
-                      style={{ opacity: isAvailable ? 1 : 0.5, cursor: isAvailable ? 'pointer' : 'not-allowed' }}
-                      className={`wood-chip ${selectedWood === config.wood ? 'selected' : ''}`}
-                      onClick={() => handleWoodChange(config.wood)}
-                    >
-                      {config.wood.replace(/([A-Z])/g, ' $1').trim()}
-                      {!isAvailable && <span style={{ fontSize: '9px', color: 'var(--error)', marginLeft: '4px' }}>Sold Out</span>}
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <button className="wood-chip selected" onClick={() => setShowWoodPicker(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
-                  {selectedWood.replace(/([A-Z])/g, ' $1').trim()}
-                  <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>expand_more</span>
-                </button>
-                <span className="body-md" style={{ color: 'var(--on-surface-variant)' }}>Base: ${basePrice}</span>
-              </div>
+            {(
+                <div className="wood-grid">
+                  {productConfigurations.map((config: any) => {
+                    const isAvailable = config.stains.some((s: any) => s.inStock);
+                    return (
+                        <button
+                            key={config.wood}
+                            disabled={!isAvailable}
+                            style={{opacity: isAvailable ? 1 : 0.5, cursor: isAvailable ? 'pointer' : 'not-allowed'}}
+                            className={`wood-chip ${selectedWood === config.wood ? 'selected' : ''}`}
+                            onClick={() => handleWoodChange(config.wood)}
+                        >
+                          {config.wood.replace(/([A-Z])/g, ' $1').trim()}
+                          {!isAvailable &&
+                              <span style={{fontSize: '9px', color: 'var(--error)', marginLeft: '4px'}}>Sold Out</span>}
+                        </button>
+                    );
+                  })}
+                </div>
             )}
           </section>
 
@@ -311,7 +295,7 @@ export default function ProductDetails() {
               style={{ opacity: selectedStain ? 1 : 0.5, cursor: selectedStain ? 'pointer' : 'not-allowed' }}
               onClick={() => {
                 const productName = currentConfig.productName ?? currentConfig.cribName;
-                posthog.capture('add_to_cart', { productName, cribName: currentConfig.cribName, wood: selectedWood, stain: selectedStain, price: currentConfig.basePrice + (currentStainData?.priceAddition || 0) });
+                posthog.capture('add_to_cart', { productName, wood: selectedWood, stain: selectedStain, price: currentConfig.basePrice + (currentStainData?.priceAddition || 0) });
                 addToCart({
                   id: `${productName}-${selectedWood}-${selectedStain}`,
                   productName,

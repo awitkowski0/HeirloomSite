@@ -1,12 +1,57 @@
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
+
+interface Order {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  items: Array<{
+    productName: string;
+    cribName?: string;
+    wood: string;
+    stainName: string;
+    price: number;
+    image: string;
+    quantity: number;
+    addons?: Array<{ name: string; price: number; stainName?: string }>;
+  }>;
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  paymentIntentId: string;
+  status: string;
+}
 
 export default function OrderConfirmation() {
   const { id } = useParams<{ id: string }>();
-  const order = useQuery(api.orders.get, { orderId: id as any });
+  const [order, setOrder] = useState<Order | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  if (order === undefined) {
+  useEffect(() => {
+    if (!id) return;
+    fetch(`/api/orders/${id}`)
+      .then(r => {
+        if (!r.ok) throw new Error('Not found');
+        return r.json();
+      })
+      .then(data => {
+        setOrder(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError(true);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
     return (
       <div className="container" style={{ padding: '120px 24px', textAlign: 'center', minHeight: '80vh' }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
@@ -18,7 +63,7 @@ export default function OrderConfirmation() {
     );
   }
 
-  if (!order) {
+  if (error || !order) {
     return (
       <div className="container" style={{ paddingTop: '120px', textAlign: 'center' }}>
         <h2 className="headline-lg">Order not found</h2>
@@ -42,7 +87,7 @@ export default function OrderConfirmation() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="label-caps text-on-surface-variant">Order ID</span>
-              <span className="body-md">{order._id}</span>
+              <span className="body-md">{order.id}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
               <span className="label-caps text-on-surface-variant">Status</span>
@@ -70,10 +115,10 @@ export default function OrderConfirmation() {
             {order.items.map((item, idx) => (
               <div key={idx} style={{ display: 'flex', gap: '16px', padding: '16px', backgroundColor: 'var(--surface-container-high)', borderRadius: '8px' }}>
                 <div style={{ width: '64px', height: '64px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, backgroundColor: 'white' }}>
-                  <img style={{ width: '100%', height: '100%', objectFit: 'contain' }} src={item.image} alt={item.cribName} />
+                  <img style={{ width: '100%', height: '100%', objectFit: 'contain' }} src={item.image} alt={item.cribName || item.productName} />
                 </div>
                 <div style={{ flexGrow: 1 }}>
-                  <h3 className="body-lg" style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.cribName}</h3>
+                  <h3 className="body-lg" style={{ fontWeight: 'bold', marginBottom: '2px' }}>{item.cribName || item.productName}</h3>
                   <p className="label-caps text-on-surface-variant" style={{ fontSize: '10px' }}>
                     {item.wood.replace(/([A-Z])/g, ' $1').trim()} &bull; {item.stainName}
                   </p>
