@@ -44,7 +44,7 @@ export default function GalleryCard({ product, isExpanded, onExpand, onCarouselO
         <div className="product-card-img-wrap">
           {product.displayImage ? (
             <img key={product.displayWood + (product.hasActiveSelection ? 'active' : 'all')} src={product.displayImage} alt={product.name}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.1))' }} />
+              style={{ width: '100%', height: '100%', objectFit: 'contain', mixBlendMode: 'multiply' }} />
           ) : (
             <div style={{ color: 'var(--outline-variant)' }}>Image Unavailable</div>
           )}

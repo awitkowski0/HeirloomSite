@@ -639,7 +639,7 @@ main {
 }
 
 .product-card {
-  background-color: var(--surface-container-lowest);
+  background-color: #ffffff;
   border-radius: 16px;
   overflow: hidden;
   position: relative;
