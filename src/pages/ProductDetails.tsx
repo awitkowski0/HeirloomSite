@@ -192,7 +192,7 @@ export default function ProductDetails() {
           )}
         </div>
 
-        <div className="stain-strip-mobile">
+        <div className="stain-strip-mobile" role="group" aria-label="Select Stain Finish">
           {currentConfig.stains.map((stain: any) => (
             <button
               key={stain.name}
@@ -200,10 +200,12 @@ export default function ProductDetails() {
               className={`stain-strip-swatch ${selectedStain === stain.name ? 'selected' : ''}`}
               onClick={() => setSelectedStain(stain.name)}
               style={{ opacity: stain.inStock ? 1 : 0.5 }}
+              aria-pressed={selectedStain === stain.name}
+              aria-label={`${stain.name} finish${!stain.inStock ? ' (Out of stock)' : ''}`}
             >
               <div className="stain-swatch" style={{backgroundColor: getStainColor(stain.name), overflow: 'hidden', position: 'relative'}}>
                 {(stain.image || stain.gallery?.[0]?.url) ? (
-                  <img src={stain.image || stain.gallery[0].url} alt={stain.name} style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0}} />
+                  <img src={stain.image || stain.gallery[0].url} alt="" aria-hidden="true" style={{width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0}} />
                 ) : null}
               </div>
             </button>
@@ -310,6 +312,25 @@ export default function ProductDetails() {
             >
               {selectedStain ? "ADD TO CART" : "OUT OF STOCK"}
             </button>
+            <button
+              className="babylist-btn"
+              style={{ background: 'none', width: '100%', padding: '14px 0', textAlign: 'center', textDecoration: 'none', border: '1px solid var(--outline-variant)', borderRadius: '8px', cursor: 'pointer', color: 'var(--on-surface)', fontSize: '14px', fontWeight: 600, letterSpacing: '0.08em', marginTop: '12px', display: 'block', boxSizing: 'border-box' }}
+              onClick={(e) => {
+                e.preventDefault();
+                // @ts-ignore
+                if (window.bl && window.bl.addToRegistry) {
+                  // @ts-ignore
+                  window.bl.addToRegistry({
+                    images: galleryImages[0] || '',
+                    price: String(totalPrice),
+                    title: currentConfig.productName ?? currentConfig.cribName,
+                    url: window.location.href
+                  });
+                }
+              }}
+            >
+              Add to Babylist
+            </button>
             <p className="label-caps delivery-info">Expected delivery: 6-8 weeks • Handcrafted for you</p>
           </section>
 
@@ -330,18 +351,18 @@ export default function ProductDetails() {
       </div>
 
       {lightboxOpen && galleryImages.length > 0 && (
-        <div className="lightbox-overlay" onClick={() => setLightboxOpen(false)}>
-          <button onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} className="lightbox-close-btn">
-            <span className="material-symbols-outlined" style={{ fontSize: '36px' }}>close</span>
+        <div className="lightbox-overlay" onClick={() => setLightboxOpen(false)} role="dialog" aria-label="Image gallery fullscreen view">
+          <button onClick={(e) => { e.stopPropagation(); setLightboxOpen(false); }} className="lightbox-close-btn" aria-label="Close image gallery">
+            <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '36px' }}>close</span>
           </button>
-          <img src={galleryImages[galleryIndex]} alt="" className="lightbox-img" onClick={e => e.stopPropagation()} />
+          <img src={galleryImages[galleryIndex]} alt={`Gallery image ${galleryIndex + 1} of ${galleryImages.length}`} className="lightbox-img" onClick={e => e.stopPropagation()} />
           {galleryImages.length > 1 && (
             <>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-prev">
-                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_left</span>
+              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i - 1 + galleryImages.length) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-prev" aria-label="Previous image">
+                <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '28px' }}>chevron_left</span>
               </button>
-              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-next">
-                <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>chevron_right</span>
+              <button onClick={(e) => { e.stopPropagation(); setGalleryIndex(i => (i + 1) % galleryImages.length); }} className="lightbox-nav-btn lightbox-nav-next" aria-label="Next image">
+                <span className="material-symbols-outlined" aria-hidden="true" style={{ fontSize: '28px' }}>chevron_right</span>
               </button>
             </>
           )}
