@@ -1,0 +1,24 @@
+[
+  {
+    "variant": "2'7\" x 4'7\"",
+    "label": "2'7\" x 4'7\"",
+    "stains": [
+      "2'7\" x 4'7\""
+    ],
+    "basePrice": 239.2,
+    "sku": "rdir-150892-2-7-x-4-7",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "5'7\" x 7'10\"",
+    "label": "5'7\" x 7'10\"",
+    "stains": [
+      "5'7\" x 7'10\""
+    ],
+    "basePrice": 860,
+    "sku": "rdir-150892-5-7-x-7-10",
+    "dimensions": null,
+    "weight": null
+  }
+]

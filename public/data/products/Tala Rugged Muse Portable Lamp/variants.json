@@ -1,0 +1,68 @@
+[
+  {
+    "variant": "Hackles Black",
+    "label": "Hackles  Black",
+    "stains": [
+      "Hackles Black"
+    ],
+    "basePrice": 365,
+    "sku": "ltop-34863-Standard",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Pleasure Garden Green",
+    "label": "Pleasure  Garden  Green",
+    "stains": [
+      "Pleasure Garden Green"
+    ],
+    "basePrice": 365,
+    "sku": "ltop-34863-Standard-2",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Candlenut White",
+    "label": "Candlenut  White",
+    "stains": [
+      "Candlenut White"
+    ],
+    "basePrice": 365,
+    "sku": "ltop-34863-Standard-3",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Pomona Red",
+    "label": "Pomona  Red",
+    "stains": [
+      "Pomona Red"
+    ],
+    "basePrice": 365,
+    "sku": "ltop-34863-Standard-4",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Selvedge Blue",
+    "label": "Selvedge  Blue",
+    "stains": [
+      "Selvedge Blue"
+    ],
+    "basePrice": 365,
+    "sku": "ltop-34863-Standard-5",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Setting Plaster Pink",
+    "label": "Setting  Plaster  Pink",
+    "stains": [
+      "Setting Plaster Pink"
+    ],
+    "basePrice": 365,
+    "sku": "ltop-34863-Standard-6",
+    "dimensions": null,
+    "weight": null
+  }
+]

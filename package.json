@@ -5,18 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/build-data.mjs && tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "data:split": "node scripts/split-data.mjs",
+    "data:build": "node scripts/build-data.mjs"
   },
   "dependencies": {
-    "@azure/msal-browser": "^5.10.0",
-    "@convex-dev/migrations": "^0.3.4",
     "@paypal/react-paypal-js": "^9.2.0",
     "@posthog/react": "^1.9.0",
     "@stripe/react-stripe-js": "^6.3.0",
     "@stripe/stripe-js": "^9.3.1",
-    "convex": "^1.36.1",
+    "minisearch": "^7.2.0",
     "posthog-js": "^1.372.10",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",

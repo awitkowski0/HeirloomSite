@@ -1,0 +1,28 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md", ".opencode/skills/feature-pull-request/SKILL.md"],
+  "agent": {
+    "feature": {
+      "description": "Builds features end-to-end: creates a branch, implements the feature, commits, pushes, creates a PR, waits for Vercel deploy, and returns the preview URL.",
+      "mode": "all",
+      "model": "anthropic/claude-sonnet-4-6",
+      "permission": {
+        "bash": {
+          "git *": "allow",
+          "npm *": "allow",
+          "node *": "allow",
+          "*": "ask"
+        }
+      }
+    }
+  },
+  "command": {
+    "feature": {
+      "description": "Build a complete feature end-to-end with automatic PR and Vercel deploy URL.",
+      "prompt": "The user wants to build a new feature. Follow the workflow in .opencode/skills/feature-pull-request/SKILL.md to implement it, create a PR, and return the Vercel preview URL."
+    }
+  },
+  "skills": {
+    "paths": [".opencode/skills"]
+  }
+}

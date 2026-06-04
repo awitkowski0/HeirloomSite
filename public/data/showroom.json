@@ -1,0 +1,41 @@
+{
+  "slides": [
+    {
+      "image": "/data/products/showroom/showroom_0.jpg",
+      "imageMobile": "/data/products/showroom/showroom_0_mobile.jpg"
+    }
+  ],
+  "featured": [
+    {
+      "productName": "Darlington",
+      "stainName": "Antique Slate"
+    },
+    {
+      "productName": "Arched Top",
+      "stainName": "Provincial"
+    },
+    {
+      "productName": "Bloomington"
+    },
+    {
+      "productName": "Hudson",
+      "stainName": "Smoke"
+    },
+    {
+      "productName": "Mission",
+      "stainName": "Mx"
+    },
+    {
+      "productName": "Moyerton",
+      "stainName": "Harvest"
+    },
+    {
+      "productName": "Princeton",
+      "stainName": "Seely"
+    },
+    {
+      "productName": "Hudson",
+      "stainName": "Fruitwood"
+    }
+  ]
+}

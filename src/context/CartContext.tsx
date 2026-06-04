@@ -1,22 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-
-export interface CartAddon {
-  name: string;
-  price: number;
-  stainName?: string;
-}
-
-export interface CartItem {
-  id: string;
-  productName: string;
-  cribName?: string;
-  wood: string;
-  stainName: string;
-  price: number;
-  image: string;
-  quantity: number;
-  addons?: CartAddon[];
-}
+import { useState, useEffect, type ReactNode } from 'react';
+import { CartContext } from './useCart';
+import type { CartItem } from '../types';
 
 function itemKey(item: CartItem): string {
   const addonKey = (item.addons || [])
@@ -26,29 +10,16 @@ function itemKey(item: CartItem): string {
   return `${item.productName}|${item.wood}|${item.stainName}|${addonKey}`;
 }
 
-interface CartContextType {
-  cart: CartItem[];
-  addToCart: (item: CartItem) => void;
-  removeFromCart: (id: string) => void;
-  clearCart: () => void;
-  totalItems: number;
-  subtotal: number;
-}
-
-const CartContext = createContext<CartContextType | undefined>(undefined);
-
-export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
-      const savedCart = localStorage.getItem('heirloom_cart');
-      return savedCart ? JSON.parse(savedCart) : [];
-    } catch (e) {
-      console.error("Failed to parse cart", e);
+      const saved = localStorage.getItem('heirloom_cart');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
       return [];
     }
   });
 
-  // Save to localStorage on change
   useEffect(() => {
     localStorage.setItem('heirloom_cart', JSON.stringify(cart));
   }, [cart]);
@@ -71,17 +42,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearCart = () => setCart([]);
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, totalItems, subtotal }}>
       {children}
     </CartContext.Provider>
   );
-};
-
-export const useCart = () => {
-  const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used within a CartProvider");
-  return context;
-};
+}
