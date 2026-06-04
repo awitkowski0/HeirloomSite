@@ -16,7 +16,15 @@ function lookupPrices(cart: any[], inventory: any[]) {
     const stain = config.stains.find((s: any) => s.name === item.stainName);
     if (!stain) throw new Error(`Stain not found: ${item.stainName}`);
     const price = (config.basePrice || 0) + (stain.priceAddition || 0);
-    return { price, quantity: item.quantity || 1 };
+
+    // Validate quantity to prevent negative or fractional quantities (manipulating order total)
+    const rawQuantity = item.quantity !== undefined ? item.quantity : 1;
+    const quantity = Number(rawQuantity);
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new Error(`Invalid quantity for product: ${item.productName}`);
+    }
+
+    return { price, quantity };
   });
 }
 
