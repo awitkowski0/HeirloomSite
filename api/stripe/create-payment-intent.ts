@@ -15,8 +15,18 @@ function lookupPrices(cart: any[], inventory: any[]) {
     if (!config) throw new Error(`Product not found: ${item.productName} / ${item.wood}`);
     const stain = config.stains.find((s: any) => s.name === item.stainName);
     if (!stain) throw new Error(`Stain not found: ${item.stainName}`);
+
+    // Security enhancement: Prevent logic bypass via tampered quantity
+    let quantity = 1;
+    if (item.quantity !== undefined) {
+      if (typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity <= 0) {
+        throw new Error(`Invalid quantity provided for ${item.productName}`);
+      }
+      quantity = item.quantity;
+    }
+
     const price = (config.basePrice || 0) + (stain.priceAddition || 0);
-    return { price, quantity: item.quantity || 1 };
+    return { price, quantity };
   });
 }
 
