@@ -10,3 +10,6 @@
 ## 2024-05-19 - Checkout Form Accessibility Improvements
 **Learning:** Adding `htmlFor` to labels and matching `id`s to inputs in the checkout form ensures proper accessibility mapping and makes the labels clickable to focus inputs, heavily improving UX for all users.
 **Action:** Always verify form inputs have linked labels with `htmlFor` and `id` tags in the future, particularly when designing forms.
+## 2024-06-05 - Empty Button Pagination Dots Accessibility
+**Learning:** Using empty `<button>` elements as pagination dots in image galleries or slideshows provides no context to screen readers, making navigation inaccessible.
+**Action:** Custom pagination dots must include descriptive `aria-label` attributes (e.g., 'Go to slide 1') and use `aria-selected="true"` for the active item to ensure screen reader visibility. Additionally, mark icon-only navigation buttons with `aria-label` and `aria-hidden="true"` on the icon itself.
