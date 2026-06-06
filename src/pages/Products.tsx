@@ -5,6 +5,7 @@ import { useContent } from '../useContent';
 import { searchProducts } from '../lib/search';
 import CategoryFilter from '../components/products/CategoryFilter';
 import ProductCard from '../components/products/ProductCard';
+import type { InventoryItem } from '../types';
 
 function getDefaultImage(stains: Array<{ name: string; priceAddition: number; image?: string }>): string {
   const base = stains.find(s => Number(s.priceAddition) === 0);
@@ -30,6 +31,14 @@ export default function Products() {
 
   const [selectedCategory, setSelectedCategory] = useState(initialCat);
 
+  const defaultImageMap = useMemo(() => {
+    const map = new Map<InventoryItem, string>();
+    inventory.forEach(item => {
+      map.set(item, getDefaultImage(item.stains));
+    });
+    return map;
+  }, [inventory]);
+
   const searched = useMemo(() => {
     if (!searchQuery) return inventory;
     return searchProducts(searchQuery, inventory);
@@ -51,12 +60,12 @@ export default function Products() {
           name: key,
           category: cat,
           minPrice: item.basePrice,
-          img: getDefaultImage(item.stains),
+          img: defaultImageMap.get(item) || '',
         });
       }
     });
     return Array.from(map.values());
-  }, [searched, selectedCategory]);
+  }, [searched, selectedCategory, defaultImageMap]);
 
   const handleCategory = (cat: string) => {
     setSelectedCategory(cat);
