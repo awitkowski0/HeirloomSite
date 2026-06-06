@@ -63,8 +63,24 @@ export function ContentProvider({ children }: { children: ReactNode }) {
           const variants = variantsList[i] || [];
           const media = mediaList[i] || {};
 
-      for (const v of variants) {
-            const imageBase = `/data/products/${encodeURIComponent(meta.productName)}/`;
+          const productName = prod.productName || meta.productName;
+          const imageBase = `/data/products/${encodeURIComponent(meta.productName)}/`;
+
+          // Add to images list
+          for (const [mediaKey, paths] of Object.entries(media)) {
+            const [wood, stain] = mediaKey.split('||');
+            (paths as string[]).forEach((path, idx) => {
+              allImages.push({
+                productName,
+                wood,
+                stainName: stain || null,
+                path: imageBase + path,
+                order: idx,
+              });
+            });
+          }
+
+          for (const v of variants) {
             const stains = (v.stains || []).map((stainName: string) => {
               const mediaKey = `${v.variant}||${stainName}`;
               const images = (media[mediaKey] || []) as string[];
@@ -81,7 +97,7 @@ export function ContentProvider({ children }: { children: ReactNode }) {
             });
 
             inventory.push({
-              productName: prod.productName || meta.productName,
+              productName,
               wood: v.variant,
               category: prod.category || meta.category || null,
               description: prod.description || null,
@@ -98,21 +114,6 @@ export function ContentProvider({ children }: { children: ReactNode }) {
               addons: prod.addons || [],
               stains,
             });
-
-            // Add to images list
-            for (const [mediaKey, paths] of Object.entries(media)) {
-              const [wood, stain] = mediaKey.split('||');
-              const imageBase = `/data/products/${encodeURIComponent(prod.productName || meta.productName)}/`;
-              (paths as string[]).forEach((path, idx) => {
-                allImages.push({
-                  productName: prod.productName || meta.productName,
-                  wood,
-                  stainName: stain || null,
-                  path: imageBase + path,
-                  order: idx,
-                });
-              });
-            }
           }
         }
 
