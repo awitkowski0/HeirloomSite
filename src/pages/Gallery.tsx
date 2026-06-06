@@ -20,14 +20,19 @@ export default function Gallery() {
     [inventory]
   );
 
-  const { products, allWoods, allStains } = useMemo(() => {
+  const { products, allWoods, allStains, itemsByProduct } = useMemo(() => {
     const uniqueMap = new Map<string, {
       id: string; name: string; minPrice: number; woods: string[];
       woodStains: Record<string, Array<{ name: string; image?: string; priceAddition: number; inStock: boolean }>>;
     }>();
+    const itemsByProduct = new Map<string, typeof galleryInventory>();
 
     galleryInventory.forEach(item => {
       const pName = item.productName;
+
+      if (!itemsByProduct.has(pName)) itemsByProduct.set(pName, []);
+      itemsByProduct.get(pName)!.push(item);
+
       const existing = uniqueMap.get(pName);
       if (existing) {
         if (item.basePrice < existing.minPrice) existing.minPrice = item.basePrice;
@@ -57,6 +62,7 @@ export default function Gallery() {
       products: Array.from(uniqueMap.values()),
       allWoods: Array.from(woodSet),
       allStains: Array.from(stainSet),
+      itemsByProduct,
     };
   }, [galleryInventory, selectedWood]);
 
@@ -65,7 +71,7 @@ export default function Gallery() {
     : null;
 
   const getDisplayConfig = (productName: string) => {
-    const configs = galleryInventory.filter(i => i.productName === productName);
+    const configs = itemsByProduct.get(productName) || [];
     let config = configs[0];
     if (selectedWood !== 'All Collections') {
       config = configs.find(c => c.wood === selectedWood) || config;
