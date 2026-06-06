@@ -56,6 +56,8 @@
   
   --shadow-soft: 0 4px 20px -4px rgba(74, 55, 40, 0.08);
   --shadow-ambient: 0 8px 30px rgba(74, 55, 40, 0.05);
+
+  --font-label: 'Manrope', sans-serif;
 }
 
 html {
@@ -1643,4 +1645,59 @@ main {
   width: 90%;
   text-align: center;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+/* Filter Pill & Stain Styles */
+.filter-pill-btn {
+  padding: 12px 24px;
+  border-radius: 100px;
+  border: none;
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-family: var(--font-label);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-pill-btn--active {
+  background: var(--primary);
+  color: var(--on-primary);
+}
+
+.filter-pill-divider {
+  width: 1px;
+  height: 24px;
+  background-color: var(--outline-variant);
+}
+
+.stain-filter-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stain-pill-btn {
+  padding: 8px 20px;
+  border-radius: 100px;
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stain-pill-btn--active {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
 }
