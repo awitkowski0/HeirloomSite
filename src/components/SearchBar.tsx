@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSearch, type SearchResult } from '../lib/search';
+import SearchResultItem from './SearchResultItem';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
@@ -77,36 +78,12 @@ export default function SearchBar() {
           }}
         >
           {results.map(r => (
-            <button
+            <SearchResultItem
               key={r.id}
-              onClick={() => handleSelect(r)}
-              style={{
-                display: 'flex', gap: '12px', padding: '10px', borderRadius: '8px',
-                border: 'none', background: 'none', cursor: 'pointer', width: '100%',
-                textAlign: 'left', alignItems: 'center', transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-container-high)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-            >
-              {r.image ? (
-                <img src={r.image} alt="" style={{ width: '48px', height: '48px', borderRadius: '6px', objectFit: 'cover', flexShrink: 0, backgroundColor: 'white' }} />
-              ) : (
-                <div style={{ width: '48px', height: '48px', borderRadius: '6px', backgroundColor: 'var(--surface-container-high)', flexShrink: 0 }} />
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--on-surface)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {r.productName}
-                </div>
-                <div style={{ fontSize: '11px', color: 'var(--on-surface-variant)', marginTop: '2px' }}>
-                  {r.wood.replace(/([A-Z])/g, ' $1').trim()}
-                  {r.matchedStain ? <span> &bull; {r.matchedStain}</span> : null}
-                  {r.category ? <span> &bull; {r.category}</span> : null}
-                </div>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--primary)', marginTop: '2px' }}>
-                  ${r.basePrice.toLocaleString()}.00
-                </div>
-              </div>
-            </button>
+              result={r}
+              onSelect={handleSelect}
+              compact
+            />
           ))}
           <button
             onClick={handleSubmit}
