@@ -1,11 +1,10 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { InventoryItem, ShowroomFeatured } from '../../types';
 
-function getFeaturedProduct(item: ShowroomFeatured, inventory: InventoryItem[]) {
-  const pName = item.productName;
-  const configs = inventory.filter(i => i.productName === pName);
-  if (configs.length === 0) return null;
-  const config = configs[0];
+function getFeaturedProduct(item: ShowroomFeatured, inventoryMap: Map<string, InventoryItem>) {
+  const config = inventoryMap.get(item.productName);
+  if (!config) return null;
   const stainName = item.stainName || 'Natural';
   const stain = config.stains.find(s => s.name === stainName && s.inStock) || config.stains.find(s => s.inStock);
   if (!stain) {
@@ -28,6 +27,16 @@ interface Props {
 export default function FeaturedGrid({ featured, inventory }: Props) {
   const navigate = useNavigate();
 
+  const inventoryMap = useMemo(() => {
+    const map = new Map<string, InventoryItem>();
+    for (const item of inventory) {
+      if (!map.has(item.productName)) {
+        map.set(item.productName, item);
+      }
+    }
+    return map;
+  }, [inventory]);
+
   const resolved = featured.length > 0
     ? featured
     : inventory.length > 0
@@ -47,7 +56,7 @@ export default function FeaturedGrid({ featured, inventory }: Props) {
       </div>
       <div className="featured-grid">
         {resolved.map((item, i) => {
-          const product = getFeaturedProduct(item, inventory);
+          const product = getFeaturedProduct(item, inventoryMap);
 
           return (
             <div
