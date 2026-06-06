@@ -62,11 +62,17 @@ for (const dirName of productDirs) {
       wood: v.variant,
       category: meta.category || null,
       description: meta.description || null,
+      extendedDescription: meta.extendedDescription || null,
       title: meta.title || null,
       metaDescription: meta.metaDescription || null,
       basePrice: bp,
+      order: meta.order || null,
       tags: meta.tags || [],
+      sku: v.sku || null,
       slug: meta.slug || null,
+      dimensions: v.dimensions || null,
+      weight: v.weight ?? null,
+      addons: meta.addons || [],
       stains,
     });
   }

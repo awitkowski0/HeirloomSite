@@ -21,105 +21,20 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     async function load() {
       try {
-        // Load shared data
-        const [stainTypes, settings, showroom, productsIndex] = await Promise.all([
+        // Load pre-aggregated data
+        const [stainTypes, settings, showroom, inventory, images] = await Promise.all([
           loadJSON('/data/stains.json'),
           loadJSON('/data/settings.json'),
           loadJSON('/data/showroom.json'),
-          loadJSON('/data/products.json'),
+          loadJSON('/data/inventory.json'),
+          loadJSON('/data/images.json'),
         ]);
 
         if (cancelled) return;
-
-        // Load individual product files
-        const productRequests = productsIndex.map((p: any) =>
-          loadJSON(`/data/products/${encodeURIComponent(p.productName)}/product.json`)
-            .catch(() => null)
-        );
-        const variantRequests = productsIndex.map((p: any) =>
-          loadJSON(`/data/products/${encodeURIComponent(p.productName)}/variants.json`)
-            .catch(() => null)
-        );
-        const mediaRequests = productsIndex.map((p: any) =>
-          loadJSON(`/data/products/${encodeURIComponent(p.productName)}/media.json`)
-            .catch(() => null)
-        );
-
-        const [products, variantsList, mediaList] = await Promise.all([
-          Promise.all(productRequests),
-          Promise.all(variantRequests),
-          Promise.all(mediaRequests),
-        ]);
-
-        if (cancelled) return;
-
-        // Reconstruct flat inventory for search and backward compatibility
-        const inventory: any[] = [];
-        const allImages: any[] = [];
-
-        for (let i = 0; i < productsIndex.length; i++) {
-          const meta = productsIndex[i];
-          const prod = products[i] || {};
-          const variants = variantsList[i] || [];
-          const media = mediaList[i] || {};
-
-          const productName = prod.productName || meta.productName;
-          const imageBase = `/data/products/${encodeURIComponent(meta.productName)}/`;
-
-          // Add to images list
-          for (const [mediaKey, paths] of Object.entries(media)) {
-            const [wood, stain] = mediaKey.split('||');
-            (paths as string[]).forEach((path, idx) => {
-              allImages.push({
-                productName,
-                wood,
-                stainName: stain || null,
-                path: imageBase + path,
-                order: idx,
-              });
-            });
-          }
-
-          for (const v of variants) {
-            const stains = (v.stains || []).map((stainName: string) => {
-              const mediaKey = `${v.variant}||${stainName}`;
-              const images = (media[mediaKey] || []) as string[];
-              const firstImage = images[0] ? imageBase + images[0] : null;
-              const gallery = images.slice(1).map((url: string) => ({ url: imageBase + url }));
-
-              return {
-                name: stainName,
-                inStock: true,
-                priceAddition: 0,
-                image: firstImage,
-                gallery: gallery.length > 0 ? gallery : undefined,
-              };
-            });
-
-            inventory.push({
-              productName,
-              wood: v.variant,
-              category: prod.category || meta.category || null,
-              description: prod.description || null,
-              extendedDescription: prod.extendedDescription || null,
-              title: prod.title || null,
-              metaDescription: prod.metaDescription || null,
-              basePrice: v.basePrice,
-              order: null,
-              tags: prod.tags || [],
-              sku: v.sku || null,
-              slug: prod.slug || null,
-              dimensions: v.dimensions || null,
-              weight: v.weight ?? null,
-              addons: prod.addons || [],
-              stains,
-            });
-          }
-        }
 
         setData({
           inventory,
-          images: allImages,
+          images,
           showroom,
           stainTypes,
           settings,
