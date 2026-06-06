@@ -55,16 +55,19 @@ export default function ProductDetails() {
 
   const selection = useMemo(() => {
     if (productConfigurations.length === 0) return { wood: '', stain: '' };
-    if (userWood) {
-      const config = productConfigurations.find((c: any) => c.wood === userWood);
-      if (config) {
-        const validStain = userStain && config.stains.some((s: any) => s.name === userStain && s.inStock)
-          ? userStain
-          : config.stains.find((s: any) => s.inStock)?.name || '';
-        return { wood: userWood, stain: validStain };
-      }
+    const initial = getInitialSelection(productConfigurations);
+    const activeWood = userWood || initial.wood;
+    const config = productConfigurations.find((c: InventoryItem) => c.wood === activeWood);
+
+    if (config) {
+      const preferredStain = userStain || initial.stain;
+      const isValid = preferredStain && config.stains.some((s: Stain) => s.name === preferredStain && s.inStock);
+      const activeStain = isValid
+        ? preferredStain
+        : config.stains.find((s: Stain) => s.inStock)?.name || '';
+      return { wood: activeWood, stain: activeStain };
     }
-    return getInitialSelection(productConfigurations);
+    return initial;
   }, [productConfigurations, userWood, userStain]);
 
   const currentConfig = productConfigurations.find((c: any) => c.wood === selection.wood) || productConfigurations[0];
