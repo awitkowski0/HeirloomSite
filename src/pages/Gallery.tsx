@@ -26,7 +26,20 @@ export default function Gallery() {
       woodStains: Record<string, Array<{ name: string; image?: string; priceAddition: number; inStock: boolean }>>;
     }>();
 
+    const woodSet = new Set<string>();
+    const stainSet = new Set<string>();
+    const isAllCollections = selectedWood === 'All Collections';
+
     galleryInventory.forEach(item => {
+      // 1. Populate woodSet
+      woodSet.add(item.wood);
+
+      // 2. Populate stainSet
+      if (isAllCollections || item.wood === selectedWood) {
+        item.stains.forEach(s => stainSet.add(s.name));
+      }
+
+      // 3. Populate uniqueMap (Products)
       const pName = item.productName;
       const existing = uniqueMap.get(pName);
       if (existing) {
@@ -47,11 +60,6 @@ export default function Gallery() {
         });
       }
     });
-
-    const woodSet = new Set(galleryInventory.map(i => i.wood));
-    const stainPool = selectedWood === 'All Collections' ? galleryInventory : galleryInventory.filter(i => i.wood === selectedWood);
-    const stainSet = new Set<string>();
-    stainPool.forEach(i => i.stains.forEach(s => stainSet.add(s.name)));
 
     return {
       products: Array.from(uniqueMap.values()),
