@@ -1,14 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react';
 import { CartContext } from './useCart';
 import type { CartItem } from '../types';
-
-function itemKey(item: CartItem): string {
-  const addonKey = (item.addons || [])
-    .map(a => `${a.name}:${a.price}:${a.stainName || ''}`)
-    .sort()
-    .join('|');
-  return `${item.productName}|${item.wood}|${item.stainName}|${addonKey}`;
-}
+import { addItemToCart } from './CartUtils';
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>(() => {
@@ -25,14 +18,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart]);
 
   const addToCart = (item: CartItem) => {
-    setCart(prev => {
-      const key = itemKey(item);
-      const existing = prev.find(i => itemKey(i) === key);
-      if (existing) {
-        return prev.map(i => itemKey(i) === key ? { ...i, quantity: i.quantity + 1 } : i);
-      }
-      return [...prev, { ...item, quantity: 1 }];
-    });
+    setCart(prev => addItemToCart(prev, item));
   };
 
   const removeFromCart = (id: string) => {
