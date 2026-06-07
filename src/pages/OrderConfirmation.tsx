@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { getOrder } from '../api';
 import OrderDetails from '../components/order/OrderDetails';
 import OrderItems from '../components/order/OrderItems';
@@ -8,16 +8,22 @@ import type { OrderData } from '../api';
 
 export default function OrderConfirmation() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-    getOrder(id)
+    if (!id || !token) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
+    getOrder(id, token)
       .then(data => { setOrder(data); setLoading(false); })
       .catch(() => { setNotFound(true); setLoading(false); });
-  }, [id]);
+  }, [id, token]);
 
   if (loading) {
     return (
