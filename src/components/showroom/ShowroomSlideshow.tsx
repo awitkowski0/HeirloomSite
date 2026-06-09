@@ -77,15 +77,22 @@ export default function ShowroomSlideshow({ slides, inventory }: Props) {
 
       {slides.length > 1 && (
         <>
-          <button className="showroom-slideshow-arrow prev" onClick={() => goToSlide((slideIndex - 1 + slides.length) % slides.length)}>
-            <span className="material-symbols-outlined">chevron_left</span>
+          <button aria-label="Previous slide" className="showroom-slideshow-arrow prev" onClick={() => goToSlide((slideIndex - 1 + slides.length) % slides.length)}>
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
           </button>
-          <button className="showroom-slideshow-arrow next" onClick={() => goToSlide((slideIndex + 1) % slides.length)}>
-            <span className="material-symbols-outlined">chevron_right</span>
+          <button aria-label="Next slide" className="showroom-slideshow-arrow next" onClick={() => goToSlide((slideIndex + 1) % slides.length)}>
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
           </button>
-          <div className="showroom-slideshow-dots">
+          <div className="showroom-slideshow-dots" role="tablist" aria-label="Slideshow pagination">
             {slides.map((_, i) => (
-              <button key={i} className={i === slideIndex ? 'active' : ''} onClick={() => goToSlide(i)} />
+              <button
+                key={i}
+                className={i === slideIndex ? 'active' : ''}
+                onClick={() => goToSlide(i)}
+                role="tab"
+                aria-selected={i === slideIndex}
+                aria-label={`Go to slide ${i + 1}`}
+              />
             ))}
           </div>
         </>
