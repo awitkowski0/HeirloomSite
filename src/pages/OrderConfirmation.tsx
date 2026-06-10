@@ -6,18 +6,30 @@ import OrderItems from '../components/order/OrderItems';
 import PaymentSummary from '../components/order/PaymentSummary';
 import type { OrderData } from '../api';
 
+import { useLocation } from 'react-router-dom';
+
 export default function OrderConfirmation() {
   const { id } = useParams<{ id: string }>();
+  const location = useLocation();
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    getOrder(id)
+    const searchParams = new URLSearchParams(location.search);
+    const token = searchParams.get('token');
+
+    if (!token) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+    }
+
+    getOrder(id, token)
       .then(data => { setOrder(data); setLoading(false); })
       .catch(() => { setNotFound(true); setLoading(false); });
-  }, [id]);
+  }, [id, location.search]);
 
   if (loading) {
     return (

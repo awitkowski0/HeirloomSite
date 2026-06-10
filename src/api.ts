@@ -21,6 +21,7 @@ export interface CreatePaymentIntentRequest {
 export interface CreatePaymentIntentResponse {
   clientSecret: string;
   paymentIntentId: string;
+  token: string;
 }
 
 export interface OrderItem {
@@ -72,6 +73,6 @@ export function createPaymentIntent(req: CreatePaymentIntentRequest): Promise<Cr
   return apiPost<CreatePaymentIntentResponse>('/api/stripe/create-payment-intent', req);
 }
 
-export function getOrder(paymentIntentId: string): Promise<OrderData> {
-  return apiGet<OrderData>(`/api/orders/${encodeURIComponent(paymentIntentId)}`);
+export function getOrder(paymentIntentId: string, token: string): Promise<OrderData> {
+  return apiGet<OrderData>(`/api/orders/${encodeURIComponent(paymentIntentId)}?token=${encodeURIComponent(token)}`);
 }
