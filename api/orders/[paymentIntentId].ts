@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { createHmac, timingSafeEqual } from "crypto";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia" as any,
@@ -11,10 +12,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { paymentIntentId } = req.query;
+    const { paymentIntentId, token } = req.query;
 
     if (!paymentIntentId || typeof paymentIntentId !== "string") {
       return res.status(400).json({ error: "PaymentIntent ID is required" });
+    }
+
+    if (!token || typeof token !== "string") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const expectedToken = createHmac("sha256", process.env.STRIPE_SECRET_KEY!)
+      .update(paymentIntentId)
+      .digest("hex");
+
+    const tokenBuffer = Buffer.from(token);
+    const expectedBuffer = Buffer.from(expectedToken);
+
+    if (tokenBuffer.length !== expectedBuffer.length || !timingSafeEqual(tokenBuffer, expectedBuffer)) {
+      return res.status(403).json({ error: "Unauthorized" });
     }
 
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
