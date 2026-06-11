@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import MiniSearch from 'minisearch';
 import { useContent } from '../useContent';
 
@@ -50,22 +49,32 @@ function createSearch() {
   });
 }
 
+// ⚡ Bolt Optimization: Cache the MiniSearch index globally.
+// Previously, the entire index was recreated on every search stroke, causing
+// unnecessary CPU load and blocking the main thread. Now we reuse it.
+let cachedIndex: MiniSearch | null = null;
+let cachedInventory: any[] | null = null;
+
+function getSearchIndex(inventory: any[]) {
+  // If the inventory hasn't changed reference, return the existing index.
+  if (cachedIndex && cachedInventory === inventory) {
+    return cachedIndex;
+  }
+  const ms = createSearch();
+  ms.addAll(buildDocs(inventory));
+  cachedIndex = ms;
+  cachedInventory = inventory;
+  return ms;
+}
+
 export function useSearch(query: string): SearchResult[] {
   const { inventory, loading } = useContent();
-  const msRef = useRef<MiniSearch | null>(null);
 
-  useEffect(() => {
-    if (loading || msRef.current) return;
-    const ms = createSearch();
-    const docs = buildDocs(inventory);
-    ms.addAll(docs);
-    msRef.current = ms;
-  }, [loading, inventory]);
-
-  if (!query.trim() || !msRef.current) return [];
+  if (loading || !query.trim()) return [];
 
   try {
-    const raw = msRef.current.search(query, { prefix: true, fuzzy: 0.2 });
+    const ms = getSearchIndex(inventory);
+    const raw = ms.search(query, { prefix: true, fuzzy: 0.2 });
     const results: SearchResult[] = [];
     const seen = new Set<string>();
 
@@ -108,8 +117,7 @@ export function useSearch(query: string): SearchResult[] {
 
 export function searchProducts(query: string, inventory: any[]): any[] {
   if (!query.trim()) return inventory;
-  const ms = createSearch();
-  ms.addAll(buildDocs(inventory));
+  const ms = getSearchIndex(inventory);
   const hits = ms.search(query, { prefix: true, fuzzy: 0.2 });
   const matched = new Set(hits.map((h: any) => h.id));
   return inventory.filter((item: any) => matched.has(`${item.productName}||${item.wood}`));
