@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { readFileSync } from "fs";
 import { join } from "path";
+import crypto from "crypto";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia" as any,
@@ -90,9 +91,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
     });
 
+    const token = crypto.createHmac("sha256", process.env.STRIPE_SECRET_KEY!).update(paymentIntent.id).digest("hex");
+
     return res.status(200).json({
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
+      token,
     });
   } catch (err: any) {
     console.error("createPaymentIntent error:", err);
