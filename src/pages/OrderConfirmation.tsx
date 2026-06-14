@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { getOrder } from '../api';
 import OrderDetails from '../components/order/OrderDetails';
 import OrderItems from '../components/order/OrderItems';
@@ -8,16 +8,35 @@ import type { OrderData } from '../api';
 
 export default function OrderConfirmation() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   const [order, setOrder] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
-    getOrder(id)
-      .then(data => { setOrder(data); setLoading(false); })
-      .catch(() => { setNotFound(true); setLoading(false); });
-  }, [id]);
+    let active = true;
+    if (!id || !token) {
+      setTimeout(() => {
+        if (!active) return;
+        if (!token) setNotFound(true);
+        setLoading(false);
+      }, 0);
+      return;
+    }
+    getOrder(id, token)
+      .then(data => {
+        if (!active) return;
+        setOrder(data);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setNotFound(true);
+        setLoading(false);
+      });
+    return () => { active = false; };
+  }, [id, token]);
 
   if (loading) {
     return (

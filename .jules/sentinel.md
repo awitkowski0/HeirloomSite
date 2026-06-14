@@ -11,3 +11,7 @@
 **Vulnerability:** A malicious user could submit a negative or fractional `quantity` in the shopping cart payload sent to `api/stripe/create-payment-intent.ts`. Since the quantity was directly injected into the pricing calculation without validation, this allowed bypassing checkout logic or manipulating order totals negatively.
 **Learning:** E-commerce systems that rely on client-provided shopping carts must enforce strict server-side validation. Implicit truthiness (`item.quantity || 1`) is insufficient security. Always validate parameter types and bounds.
 **Prevention:** Implement strict type-checking and positive integer validation (`!Number.isInteger(quantity) || quantity <= 0`) for any numeric input impacting business logic or calculations.
+## 2026-06-06 - Insecure Direct Object Reference (IDOR) on Order Endpoint
+**Vulnerability:** The `/api/orders/[paymentIntentId]` endpoint lacked authorization, allowing anyone with a `paymentIntentId` to view detailed PII (Personally Identifiable Information) for an order.
+**Learning:** Returning predictable or discoverable IDs in API endpoints without verifying access rights is an IDOR vulnerability, particularly critical when accessing PII.
+**Prevention:** Implement capability tokens (e.g., HMAC-SHA256 signatures generated from server secrets + the resource ID) and require them in the request to prove authorized access to sensitive endpoints.

@@ -11,6 +11,7 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   const [clientSecret, setClientSecret] = useState('');
+  const [paymentToken, setPaymentToken] = useState('');
   const [error, setError] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
@@ -42,6 +43,7 @@ export default function Checkout() {
       })
       .then(data => {
         setClientSecret(data.clientSecret);
+        setPaymentToken(data.token);
       })
       .catch(() => {
         setError('Failed to initialize payment. Please try again or contact support.');
@@ -102,7 +104,7 @@ export default function Checkout() {
             </label>
 
             {clientSecret && (
-              <PaymentSection clientSecret={clientSecret} agreedToTerms={agreedToTerms} onSuccess={(piId) => { clearCart(); navigate(`/order-confirmation/${piId}`); }} />
+              <PaymentSection clientSecret={clientSecret} agreedToTerms={agreedToTerms} onSuccess={(piId) => { clearCart(); navigate(`/order-confirmation/${piId}?token=${encodeURIComponent(paymentToken)}`); }} />
             )}
           </div>
         </div>
