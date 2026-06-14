@@ -1,7 +1,8 @@
 interface Props {
   clientSecret: string;
+  token: string;
   agreedToTerms: boolean;
-  onSuccess: (paymentIntentId: string) => void;
+  onSuccess: (paymentIntentId: string, token: string) => void;
 }
 
 import { useState } from 'react';
@@ -10,7 +11,7 @@ import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
-function StripeForm({ onSuccess }: { onSuccess: (paymentIntentId: string) => void }) {
+function StripeForm({ token, onSuccess }: { token: string, onSuccess: (paymentIntentId: string, token: string) => void }) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -26,7 +27,7 @@ function StripeForm({ onSuccess }: { onSuccess: (paymentIntentId: string) => voi
     if (error) {
       alert(error.message);
     } else if (paymentIntent && paymentIntent.status === 'succeeded') {
-      onSuccess(paymentIntent.id);
+      onSuccess(paymentIntent.id, token);
     }
     setIsProcessing(false);
   };
@@ -44,7 +45,7 @@ function StripeForm({ onSuccess }: { onSuccess: (paymentIntentId: string) => voi
   );
 }
 
-export default function PaymentSection({ clientSecret, agreedToTerms, onSuccess }: Props) {
+export default function PaymentSection({ clientSecret, token, agreedToTerms, onSuccess }: Props) {
   return (
     <section style={{ padding: '32px', backgroundColor: 'var(--surface-container-lowest)', borderRadius: '12px', boxShadow: 'var(--shadow-ambient)', border: '1px solid var(--surface-container-highest)' }}>
       <h2 className="headline-md" style={{ marginBottom: '24px' }}>Terms &amp; Conditions</h2>
@@ -70,7 +71,7 @@ export default function PaymentSection({ clientSecret, agreedToTerms, onSuccess 
       {clientSecret && (
         <div style={{ opacity: agreedToTerms ? 1 : 0.5, pointerEvents: agreedToTerms ? 'auto' : 'none' }}>
           <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'flat' } }}>
-            <StripeForm onSuccess={onSuccess} />
+            <StripeForm token={token} onSuccess={onSuccess} />
           </Elements>
         </div>
       )}

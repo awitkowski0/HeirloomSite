@@ -11,3 +11,7 @@
 **Vulnerability:** A malicious user could submit a negative or fractional `quantity` in the shopping cart payload sent to `api/stripe/create-payment-intent.ts`. Since the quantity was directly injected into the pricing calculation without validation, this allowed bypassing checkout logic or manipulating order totals negatively.
 **Learning:** E-commerce systems that rely on client-provided shopping carts must enforce strict server-side validation. Implicit truthiness (`item.quantity || 1`) is insufficient security. Always validate parameter types and bounds.
 **Prevention:** Implement strict type-checking and positive integer validation (`!Number.isInteger(quantity) || quantity <= 0`) for any numeric input impacting business logic or calculations.
+## 2024-05-15 - Insecure Direct Object Reference (IDOR) via Predictable IDs
+**Vulnerability:** Order details endpoint `/api/orders/[paymentIntentId]` allowed unauthenticated access to PII (name, address, purchased items) if a user knew or guessed a Stripe paymentIntentId.
+**Learning:** External IDs (like payment intent IDs) should not be treated as secret capability tokens for authorization, as they might be exposed elsewhere or brute-forced.
+**Prevention:** Generate and require server-side HMAC-SHA256 capability tokens (signed with a backend secret) bound to the specific resource ID when authorizing access to unauthenticated user data. Always use constant-time comparison (`timingSafeEqual`) to verify MACs.
