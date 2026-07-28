@@ -549,24 +549,23 @@ main {
   align-items: center;
   justify-content: space-between;
   padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 12px;
-  background: linear-gradient(rgba(0, 0, 0, 0.4), transparent);
+  background: linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
 }
 
 .stain-reel-count {
-  color: #fff;
+  color: var(--on-surface-variant);
   font-family: 'Manrope', sans-serif;
   font-size: 13px;
   font-weight: 600;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .stain-reel-close {
   width: 40px;
   height: 40px;
-  border: none;
+  border: 1px solid var(--outline-variant);
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.42);
-  color: #fff;
+  background: var(--surface);
+  color: var(--primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -578,6 +577,8 @@ main {
   overflow-y: auto;
   scroll-snap-type: y mandatory;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
   scrollbar-width: none;
 }
 
@@ -589,19 +590,27 @@ main {
   position: relative;
   height: 100dvh;
   scroll-snap-align: start;
-  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+/* Image area fills the space above the info panel */
+.stain-reel-media {
+  position: relative;
+  flex: 1;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f6f2ec;
+  padding: 72px 16px 8px;
+  box-sizing: border-box;
 }
 
-.stain-reel-card img {
-  width: 100%;
-  height: 100%;
+.stain-reel-media img {
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
-  padding: 20px;
-  box-sizing: border-box;
 }
 
 .stain-reel-noimg {
@@ -609,104 +618,94 @@ main {
   font-family: 'Manrope', sans-serif;
 }
 
-.stain-reel-scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(to top, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0) 42%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 16%);
+/* Solid info + actions panel anchored to the bottom */
+.stain-reel-panel {
+  flex-shrink: 0;
+  padding: 18px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--outline-variant);
+  background: var(--surface-container-lowest);
 }
 
-.stain-reel-caption {
-  position: absolute;
-  left: 20px;
-  right: 88px;
-  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-  z-index: 2;
-  color: #fff;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+.stain-reel-eyebrow {
+  color: var(--on-surface-variant);
 }
 
-.stain-reel-caption .label-caps {
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.stain-reel-caption h2 {
+.stain-reel-name {
   font-family: 'Noto Serif', serif;
-  font-size: 26px;
-  margin: 4px 0;
-  color: #fff;
+  font-size: 24px;
+  color: var(--primary);
+  margin: 4px 0 2px;
 }
 
 .stain-reel-price {
   font-family: 'Manrope', sans-serif;
   font-size: 18px;
   font-weight: 600;
+  color: var(--secondary);
+  margin: 0 0 14px;
 }
 
-.stain-reel-actions {
-  position: absolute;
-  right: 12px;
-  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
-  z-index: 3;
+.stain-reel-panel-actions {
   display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.stain-reel-actions button {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #fff;
-  -webkit-tap-highlight-color: transparent;
+  gap: 10px;
 }
 
-.stain-reel-actions button:active {
-  transform: scale(0.92);
-}
-
-.stain-reel-actions button .material-symbols-outlined {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.45);
+.stain-reel-add-btn {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-}
-
-.stain-reel-add .material-symbols-outlined {
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 9999px;
   background: var(--secondary);
   color: var(--on-secondary);
+  font-family: 'Manrope', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.stain-reel-action-label {
-  font-family: 'Manrope', sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+.stain-reel-add-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.stain-reel-icon-btn {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stain-reel-add-btn:active,
+.stain-reel-icon-btn:active {
+  transform: scale(0.95);
 }
 
 .stain-reel-hint {
   position: absolute;
   left: 50%;
+  bottom: 12px;
   transform: translateX(-50%);
-  bottom: calc(150px + env(safe-area-inset-bottom, 0px));
-  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--on-surface-variant);
   font-family: 'Manrope', sans-serif;
   font-size: 12px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   pointer-events: none;
   animation: stain-reel-bob 1.6s ease-in-out infinite;
 }

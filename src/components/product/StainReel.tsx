@@ -33,7 +33,6 @@ export default function StainReel({
   const cardRefs = useRef<Array<HTMLElement | null>>([]);
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeStain = reelStains[activeIndex];
   const priceFor = (s: Stain) => basePrice + (s.priceAddition || 0);
 
   const showToast = useCallback((msg: string) => {
@@ -80,9 +79,9 @@ export default function StainReel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reelStains.length]);
 
-  const handleShare = async () => {
+  const handleShare = async (stain: Stain) => {
     const url = window.location.href;
-    const title = `${productName} — ${activeStain?.name} finish`;
+    const title = `${productName} — ${stain.name} finish`;
     try {
       if (navigator.share) {
         await navigator.share({ title, text: title, url });
@@ -95,24 +94,19 @@ export default function StainReel({
     }
   };
 
-  const handleBabylist = () => {
-    if (!activeStain) return;
+  const handleBabylist = (stain: Stain) => {
     const bl = (window as WindowWithBabylist).bl;
     if (bl?.addToRegistry) {
       bl.addToRegistry({
-        images: activeStain.image || '',
-        price: String(priceFor(activeStain)),
-        title: `${productName} (${activeStain.name})`,
+        images: stain.image || '',
+        price: String(priceFor(stain)),
+        title: `${productName} (${stain.name})`,
         url: window.location.href,
       });
       showToast('Added to Babylist');
     } else {
       showToast('Babylist is unavailable right now');
     }
-  };
-
-  const handleAdd = () => {
-    if (activeStain) onAddToCart(activeStain);
   };
 
   if (reelStains.length === 0) return null;
@@ -135,42 +129,40 @@ export default function StainReel({
             ref={el => { cardRefs.current[i] = el; }}
             aria-label={`${stain.name} finish`}
           >
-            {stain.image ? (
-              <img src={stain.image} alt={`${productName} in ${stain.name}`} draggable={false} />
-            ) : (
-              <div className="stain-reel-noimg">No preview</div>
-            )}
-            <div className="stain-reel-scrim" aria-hidden="true" />
-            <div className="stain-reel-caption">
-              <p className="label-caps">Finish {i + 1} of {reelStains.length}</p>
-              <h2>{stain.name}</h2>
+            <div className="stain-reel-media">
+              {stain.image ? (
+                <img src={stain.image} alt={`${productName} in ${stain.name}`} draggable={false} />
+              ) : (
+                <div className="stain-reel-noimg">No preview</div>
+              )}
+              {reelStains.length > 1 && activeIndex === 0 && i === 0 && (
+                <div className="stain-reel-hint" aria-hidden="true">
+                  <span className="material-symbols-outlined">keyboard_arrow_up</span>
+                  Swipe for more finishes
+                </div>
+              )}
+            </div>
+
+            <div className="stain-reel-panel">
+              <p className="label-caps stain-reel-eyebrow">Finish {i + 1} of {reelStains.length}</p>
+              <h2 className="stain-reel-name">{stain.name}</h2>
               <p className="stain-reel-price">${priceFor(stain).toLocaleString()}</p>
+              <div className="stain-reel-panel-actions">
+                <button className="stain-reel-add-btn" onClick={() => onAddToCart(stain)}>
+                  <span className="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
+                  Add to Cart
+                </button>
+                <button className="stain-reel-icon-btn" onClick={() => handleShare(stain)} aria-label="Share this finish">
+                  <span className="material-symbols-outlined" aria-hidden="true">ios_share</span>
+                </button>
+                <button className="stain-reel-icon-btn" onClick={() => handleBabylist(stain)} aria-label="Add to Babylist">
+                  <span className="material-symbols-outlined" aria-hidden="true">favorite</span>
+                </button>
+              </div>
             </div>
           </section>
         ))}
       </div>
-
-      <div className="stain-reel-actions">
-        <button onClick={handleShare} aria-label="Share this finish">
-          <span className="material-symbols-outlined" aria-hidden="true">ios_share</span>
-          <span className="stain-reel-action-label">Share</span>
-        </button>
-        <button onClick={handleBabylist} aria-label="Add to Babylist">
-          <span className="material-symbols-outlined" aria-hidden="true">favorite</span>
-          <span className="stain-reel-action-label">Babylist</span>
-        </button>
-        <button className="stain-reel-add" onClick={handleAdd} aria-label={`Add ${activeStain?.name} to cart`}>
-          <span className="material-symbols-outlined" aria-hidden="true">add_shopping_cart</span>
-          <span className="stain-reel-action-label">Add</span>
-        </button>
-      </div>
-
-      {reelStains.length > 1 && activeIndex === 0 && (
-        <div className="stain-reel-hint" aria-hidden="true">
-          <span className="material-symbols-outlined">keyboard_arrow_up</span>
-          Swipe for more finishes
-        </div>
-      )}
 
       {toast && <div className="stain-reel-toast" role="status">{toast}</div>}
     </div>
