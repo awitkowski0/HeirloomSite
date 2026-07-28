@@ -462,6 +462,280 @@ main {
   height: 44px;
 }
 
+/* ---- Mobile stain reel (TikTok-style vertical finish browser) ---- */
+
+/* Launcher: opens the reel. Mobile only — desktop keeps the stain list. */
+.stain-reel-launcher {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .stain-reel-launcher {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 12px;
+    margin: 8px 0 4px;
+    border: 1px solid var(--outline-variant);
+    border-radius: 16px;
+    background: var(--surface-container-lowest);
+    cursor: pointer;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.stain-reel-launcher-swatch {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  border: 1px solid var(--outline-variant);
+  background-color: var(--surface-container-high);
+  background-size: cover;
+  background-position: center;
+}
+
+.stain-reel-launcher-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.stain-reel-launcher-name {
+  font-family: 'Noto Serif', serif;
+  font-size: 16px;
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stain-reel-launcher-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+}
+
+.stain-reel-launcher-cta .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* Full-screen reel overlay */
+.stain-reel {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: #f6f2ec;
+}
+
+.stain-reel-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 12px;
+  background: linear-gradient(rgba(0, 0, 0, 0.4), transparent);
+}
+
+.stain-reel-count {
+  color: #fff;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.stain-reel-close {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.42);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.stain-reel-scroll {
+  height: 100dvh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.stain-reel-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.stain-reel-card {
+  position: relative;
+  height: 100dvh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f6f2ec;
+}
+
+.stain-reel-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.stain-reel-noimg {
+  color: var(--on-surface-variant);
+  font-family: 'Manrope', sans-serif;
+}
+
+.stain-reel-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0) 42%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 16%);
+}
+
+.stain-reel-caption {
+  position: absolute;
+  left: 20px;
+  right: 88px;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+.stain-reel-caption .label-caps {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.stain-reel-caption h2 {
+  font-family: 'Noto Serif', serif;
+  font-size: 26px;
+  margin: 4px 0;
+  color: #fff;
+}
+
+.stain-reel-price {
+  font-family: 'Manrope', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.stain-reel-actions {
+  position: absolute;
+  right: 12px;
+  bottom: calc(40px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.stain-reel-actions button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.stain-reel-actions button:active {
+  transform: scale(0.92);
+}
+
+.stain-reel-actions button .material-symbols-outlined {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.stain-reel-add .material-symbols-outlined {
+  background: var(--secondary);
+  color: var(--on-secondary);
+}
+
+.stain-reel-action-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+.stain-reel-hint {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(150px + env(safe-area-inset-bottom, 0px));
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: stain-reel-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes stain-reel-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+
+.stain-reel-toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(120px + env(safe-area-inset-bottom, 0px));
+  z-index: 5;
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 9999px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stain-reel-hint {
+    animation: none;
+  }
+}
+
 @media (max-width: 767px) {
   .stain-strip-mobile {
     display: flex;

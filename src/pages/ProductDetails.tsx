@@ -7,7 +7,7 @@ import posthog from 'posthog-js';
 import ProductGallery from '../components/product/ProductGallery';
 import WoodSelector from '../components/product/WoodSelector';
 import StainSelector from '../components/product/StainSelector';
-import StainStripMobile from '../components/product/StainStripMobile';
+import StainReel from '../components/product/StainReel';
 import CartPopup from '../components/product/CartPopup';
 import type { InventoryItem, Stain } from '../types';
 
@@ -52,6 +52,7 @@ export default function ProductDetails() {
   const [userWood, setUserWood] = useState<string | null>(null);
   const [userStain, setUserStain] = useState<string | null>(null);
   const [showCartPopup, setShowCartPopup] = useState(false);
+  const [showStainReel, setShowStainReel] = useState(false);
 
   const selection = useMemo(() => {
     if (productConfigurations.length === 0) return { wood: '', stain: '' };
@@ -125,6 +126,27 @@ export default function ProductDetails() {
   const basePrice = Number(currentConfig.basePrice) || 0;
   const addition = Number(currentStainData?.priceAddition) || 0;
   const totalPrice = basePrice + addition;
+  const inStockStainCount = currentConfig.stains.filter((s: Stain) => s.inStock).length;
+
+  const addStainToCart = (stain: Stain) => {
+    const price = basePrice + (Number(stain.priceAddition) || 0);
+    posthog.capture('add_to_cart', {
+      productName: currentConfig.productName,
+      wood: selection.wood,
+      stain: stain.name,
+      price,
+    });
+    addToCart({
+      id: `${currentConfig.productName}-${selection.wood}-${stain.name}`,
+      productName: currentConfig.productName,
+      wood: selection.wood,
+      stainName: stain.name,
+      price,
+      image: stain.image || galleryImages[0] || '',
+      quantity: 1,
+    });
+    setShowCartPopup(true);
+  };
 
   return (
     <>
@@ -141,7 +163,25 @@ export default function ProductDetails() {
         </div>
 
         {showStainStep && (
-          <StainStripMobile stains={currentConfig.stains} selected={selection.stain} onSelect={setUserStain} />
+          <button
+            type="button"
+            className="stain-reel-launcher"
+            onClick={() => setShowStainReel(true)}
+            aria-label={`Browse ${inStockStainCount} finishes`}
+          >
+            <span
+              className="stain-reel-launcher-swatch"
+              style={currentStainData?.image ? { backgroundImage: `url(${currentStainData.image})` } : undefined}
+            />
+            <span className="stain-reel-launcher-text">
+              <span className="label-caps">Finish</span>
+              <span className="stain-reel-launcher-name">{selection.stain || 'Choose a finish'}</span>
+            </span>
+            <span className="stain-reel-launcher-cta">
+              <span className="material-symbols-outlined" aria-hidden="true">swipe_vertical</span>
+              Browse {inStockStainCount}
+            </span>
+          </button>
         )}
 
         <div className="configuration-panel">
@@ -183,24 +223,7 @@ export default function ProductDetails() {
               className="add-to-cart"
               disabled={!selection.stain}
               style={{ opacity: selection.stain ? 1 : 0.5, cursor: selection.stain ? 'pointer' : 'not-allowed' }}
-              onClick={() => {
-                posthog.capture('add_to_cart', {
-                  productName: currentConfig.productName,
-                  wood: selection.wood,
-                  stain: selection.stain,
-                  price: basePrice + addition,
-                });
-                addToCart({
-                  id: `${currentConfig.productName}-${selection.wood}-${selection.stain}`,
-                  productName: currentConfig.productName,
-                  wood: selection.wood,
-                  stainName: selection.stain,
-                  price: basePrice + addition,
-                  image: galleryImages[0] || '',
-                  quantity: 1,
-                });
-                setShowCartPopup(true);
-              }}
+              onClick={() => { if (currentStainData) addStainToCart(currentStainData); }}
             >
               {selection.stain ? "ADD TO CART" : "OUT OF STOCK"}
             </button>
@@ -229,6 +252,18 @@ export default function ProductDetails() {
           </section>
         </div>
       </div>
+
+      {showStainReel && (
+        <StainReel
+          stains={currentConfig.stains}
+          productName={currentConfig.productName}
+          basePrice={basePrice}
+          initialStain={selection.stain}
+          onSelectStain={setUserStain}
+          onAddToCart={(stain) => { addStainToCart(stain); setShowStainReel(false); }}
+          onClose={() => setShowStainReel(false)}
+        />
+      )}
 
       {showCartPopup && (
         <CartPopup
