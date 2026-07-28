@@ -73,14 +73,25 @@ export default function ProductDetails() {
   const currentConfig = productConfigurations.find((c: any) => c.wood === selection.wood) || productConfigurations[0];
   const currentStainData = currentConfig?.stains.find((s: any) => s.name === selection.stain);
 
+  // Build the photo gallery for the current wood. Each stain only carries a
+  // single photo, so on its own the gallery has nothing to page through. We
+  // lead with the selected stain's photo(s), then append the other in-stock
+  // finishes for this wood so shoppers can swipe/scroll through the crib's
+  // available looks. Duplicates are removed and order is preserved.
   const galleryImages: string[] = [];
-  if (currentStainData?.gallery?.length) {
-    currentStainData.gallery.forEach((g: any) => { if (g.url) galleryImages.push(g.url); });
-  } else if (currentStainData?.image) {
-    galleryImages.push(currentStainData.image);
-  } else if (currentConfig?.stains[0]?.image) {
-    galleryImages.push(currentConfig.stains[0].image);
-  }
+  const pushImage = (url?: string | null) => {
+    if (url && !galleryImages.includes(url)) galleryImages.push(url);
+  };
+  const pushStainImages = (stain?: { image?: string | null; gallery?: Array<{ url?: string }> } | null) => {
+    stain?.gallery?.forEach(g => pushImage(g.url));
+    pushImage(stain?.image);
+  };
+
+  pushStainImages(currentStainData);
+  currentConfig?.stains.forEach((s: Stain) => {
+    if (s.inStock) pushStainImages(s);
+  });
+  if (galleryImages.length === 0) pushImage(currentConfig?.stains[0]?.image);
 
   useEffect(() => {
     if (currentConfig && selection.stain) {
