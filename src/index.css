@@ -184,6 +184,39 @@ body {
   gap: 16px;
 }
 
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  margin-left: 2rem;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--on-surface-variant);
+  font-size: 13px;
+  transition: color 0.2s;
+}
+
+.nav-link:hover {
+  color: var(--primary);
+}
+
+.nav-link.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Contact info cards: two-up on desktop, stacked on mobile */
+.contact-info-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 767px) {
+  .contact-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .icon-btn {
   background: none;
   border: none;
@@ -590,25 +623,37 @@ main {
   z-index: 50;
   background-color: rgba(253, 252, 251, 0.9);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid #f5f5f4;
   box-shadow: 0 -8px 30px rgba(74, 55, 40, 0.05);
   border-top-left-radius: 32px;
   border-top-right-radius: 32px;
   display: flex;
   justify-content: space-around;
-  align-items: center;
-  padding: 8px 16px 12px;
+  align-items: stretch;
+  padding: 8px 8px 4px;
+  /* Keep the nav clear of the iOS home indicator / gesture bar */
+  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
 }
 
 .nav-item {
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   color: #a8a29e;
-  padding: 8px 16px;
+  padding: 8px 4px;
+  /* Guarantee a comfortable ≥48px tap target */
+  min-height: 48px;
+  background: none;
+  border: none;
+  border-top: 2px solid transparent;
+  cursor: pointer;
   text-decoration: none;
-  transition: color 0.3s, transform 0.3s;
+  transition: color 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-item:hover {
@@ -616,21 +661,78 @@ main {
 }
 
 .nav-item:active {
-  transform: scale(1.05);
+  transform: scale(0.94);
 }
 
 .nav-item.active {
   color: #4A3728;
-  border-top: 2px solid #4A3728;
+  border-top-color: #4A3728;
+}
+
+.nav-item:focus-visible {
+  outline: 2px solid #4A3728;
+  outline-offset: -2px;
+  border-radius: 8px;
+}
+
+/* Cart icon + count badge wrapper */
+.nav-item-icon {
+  position: relative;
+  display: inline-flex;
+}
+
+.nav-badge {
+  position: absolute;
+  top: -6px;
+  right: -10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  background-color: var(--primary);
+  color: #fff;
+  border-radius: 9999px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
 }
 
 .nav-label {
   font-family: 'Noto Serif', serif;
   font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   margin-top: 4px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Narrow phones: tighten so all six items fit without clipping */
+@media (max-width: 430px) {
+  .nav-label {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .nav-item {
+    padding: 8px 2px;
+  }
+  .bottom-nav {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+}
+
+/* Smaller phones (≤400px): shrink labels a touch more so the longest
+   label ("Showroom") still fits its equal-width slot without ellipsis */
+@media (max-width: 400px) {
+  .nav-label {
+    font-size: 9px;
+  }
 }
 
 /* Gallery Grid */
@@ -1454,26 +1556,26 @@ main {
     display: none;
   }
 
-  .app-header .header-right form {
+  /* Desktop search lives in the bottom nav on mobile (MobileSearch) */
+  .search-bar-desktop {
     display: none;
   }
 
+  /* Prevent iOS from auto-zooming when a form field is focused */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
   .container {
     padding: 0 16px;
   }
 
   main {
     padding-top: 0;
-    padding-bottom: 80px;
-  }
-
-  .container {
-    padding: 0 16px;
-  }
-
-  main {
-    padding-top: 0;
-    padding-bottom: 80px;
+    /* Clear the fixed bottom nav (~72px) plus the device safe area */
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
   }
 
   .bottom-nav {
@@ -1489,7 +1591,10 @@ main {
     background: var(--surface-container-lowest);
     z-index: 200;
     padding: 16px;
-    padding-top: 24px;
+    padding-top: calc(24px + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .mobile-search-overlay input {

@@ -8,7 +8,7 @@ import Checkout from './pages/Checkout';
 import OrderConfirmation from './pages/OrderConfirmation';
 import Contact from './pages/Contact';
 import { CartProvider } from './context/CartContext';
-import MobileSearch from './components/MobileSearch';
+import BottomNav from './components/BottomNav';
 
 function AppContent() {
   return (
@@ -27,29 +27,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      <nav className="bottom-nav">
-        <Link to="/" className="nav-item">
-          <span className="material-symbols-outlined">store</span>
-          <span className="nav-label">Showroom</span>
-        </Link>
-        <Link to="/gallery" className="nav-item">
-          <span className="material-symbols-outlined">photo_library</span>
-          <span className="nav-label">Gallery</span>
-        </Link>
-        <Link to="/products" className="nav-item">
-          <span className="material-symbols-outlined">collections_bookmark</span>
-          <span className="nav-label">Products</span>
-        </Link>
-        <MobileSearch />
-        <Link to="/contact" className="nav-item">
-          <span className="material-symbols-outlined">mail</span>
-          <span className="nav-label">Contact</span>
-        </Link>
-        <Link to="/checkout" className="nav-item" style={{ position: 'relative' }}>
-          <span className="material-symbols-outlined">shopping_bag</span>
-          <span className="nav-label">Cart</span>
-        </Link>
-      </nav>
+      <BottomNav />
 
       <footer style={{ backgroundColor: 'var(--surface-container-low)', marginTop: '96px', borderTop: '1px solid var(--outline-variant)', padding: '64px 24px' }}>
          <div className="container">

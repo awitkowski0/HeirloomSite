@@ -29,11 +29,11 @@ export default function Contact() {
         </header>
 
         <section>
-          <div style={{ display: 'grid', gap: '24px', marginBottom: '40px', gridTemplateColumns: '1fr 1fr' }}>
+          <div className="contact-info-grid" style={{ display: 'grid', gap: '24px', marginBottom: '40px' }}>
             <div style={{ padding: '20px', borderRadius: '10px', backgroundColor: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)' }}>
               <span className="material-symbols-outlined text-primary" style={{ fontSize: '24px', marginBottom: '8px', display: 'block' }}>mail</span>
               <h2 className="label-caps" style={{ marginBottom: '4px' }}>Email</h2>
-              <p className="body-md">support@heirloomcribsandmore.com</p>
+              <p className="body-md" style={{ overflowWrap: 'anywhere' }}>support@heirloomcribsandmore.com</p>
             </div>
             <div style={{ padding: '20px', borderRadius: '10px', backgroundColor: 'var(--surface-container-lowest)', border: '1px solid var(--outline-variant)' }}>
               <span className="material-symbols-outlined text-primary" style={{ fontSize: '24px', marginBottom: '8px', display: 'block' }}>call</span>

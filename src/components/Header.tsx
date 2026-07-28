@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import SearchBar from './SearchBar';
 
@@ -11,11 +11,11 @@ export default function Header() {
         <Link to="/" className="brand-title">
           <img src="/logo-wide.png" alt="Heirloom Cribs and More" style={{ height: '36px', width: 'auto', display: 'block' }} />
         </Link>
-        <nav className="nav-links" style={{ display: 'flex', gap: '1rem', marginLeft: '2rem' }} aria-label="Main navigation">
-          <Link to="/" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Showroom</Link>
-          <Link to="/gallery" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Gallery</Link>
-          <Link to="/products" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Products</Link>
-          <Link to="/contact" style={{ textDecoration: 'none', color: 'var(--on-surface-variant)', fontSize: '13px' }}>Contact</Link>
+        <nav className="nav-links" aria-label="Main navigation">
+          <NavLink to="/" end className="nav-link">Showroom</NavLink>
+          <NavLink to="/gallery" className="nav-link">Gallery</NavLink>
+          <NavLink to="/products" className="nav-link">Products</NavLink>
+          <NavLink to="/contact" className="nav-link">Contact</NavLink>
         </nav>
       </div>
       <div className="header-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

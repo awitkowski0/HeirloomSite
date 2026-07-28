@@ -47,7 +47,7 @@ export default function SearchBar() {
   };
 
   return (
-    <div ref={containerRef} style={{ position: 'relative' }}>
+    <div ref={containerRef} className="search-bar-desktop" style={{ position: 'relative' }}>
       <form onSubmit={handleSubmit} role="search" style={{ display: 'flex', alignItems: 'center' }}>
         <input
           ref={inputRef}
