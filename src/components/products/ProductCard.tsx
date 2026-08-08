@@ -1,30 +1,43 @@
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
+import Image from 'next/image';
+import { formatPriceApprox } from '@/lib/format';
+import { PRODUCT_IMAGE_SIZES } from '@/lib/images';
 
 interface Props {
-  id: string;
+  slug: string;
   name: string;
-  category: string;
+  category: string | null;
   minPrice: number;
-  img: string;
+  img: string | null;
+  /** Set on the first row so the LCP image is not lazy-loaded. */
+  priority?: boolean;
 }
 
-export default function ProductCard({ id, name, category, minPrice, img }: Props) {
+/** Server component: a product tile is a link, it needs no client JS. */
+export default function ProductCard({ slug, name, category, minPrice, img, priority }: Props) {
   return (
-    <Link to={`/product/${id}`} className="featured-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+    <Link href={`/product/${slug}`} className="featured-card product-card-link">
       <article>
         <div className="featured-card-img">
           {img ? (
-            <img src={img} alt={name} loading="lazy" />
+            <Image
+              src={img}
+              alt={name}
+              fill
+              sizes={PRODUCT_IMAGE_SIZES}
+              priority={priority}
+              style={{ objectFit: 'contain' }}
+            />
           ) : (
-            <span className="material-symbols-outlined" style={{ fontSize: '48px', color: 'var(--outline-variant)' }}>crib</span>
+            <span className="material-symbols-outlined product-card-placeholder" aria-hidden="true">
+              crib
+            </span>
           )}
         </div>
         <div className="featured-card-body">
-          <span style={{ fontSize: '10px', fontFamily: 'var(--font-label)', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--primary)' }}>
-            {category || 'Crib'}
-          </span>
+          <span className="product-card-category">{category || 'Crib'}</span>
           <h3>{name}</h3>
-          <p className="price">From ${minPrice.toLocaleString()}</p>
+          <p className="price">From {formatPriceApprox(minPrice)}</p>
         </div>
       </article>
     </Link>

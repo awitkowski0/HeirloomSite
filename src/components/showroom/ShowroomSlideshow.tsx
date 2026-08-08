@@ -1,6 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import type { InventoryItem, ShowroomSlide } from '../../types';
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import type { InventoryItem, ShowroomSlide } from '@/types';
+
+const ADVANCE_MS = 5000;
 
 interface Props {
   slides: ShowroomSlide[];
@@ -8,85 +13,125 @@ interface Props {
 }
 
 export default function ShowroomSlideshow({ slides, inventory }: Props) {
-  const navigate = useNavigate();
   const [slideIndex, setSlideIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    if (slides.length <= 1) return;
-    intervalRef.current = setInterval(() => {
-      setSlideIndex(i => (i + 1) % slides.length);
-    }, 5000);
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [slides.length]);
+  // Resolve each slide's product once, so the CTA always points at a real slug.
+  // The old code linked "Shop this room" to
+  // /product/${encodeURIComponent(slide.productId)} - the raw product NAME -
+  // while the slide's own click handler correctly looked up the slug. That link
+  // would soft-404 the moment any slide gained a productId.
+  const slugFor = (productId: string | undefined) =>
+    productId ? inventory.find(i => i.productName === productId)?.slug ?? null : null;
 
-  const goToSlide = (index: number) => {
-    setSlideIndex(index);
+  const stop = useCallback(() => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1 || paused) return;
+    // Honour the OS reduced-motion setting: do not auto-advance.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     intervalRef.current = setInterval(() => {
       setSlideIndex(i => (i + 1) % slides.length);
-    }, 5000);
+    }, ADVANCE_MS);
+    return stop;
+  }, [slides.length, paused, slideIndex, stop]);
+
+  const goToSlide = (index: number) => {
+    setSlideIndex(((index % slides.length) + slides.length) % slides.length);
   };
 
   if (slides.length === 0) return null;
 
   return (
-    <section className="showroom-slideshow">
-      {slides.map((slide, i) => (
-        <div
-          key={i}
-          className={`showroom-slide ${i === slideIndex ? 'active' : ''}`}
-          onClick={() => {
-            if (slide.productId) {
-              const invItem = inventory.find(i => i.productName === slide.productId);
-              navigate(`/product/${invItem?.slug || encodeURIComponent(slide.productId)}`);
-            }
-          }}
-        >
-          <picture>
-            {slide.imageMobile && <source media="(max-width: 767px)" srcSet={slide.imageMobile} />}
-            <img src={slide.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </picture>
-          <div className="showroom-slide-overlay" />
-          {slide.productId && (
-            <div className="showroom-slide-info">
-              <p className="label-caps">FEATURED COLLECTION</p>
-              <h2>{slide.productId}</h2>
-            </div>
-          )}
-          <div className="showroom-slide-actions">
+    <section
+      className="showroom-slideshow"
+      aria-roledescription="carousel"
+      aria-label="Featured rooms"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocusCapture={() => setPaused(true)}
+      onBlurCapture={() => setPaused(false)}
+    >
+      {slides.map((slide, i) => {
+        const isActive = i === slideIndex;
+        const slug = slugFor(slide.productId);
+        return (
+          <div
+            key={slide.image}
+            className={`showroom-slide ${isActive ? 'active' : ''}`}
+            role="group"
+            aria-roledescription="slide"
+            aria-label={`${i + 1} of ${slides.length}`}
+            /*
+              Inactive slides are hidden with opacity: 0 only. Without inert,
+              every off-screen slide keeps its two links in the tab order and in
+              the accessibility tree, so a keyboard user tabbed through 2N
+              invisible links and a screen reader read N copies of the same
+              content.
+            */
+            inert={!isActive}
+          >
+            <picture>
+              {slide.imageMobile && <source media="(max-width: 767px)" srcSet={slide.imageMobile} />}
+              <Image
+                src={slide.image}
+                alt=""
+                fill
+                sizes="100vw"
+                priority={i === 0}
+                style={{ objectFit: 'cover' }}
+              />
+            </picture>
+            <div className="showroom-slide-overlay" />
             {slide.productId && (
-              <Link to={`/product/${encodeURIComponent(slide.productId)}`} className="showroom-action-primary">
-                Shop this room
-              </Link>
+              <div className="showroom-slide-info">
+                <p className="label-caps">Featured collection</p>
+                <h2>{slide.productId}</h2>
+              </div>
             )}
-            <Link to="/products" className="showroom-action-secondary">
-              See our cribs
-            </Link>
+            <div className="showroom-slide-actions">
+              {slug && (
+                <Link href={`/product/${slug}`} className="showroom-action-primary">
+                  Shop this room
+                </Link>
+              )}
+              <Link href="/products" className="showroom-action-secondary">
+                See our cribs
+              </Link>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {slides.length > 1 && (
         <>
-          <button className="showroom-slideshow-arrow prev" aria-label="Previous slide" onClick={() => goToSlide((slideIndex - 1 + slides.length) % slides.length)}>
+          <button
+            type="button"
+            className="showroom-slideshow-arrow prev"
+            aria-label="Previous slide"
+            onClick={() => goToSlide(slideIndex - 1)}
+          >
             <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
           </button>
-          <button className="showroom-slideshow-arrow next" aria-label="Next slide" onClick={() => goToSlide((slideIndex + 1) % slides.length)}>
+          <button
+            type="button"
+            className="showroom-slideshow-arrow next"
+            aria-label="Next slide"
+            onClick={() => goToSlide(slideIndex + 1)}
+          >
             <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
           </button>
           <div className="showroom-slideshow-dots" role="tablist" aria-label="Slideshow pagination">
-            {slides.map((_, i) => (
+            {slides.map((slide, i) => (
               <button
-                key={i}
+                key={slide.image}
+                type="button"
                 role="tab"
                 aria-selected={i === slideIndex}
                 aria-label={`Go to slide ${i + 1}`}
