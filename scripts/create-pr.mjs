@@ -1,5 +1,5 @@
 import https from 'https'
-import { execSync } from 'child_process'
+import { execSync, execFileSync } from 'child_process'
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN
@@ -88,7 +88,9 @@ async function main() {
   }
 
   console.log(`\n📦 Pushing branch: ${branch}`)
-  run(`git push origin ${branch}`)
+  // execFileSync, not a shell string: git branch names may contain $, ` and ;,
+  // which a template-interpolated execSync would hand straight to the shell.
+  execFileSync('git', ['push', 'origin', branch], { stdio: 'inherit' })
 
   console.log(`\n🔀 Creating PR: "${title}"`)
   const pr = await github('/pulls', 'POST', {
