@@ -82,9 +82,10 @@ export default function StainSelector({
               ) : (
                 <span className="stain-swatch" style={{ backgroundColor: color }}>
                   {stain.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- 40px
-                    // swatch; the optimizer round-trip costs more than it saves
-                    // and would multiply transform count by every stain.
+                    // A 40px swatch: the optimizer round-trip costs more than
+                    // it saves, and would multiply Vercel image transformations
+                    // by every stain on every product.
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={stain.image} alt="" loading="lazy" className="stain-swatch-img" />
                   ) : null}
                 </span>

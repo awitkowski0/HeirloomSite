@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 /**
  * Error boundary. The app previously had none anywhere, so a single throw in a
@@ -26,7 +27,7 @@ export default function Error({
       </p>
       <div className="not-found-actions">
         <button type="button" className="button-primary" onClick={reset}>Try again</button>
-        <a href="/" className="button-secondary">Back to the showroom</a>
+        <Link href="/" className="button-secondary">Back to the showroom</Link>
       </div>
     </div>
   );

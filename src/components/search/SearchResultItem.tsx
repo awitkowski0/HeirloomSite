@@ -31,9 +31,9 @@ export default function SearchResultItem({
       className={compact ? 'search-result search-result--compact' : 'search-result'}
     >
       {r.image ? (
-        // eslint-disable-next-line @next/next/no-img-element -- 48px thumbnail;
-        // a /_next/image round-trip costs more than it saves at this size and
-        // would multiply Vercel transformation count across every search hit.
+        // A 48px thumbnail: a /_next/image round-trip costs more than it saves
+        // at this size, and would multiply transformations by every search hit.
+        // eslint-disable-next-line @next/next/no-img-element
         <img src={r.image} alt="" className="search-result-thumb" loading="lazy" />
       ) : (
         <div className="search-result-thumb search-result-thumb--empty" />

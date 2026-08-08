@@ -56,6 +56,9 @@ export default function ProductConfigurator({ productName, slug, configurations 
    * migration. Server HTML therefore shows the default variant - correct for
    * the canonical URL - and the deep link applies after hydration.
    */
+  /* eslint-disable react-hooks/set-state-in-effect --
+     A one-shot read of browser-only state applied after hydration; there is no
+     external store to subscribe to, and this cannot run during render. */
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const woodParam = params.get('wood');
@@ -66,6 +69,7 @@ export default function ProductConfigurator({ productName, slug, configurations 
       if (target?.stains.some(s => s.name === stainParam && s.inStock)) setUserStain(stainParam);
     }
   }, [configurations, woods]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const selection = useMemo(() => {
     if (configurations.length === 0) return { wood: '', stain: '' };

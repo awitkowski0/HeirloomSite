@@ -38,8 +38,8 @@ function readData<T>(name: string): T {
     // Do not degrade to an empty list. An empty inventory would build a site
     // where every product page 404s; failing the build is the correct outcome.
     throw new Error(
-      `Failed to read required data file ${path}. Run \`npm run data:build\` first. ` +
-        `Cause: ${(err as Error).message}`
+      `Failed to read required data file ${path}. Run \`npm run data:build\` first.`,
+      { cause: err }
     );
   }
 }

@@ -78,6 +78,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Deliberate: this lives in the ROOT layout, so it is not a per-page
+            custom font. next/font/google is a poor fit for a variable icon font
+            with wght,FILL axes. */}
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
