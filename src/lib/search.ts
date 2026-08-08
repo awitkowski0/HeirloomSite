@@ -1,5 +1,7 @@
+'use client';
+
 import MiniSearch from 'minisearch';
-import { useContent } from '../useContent';
+import { useEffect, useMemo, useState } from 'react';
 
 export interface SearchResult {
   id: string;
@@ -12,35 +14,24 @@ export interface SearchResult {
   matchedStain?: string;
 }
 
-function buildDocs(inventory: any[]) {
-  const seen = new Set<string>();
-  return inventory.flatMap(item => {
-    const key = `${item.productName}||${item.wood}`;
-    if (seen.has(key)) return [];
-    seen.add(key);
-    const stainNames = item.stains.map((s: any) => s.name).join(' ');
-    const stainImages: Record<string, string> = {};
-    for (const s of item.stains) {
-      stainImages[s.name] = s.image || '';
-    }
-    return {
-      id: `${item.productName}||${item.wood}`,
-      productName: item.productName,
-      slug: item.slug || '',
-      wood: item.wood,
-      category: item.category || '',
-      stainNames,
-      stainImages,
-      description: item.description || '',
-      basePrice: item.basePrice,
-    };
-  });
+interface SearchDoc {
+  id: string;
+  productName: string;
+  slug: string | null;
+  wood: string;
+  category: string;
+  stainNames: string;
+  description: string;
+  basePrice: number;
+  stainImages: Record<string, string>;
 }
 
-function createSearch() {
-  return new MiniSearch({
+const MAX_RESULTS = 8;
+
+function createIndex() {
+  return new MiniSearch<SearchDoc>({
     fields: ['productName', 'wood', 'category', 'stainNames', 'description'],
-    storeFields: ['productName', 'slug', 'wood', 'category', 'basePrice', 'stainImages'],
+    storeFields: ['productName', 'slug', 'wood', 'category', 'basePrice', 'stainImages', 'stainNames'],
     searchOptions: {
       boost: { productName: 3, wood: 2, stainNames: 2, category: 2, description: 1 },
       prefix: true,
@@ -49,76 +40,155 @@ function createSearch() {
   });
 }
 
-// ⚡ Bolt Optimization: Cache the MiniSearch index globally.
-// Previously, the entire index was recreated on every search stroke, causing
-// unnecessary CPU load and blocking the main thread. Now we reuse it.
-let cachedIndex: MiniSearch | null = null;
-let cachedInventory: any[] | null = null;
+/**
+ * The search corpus is a build-time artifact (src/data/search-docs.json, ~18 KB
+ * gzipped) loaded via dynamic import, so:
+ *   - it contributes zero bytes to the initial bundle,
+ *   - it becomes a content-hashed chunk, so caching is immutable and a deploy
+ *     can never serve a stale index,
+ *   - both search surfaces share one promise, so it downloads at most once.
+ */
+let indexPromise: Promise<MiniSearch<SearchDoc>> | null = null;
 
-function getSearchIndex(inventory: any[]) {
-  // If the inventory hasn't changed reference, return the existing index.
-  if (cachedIndex && cachedInventory === inventory) {
-    return cachedIndex;
-  }
-  const ms = createSearch();
-  ms.addAll(buildDocs(inventory));
-  cachedIndex = ms;
-  cachedInventory = inventory;
-  return ms;
+export function loadSearchIndex(): Promise<MiniSearch<SearchDoc>> {
+  indexPromise ??= import('@/data/search-docs.json').then(mod => {
+    const ms = createIndex();
+    ms.addAll(mod.default as unknown as SearchDoc[]);
+    return ms;
+  });
+  return indexPromise;
 }
 
+/**
+ * Resolve which stain the query referred to, so the result row can show that
+ * stain's photo.
+ *
+ * The previous implementation returned the matching *query word* rather than
+ * the stain name, then looked that up in stainImages -- so a query for "ebony"
+ * produced the key "ebony" while the map is keyed "Ebony", and the image
+ * silently fell back to the first stain. This returns the real stain name.
+ */
+function findMatchedStain(stainNames: string, query: string): string | undefined {
+  if (!stainNames) return undefined;
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return undefined;
+  const stains = stainNames.split(' ').filter(Boolean);
+  return stains.find(stain => {
+    const s = stain.toLowerCase();
+    return words.some(w => s.includes(w) || w.includes(s));
+  });
+}
+
+function toResults(ms: MiniSearch<SearchDoc>, query: string): SearchResult[] {
+  const raw = ms.search(query, { prefix: true, fuzzy: 0.2 });
+  const results: SearchResult[] = [];
+  const seen = new Set<string>();
+
+  for (const hit of raw) {
+    const doc = hit as unknown as SearchDoc;
+    const key = `${doc.productName}||${doc.wood}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const matchedStain = findMatchedStain(doc.stainNames, query);
+    const stainImages = doc.stainImages || {};
+    const fallbackKey = Object.keys(stainImages)[0] || '';
+    const image = (matchedStain && stainImages[matchedStain]) || stainImages[fallbackKey] || '';
+
+    results.push({
+      id: doc.id,
+      productName: doc.productName,
+      slug: doc.slug || '',
+      wood: doc.wood,
+      category: doc.category,
+      basePrice: doc.basePrice,
+      image,
+      matchedStain,
+    });
+
+    if (results.length >= MAX_RESULTS) break;
+  }
+  return results;
+}
+
+/**
+ * Previously this hook ran the full MiniSearch query plus a per-hit
+ * lowercase/split on *every parent render*, not just when the query changed.
+ * Index construction now happens once in an effect and the query result is
+ * memoised.
+ */
 export function useSearch(query: string): SearchResult[] {
-  const { inventory, loading } = useContent();
+  const [index, setIndex] = useState<MiniSearch<SearchDoc> | null>(null);
+  const trimmed = query.trim();
 
-  if (loading || !query.trim()) return [];
+  useEffect(() => {
+    if (!trimmed || index) return;
+    let cancelled = false;
+    loadSearchIndex().then(
+      ms => {
+        if (!cancelled) setIndex(ms);
+      },
+      err => {
+        if (!cancelled) console.error('Failed to load search index:', err);
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [trimmed, index]);
 
-  try {
-    const ms = getSearchIndex(inventory);
-    const raw = ms.search(query, { prefix: true, fuzzy: 0.2 });
-    const results: SearchResult[] = [];
+  return useMemo(() => {
+    if (!index || !trimmed) return [];
+    return toResults(index, trimmed);
+  }, [index, trimmed]);
+}
+
+/** Full result list (no MAX_RESULTS cap) for the dedicated /search page. */
+export function useSearchAll(query: string): { results: SearchResult[]; loading: boolean } {
+  const [index, setIndex] = useState<MiniSearch<SearchDoc> | null>(null);
+  const trimmed = query.trim();
+
+  useEffect(() => {
+    let cancelled = false;
+    loadSearchIndex().then(
+      ms => {
+        if (!cancelled) setIndex(ms);
+      },
+      err => {
+        if (!cancelled) console.error('Failed to load search index:', err);
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const results = useMemo(() => {
+    if (!index || !trimmed) return [];
+    const raw = index.search(trimmed, { prefix: true, fuzzy: 0.2 });
     const seen = new Set<string>();
-
+    const out: SearchResult[] = [];
     for (const hit of raw) {
-      const doc = hit as any;
-      const key = `${doc.productName}||${doc.wood}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-
-      const queryWords = query.toLowerCase().split(/\s+/);
-      const matchedStain = doc.stainNames
-        ? queryWords.find((w: string) =>
-            doc.stainNames.toLowerCase().split(' ').some((s: string) => s.includes(w) || w.includes(s))
-          )
-        : undefined;
-
-      const firstStain = Object.keys(doc.stainImages || {})[0] || '';
-      const image = matchedStain && doc.stainImages?.[matchedStain]
-        ? doc.stainImages[matchedStain]
-        : doc.stainImages?.[firstStain] || '';
-
-      results.push({
+      const doc = hit as unknown as SearchDoc;
+      // The dedicated search page lists products, not wood variants.
+      if (!doc.slug || seen.has(doc.slug)) continue;
+      seen.add(doc.slug);
+      const stainImages = doc.stainImages || {};
+      const matchedStain = findMatchedStain(doc.stainNames, trimmed);
+      const fallbackKey = Object.keys(stainImages)[0] || '';
+      out.push({
         id: doc.id,
         productName: doc.productName,
-        slug: doc.slug || '',
+        slug: doc.slug,
         wood: doc.wood,
         category: doc.category,
         basePrice: doc.basePrice,
-        image,
-        matchedStain: matchedStain || undefined,
+        image: (matchedStain && stainImages[matchedStain]) || stainImages[fallbackKey] || '',
+        matchedStain,
       });
-
-      if (results.length >= 8) break;
     }
-    return results;
-  } catch {
-    return [];
-  }
-}
+    return out;
+  }, [index, trimmed]);
 
-export function searchProducts(query: string, inventory: any[]): any[] {
-  if (!query.trim()) return inventory;
-  const ms = getSearchIndex(inventory);
-  const hits = ms.search(query, { prefix: true, fuzzy: 0.2 });
-  const matched = new Set(hits.map((h: any) => h.id));
-  return inventory.filter((item: any) => matched.has(`${item.productName}||${item.wood}`));
+  return { results, loading: !index && Boolean(trimmed) };
 }
