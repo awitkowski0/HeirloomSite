@@ -145,15 +145,6 @@ export default function ProductConfigurator({ productName, slug, configurations 
           <ProductGallery images={galleryImages} productName={productName} priority />
         </div>
 
-        {showStainStep && (
-          <StainSelector
-            stains={currentConfig.stains}
-            selected={selection.stain}
-            onSelect={setUserStain}
-            variant="strip"
-          />
-        )}
-
         <div className="configuration-panel">
           {variantLabel && (
             <WoodSelector
@@ -165,6 +156,8 @@ export default function ProductConfigurator({ productName, slug, configurations 
             />
           )}
 
+          {/* One instance. Its layout - horizontal swatch rail vs. vertical
+              list with text - is decided in CSS, not by mounting twice. */}
           {showStainStep && (
             <StainSelector
               stains={currentConfig.stains}

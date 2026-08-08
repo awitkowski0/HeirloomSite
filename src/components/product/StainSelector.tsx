@@ -8,53 +8,51 @@ interface Props {
   stains: Stain[];
   selected: string;
   onSelect: (name: string) => void;
-  /** Compact horizontal strip (mobile) vs. full list with descriptions. */
-  variant?: 'list' | 'strip';
   label?: string;
 }
 
 /**
- * Stain / finish picker.
+ * Stain / finish picker. ONE component, ONE instance, ONE DOM tree.
  *
- * This is now ONE component. Previously StainSelector and StainStripMobile were
- * both rendered unconditionally on every product page with identical props and
- * hidden from each other with CSS - so every stain image was requested twice
- * (display:none does not prevent <img src> fetching). A 12-stain product issued
- * 24 image requests, half of which could never be seen.
+ * There were previously two components - StainSelector and StainStripMobile -
+ * both mounted unconditionally on every product page with identical props and
+ * hidden from each other with CSS. Because display:none does not stop an <img>
+ * from loading, a 12-stain product issued 24 image requests for 12 visible
+ * swatches.
  *
- * Accessibility fixes over the old strip: swatch buttons had no accessible name
- * at all when a stain had no image (announced as bare "button"), selection was
- * conveyed only by transform: scale(1.15), and out-of-stock was signalled purely
- * by opacity.
+ * The two presentations were never different controls, only different layouts
+ * of the same buttons: a horizontal swatch rail on narrow screens, a vertical
+ * list with names, prices and stock state on wide ones. So this renders one set
+ * of buttons, each carrying both the swatch and the text, and CSS decides which
+ * parts are visible at which width. The text stays in the accessibility tree in
+ * both layouts (it is hidden with a visually-hidden pattern, not display:none),
+ * so screen-reader users get the full label regardless of viewport.
+ *
+ * Other fixes over the old strip: swatch buttons had no accessible name at all
+ * when a stain had no image (announced as a bare "button"), selection was
+ * conveyed only by transform: scale(1.15), and out-of-stock was signalled
+ * purely by opacity.
  */
 export default function StainSelector({
   stains,
   selected,
   onSelect,
-  variant = 'list',
   label = 'Choose Stain Finish',
 }: Props) {
   if (stains.length === 0) return null;
 
-  const isStrip = variant === 'strip';
-
   return (
-    <section className={isStrip ? 'stain-strip' : 'config-section stain-section'}>
-      {!isStrip && (
-        <div className="config-header">
-          <h3 className="label-caps">02. {label}</h3>
-        </div>
-      )}
-      <div
-        className={isStrip ? 'stain-strip-list' : 'stain-list'}
-        role="radiogroup"
-        aria-label={label}
-      >
+    <section className="config-section stain-section">
+      <div className="config-header">
+        <h3 className="label-caps">02. {label}</h3>
+      </div>
+      <div className="stain-list" role="radiogroup" aria-label={label}>
         {stains.map(stain => {
           const isSelected = selected === stain.name;
           const color = getStainColor(stain.name);
           const display = stainLabel(stain.name);
-          const priceNote = stain.priceAddition > 0 ? `, plus ${formatPrice(stain.priceAddition)}` : '';
+          const priceNote =
+            stain.priceAddition > 0 ? `, plus ${formatPrice(stain.priceAddition)}` : '';
           const stockNote = stain.inStock ? '' : ', out of stock';
 
           return (
@@ -63,11 +61,13 @@ export default function StainSelector({
               type="button"
               role="radio"
               aria-checked={isSelected}
-              // The strip has no visible text, so it needs an explicit name.
-              aria-label={isStrip ? `${display}${priceNote}${stockNote}` : undefined}
+              // Explicit name: in the compact layout the text below is visually
+              // hidden, and a stain without an image would otherwise leave the
+              // button with no accessible name at all.
+              aria-label={`${display}${priceNote}${stockNote}`}
               disabled={!stain.inStock}
               className={[
-                isStrip ? 'stain-strip-swatch' : 'stain-button',
+                'stain-button',
                 isSelected ? 'selected' : '',
                 !stain.inStock ? 'is-out-of-stock' : '',
               ]
@@ -91,26 +91,24 @@ export default function StainSelector({
                 </span>
               )}
 
-              {!isStrip && (
-                <span className="stain-info">
-                  <span className="body-md stain-name">
-                    {display}
-                    {stain.priceAddition > 0 && (
-                      <span className="stain-surcharge"> (+{formatPrice(stain.priceAddition)})</span>
-                    )}
-                    {!stain.inStock && <span className="stain-oos">[Out of Stock]</span>}
-                  </span>
-                  {color !== null && (
-                    <span className="label-caps stain-desc">
-                      {display.toLowerCase().includes('natural')
-                        ? "Enhances the wood's inherent character"
-                        : 'Sophisticated artisan pigment'}
-                    </span>
+              <span className="stain-info" aria-hidden="true">
+                <span className="body-md stain-name">
+                  {display}
+                  {stain.priceAddition > 0 && (
+                    <span className="stain-surcharge"> (+{formatPrice(stain.priceAddition)})</span>
                   )}
+                  {!stain.inStock && <span className="stain-oos">[Out of Stock]</span>}
                 </span>
-              )}
+                {color !== null && (
+                  <span className="label-caps stain-desc">
+                    {display.toLowerCase().includes('natural')
+                      ? "Enhances the wood's inherent character"
+                      : 'Sophisticated artisan pigment'}
+                  </span>
+                )}
+              </span>
 
-              {!isStrip && isSelected && (
+              {isSelected && (
                 <span className="material-symbols-outlined stain-check" aria-hidden="true">
                   check_circle
                 </span>
