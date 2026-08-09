@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSearch, type SearchResult } from '../lib/search';
 import SearchResultItem from './SearchResultItem';
+import posthog from 'posthog-js';
 
 export default function MobileSearch() {
   const [open, setOpen] = useState(false);
@@ -15,6 +16,7 @@ export default function MobileSearch() {
   }, [open]);
 
   const handleSelect = (r: SearchResult) => {
+    posthog.capture('product_selected', { product_name: r.productName, product_category: r.category || 'Crib', source: 'mobile_search_result' });
     setOpen(false);
     setQuery('');
     const params = new URLSearchParams();
@@ -26,6 +28,7 @@ export default function MobileSearch() {
     if (!query.trim()) return;
     setOpen(false);
     setQuery('');
+    posthog.capture('search_submitted', { result_count: results.length, search_surface: 'mobile' });
     navigate(`/products?search=${encodeURIComponent(query.trim())}`);
   };
 

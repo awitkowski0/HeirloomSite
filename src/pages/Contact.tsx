@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
+import posthog from 'posthog-js';
 
 export default function Contact() {
   const [name, setName] = useState('');
@@ -11,6 +12,7 @@ export default function Contact() {
     e.preventDefault();
     const mailto = `mailto:support@heirloomcribsandmore.com?subject=Contact from ${encodeURIComponent(name)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`;
     window.open(mailto, '_blank');
+    posthog.capture('contact_message_submitted');
     setSent(true);
     setName(''); setEmail(''); setMessage('');
   };

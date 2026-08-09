@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSearch, type SearchResult } from '../lib/search';
 import SearchResultItem from './SearchResultItem';
+import posthog from 'posthog-js';
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
@@ -32,6 +33,7 @@ export default function SearchBar() {
   }, [query]);
 
   const handleSelect = (r: SearchResult) => {
+    posthog.capture('product_selected', { product_name: r.productName, product_category: r.category || 'Crib', source: 'desktop_search_result' });
     setQuery('');
     setOpen(false);
     const params = new URLSearchParams();
@@ -43,6 +45,7 @@ export default function SearchBar() {
     e.preventDefault();
     if (!query.trim()) return;
     setOpen(false);
+    posthog.capture('search_submitted', { result_count: results.length, search_surface: 'desktop' });
     navigate(`/products?search=${encodeURIComponent(query.trim())}`);
   };
 

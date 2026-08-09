@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import posthog from 'posthog-js';
 
 interface Props {
   id: string;
@@ -10,7 +11,12 @@ interface Props {
 
 export default function ProductCard({ id, name, category, minPrice, img }: Props) {
   return (
-    <Link to={`/product/${id}`} className="featured-card" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+    <Link
+      to={`/product/${id}`}
+      className="featured-card"
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+      onClick={() => posthog.capture('product_selected', { product_name: name, product_category: category || 'Crib', source: 'product_listing' })}
+    >
       <article>
         <div className="featured-card-img">
           {img ? (

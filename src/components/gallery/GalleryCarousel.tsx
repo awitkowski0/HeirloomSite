@@ -22,7 +22,7 @@ export default function GalleryCarousel({ product, onClose }: Props) {
   const initialStains = product.woodStains[initialWood] || [];
 
   const handleViewDetails = () => {
-    posthog.capture('product_click', { productName: product.name, source: 'carousel_cta' });
+    posthog.capture('product_selected', { product_name: product.name, source: 'gallery_carousel' });
     navigate(`/product/${product.id}`);
   };
 

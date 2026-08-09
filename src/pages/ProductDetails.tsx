@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useCart } from '../context/useCart';
@@ -82,17 +82,6 @@ export default function ProductDetails() {
     galleryImages.push(currentConfig.stains[0].image);
   }
 
-  useEffect(() => {
-    if (currentConfig && selection.stain) {
-      posthog.capture('product_view', {
-        productName: currentConfig.productName,
-        wood: selection.wood,
-        stain: selection.stain,
-        productId: id,
-      });
-    }
-  }, [currentConfig?.productName, selection.wood, selection.stain, id]);
-
   const handleWoodChange = (wood: string) => {
     setUserWood(wood);
     setUserStain(null);
@@ -173,11 +162,11 @@ export default function ProductDetails() {
               disabled={!selection.stain}
               style={{ opacity: selection.stain ? 1 : 0.5, cursor: selection.stain ? 'pointer' : 'not-allowed' }}
               onClick={() => {
-                posthog.capture('add_to_cart', {
-                  productName: currentConfig.productName,
+                posthog.capture('product_added_to_cart', {
+                  product_name: currentConfig.productName,
                   wood: selection.wood,
                   stain: selection.stain,
-                  price: basePrice + addition,
+                  price: totalPrice,
                 });
                 addToCart({
                   id: `${currentConfig.productName}-${selection.wood}-${selection.stain}`,
