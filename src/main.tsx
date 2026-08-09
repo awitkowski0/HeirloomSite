@@ -7,15 +7,25 @@ import './index.css'
 import App from './App.tsx'
 import { ContentProvider } from './content'
 
-const posthogToken = import.meta.env.VITE_POSTHOG_TOKEN || '';
-if (typeof window !== 'undefined') {
+const posthogToken = import.meta.env.VITE_POSTHOG_TOKEN
+const posthogHost = import.meta.env.VITE_POSTHOG_HOST
+
+if (typeof window !== 'undefined' && posthogToken && posthogHost) {
   posthog.init(posthogToken, {
-    api_host: import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com',
+    api_host: posthogHost,
     person_profiles: 'identified_only',
-    loaded: (ph) => {
-      if (import.meta.env.DEV) ph.opt_out_capturing();
+    capture_exceptions: {
+      capture_unhandled_errors: true,
+      capture_unhandled_rejections: true,
+      capture_console_errors: false,
     },
-  });
+  })
+} else if (import.meta.env.DEV) {
+  if (!posthogToken) {
+    throw new Error('VITE_POSTHOG_TOKEN variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once VITE_POSTHOG_TOKEN is configured')
+  }
+
+  throw new Error('VITE_POSTHOG_HOST variable required by PostHog is missing or un-configured, this causes events to be silently missed. This error stops appearing once VITE_POSTHOG_HOST is configured')
 }
 
 createRoot(document.getElementById('root')!).render(

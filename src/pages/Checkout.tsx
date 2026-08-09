@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import posthog from 'posthog-js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import { createPaymentIntent } from '../api';
@@ -104,7 +105,14 @@ export default function Checkout() {
             </label>
 
             {clientSecret && (
-              <PaymentSection clientSecret={clientSecret} agreedToTerms={agreedToTerms} onSuccess={(piId) => { clearCart(); navigate(`/order-confirmation/${piId}?token=${encodeURIComponent(paymentToken)}`); }} />
+              <PaymentSection clientSecret={clientSecret} agreedToTerms={agreedToTerms} onSuccess={(piId) => {
+                posthog.capture('checkout_completed', {
+                  item_count: cart.reduce((count, item) => count + item.quantity, 0),
+                  order_total: finalTotal,
+                });
+                clearCart();
+                navigate(`/order-confirmation/${piId}?token=${encodeURIComponent(paymentToken)}`);
+              }} />
             )}
           </div>
         </div>
@@ -125,7 +133,14 @@ export default function Checkout() {
                     </p>
                     <p className="body-md" style={{ marginTop: '4px' }}>${item.price.toLocaleString()}.00 x {item.quantity}</p>
                   </div>
-                  <button onClick={() => removeFromCart(item.id)}
+                  <button onClick={() => {
+                    posthog.capture('cart_item_removed', {
+                      product_name: item.productName,
+                      product_category: item.wood,
+                      item_quantity: item.quantity,
+                    });
+                    removeFromCart(item.id);
+                  }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--on-surface-variant)' }}>
                     <span className="material-symbols-outlined">close</span>
                   </button>

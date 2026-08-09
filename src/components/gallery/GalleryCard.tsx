@@ -34,7 +34,7 @@ export default function GalleryCard({ product, isExpanded, onExpand, onCarouselO
       onCarouselOpen();
       return;
     }
-    posthog.capture('product_click', { productName: product.name, source: 'card' });
+    posthog.capture('product_selected', { product_name: product.name, source: 'gallery_card' });
     navigate(`/product/${product.id}`);
   };
 
@@ -71,7 +71,7 @@ export default function GalleryCard({ product, isExpanded, onExpand, onCarouselO
 
         <div className="view-details-btn" onClick={e => {
           e.stopPropagation();
-          posthog.capture('product_click', { productName: product.name, source: 'view_details' });
+          posthog.capture('product_selected', { product_name: product.name, source: 'gallery_view_details' });
           navigate(`/product/${product.id}`);
         }}>
           <span className="label-caps" style={{ color: 'var(--primary)', letterSpacing: '0.1em' }}>View Details</span>

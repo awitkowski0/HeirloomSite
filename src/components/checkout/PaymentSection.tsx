@@ -7,6 +7,7 @@ interface Props {
 import { useState } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import posthog from 'posthog-js';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || '');
 
@@ -19,6 +20,7 @@ function StripeForm({ onSuccess }: { onSuccess: (paymentIntentId: string) => voi
     e.preventDefault();
     if (!stripe || !elements) return;
     setIsProcessing(true);
+    posthog.capture('checkout_payment_submitted');
     const { error, paymentIntent } = await stripe.confirmPayment({
       elements,
       redirect: 'if_required',
