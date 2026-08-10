@@ -37,3 +37,6 @@ public/data/inventory.json
 public/data/products.json
 src/data/search-docs.json
 data/pricing.json
+
+# TypeScript incremental build cache
+*.tsbuildinfo
