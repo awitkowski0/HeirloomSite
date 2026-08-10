@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import Modal from '@/components/ui/Modal';
-import { humanizeWood } from '@/components/search/SearchResultItem';
-import { stainLabel } from '@/lib/stainColors';
+import { variantLabel } from '@/lib/labels';
 
 interface Props {
   open: boolean;
@@ -35,7 +34,7 @@ export default function CartPopup({ open, productName, wood, stain, onClose }: P
         check_circle
       </span>
       <p className="body-md text-on-surface-variant cart-popup-detail">
-        {productName} — {humanizeWood(wood)} / {stainLabel(stain)}
+        {productName} — {variantLabel(wood, stain)}
       </p>
       <div className="cart-popup-actions">
         <Link href="/checkout" className="button-primary">

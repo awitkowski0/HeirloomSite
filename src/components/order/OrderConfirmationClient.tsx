@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getOrder, type OrderData } from '@/lib/api-client';
 import { formatPrice, fromCents } from '@/lib/format';
-import { humanizeWood } from '@/components/search/SearchResultItem';
-import { stainLabel } from '@/lib/stainColors';
+import { variantLabel } from '@/lib/labels';
 
 type State =
   | { kind: 'loading' }
@@ -167,7 +166,7 @@ export default function OrderConfirmationClient({ paymentIntentId }: { paymentIn
               <div className="order-item-detail">
                 <h3 className="body-lg">{item.productName}</h3>
                 <p className="label-caps text-on-surface-variant">
-                  {humanizeWood(item.wood)} &bull; {stainLabel(item.stainName)}
+                  {variantLabel(item.wood, item.stainName)}
                 </p>
                 {item.addons.length > 0 && (
                   <p className="label-caps text-on-surface-variant">

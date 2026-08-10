@@ -6,8 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/useCart';
 import { createPaymentIntent, type OrderTotals } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
-import { humanizeWood } from '@/components/search/SearchResultItem';
-import { stainLabel } from '@/lib/stainColors';
+import { variantLabel } from '@/lib/labels';
 import ShippingForm, {
   EMPTY_SHIPPING,
   validateShipping,
@@ -223,7 +222,7 @@ export default function CheckoutClient() {
                   <div className="order-summary-detail">
                     <h3 className="body-lg">{item.productName}</h3>
                     <p className="label-caps text-on-surface-variant">
-                      {humanizeWood(item.wood)} &bull; {stainLabel(item.stainName)}
+                      {variantLabel(item.wood, item.stainName)}
                     </p>
                     <p className="body-md">
                       {formatPrice(item.price)} &times; {item.quantity}

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStripe } from '@/lib/stripe-server';
+import { getStripe, StripeNotConfiguredError } from '@/lib/stripe-server';
 import { verifyOrderToken } from '@/lib/orderToken';
 
 export const runtime = 'nodejs';
@@ -94,6 +94,13 @@ export async function GET(
       { headers: { 'Cache-Control': 'no-store, private' } }
     );
   } catch (err) {
+    if (err instanceof StripeNotConfiguredError) {
+      console.error('orders: payments are not configured.', err.message);
+      return NextResponse.json(
+        { error: 'Order lookup is unavailable on this deployment.' },
+        { status: 503 }
+      );
+    }
     console.error('getOrder error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

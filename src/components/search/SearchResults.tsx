@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useSearchAll } from '@/lib/search';
 import { formatPriceApprox } from '@/lib/format';
-import { humanizeWood } from './SearchResultItem';
+import { humanizeWood } from '@/lib/labels';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();

@@ -2,17 +2,13 @@
 
 import type { SearchResult } from '@/lib/search';
 import { formatPrice } from '@/lib/format';
+import { humanizeWood } from '@/lib/labels';
 
 interface SearchResultItemProps {
   result: SearchResult;
   onSelect: (result: SearchResult) => void;
   compact?: boolean;
   id?: string;
-}
-
-/** Expands "BrownMaple" to "Brown Maple" for display. */
-export function humanizeWood(wood: string): string {
-  return wood.replace(/([A-Z])/g, ' $1').trim();
 }
 
 export default function SearchResultItem({

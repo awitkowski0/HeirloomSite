@@ -7,7 +7,7 @@ import posthog from 'posthog-js';
 import Modal from '@/components/ui/Modal';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 import { formatPriceApprox } from '@/lib/format';
-import { humanizeWood } from '@/components/search/SearchResultItem';
+import { humanizeWood } from '@/lib/labels';
 import type { GalleryProduct } from './types';
 
 interface Props {

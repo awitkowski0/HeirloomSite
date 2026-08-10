@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStripe } from '@/lib/stripe-server';
+import { getStripe, StripeNotConfiguredError } from '@/lib/stripe-server';
 import { mintOrderToken } from '@/lib/orderToken';
 import { priceCart, validateShipping, PricingError } from '@/lib/pricing';
 
@@ -106,6 +106,18 @@ export async function POST(req: Request) {
       },
     });
   } catch (err) {
+    if (err instanceof StripeNotConfiguredError) {
+      // 503, not 500: the service is unconfigured, not broken. The message is
+      // safe to surface - it names an absent variable, never a value.
+      console.error('create-payment-intent: payments are not configured.', err.message);
+      return NextResponse.json(
+        {
+          error:
+            'Payments are not configured on this deployment. Please contact us to complete your order.',
+        },
+        { status: 503 }
+      );
+    }
     if (err instanceof PricingError) {
       // Validation problems are the caller's to fix, and the message is safe
       // to show: it names a product, stain or field, never anything internal.

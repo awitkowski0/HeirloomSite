@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import posthog from 'posthog-js';
 import { formatPriceApprox } from '@/lib/format';
-import { humanizeWood } from '@/components/search/SearchResultItem';
+import { humanizeWood } from '@/lib/labels';
 import { PRODUCT_IMAGE_SIZES } from '@/lib/images';
 import type { GalleryProduct } from './types';
 

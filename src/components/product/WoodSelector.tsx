@@ -1,6 +1,6 @@
 'use client';
 
-import { humanizeWood } from '@/components/search/SearchResultItem';
+import { humanizeWood } from '@/lib/labels';
 
 interface Props {
   woods: string[];

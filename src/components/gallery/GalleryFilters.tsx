@@ -1,6 +1,6 @@
 'use client';
 
-import { humanizeWood } from '@/components/search/SearchResultItem';
+import { humanizeWood } from '@/lib/labels';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 
 export const ALL_WOODS = 'All Collections';

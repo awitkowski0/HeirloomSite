@@ -9,6 +9,7 @@ import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import { formatPrice } from '@/lib/format';
+import { variantLabel as formatVariant } from '@/lib/labels';
 import type { InventoryItem, Stain } from '@/types';
 
 const WOOD_SPECIES = ['brownmaple', 'cherrywood', 'redoak'];
@@ -172,7 +173,7 @@ export default function ProductConfigurator({ productName, slug, configurations 
             </div>
             <p role="status" aria-live="polite" className="visually-hidden">
               {selection.stain
-                ? `Selected: ${selection.wood}, ${selection.stain}. ${formatPrice(totalPrice)}.`
+                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. ${formatPrice(totalPrice)}.`
                 : ''}
             </p>
           </section>
