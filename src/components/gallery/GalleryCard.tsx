@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import posthog from 'posthog-js';
+import { productSelected } from '@/lib/analytics';
 import { formatPriceApprox } from '@/lib/format';
 import { humanizeWood } from '@/lib/labels';
 import { PRODUCT_IMAGE_SIZES } from '@/lib/images';
@@ -48,7 +48,12 @@ export default function GalleryCard({
         <Link
           href={`/product/${product.slug}`}
           className="product-card-link-area"
-          onClick={() => posthog.capture('product_click', { productName: product.name, source: 'card' })}
+          onClick={() =>
+            productSelected({
+              product_name: product.name,
+              source: 'gallery_card',
+            })
+          }
         >
           <span className="visually-hidden">{product.name}, {priceLabel}</span>
           <span className="product-card-img-wrap">
@@ -83,7 +88,14 @@ export default function GalleryCard({
 
       <div className="product-card-text">
         <h3 className="headline-lg text-primary">
-          <Link href={`/product/${product.slug}`}>{product.name}</Link>
+          <Link
+            href={`/product/${product.slug}`}
+            onClick={() =>
+              productSelected({ product_name: product.name, source: 'gallery_view_details' })
+            }
+          >
+            {product.name}
+          </Link>
         </h3>
         <div className="product-card-price-row">
           <span className="product-card-rule" aria-hidden="true" />

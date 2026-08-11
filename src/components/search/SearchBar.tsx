@@ -16,7 +16,7 @@ export default function SearchBar() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
-  const { query, setQuery, results, selectResult, submitQuery } = useProductSearch(() =>
+  const { query, setQuery, results, selectResult, submitQuery } = useProductSearch('desktop', () =>
     setOpen(false)
   );
 

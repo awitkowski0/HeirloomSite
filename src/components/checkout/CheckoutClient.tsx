@@ -7,6 +7,7 @@ import { useCart } from '@/context/useCart';
 import { createPaymentIntent, type OrderTotals } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { variantLabel } from '@/lib/labels';
+import { cartItemRemoved, checkoutCompleted } from '@/lib/analytics';
 import ShippingForm, {
   EMPTY_SHIPPING,
   validateShipping,
@@ -101,6 +102,12 @@ export default function CheckoutClient() {
   };
 
   const handleSuccess = (paymentIntentId: string) => {
+    // Captured before clearCart(), which empties the array these read from, and
+    // from the server-authoritative total rather than the client estimate.
+    checkoutCompleted({
+      item_count: cart.reduce((count, item) => count + item.quantity, 0),
+      order_total: fromCents(totals.totalCents),
+    });
     clearCart();
     try {
       // Handed to the confirmation page through sessionStorage rather than the
@@ -230,7 +237,14 @@ export default function CheckoutClient() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => {
+                      cartItemRemoved({
+                        product_name: item.productName,
+                        product_category: item.wood,
+                        item_quantity: item.quantity,
+                      });
+                      removeFromCart(item.id);
+                    }}
                     className="icon-btn"
                     aria-label={`Remove ${item.productName} from cart`}
                     disabled={detailsLocked}

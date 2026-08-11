@@ -19,6 +19,8 @@ next-env.d.ts
 .env
 .env.*
 !.env.example
+# Public PostHog project token only - no secret ever belongs in this file.
+!.env.production
 
 # Editor directories and files
 .vscode/*

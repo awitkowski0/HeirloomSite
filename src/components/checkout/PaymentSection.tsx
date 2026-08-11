@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getStripe } from '@/lib/stripe-client';
+import { checkoutPaymentSubmitted } from '@/lib/analytics';
 
 interface Props {
   clientSecret: string;
@@ -33,6 +34,7 @@ function StripeForm({
     setError('');
     setNotice('');
     setIsProcessing(true);
+    checkoutPaymentSubmitted();
 
     const result = await stripe.confirmPayment({
       elements,

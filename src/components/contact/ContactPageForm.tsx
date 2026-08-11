@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { contactMessageSubmitted } from '@/lib/analytics';
 
 export default function ContactPageForm({ email: supportEmail }: { email: string }) {
   const [name, setName] = useState('');
@@ -16,6 +17,7 @@ export default function ContactPageForm({ email: supportEmail }: { email: string
     window.location.href = `mailto:${supportEmail}?subject=${encodeURIComponent(
       subject
     )}&body=${encodeURIComponent(body)}`;
+    contactMessageSubmitted();
     setSent(true);
     setName('');
     setEmail('');

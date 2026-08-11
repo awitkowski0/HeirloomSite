@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import posthog from 'posthog-js';
 import Modal from '@/components/ui/Modal';
+import { productSelected } from '@/lib/analytics';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 import { formatPriceApprox } from '@/lib/format';
 import { humanizeWood } from '@/lib/labels';
@@ -136,7 +136,7 @@ export default function GalleryCarousel({ product, onClose }: Props) {
           href={`/product/${product.slug}`}
           className="gallery-carousel-cta button-primary"
           onClick={() =>
-            posthog.capture('product_click', { productName: product.name, source: 'carousel_cta' })
+            productSelected({ product_name: product.name, source: 'gallery_carousel' })
           }
         >
           View Details

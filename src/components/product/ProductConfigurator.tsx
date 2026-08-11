@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import posthog from 'posthog-js';
+import { productAddedToCart } from '@/lib/analytics';
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
 import ProductGallery from './ProductGallery';
@@ -32,11 +32,10 @@ function firstInStock(config: InventoryItem | undefined): string {
 
 interface Props {
   productName: string;
-  slug: string;
   configurations: InventoryItem[];
 }
 
-export default function ProductConfigurator({ productName, slug, configurations }: Props) {
+export default function ProductConfigurator({ productName, configurations }: Props) {
   const { addToCart } = useCart();
   const [userWood, setUserWood] = useState<string | null>(null);
   const [userStain, setUserStain] = useState<string | null>(null);
@@ -96,15 +95,11 @@ export default function ProductConfigurator({ productName, slug, configurations 
     return out;
   }, [currentStain, currentConfig]);
 
-  useEffect(() => {
-    if (!currentConfig || !selection.stain) return;
-    posthog.capture('product_view', {
-      productName: currentConfig.productName,
-      wood: selection.wood,
-      stain: selection.stain,
-      slug,
-    });
-  }, [currentConfig, selection.wood, selection.stain, slug]);
+  // A 'product_view' capture used to live here, keyed on wood and stain, so it
+  // re-fired every time the visitor clicked a swatch - one page visit produced
+  // a dozen "views". PR #77 on dev removed it; $pageview already records the
+  // visit, and configurator interaction is better measured by what gets added
+  // to the cart.
 
   if (!currentConfig) return null;
 
@@ -128,7 +123,13 @@ export default function ProductConfigurator({ productName, slug, configurations 
       wood: selection.wood,
       stainName: selection.stain,
     };
-    posthog.capture('add_to_cart', { ...item, price: totalPrice });
+    productAddedToCart({
+      product_name: item.productName,
+      wood: item.wood,
+      stain: item.stainName,
+      price: totalPrice,
+      quantity: 1,
+    });
     addToCart({
       ...item,
       id: cartItemId(item),

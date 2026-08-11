@@ -3,6 +3,7 @@ import { getProductIndex, getCategories } from '@/lib/content';
 import { itemListJsonLd } from '@/lib/seo';
 import CategoryPills from '@/components/products/CategoryPills';
 import ProductCard from '@/components/products/ProductCard';
+import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 export const metadata: Metadata = {
   title: 'All Products',
@@ -45,6 +46,7 @@ export default function ProductsPage() {
             />
           ))}
         </div>
+        <ListingAnalytics />
       </section>
     </div>
   );

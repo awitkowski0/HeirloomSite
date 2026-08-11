@@ -15,7 +15,7 @@ import SearchResultItem from './SearchResultItem';
 export default function MobileSearchTrigger() {
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { query, setQuery, results, selectResult, submitQuery } = useProductSearch(() =>
+  const { query, setQuery, results, selectResult, submitQuery } = useProductSearch('mobile', () =>
     setOpen(false)
   );
 

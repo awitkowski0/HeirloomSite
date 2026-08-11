@@ -4,6 +4,7 @@ import { getCategories, getCategoryBySlug, getProductsInCategory } from '@/lib/c
 import { itemListJsonLd, breadcrumbJsonLd } from '@/lib/seo';
 import CategoryPills from '@/components/products/CategoryPills';
 import ProductCard from '@/components/products/ProductCard';
+import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 export const dynamicParams = false;
 
@@ -99,6 +100,7 @@ export default async function CategoryPage({
             />
           ))}
         </div>
+        <ListingAnalytics />
       </section>
     </div>
   );

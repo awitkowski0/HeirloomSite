@@ -135,7 +135,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <ProductConfigurator
         productName={product.productName}
-        slug={slug}
         configurations={product.configurations}
       />
 
