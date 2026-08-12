@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearch, type SearchResult } from '@/lib/search';
+import { variantHref } from '@/lib/variants';
 import { productSelected, searchSubmitted } from '@/lib/analytics';
 
 /**
@@ -35,10 +36,13 @@ export function useProductSearch(
       });
       setQuery('');
       onNavigate?.();
-      const params = new URLSearchParams();
-      if (result.matchedStain) params.set('stain', result.matchedStain);
-      const qs = params.toString();
-      router.push(`/product/${result.slug}${qs ? `?${qs}` : ''}`);
+      // A finish that matched the query gets its own URL, so searching
+      // "driftwood" lands on that finish rather than the default one.
+      router.push(
+        result.matchedStain
+          ? variantHref(result.slug, result.wood, result.matchedStain)
+          : `/product/${result.slug}`
+      );
     },
     [router, onNavigate, surface]
   );

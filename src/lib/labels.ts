@@ -1,3 +1,4 @@
+export { stainLabel } from './stainColors';
 import { stainLabel } from './stainColors';
 
 /**

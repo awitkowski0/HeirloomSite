@@ -10,6 +10,7 @@ import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
+import { variantHref } from '@/lib/variants';
 import type { InventoryItem, Stain } from '@/types';
 
 const WOOD_SPECIES = ['brownmaple', 'cherrywood', 'redoak'];
@@ -33,12 +34,23 @@ function firstInStock(config: InventoryItem | undefined): string {
 interface Props {
   productName: string;
   configurations: InventoryItem[];
+  slug: string;
+  /** Resolved on the server from the URL path, so the correct configuration is
+      in the initial HTML rather than applied after hydration. */
+  initialWood: string;
+  initialStain: string | null;
 }
 
-export default function ProductConfigurator({ productName, configurations }: Props) {
+export default function ProductConfigurator({
+  productName,
+  configurations,
+  slug,
+  initialWood,
+  initialStain,
+}: Props) {
   const { addToCart } = useCart();
-  const [userWood, setUserWood] = useState<string | null>(null);
-  const [userStain, setUserStain] = useState<string | null>(null);
+  const [userWood, setUserWood] = useState<string | null>(initialWood);
+  const [userStain, setUserStain] = useState<string | null>(initialStain);
   const [showCartPopup, setShowCartPopup] = useState(false);
 
   const woods = useMemo(() => configurations.map(c => c.wood), [configurations]);
@@ -47,14 +59,14 @@ export default function ProductConfigurator({ productName, configurations }: Pro
   const showDeliveryMessage = isHandcraftedWood(woods);
 
   /**
-   * ?wood= / ?stain= deep links are applied in a mount effect, not during
-   * render.
+   * Legacy ?wood= / ?stain= links only.
    *
-   * Two reasons. Reading window.location.search during render (what the old
-   * code did) is not safe under SSR. And reading it via useSearchParams would
-   * opt this whole route out of static prerendering, which is the point of the
-   * migration. Server HTML therefore shows the default variant - correct for
-   * the canonical URL - and the deep link applies after hydration.
+   * The current form is a path - /product/bloomington/cherry_wood/antique_slate
+   * - resolved on the server, so the right configuration is in the HTML a
+   * crawler sees. This effect exists for links shared before that change.
+   *
+   * It stays an effect rather than useSearchParams(), which would opt the whole
+   * route out of static prerendering.
    */
   /* eslint-disable react-hooks/set-state-in-effect --
      A one-shot read of browser-only state applied after hydration; there is no
@@ -118,10 +130,25 @@ export default function ProductConfigurator({ productName, configurations }: Pro
   const addition = Number(currentStain?.priceAddition) || 0;
   const totalPrice = basePrice + addition;
 
+  /*
+   * Keep the address bar on the configuration being shown, so the URL is
+   * always the one worth copying.
+   *
+   * history.replaceState, not router.replace: this is the same page with a
+   * different variant already in memory, so a Next navigation would re-render
+   * the tree to reach a state we are already in. replaceState also does not
+   * stack a history entry per swatch, so Back still leaves the product rather
+   * than walking eleven finishes.
+   */
+  const syncUrl = (wood: string, stain: string | null) => {
+    window.history.replaceState(null, '', variantHref(slug, wood, stain));
+  };
+
   // Funnel step 2. Fires on interaction rather than on render, so it measures
   // intent - a visitor who touched a control - not merely arriving on a page.
   const handleStainChange = (stain: string) => {
     setUserStain(stain);
+    syncUrl(selection.wood, stain);
     variantConfigured({
       product_name: productName,
       wood: selection.wood,
@@ -132,8 +159,10 @@ export default function ProductConfigurator({ productName, configurations }: Pro
 
   const handleWoodChange = (wood: string) => {
     variantConfigured({ product_name: productName, wood, stain: selection.stain, field: 'wood' });
+    const nextStain = firstInStock(configurations.find(c => c.wood === wood)) || null;
     setUserWood(wood);
-    setUserStain(firstInStock(configurations.find(c => c.wood === wood)) || null);
+    setUserStain(nextStain);
+    syncUrl(wood, nextStain);
   };
 
   const isWoodSoldOut = (wood: string) => {
