@@ -9,6 +9,7 @@ import {
   productJsonLd,
   breadcrumbJsonLd,
   absoluteUrl,
+  jsonLdScript,
 } from '@/lib/seo';
 import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
@@ -164,7 +165,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdScript(
             productJsonLd({
               productName: product.productName,
               slug,
@@ -178,7 +179,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumb)) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd(breadcrumb)) }}
       />
 
       <nav aria-label="Breadcrumb" className="breadcrumb">

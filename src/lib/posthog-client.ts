@@ -25,6 +25,47 @@ export function initPostHog(): void {
     person_profiles: 'identified_only',
     // App Router navigates client-side; pageviews are captured explicitly.
     capture_pageview: false,
+
+    /*
+     * Autocapture off.
+     *
+     * It was never configured, so posthog-js defaulted it ON across the whole
+     * site including /checkout, sending element text and attributes for every
+     * click. src/lib/analytics.ts is a deliberate, complete event vocabulary -
+     * eleven named events covering the entire funnel - so autocapture adds
+     * noise on top of a checkout form carrying a name, street address and
+     * email, and adds nothing that is actually read.
+     */
+    autocapture: false,
+
+    /*
+     * Session recording off, explicitly.
+     *
+     * Leaving it unset does not mean off: it is decided by the PostHog PROJECT
+     * setting, so anyone with dashboard access could start recording the
+     * checkout form - card fields are inside Stripe's iframes and safe, the
+     * address fields are not - without any code change or review. Stating it
+     * here means turning it on requires a commit.
+     */
+    disable_session_recording: true,
+
+    /*
+     * Defence in depth for the order token.
+     *
+     * The `?token=` lookup path is gone, but $current_url is captured on every
+     * pageview, so anything that ever puts a credential in a query string ships
+     * it here. Strip it on the way out rather than trusting that no future URL
+     * carries one.
+     */
+    sanitize_properties: properties => {
+      const scrub = (value: unknown): unknown => {
+        if (typeof value !== 'string' || !value.includes('token=')) return value;
+        return value.replace(/([?&](?:token|order_token)=)[^&#]*/gi, '$1[redacted]');
+      };
+      return Object.fromEntries(
+        Object.entries(properties).map(([k, v]) => [k, scrub(v)])
+      ) as typeof properties;
+    },
     // Surface client-side crashes. Console errors stay off - they are
     // dominated by third-party script noise.
     capture_exceptions: {

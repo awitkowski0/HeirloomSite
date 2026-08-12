@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { getStripe, StripeNotConfiguredError } from '@/lib/stripe-server';
 import { mintOrderToken } from '@/lib/orderToken';
 import { priceCart, validateShipping, requireTermsAcceptance, PricingError } from '@/lib/pricing';
+import { verifyTurnstile, TurnstileError } from '@/lib/turnstile';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,13 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Before anything else: this endpoint creates real PaymentIntents and is
+    // reachable by anyone. No-op unless TURNSTILE_SECRET_KEY is configured.
+    await verifyTurnstile(
+      body.turnstileToken,
+      req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for')
+    );
+
     const shipping = validateShipping(body);
     requireTermsAcceptance(body);
     const priced = priceCart(body.cart);
@@ -140,6 +148,9 @@ export async function POST(req: Request) {
         },
         { status: 503 }
       );
+    }
+    if (err instanceof TurnstileError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
     }
     if (err instanceof PricingError) {
       // Validation problems are the caller's to fix, and the message is safe

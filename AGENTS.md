@@ -83,7 +83,25 @@ intentionally remove a product, lower it.
   with no fallback (`openssl rand -hex 32`). The token is passed to
   `/api/orders/*` in the `x-order-token` header only — never in the URL, because
   PostHog captures `$current_url` with its query string.
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` — Cloudflare
+  Turnstile on the checkout submit. Both are optional and the integration is
+  inert without them, but while they are unset the payment-intent endpoint has
+  no bot protection at all. Verified against Cloudflare's documented test
+  secrets: fails closed on `2x0000...`, passes on `1x0000...`.
 - `GITHUB_TOKEN`, `VERCEL_TOKEN` — local tooling only
+
+## Security posture
+
+- Security headers live in `next.config.ts`. The CSP is deliberately shipped as
+  `Content-Security-Policy-Report-Only`: enforcing a wrong policy breaks
+  checkout for everyone, and the only honest way to know it is right is to watch
+  a real browser load every page with it on. Flip the header NAME to
+  `Content-Security-Policy` once the console is clean — the value does not
+  change. `/checkout` is the page that matters: Stripe, PostHog, Google Fonts,
+  Babylist and (if configured) Turnstile all load there together.
+- Rate limiting is NOT implemented in code. Turnstile covers the bot case;
+  add a Vercel Firewall rate-limit rule on `/api/stripe/*` for the volumetric
+  one, which also covers token guessing on `/api/orders/*`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

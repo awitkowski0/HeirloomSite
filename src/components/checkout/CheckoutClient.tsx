@@ -21,6 +21,7 @@ import ShippingForm, {
   type ShippingValues,
 } from './ShippingForm';
 import TermsBlock from './TermsBlock';
+import TurnstileWidget from './TurnstileWidget';
 import PaymentSection from './PaymentSection';
 
 // Must match src/lib/pricing.ts, which is the authority: this is only the
@@ -36,6 +37,7 @@ export default function CheckoutClient() {
   const [shipping, setShipping] = useState<ShippingValues>(EMPTY_SHIPPING);
   const [errors, setErrors] = useState<Partial<Record<keyof ShippingValues, string>>>({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState('');
 
   const [clientSecret, setClientSecret] = useState('');
   const [paymentIntentId, setPaymentIntentId] = useState('');
@@ -116,6 +118,7 @@ export default function CheckoutClient() {
           })),
           ...shipping,
           agreedToTerms,
+          turnstileToken,
         },
         controller.signal
       );
@@ -230,6 +233,9 @@ export default function CheckoutClient() {
                 after the button would strand the customer on a server error
                 pointing at a checkbox further down the page. */}
             <TermsBlock agreed={agreedToTerms} onChange={setAgreedToTerms} />
+
+            {/* Renders nothing unless NEXT_PUBLIC_TURNSTILE_SITE_KEY is set. */}
+            <TurnstileWidget onToken={setTurnstileToken} />
 
             {!detailsLocked && (
               <button

@@ -17,6 +17,8 @@ export interface CreatePaymentIntentRequest {
   cart: CartItemPayload[];
   /** Recorded on the PaymentIntent; the server rejects anything but `true`. */
   agreedToTerms: boolean;
+  /** Cloudflare Turnstile token; required only when the server has a secret. */
+  turnstileToken?: string;
   email: string;
   firstName: string;
   lastName: string;

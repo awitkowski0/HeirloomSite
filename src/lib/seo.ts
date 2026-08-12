@@ -50,6 +50,25 @@ export function priceRange(configurations: InventoryItem[]): { low: number; high
   return { low: Math.min(...prices), high: Math.max(...prices) };
 }
 
+/**
+ * Serialise JSON-LD for injection into a <script> block.
+ *
+ * `JSON.stringify` does not escape `<`, so a value containing the literal
+ * `</script>` closes the block early and everything after it is parsed as
+ * markup. Nothing request-derived reaches these sinks today - the inputs are
+ * build-time catalogue files - so this is a trust boundary rather than a live
+ * hole, but the catalogue copy is re-imported from a supplier feed and the
+ * boundary is one line wide.
+ *
+ * The three escapes stay valid JSON, so consumers parse them identically.
+ */
+export function jsonLdScript(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
 interface JsonLd {
   '@context': string;
   [key: string]: unknown;

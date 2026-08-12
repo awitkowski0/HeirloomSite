@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getShowroom, getInventory } from '@/lib/content';
-import { organizationJsonLd, webSiteJsonLd } from '@/lib/seo';
+import { organizationJsonLd, webSiteJsonLd,
+  jsonLdScript,
+} from '@/lib/seo';
 import { resolveFeature, indexByProductName } from '@/lib/showroom';
 import HomeHero from '@/components/home/HomeHero';
 import ProvenanceBand from '@/components/home/ProvenanceBand';
@@ -38,11 +40,11 @@ export default function HomePage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd()) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd()) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd()) }}
       />
 
       <HomeHero detail={detail} heroImage={heroImage} />

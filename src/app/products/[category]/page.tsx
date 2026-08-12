@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getCategories, getCategoryBySlug, getProductsInCategory } from '@/lib/content';
-import { itemListJsonLd, breadcrumbJsonLd } from '@/lib/seo';
+import { itemListJsonLd, breadcrumbJsonLd,
+  jsonLdScript,
+} from '@/lib/seo';
 import CategoryPills from '@/components/products/CategoryPills';
 import ProductCard from '@/components/products/ProductCard';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
@@ -63,13 +65,13 @@ export default async function CategoryPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(itemListJsonLd(products, `/products/${slug}`)),
+          __html: jsonLdScript(itemListJsonLd(products, `/products/${slug}`)),
         }}
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdScript(
             breadcrumbJsonLd([
               { name: 'Home', path: '/' },
               { name: 'Products', path: '/products' },
