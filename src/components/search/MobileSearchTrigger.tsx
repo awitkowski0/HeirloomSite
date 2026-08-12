@@ -15,9 +15,8 @@ import SearchResultItem from './SearchResultItem';
 export default function MobileSearchTrigger() {
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { query, setQuery, results, selectResult, submitQuery } = useProductSearch('mobile', () =>
-    setOpen(false)
-  );
+  const { query, setQuery, results, selectResult, submitQuery, activeIndex, setActiveIndex, handleKeyDown } =
+    useProductSearch('mobile', () => setOpen(false));
 
   useEffect(() => {
     if (!open) return;
@@ -55,6 +54,9 @@ export default function MobileSearchTrigger() {
             type="search"
             value={query}
             onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => {
+              if (handleKeyDown(e) === 'close') setOpen(false);
+            }}
             placeholder="Search products..."
             aria-label="Search products"
             className="mobile-search-input"
@@ -85,8 +87,14 @@ export default function MobileSearchTrigger() {
         </p>
 
         <div role="listbox" aria-label="Search results">
-          {results.map(r => (
-            <SearchResultItem key={r.id} result={r} onSelect={selectResult} />
+          {results.map((r, i) => (
+            <SearchResultItem
+              key={r.id}
+              result={r}
+              onSelect={selectResult}
+              active={i === activeIndex}
+              onMouseEnter={() => setActiveIndex(i)}
+            />
           ))}
         </div>
 

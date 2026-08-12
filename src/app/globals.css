@@ -2652,3 +2652,33 @@ main {
   color: var(--accent);
   text-underline-offset: 3px;
 }
+
+/* ---------------------------------------------------------------------------
+   Search: keyboard highlight and native chrome
+   --------------------------------------------------------------------------- */
+
+/*
+ * Arrow-key highlight. Distinct from :hover, because both can be true at once
+ * and the keyboard position is the one that Enter acts on.
+ */
+/* Same treatment as every other product photograph on the site. */
+.search-result-thumb {
+  mix-blend-mode: multiply;
+}
+
+.search-result.is-active {
+  background-color: var(--paper-2);
+  box-shadow: inset 2px 0 0 0 var(--accent);
+}
+
+/*
+ * WebKit paints its own clear button inside type="search", in the UA's blue.
+ * On a cream and oxblood page it reads as a rendering error, and the form
+ * already has an explicit submit control.
+ */
+.search-bar-input::-webkit-search-cancel-button,
+.mobile-search-input::-webkit-search-cancel-button,
+.mobile-search-overlay input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}

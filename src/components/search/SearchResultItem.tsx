@@ -9,6 +9,9 @@ interface SearchResultItemProps {
   onSelect: (result: SearchResult) => void;
   compact?: boolean;
   id?: string;
+  /** Highlighted by arrow keys. Not focus - focus stays in the input. */
+  active?: boolean;
+  onMouseEnter?: () => void;
 }
 
 export default function SearchResultItem({
@@ -16,15 +19,26 @@ export default function SearchResultItem({
   onSelect,
   compact = false,
   id,
+  active = false,
+  onMouseEnter,
 }: SearchResultItemProps) {
   return (
     <button
       type="button"
       id={id}
       role="option"
-      aria-selected={false}
+      aria-selected={active}
+      // The input keeps DOM focus and points here with aria-activedescendant,
+      // so this must not steal it on mousedown either.
+      onMouseDown={e => e.preventDefault()}
+      onMouseEnter={onMouseEnter}
       onClick={() => onSelect(r)}
-      className={compact ? 'search-result search-result--compact' : 'search-result'}
+      className={[
+        compact ? 'search-result search-result--compact' : 'search-result',
+        active ? 'is-active' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       {r.image ? (
         // A 48px thumbnail: a /_next/image round-trip costs more than it saves
@@ -36,12 +50,23 @@ export default function SearchResultItem({
       )}
       <span className="search-result-body">
         <span className="search-result-name">{r.productName}</span>
+        {/*
+          One row per product, so the meta line describes the product rather
+          than one variant: the finish that matched if the query named one,
+          otherwise how many variants there are. Repeating the same wood and
+          the same price down eight rows told the reader nothing.
+        */}
         <span className="search-result-meta">
-          {humanizeWood(r.wood)}
-          {r.matchedStain ? <> &bull; {r.matchedStain}</> : null}
+          {r.matchedStain
+            ? r.matchedStain
+            : r.variantCount > 1
+              ? `${r.variantCount} finishes`
+              : humanizeWood(r.wood)}
           {r.category ? <> &bull; {r.category}</> : null}
         </span>
-        <span className="search-result-price">{formatPrice(r.basePrice)}</span>
+        <span className="search-result-price">
+          {r.variantCount > 1 ? `From ${formatPrice(r.basePrice)}` : formatPrice(r.basePrice)}
+        </span>
       </span>
     </button>
   );

@@ -16,9 +16,8 @@ export default function SearchBar() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
-  const { query, setQuery, results, selectResult, submitQuery } = useProductSearch('desktop', () =>
-    setOpen(false)
-  );
+  const { query, setQuery, results, selectResult, submitQuery, activeIndex, setActiveIndex, handleKeyDown } =
+    useProductSearch('desktop', () => setOpen(false));
 
   const showDropdown = open && query.trim().length > 0 && results.length > 0;
 
@@ -51,7 +50,7 @@ export default function SearchBar() {
           }}
           onFocus={() => setOpen(true)}
           onKeyDown={e => {
-            if (e.key === 'Escape') setOpen(false);
+            if (handleKeyDown(e) === 'close') setOpen(false);
           }}
           placeholder="Search products, stains, woods..."
           aria-label="Search products"
@@ -59,6 +58,11 @@ export default function SearchBar() {
           aria-expanded={showDropdown}
           aria-controls={listboxId}
           aria-autocomplete="list"
+          aria-activedescendant={
+            activeIndex >= 0 && results[activeIndex]
+              ? `${listboxId}-opt-${activeIndex}`
+              : undefined
+          }
           className="search-bar-input"
         />
         <button type="submit" className="icon-btn" aria-label="Submit search">
@@ -78,8 +82,16 @@ export default function SearchBar() {
       {showDropdown && (
         <div className="search-dropdown">
           <div id={listboxId} role="listbox" aria-label="Search results">
-            {results.map(r => (
-              <SearchResultItem key={r.id} result={r} onSelect={selectResult} compact />
+            {results.map((r, i) => (
+              <SearchResultItem
+                key={r.id}
+                id={`${listboxId}-opt-${i}`}
+                result={r}
+                onSelect={selectResult}
+                active={i === activeIndex}
+                onMouseEnter={() => setActiveIndex(i)}
+                compact
+              />
             ))}
           </div>
           <button type="button" onClick={submitQuery} className="search-see-all">
