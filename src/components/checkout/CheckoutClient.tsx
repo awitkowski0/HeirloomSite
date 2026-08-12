@@ -7,7 +7,13 @@ import { useCart } from '@/context/useCart';
 import { createPaymentIntent, type OrderTotals } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { variantLabel } from '@/lib/labels';
-import { cartItemRemoved, checkoutCompleted } from '@/lib/analytics';
+import {
+  cartItemRemoved,
+  checkoutFailed,
+  checkoutStarted,
+  orderCompleted,
+  shippingSubmitted,
+} from '@/lib/analytics';
 import ShippingForm, {
   EMPTY_SHIPPING,
   validateShipping,
@@ -35,6 +41,24 @@ export default function CheckoutClient() {
 
   const abortRef = useRef<AbortController | null>(null);
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  /*
+   * Funnel step 4, fired once.
+   *
+   * Gated on `hydrated` because the server renders an empty cart, so firing on
+   * mount would record every visit as a zero-item checkout. The ref stops it
+   * re-firing when a line is removed, which would otherwise inflate the step
+   * above the number of people who actually reached it.
+   */
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (!hydrated || startedRef.current || cart.length === 0) return;
+    startedRef.current = true;
+    checkoutStarted({
+      item_count: cart.reduce((n, i) => n + i.quantity, 0),
+      cart_value: subtotal,
+    });
+  }, [hydrated, cart, subtotal]);
 
   // Estimates only, replaced by the server's numbers once the intent exists.
   const estSubtotalCents = toCents(subtotal);
@@ -93,9 +117,16 @@ export default function CheckoutClient() {
       setClientSecret(data.clientSecret);
       setOrderToken(data.token);
       setServerTotals(data.totals);
+      // Funnel step 5: the address validated and Stripe accepted the intent.
+      shippingSubmitted({
+        item_count: cart.reduce((n, i) => n + i.quantity, 0),
+        order_total: fromCents(data.totals.totalCents),
+      });
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
-      setError((err as Error).message || 'Could not start checkout. Please try again.');
+      const message = (err as Error).message || 'Could not start checkout. Please try again.';
+      checkoutFailed({ step: 'shipping', reason: message });
+      setError(message);
     } finally {
       if (!controller.signal.aborted) setSubmitting(false);
     }
@@ -104,7 +135,7 @@ export default function CheckoutClient() {
   const handleSuccess = (paymentIntentId: string) => {
     // Captured before clearCart(), which empties the array these read from, and
     // from the server-authoritative total rather than the client estimate.
-    checkoutCompleted({
+    orderCompleted({
       item_count: cart.reduce((count, item) => count + item.quantity, 0),
       order_total: fromCents(totals.totalCents),
     });

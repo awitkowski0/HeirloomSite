@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { productAddedToCart } from '@/lib/analytics';
+import { productAddedToCart, productViewed, variantConfigured } from '@/lib/analytics';
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
 import ProductGallery from './ProductGallery';
@@ -95,11 +95,22 @@ export default function ProductConfigurator({ productName, configurations }: Pro
     return out;
   }, [currentStain, currentConfig]);
 
-  // A 'product_view' capture used to live here, keyed on wood and stain, so it
-  // re-fired every time the visitor clicked a swatch - one page visit produced
-  // a dozen "views". PR #77 on dev removed it; $pageview already records the
-  // visit, and configurator interaction is better measured by what gets added
-  // to the cart.
+  /*
+   * Funnel step 1, fired once per product page.
+   *
+   * The old 'product_view' capture was keyed on wood and stain, so it re-fired
+   * on every swatch click and one visit produced a dozen "views" - which made
+   * the top of the funnel meaningless. The dependency array is the product
+   * name alone, deliberately: changing a finish is step 2, not another view.
+   */
+  useEffect(() => {
+    if (!productName) return;
+    productViewed({
+      product_name: productName,
+      product_category: configurations[0]?.category ?? null,
+      price: (configurations[0]?.basePrice as number) ?? 0,
+    });
+  }, [productName, configurations]);
 
   if (!currentConfig) return null;
 
@@ -107,7 +118,20 @@ export default function ProductConfigurator({ productName, configurations }: Pro
   const addition = Number(currentStain?.priceAddition) || 0;
   const totalPrice = basePrice + addition;
 
+  // Funnel step 2. Fires on interaction rather than on render, so it measures
+  // intent - a visitor who touched a control - not merely arriving on a page.
+  const handleStainChange = (stain: string) => {
+    setUserStain(stain);
+    variantConfigured({
+      product_name: productName,
+      wood: selection.wood,
+      stain,
+      field: 'stain',
+    });
+  };
+
   const handleWoodChange = (wood: string) => {
+    variantConfigured({ product_name: productName, wood, stain: selection.stain, field: 'wood' });
     setUserWood(wood);
     setUserStain(firstInStock(configurations.find(c => c.wood === wood)) || null);
   };
@@ -164,7 +188,7 @@ export default function ProductConfigurator({ productName, configurations }: Pro
             <StainSelector
               stains={currentConfig.stains}
               selected={selection.stain}
-              onSelect={setUserStain}
+              onSelect={handleStainChange}
             />
           )}
 
