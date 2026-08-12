@@ -786,6 +786,13 @@ main {
   padding: 8px 4px;
   text-decoration: none;
   transition: color 0.3s, transform 0.3s;
+  /* Four of these are <a> and one - Search - is a <button>. Without this the
+     button alone picked up the UA's grey field and border and rendered as a
+     box sitting in the middle of the bar. */
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
 }
 
 .nav-item:hover {
