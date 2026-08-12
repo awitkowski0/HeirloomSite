@@ -46,29 +46,14 @@ export default function ProductGallery({ images, productName, priority = false }
           />
         </button>
 
-        {images.length > 1 && (
-          <>
-            <button type="button" onClick={prev} className="gallery-nav-btn gallery-nav-prev" aria-label="Previous image">
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
-            </button>
-            <button type="button" onClick={next} className="gallery-nav-btn gallery-nav-next" aria-label="Next image">
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-            </button>
-            <div className="gallery-pagination" role="tablist" aria-label="Image gallery pagination">
-              {images.map((url, i) => (
-                <button
-                  key={url}
-                  type="button"
-                  role="tab"
-                  aria-selected={i === safeIndex}
-                  aria-label={`Go to image ${i + 1} of ${images.length}`}
-                  onClick={() => setIndex(i)}
-                  className={`gallery-dot ${i === safeIndex ? 'active' : ''}`}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        {/*
+          The arrows over the main image and a dot `tablist` beneath it used
+          to live here, giving this component four ways to change image -
+          arrows, dots, thumbnails, and the lightbox's own arrows - three of
+          which did exactly the same thing. The thumbnails are strictly better
+          than the dots (they show what you are selecting) and the lightbox
+          keeps its arrows, so both of these went.
+        */}
       </div>
 
       {images.length > 1 && (

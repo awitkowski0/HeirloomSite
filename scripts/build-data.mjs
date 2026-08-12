@@ -17,6 +17,26 @@ const PRODUCTS = join(PUBLIC, "data", "products");
 // Adding products raises the count and passes. Intentionally REMOVING a
 // product is a deliberate one-line edit here, which is the point -- an
 // accidental removal should never build.
+/**
+ * Collapse an accidentally repeated word ("The The Darlington features...",
+ * "solid solid hardwood").
+ *
+ * Six products ship this in both `description` and `metaDescription`, so it
+ * reaches the product page, the meta description and the JSON-LD. Normalising
+ * here rather than at render time means every generated artifact is clean and
+ * no component has to know about it. Each collapse is logged, so if a genuine
+ * double ("had had") ever appears it will be visible in the build output
+ * rather than silently rewritten.
+ */
+const dedupedWords = [];
+function collapseRepeatedWords(text, where) {
+  if (!text) return text;
+  return text.replace(/\b(\w+)(\s+)\1\b/gi, (match, word, gap, offset, full) => {
+    dedupedWords.push(`${where}: "${match}" -> "${word}"`);
+    return word;
+  });
+}
+
 const MIN_EXPECTED_PRODUCTS = 73;
 
 function fail(message) {
@@ -93,10 +113,13 @@ for (const dirName of productDirs) {
       productName,
       wood: v.variant,
       category: meta.category || null,
-      description: meta.description || null,
-      extendedDescription: meta.extendedDescription || null,
+      description: collapseRepeatedWords(meta.description, `${productName}.description`) || null,
+      extendedDescription:
+        collapseRepeatedWords(meta.extendedDescription, `${productName}.extendedDescription`) ||
+        null,
       title: meta.title || null,
-      metaDescription: meta.metaDescription || null,
+      metaDescription:
+        collapseRepeatedWords(meta.metaDescription, `${productName}.metaDescription`) || null,
       basePrice: bp,
       order: meta.order || null,
       tags: meta.tags || [],
@@ -220,6 +243,10 @@ const pricing = inventory.map(item => ({
 writeFileSync(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
 
 console.log(`Generated from ${productDirs.length} product directories`);
+if (dedupedWords.length > 0) {
+  console.log(`  collapsed ${dedupedWords.length} repeated word(s):`);
+  for (const d of dedupedWords) console.log(`    ${d}`);
+}
 console.log(`  public/data/inventory.json:  ${inventory.length} items`);
 console.log(`  public/data/products.json:   ${productIndex.length} products`);
 console.log(`  public/data/images.json:     ${allImages.length} images`);

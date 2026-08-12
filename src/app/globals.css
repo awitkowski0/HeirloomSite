@@ -401,6 +401,13 @@ main {
   aspect-ratio: 4 / 5;
   border-radius: 0;
   overflow: hidden;
+  background: transparent;
+}
+
+/* Same treatment as the catalogue cards: multiply drops the white plate the
+   photograph was shot on into the cream behind it. */
+.image-container img {
+  mix-blend-mode: multiply;
 }
 
 .image-container img {
@@ -1169,59 +1176,6 @@ main {
   }
 }
 
-/* Gallery & Lightbox */
-.gallery-nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 0;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.gallery-nav-prev {
-  left: 12px;
-}
-
-.gallery-nav-next {
-  right: 12px;
-}
-
-.gallery-pagination {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 2;
-}
-
-.gallery-dot {
-  height: 8px;
-  border-radius: var(--radius-circle);
-  border: none;
-  background-color: var(--outline-variant);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.gallery-dot.active {
-  width: 20px;
-  background-color: var(--primary);
-}
-
-.gallery-dot:not(.active) {
-  width: 8px;
-}
-
 .lightbox-overlay {
   position: fixed;
   inset: 0;
@@ -1361,12 +1315,6 @@ main {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
-}
-
-/* Controls sitting on dark photography need a ring that survives the backdrop. */
-.gallery-nav-btn:focus-visible {
-  outline: 2px solid var(--surface-container-lowest);
-  outline-offset: 3px;
 }
 
 .visually-hidden {
@@ -1892,12 +1840,6 @@ main {
   background-color: var(--primary);
   opacity: 0.2;
 }
-
-.product-overlay-price {
-  font-family: var(--font-label);
-  font-weight: 600;
-  color: var(--primary);
-}
 .product-overlay-woods {
   display: flex;
   gap: 6px;
@@ -1997,7 +1939,7 @@ main {
 .product-image {
   position: relative;
   min-height: 420px;
-  background-color: var(--surface-container-lowest);
+  background-color: transparent;
 }
 .product-image--empty {
   display: flex;
