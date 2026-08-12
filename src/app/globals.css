@@ -827,7 +827,9 @@ main {
 }
 
 .product-card {
-  background-color: var(--surface-container-lowest);
+  /* Transparent plus multiply on the image, matching the catalogue cards:
+     the white plate the photograph was shot on dissolves into the cream. */
+  background-color: transparent;
   border-radius: 0;
   overflow: hidden;
   position: relative;
@@ -1808,16 +1810,39 @@ main {
   font-size: 14px;
 }
 
+/*
+ * The link must be given a definite size by the flex container, not ask its
+ * own content for one.
+ *
+ * .product-card is display:flex, so this <a> is a flex item. Its only in-flow
+ * child is .product-card-img-wrap at width:100% - a percentage resolved
+ * against this element's width, which under `flex-basis: auto` is itself
+ * derived from content. That is circular, and the next/image `fill` inside is
+ * position:absolute so it contributes no intrinsic size to break it. The whole
+ * chain resolved to 0x0: every gallery image downloaded correctly and then
+ * rendered into a zero-sized box.
+ *
+ * `flex: 1 1 0` gives the item a definite main size from the container instead,
+ * and align-self: stretch does the same on the cross axis.
+ */
 .product-card-link-area {
   display: block;
+  flex: 1 1 0;
+  align-self: stretch;
+  min-width: 0;
   text-decoration: none;
   color: inherit;
+}
+.product-card-img-wrap img {
+  mix-blend-mode: multiply;
 }
 .product-card-img-wrap {
   position: relative; /* next/image fill */
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  /* Fills the card, which already has a fixed height; an aspect-ratio here
+     would overflow that height and be clipped by the card's overflow:hidden. */
+  height: 100%;
 }
 
 .product-card-text {
