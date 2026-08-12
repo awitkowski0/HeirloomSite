@@ -4,30 +4,21 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 /**
  * Capability token for reading an order.
  *
- * Keyed on ORDER_TOKEN_SECRET, not STRIPE_SECRET_KEY. Using the Stripe key
- * meant one secret served two unrelated purposes, and rotating Stripe silently
- * invalidated every outstanding order link a customer had been emailed.
- *
- * Falls back to the Stripe key only so that tokens minted before this change
- * keep working; the fallback is logged once so it does not become permanent.
+ * Keyed on ORDER_TOKEN_SECRET alone. It used to fall back to STRIPE_SECRET_KEY
+ * "so tokens minted before this change keep working" - but tokens live in
+ * sessionStorage for the length of one checkout, and nothing has ever emailed
+ * one, so there were no outstanding tokens for the fallback to protect. All it
+ * did was give one secret two unrelated jobs and widen what a leak of either
+ * one costs. Fails closed instead.
  */
-let warned = false;
-
 function secret(): string {
   const dedicated = process.env.ORDER_TOKEN_SECRET;
-  if (dedicated && dedicated.length >= 16) return dedicated;
-
-  const fallback = process.env.STRIPE_SECRET_KEY;
-  if (!fallback) throw new Error('ORDER_TOKEN_SECRET is not configured');
-  if (!warned) {
-    warned = true;
-    console.warn(
-      'ORDER_TOKEN_SECRET is unset; falling back to STRIPE_SECRET_KEY. ' +
-        'Set ORDER_TOKEN_SECRET (openssl rand -hex 32) so rotating the Stripe key ' +
-        'does not invalidate outstanding order links.'
+  if (!dedicated || dedicated.length < 16) {
+    throw new Error(
+      'ORDER_TOKEN_SECRET is not configured (needs at least 16 chars; openssl rand -hex 32)'
     );
   }
-  return fallback;
+  return dedicated;
 }
 
 export function mintOrderToken(paymentIntentId: string): string {

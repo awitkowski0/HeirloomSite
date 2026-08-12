@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/useCart';
 import { createPaymentIntent, type OrderTotals } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
+import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 import { variantLabel } from '@/lib/labels';
 import {
   cartItemRemoved,
@@ -29,7 +30,7 @@ const SHIPPING_CENTS = 0;
 const TAX_RATE = 0.08;
 
 export default function CheckoutClient() {
-  const { cart, hydrated, subtotal, clearCart, removeFromCart } = useCart();
+  const { cart, hydrated, subtotal, clearCart, removeFromCart, updateQuantity } = useCart();
   const router = useRouter();
 
   const [shipping, setShipping] = useState<ShippingValues>(EMPTY_SHIPPING);
@@ -37,7 +38,7 @@ export default function CheckoutClient() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const [clientSecret, setClientSecret] = useState('');
-  const [orderToken, setOrderToken] = useState('');
+  const [paymentIntentId, setPaymentIntentId] = useState('');
   const [serverTotals, setServerTotals] = useState<OrderTotals | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -114,12 +115,29 @@ export default function CheckoutClient() {
             addons: item.addons?.map(a => ({ name: a.name })),
           })),
           ...shipping,
+          agreedToTerms,
         },
         controller.signal
       );
       setClientSecret(data.clientSecret);
-      setOrderToken(data.token);
+      setPaymentIntentId(data.paymentIntentId);
       setServerTotals(data.totals);
+      /*
+       * Stored here, not on success.
+       *
+       * A redirect payment method - Klarna, Affirm, Cash App, all enabled by
+       * automatic_payment_methods - leaves the site entirely and comes back
+       * through return_url, so handleSuccess never runs and anything written
+       * there is never written at all. The token has to be on disk BEFORE the
+       * customer leaves, or the confirmation page has no way to read the order
+       * they just paid for.
+       */
+      try {
+        sessionStorage.setItem(`order_token_${data.paymentIntentId}`, data.token);
+      } catch {
+        // Safari private mode. The inline path still works; a redirect payment
+        // will land on the confirmation page unable to load the order.
+      }
       // Funnel step 5: the address validated and Stripe accepted the intent.
       shippingSubmitted({
         item_count: cart.reduce((n, i) => n + i.quantity, 0),
@@ -135,7 +153,9 @@ export default function CheckoutClient() {
     }
   };
 
-  const handleSuccess = (paymentIntentId: string) => {
+  // Named to avoid shadowing the state of the same name; this is the id from
+  // the PaymentIntent Stripe actually confirmed, so it is the authoritative one.
+  const handleSuccess = (confirmedId: string) => {
     // Captured before clearCart(), which empties the array these read from, and
     // from the server-authoritative total rather than the client estimate.
     orderCompleted({
@@ -143,16 +163,11 @@ export default function CheckoutClient() {
       order_total: fromCents(totals.totalCents),
     });
     clearCart();
-    try {
-      // Handed to the confirmation page through sessionStorage rather than the
-      // URL: the token is a bearer credential for an endpoint returning name,
-      // street address and email, and PostHog captures $current_url on every
-      // pageview, so a query parameter shipped it to a third party.
-      sessionStorage.setItem(`order_token_${paymentIntentId}`, orderToken);
-    } catch {
-      // Falls back to the query parameter below if storage is unavailable.
-    }
-    router.push(`/order-confirmation/${paymentIntentId}`);
+    // The token was written to sessionStorage when the intent was created, so
+    // there is nothing to hand over here. It never travels in the URL: it is a
+    // bearer credential for an endpoint returning name, street address and
+    // email, and PostHog captures $current_url on every pageview.
+    router.push(`/order-confirmation/${confirmedId}`);
   };
 
   // Gate on `hydrated`, not on cart.length: the server renders an empty cart,
@@ -210,8 +225,18 @@ export default function CheckoutClient() {
               </div>
             )}
 
+            {/* Above the submit, not below it: acceptance is now a
+                precondition of creating the PaymentIntent, so asking for it
+                after the button would strand the customer on a server error
+                pointing at a checkbox further down the page. */}
+            <TermsBlock agreed={agreedToTerms} onChange={setAgreedToTerms} />
+
             {!detailsLocked && (
-              <button type="submit" className="add-to-cart checkout-continue" disabled={submitting}>
+              <button
+                type="submit"
+                className="add-to-cart checkout-continue"
+                disabled={submitting || !agreedToTerms}
+              >
                 {submitting ? 'Preparing payment…' : 'Continue to payment'}
               </button>
             )}
@@ -225,7 +250,7 @@ export default function CheckoutClient() {
                 // Editing details invalidates the intent; a new one is created
                 // on the next submit.
                 setClientSecret('');
-                setOrderToken('');
+                setPaymentIntentId('');
                 setServerTotals(null);
               }}
             >
@@ -233,15 +258,23 @@ export default function CheckoutClient() {
             </button>
           )}
 
-          <TermsBlock agreed={agreedToTerms} onChange={setAgreedToTerms} />
-
           {clientSecret && (
             <PaymentSection
               clientSecret={clientSecret}
               agreedToTerms={agreedToTerms}
+              /*
+               * The real confirmation URL for THIS order.
+               *
+               * This was `/order-confirmation/pending`, a literal string that
+               * is not a payment intent id: it failed the ^pi_ check with a
+               * 400, no token had been stored under "pending", and the cart
+               * was never cleared. Every customer who paid with a redirect
+               * method - having actually been charged - landed on "We couldn't
+               * load that order" with their cart still full.
+               */
               returnUrl={
                 typeof window !== 'undefined'
-                  ? `${window.location.origin}/order-confirmation/pending`
+                  ? `${window.location.origin}/order-confirmation/${paymentIntentId}`
                   : ''
               }
               onSuccess={handleSuccess}
@@ -265,9 +298,33 @@ export default function CheckoutClient() {
                     <p className="label-caps text-on-surface-variant">
                       {variantLabel(item.wood, item.stainName)}
                     </p>
-                    <p className="body-md">
-                      {formatPrice(item.price)} &times; {item.quantity}
-                    </p>
+                    <p className="body-md">{formatPrice(item.price)}</p>
+                    {/* The cart had no quantity control anywhere on the site -
+                        updateQuantity was written, typed and exported with no
+                        call site - so a line could only reach 2 by adding the
+                        product again, and could only ever be removed, never
+                        reduced. */}
+                    <div className="qty-stepper">
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        disabled={detailsLocked || item.quantity <= 1}
+                        aria-label={`Decrease quantity of ${item.productName}`}
+                      >
+                        &minus;
+                      </button>
+                      <span aria-live="polite" aria-label={`Quantity: ${item.quantity}`}>
+                        {item.quantity}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        disabled={detailsLocked || item.quantity >= MAX_QUANTITY_PER_LINE}
+                        aria-label={`Increase quantity of ${item.productName}`}
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                   <button
                     type="button"

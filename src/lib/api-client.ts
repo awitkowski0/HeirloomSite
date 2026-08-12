@@ -15,6 +15,8 @@ export interface OrderTotals {
 
 export interface CreatePaymentIntentRequest {
   cart: CartItemPayload[];
+  /** Recorded on the PaymentIntent; the server rejects anything but `true`. */
+  agreedToTerms: boolean;
   email: string;
   firstName: string;
   lastName: string;

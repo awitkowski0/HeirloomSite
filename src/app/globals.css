@@ -2757,3 +2757,29 @@ main {
 .search-result-oos {
   color: var(--error);
 }
+
+/* Quantity stepper in the checkout order summary. */
+.qty-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+.qty-stepper button {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+.qty-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.qty-stepper span {
+  min-inline-size: 1.5rem;
+  text-align: center;
+}

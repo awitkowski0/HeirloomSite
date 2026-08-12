@@ -1,6 +1,7 @@
 'use client';
 
 import type { CartItem, CartAddon } from '@/types';
+import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 
 const STORAGE_KEY = 'heirloom_cart';
 const EVENT = 'heirloom_cart_change';
@@ -96,7 +97,9 @@ export function parseStoredCart(raw: string | null): CartItem[] {
       cribName: typeof e.cribName === 'string' ? e.cribName : undefined,
       price: e.price,
       image: typeof e.image === 'string' ? e.image : '',
-      quantity: Math.min(e.quantity, 99),
+      // Clamped to the same ceiling the server enforces, so a cart restored
+      // from localStorage can never carry a line checkout will reject.
+      quantity: Math.min(e.quantity, MAX_QUANTITY_PER_LINE),
     });
   }
   return out;

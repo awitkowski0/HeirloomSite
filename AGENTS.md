@@ -77,6 +77,20 @@ intentionally remove a product, lower it.
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`
 - `STRIPE_SECRET_KEY` — server only
-- `ORDER_TOKEN_SECRET` — server only; HMAC key for order-lookup tokens. Must be
-  independent of the Stripe key (`openssl rand -hex 32`).
+- `STRIPE_WEBHOOK_SECRET` — server only; verifies `/api/stripe/webhook`. The
+  route returns 503 rather than trusting an unsigned body.
+- `ORDER_TOKEN_SECRET` — server only; HMAC key for order-lookup tokens. Required,
+  with no fallback (`openssl rand -hex 32`). The token is passed to
+  `/api/orders/*` in the `x-order-token` header only — never in the URL, because
+  PostHog captures `$current_url` with its query string.
 - `GITHUB_TOKEN`, `VERCEL_TOKEN` — local tooling only
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
