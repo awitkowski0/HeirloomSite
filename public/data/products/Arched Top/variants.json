@@ -1,9 +1,9 @@
 [
   {
-    "variant": "BrownMaple / Antique Slate",
+    "variant": "Antique Slate",
     "label": "Brown Maple /  Antique  Slate",
     "stains": [
-      "BrownMaple / Antique Slate"
+      "Antique Slate"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Antique Slate",
@@ -11,10 +11,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Driftwood",
+    "variant": "Driftwood",
     "label": "Brown Maple /  Driftwood",
     "stains": [
-      "BrownMaple / Driftwood"
+      "Driftwood"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Driftwood",
@@ -22,10 +22,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Frost",
+    "variant": "Frost",
     "label": "Brown Maple /  Frost",
     "stains": [
-      "BrownMaple / Frost"
+      "Frost"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Frost",
@@ -33,10 +33,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Fruitwood",
+    "variant": "Fruitwood",
     "label": "Brown Maple /  Fruitwood",
     "stains": [
-      "BrownMaple / Fruitwood"
+      "Fruitwood"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Fruitwood",
@@ -44,10 +44,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Harvest",
+    "variant": "Harvest",
     "label": "Brown Maple /  Harvest",
     "stains": [
-      "BrownMaple / Harvest"
+      "Harvest"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Harvest",
@@ -55,10 +55,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Mx",
+    "variant": "Mx",
     "label": "Brown Maple /  Mx",
     "stains": [
-      "BrownMaple / Mx"
+      "Mx"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Mx",
@@ -66,10 +66,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Natural",
+    "variant": "Natural",
     "label": "Brown Maple /  Natural",
     "stains": [
-      "BrownMaple / Natural"
+      "Natural"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Natural",
@@ -77,10 +77,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Provincial",
+    "variant": "Provincial",
     "label": "Brown Maple /  Provincial",
     "stains": [
-      "BrownMaple / Provincial"
+      "Provincial"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Provincial",
@@ -88,10 +88,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Seely",
+    "variant": "Seely",
     "label": "Brown Maple /  Seely",
     "stains": [
-      "BrownMaple / Seely"
+      "Seely"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Seely",
@@ -99,10 +99,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Smoke",
+    "variant": "Smoke",
     "label": "Brown Maple /  Smoke",
     "stains": [
-      "BrownMaple / Smoke"
+      "Smoke"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Smoke",
@@ -110,10 +110,10 @@
     "weight": null
   },
   {
-    "variant": "BrownMaple / Washington",
+    "variant": "Washington",
     "label": "Brown Maple /  Washington",
     "stains": [
-      "BrownMaple / Washington"
+      "Washington"
     ],
     "basePrice": 2300,
     "sku": "FQP-201-BrownMaple_OCS_100_Washington",

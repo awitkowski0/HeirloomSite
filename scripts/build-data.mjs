@@ -9,9 +9,15 @@ const PRODUCTS = join(PUBLIC, "data", "products");
 
 // The site statically prerenders one page per product slug. If this script
 // silently produces a short or slug-less product list, the build succeeds and
-// ships a deploy where every /product/<slug> URL 404s -- including URLs that
-// are already indexed by Google and linked from Babylist registries. Failing
-// loudly here is the only cheap place to catch that.
+// ships a deploy where every /product/<slug> URL 404s.
+//
+// The original note here said those URLs were already indexed by Google and
+// linked from Babylist registries. That is not true -- the site is not public
+// and nothing has been added to a registry -- and it was being read as a
+// standing ban on changing any product URL. The guard is still worth keeping,
+// but for the plainer reason: a data-pipeline failure that empties the
+// catalogue should fail the build, not ship a working-looking site with no
+// products in it.
 //
 // This is a tripwire, not a guess: it is the exact current product count.
 // Adding products raises the count and passes. Intentionally REMOVING a
@@ -21,8 +27,11 @@ const PRODUCTS = join(PUBLIC, "data", "products");
  * Collapse an accidentally repeated word ("The The Darlington features...",
  * "solid solid hardwood").
  *
- * Six products ship this in both `description` and `metaDescription`, so it
- * reaches the product page, the meta description and the JSON-LD. Normalising
+ * The catalogue is clean of these today -- the six offenders were boilerplate
+ * descriptions replaced during the duplicate-listing merge -- so this currently
+ * collapses nothing. It stays because the copy is re-imported from a supplier
+ * feed, and it reaches the product page, the meta description and the JSON-LD.
+ * Normalising
  * here rather than at render time means every generated artifact is clean and
  * no component has to know about it. Each collapse is logged, so if a genuine
  * double ("had had") ever appears it will be visible in the build output
@@ -37,7 +46,58 @@ function collapseRepeatedWords(text, where) {
   });
 }
 
-const MIN_EXPECTED_PRODUCTS = 73;
+/**
+ * `variantType` declares what the `variant` field MEANS for a product, because
+ * one field carries five different things across the catalogue: a wood species
+ * ("BrownMaple"), a rug size ('5\'7" x 7\'10"'), a finish ("Asbury-Brown"), or
+ * nothing at all ("Default Title", a Shopify export artifact).
+ *
+ * The UI used to guess this at render time by sniffing the string for quote
+ * marks and "x " - which silently mislabelled every product the heuristic did
+ * not anticipate, and hid the finish selector entirely on the seven products
+ * whose variants were flattened to "BrownMaple / Antique Slate".
+ *
+ * Declaring it is only half the fix; a declaration that can drift from the data
+ * is worth little, so it is checked here against the actual variant names.
+ */
+const WOOD_SPECIES = new Set(["brownmaple", "cherrywood", "redoak"]);
+const VARIANT_TYPES = new Set(["wood", "size", "finish", "none"]);
+
+function inferVariantType(names) {
+  if (names.length === 1 && names[0] === "Default Title") return "none";
+  if (names.every(n => WOOD_SPECIES.has(n.toLowerCase().replace(/\s/g, "")))) return "wood";
+  if (names.every(n => n.includes('"') || /\d'/.test(n))) return "size";
+  return "finish";
+}
+
+const variantTypeProblems = [];
+function checkVariantType(dirName, declared, names) {
+  if (!declared) {
+    variantTypeProblems.push(`${dirName}: product.json has no variantType`);
+    return;
+  }
+  if (!VARIANT_TYPES.has(declared)) {
+    variantTypeProblems.push(`${dirName}: variantType "${declared}" is not one of ${[...VARIANT_TYPES].join(", ")}`);
+    return;
+  }
+  // A composite "BrownMaple / Antique Slate" is the specific corruption this
+  // guard exists to keep out: it reads as a finish but hides a wood.
+  const composite = names.filter(n => n.includes(" / "));
+  if (composite.length > 0) {
+    variantTypeProblems.push(
+      `${dirName}: variant names still encode wood AND finish (${composite[0]}); split them`
+    );
+    return;
+  }
+  const inferred = inferVariantType(names);
+  if (inferred !== declared) {
+    variantTypeProblems.push(
+      `${dirName}: variantType is "${declared}" but the variant names look like "${inferred}" (${names.slice(0, 2).join(", ")})`
+    );
+  }
+}
+
+const MIN_EXPECTED_PRODUCTS = 67;
 
 function fail(message) {
   console.error(`\n  FATAL: ${message}\n`);
@@ -87,6 +147,7 @@ for (const dirName of productDirs) {
   if (!meta) fail(`${dirName}/product.json exists but could not be parsed`);
 
   const productName = meta.productName;
+  checkVariantType(dirName, meta.variantType, variants.map(v => v.variant));
   const imageBase = `/data/products/${encodeURIComponent(dirName)}/`;
   let minPrice = Infinity;
 
@@ -113,6 +174,7 @@ for (const dirName of productDirs) {
       productName,
       wood: v.variant,
       category: meta.category || null,
+      variantType: meta.variantType,
       description: collapseRepeatedWords(meta.description, `${productName}.description`) || null,
       extendedDescription:
         collapseRepeatedWords(meta.extendedDescription, `${productName}.extendedDescription`) ||
@@ -121,7 +183,6 @@ for (const dirName of productDirs) {
       metaDescription:
         collapseRepeatedWords(meta.metaDescription, `${productName}.metaDescription`) || null,
       basePrice: bp,
-      order: meta.order || null,
       tags: meta.tags || [],
       sku: v.sku || null,
       slug: meta.slug || null,
@@ -170,6 +231,10 @@ if (productIndex.length < MIN_EXPECTED_PRODUCTS) {
     `only ${productIndex.length} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
       `    If a product was removed on purpose, lower MIN_EXPECTED_PRODUCTS in this file.`
   );
+}
+
+if (variantTypeProblems.length > 0) {
+  fail(`variantType does not match the data:\n` + variantTypeProblems.map(p => `    - ${p}`).join("\n"));
 }
 
 const slugless = productIndex.filter(p => !p.slug);
@@ -240,6 +305,9 @@ const pricing = inventory.map(item => ({
     inStock: s.inStock !== false,
   })),
 }));
+// data/ holds only generated output now that the stale hand-maintained copies
+// of the catalogue were removed, so it will not exist in a fresh clone.
+mkdirSync(join(root, "data"), { recursive: true });
 writeFileSync(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
 
 console.log(`Generated from ${productDirs.length} product directories`);

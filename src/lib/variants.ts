@@ -24,13 +24,13 @@ export function variantSlug(name: string): string {
 /**
  * Whether a finish segment adds anything to the wood segment.
  *
- * Some products encode the finish INTO the wood field - Hudson Style's woods
- * are "BrownMaple / Antique Slate", "BrownMaple / Driftwood" and so on, and
- * each carries a single stain with the same name. Emitting a finish segment
- * there would produce
- * /product/hudson-style/brown_maple_antique_slate/brown_maple_antique_slate.
- * Same containment test as variantLabel(), so the URL and the visible label
- * agree about when a finish is redundant.
+ * Still load-bearing after the composite "BrownMaple / Antique Slate" variants
+ * were split: on a `finish`-type product the variant IS the finish, so each
+ * variant carries a single stain of exactly the same name (variant "Driftwood",
+ * stains ["Driftwood"]). Emitting a finish segment there would produce
+ * /product/arched-top/driftwood/driftwood. Same containment test as
+ * variantLabel(), so the URL and the visible label agree about when a finish is
+ * redundant.
  */
 export function stainIsDistinct(wood: string, stainName: string): boolean {
   const normalise = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -77,6 +77,13 @@ export function variantPathsFor(configurations: InventoryItem[]): string[][] {
   const seen = new Set<string>();
 
   for (const config of configurations) {
+    /*
+     * "Default Title" is a Shopify export artifact, not a choice a customer
+     * makes. Emitting it as a segment gave all 43 single-variant products a
+     * /<slug>/default_title page that was a byte-identical duplicate of
+     * /<slug>, prerendered and submitted in the sitemap.
+     */
+    if (config.variantType === 'none') continue;
     const woodSeg = variantSlug(config.wood);
     if (!woodSeg || seen.has(woodSeg)) continue;
     seen.add(woodSeg);

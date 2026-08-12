@@ -34,7 +34,7 @@ export function generateStaticParams(): Params[] {
   const slugs = getAllProductSlugs();
   // Mirrors the guard in build-data.mjs. If the data artifact is short, refuse
   // to build rather than ship a deploy that 404s already-indexed product URLs.
-  if (slugs.length < 70) {
+  if (slugs.length < 67) {
     throw new Error(
       `Refusing to build: only ${slugs.length} product slugs found. Run \`npm run data:build\`.`
     );

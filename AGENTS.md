@@ -28,6 +28,23 @@ Furniture e-commerce site. Next.js App Router + TypeScript, deployed on Vercel.
 - `src/data/search-docs.json` — lazily imported by the client search
 - `data/pricing.json` — statically imported by the payment-intent route
 
+Every one of those is generated and gitignored. `data/` holds nothing else;
+the hand-maintained copies of the catalogue that used to sit there
+(`data/{inventory,images,settings,showroom,stain-types}.json`, plus
+`public/data/{stains,variants,settings,stain-types}.json`) were stale by
+hundreds of rows, read by nothing, and have been removed.
+
+A product directory's NAME is the image base path, so it cannot contain a
+slash: three products replace `/` with `-` (`3-4 Guard Rail` for the product
+`3/4 Guard Rail`). `productName` in `product.json` is the real name; the
+directory is only a path.
+
+`product.json` must declare `variantType` — `wood`, `size`, `finish` or `none`
+— saying what the `variant` field means for that product. It is validated
+against the actual variant names at build time and the build fails on a
+mismatch. Do not reintroduce composite `"BrownMaple / Antique Slate"` variants:
+they hide a wood inside a finish, and the finish selector will not render.
+
 The script has hard guards and **exits 1** rather than emit a short or
 slug-less product list. Every product is statically prerendered at
 `/product/<slug>`, so a silent data failure would ship a deploy that 404s
@@ -39,8 +56,11 @@ intentionally remove a product, lower it.
   outside a `<Suspense>` boundary. Either one opts the route out of static
   prerendering, which silently undoes the site's SEO. Check the `next build`
   route table: any `ƒ` on a content route is a regression.
-- Product URLs `/product/<slug>` are live and referenced by Babylist registry
-  entries. Do not change them.
+- Product URLs `/product/<slug>` are stable by preference, not by constraint.
+  An earlier note claimed they were live and referenced by Babylist registry
+  entries; the site is not public and nothing has been registered, so there is
+  no external link to break. Change a slug when a better one exists — but keep
+  them stable once the site does go live.
 - The client never sends prices. `src/lib/pricing.ts` is the only source of
   truth for what a cart costs, and all money is in integer cents.
 - Responsive work is CSS-first: one component, one DOM tree, layout switched in

@@ -78,7 +78,13 @@ export function isDimensionName(name: string): boolean {
   return /\d\s*(?:'|")|\bx\b/i.test(name) && /['"]/.test(name);
 }
 
-/** The finish part of a composite "Wood / Stain" name. */
+/**
+ * The finish part of a "Wood / Stain" name.
+ *
+ * No catalogue name is composite any more - those variants were split - but the
+ * swatch table is keyed on finish words, so reducing to the last segment stays
+ * the correct read for any name that does arrive with a wood prefix.
+ */
 function finishSegment(name: string): string {
   const parts = name.split('/');
   return (parts[parts.length - 1] || name).trim().toLowerCase();
@@ -105,7 +111,13 @@ export function getStainColor(name: string): string | null {
   return FALLBACK;
 }
 
-/** Display label: drops the redundant wood prefix from "Wood / Stain" names. */
+/**
+ * Display label: drops a redundant wood prefix from a "Wood / Stain" name.
+ *
+ * Inert against the current catalogue, which has no composite names left. Kept
+ * as a display-layer guard so a re-import that reintroduces them renders a
+ * finish rather than "BrownMaple / Driftwood".
+ */
 export function stainLabel(name: string): string {
   const parts = name.split('/');
   if (parts.length < 2) return name;

@@ -15,8 +15,8 @@
       "Smoke",
       "Washington"
     ],
-    "basePrice": 2499,
-    "sku": null,
+    "basePrice": 2250,
+    "sku": "FQP-501",
     "dimensions": null,
     "weight": null
   },
@@ -26,7 +26,7 @@
     "stains": [
       "Antique Slate",
       "Driftwood",
-      "Frost Cherry",
+      "Frost",
       "Fruitwood",
       "Harvest",
       "Mx",
@@ -37,7 +37,7 @@
       "Washington"
     ],
     "basePrice": 2499,
-    "sku": null,
+    "sku": "FQP-501",
     "dimensions": null,
     "weight": null
   },
@@ -58,7 +58,7 @@
       "Washington"
     ],
     "basePrice": 2499,
-    "sku": null,
+    "sku": "FQP-501",
     "dimensions": null,
     "weight": null
   }

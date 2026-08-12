@@ -12,21 +12,25 @@ import PurchaseAssurances from './PurchaseAssurances';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
 import { variantHref } from '@/lib/variants';
-import type { InventoryItem, Stain } from '@/types';
+import type { InventoryItem, Stain, VariantType } from '@/types';
 
-const WOOD_SPECIES = ['brownmaple', 'cherrywood', 'redoak'];
-
-function getVariantLabel(woods: string[]): string | null {
-  if (woods.length <= 1 && woods[0] === 'Default Title') return null;
-  if (woods.some(w => WOOD_SPECIES.includes(w.toLowerCase().replace(/\s/g, '')))) return 'Select Wood Species';
-  if (woods.some(w => w.includes('"') || w.includes('x ') || w.includes('FT') || w.toLowerCase().includes('feet')))
-    return 'Select Size';
-  return 'Select Option';
-}
-
-function isHandcraftedWood(woods: string[]): boolean {
-  return woods.some(w => WOOD_SPECIES.includes(w.toLowerCase().replace(/\s/g, '')));
-}
+/**
+ * What to call the variant selector, keyed on the product's declared type.
+ *
+ * This was a heuristic that sniffed the variant strings for quote marks, "x ",
+ * "FT" and "feet". It mislabelled everything it did not anticipate as the
+ * generic "Select Option" - which is what the eleven finish-variant products
+ * got - and on the seven products whose variants had been flattened to
+ * "BrownMaple / Antique Slate" it also meant `showStainStep` was false, so the
+ * finish selector never rendered at all. The type is now declared in
+ * product.json and validated against the data at build time.
+ */
+const VARIANT_LABELS: Record<VariantType, string | null> = {
+  wood: 'Select Wood Species',
+  size: 'Select Size',
+  finish: 'Select Finish',
+  none: null,
+};
 
 function firstInStock(config: InventoryItem | undefined): string {
   return config?.stains.find((s: Stain) => s.inStock)?.name || '';
@@ -55,9 +59,12 @@ export default function ProductConfigurator({
   const [showCartPopup, setShowCartPopup] = useState(false);
 
   const woods = useMemo(() => configurations.map(c => c.wood), [configurations]);
-  const variantLabel = getVariantLabel(woods);
-  const showStainStep = variantLabel === 'Select Wood Species';
-  const showDeliveryMessage = isHandcraftedWood(woods);
+  const variantType = configurations[0]?.variantType ?? 'none';
+  const variantLabel = VARIANT_LABELS[variantType];
+  // Only a wood-variant product has a separate finish axis; for a finish-variant
+  // product the variant selector IS the finish selector.
+  const showStainStep = variantType === 'wood';
+  const showDeliveryMessage = variantType === 'wood';
 
   /**
    * Legacy ?wood= / ?stain= links only.
