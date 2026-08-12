@@ -2752,3 +2752,8 @@ main {
   line-height: 1.55;
   color: var(--ink-muted);
 }
+
+/* A search hit whose matched finish is currently withdrawn. */
+.search-result-oos {
+  color: var(--error);
+}

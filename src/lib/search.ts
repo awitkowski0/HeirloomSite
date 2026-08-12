@@ -13,6 +13,8 @@ export interface SearchResult {
   basePrice: number;
   image: string;
   matchedStain?: string;
+  /** True when the finish the query matched is currently withdrawn. */
+  matchedStainUnavailable?: boolean;
   /** How many variants of this product matched, for a "6 finishes" hint. */
   variantCount: number;
 }
@@ -24,6 +26,7 @@ interface SearchDoc {
   wood: string;
   category: string;
   stainNames: string;
+  unavailableStains: string[];
   description: string;
   basePrice: number;
   stainImages: Record<string, string>;
@@ -34,7 +37,16 @@ const MAX_RESULTS = 8;
 function createIndex() {
   return new MiniSearch<SearchDoc>({
     fields: ['productName', 'wood', 'category', 'stainNames', 'description'],
-    storeFields: ['productName', 'slug', 'wood', 'category', 'basePrice', 'stainImages', 'stainNames'],
+    storeFields: [
+      'productName',
+      'slug',
+      'wood',
+      'category',
+      'basePrice',
+      'stainImages',
+      'stainNames',
+      'unavailableStains',
+    ],
     searchOptions: {
       boost: { productName: 3, wood: 2, stainNames: 2, category: 2, description: 1 },
       prefix: true,
@@ -114,6 +126,8 @@ function toResults(
       // A later variant may be the one that actually matched the stain term.
       if (!existing.matchedStain) {
         existing.matchedStain = findMatchedStain(doc.stainNames, query);
+        existing.matchedStainUnavailable =
+          !!existing.matchedStain && (doc.unavailableStains || []).includes(existing.matchedStain);
       }
       continue;
     }
@@ -134,6 +148,8 @@ function toResults(
       basePrice: doc.basePrice,
       image,
       matchedStain,
+      matchedStainUnavailable:
+        !!matchedStain && (doc.unavailableStains || []).includes(matchedStain),
       variantCount: 1,
     });
   }

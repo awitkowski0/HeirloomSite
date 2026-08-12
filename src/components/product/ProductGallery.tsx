@@ -15,10 +15,18 @@ export default function ProductGallery({ images, productName, priority = false }
   const [index, setIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
+  /*
+   * A product with no images is a missing asset, not a stock state.
+   *
+   * This said "Out of Stock", which was wrong on both counts: nothing here
+   * knows anything about availability, and the buy button next to it went on
+   * saying ADD TO CART. Two live products have no photography at all
+   * (crib-mattress, guard-rail), so both pages contradicted themselves.
+   */
   if (images.length === 0) {
     return (
       <div className="image-container product-image product-image--empty">
-        <p className="product-image-empty-text">Out of Stock</p>
+        <p className="product-image-empty-text">Photography coming soon</p>
       </div>
     );
   }

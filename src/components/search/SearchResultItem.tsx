@@ -62,6 +62,12 @@ export default function SearchResultItem({
             : r.variantCount > 1
               ? `${r.variantCount} finishes`
               : humanizeWood(r.wood)}
+          {/* Searching a finish that has been withdrawn used to route the
+              visitor to a product page where that swatch is disabled, with no
+              warning on the way. */}
+          {r.matchedStainUnavailable ? (
+            <span className="search-result-oos"> (unavailable)</span>
+          ) : null}
           {r.category ? <> &bull; {r.category}</> : null}
         </span>
         <span className="search-result-price">

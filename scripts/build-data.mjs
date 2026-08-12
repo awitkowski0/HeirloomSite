@@ -71,6 +71,7 @@ function inferVariantType(names) {
 }
 
 const variantTypeProblems = [];
+const availabilityProblems = [];
 function checkVariantType(dirName, declared, names) {
   if (!declared) {
     variantTypeProblems.push(`${dirName}: product.json has no variantType`);
@@ -152,6 +153,32 @@ for (const dirName of productDirs) {
   let minPrice = Infinity;
 
   for (const v of variants) {
+    /*
+     * Availability, sourced rather than invented.
+     *
+     * `inStock` was the literal `true` here, so all 453 stain rows in every
+     * generated artifact said in-stock and none ever said otherwise. That made
+     * the whole out-of-stock apparatus unreachable: the disabled swatches, the
+     * "Sold Out" chips, the aria labels, the schema.org branch, and the
+     * server-side rejection in src/lib/pricing.ts, which could never fire.
+     *
+     * Both keys are optional, because the normal state of a made-to-order
+     * catalogue is that everything is orderable. Set `unavailable: true` on a
+     * variant to withdraw a whole wood, or list finishes in
+     * `unavailableStains` to withdraw individual ones.
+     */
+    const unavailable = new Set(v.unavailableStains || []);
+    const stainNames = new Set(v.stains || []);
+    for (const name of unavailable) {
+      if (!stainNames.has(name)) {
+        // Silently doing nothing is the failure mode worth catching: the finish
+        // stays on sale and nobody finds out until it is ordered.
+        availabilityProblems.push(
+          `${dirName} / ${v.variant}: unavailableStains lists "${name}", which is not one of its stains`
+        );
+      }
+    }
+
     const stains = (v.stains || []).map(stainName => {
       const mediaKey = `${v.variant}||${stainName}`;
       const images = media[mediaKey] || [];
@@ -160,7 +187,7 @@ for (const dirName of productDirs) {
 
       return {
         name: stainName,
-        inStock: true,
+        inStock: v.unavailable !== true && !unavailable.has(stainName),
         priceAddition: 0,
         image: firstImage,
         gallery: gallery.length > 0 ? gallery : undefined,
@@ -233,6 +260,10 @@ if (productIndex.length < MIN_EXPECTED_PRODUCTS) {
   );
 }
 
+if (availabilityProblems.length > 0) {
+  fail(`unavailableStains does not match the data:\n` + availabilityProblems.map(p => `    - ${p}`).join("\n"));
+}
+
 if (variantTypeProblems.length > 0) {
   fail(`variantType does not match the data:\n` + variantTypeProblems.map(p => `    - ${p}`).join("\n"));
 }
@@ -282,6 +313,9 @@ for (const item of inventory) {
     wood: item.wood,
     category: item.category || "",
     stainNames: item.stains.map(s => s.name).join(" "),
+    // Availability was deliberately omitted here, which meant a search result
+    // could never reflect it. It can now, because it is real.
+    unavailableStains: item.stains.filter(s => !s.inStock).map(s => s.name),
     description: (item.description || "").slice(0, 300),
     basePrice: item.basePrice,
     stainImages: Object.fromEntries(item.stains.map(s => [s.name, s.image || ""])),
@@ -315,7 +349,9 @@ if (dedupedWords.length > 0) {
   console.log(`  collapsed ${dedupedWords.length} repeated word(s):`);
   for (const d of dedupedWords) console.log(`    ${d}`);
 }
-console.log(`  public/data/inventory.json:  ${inventory.length} items`);
+const stainRows = inventory.reduce((n, i) => n + i.stains.length, 0);
+const oosRows = inventory.reduce((n, i) => n + i.stains.filter(s => !s.inStock).length, 0);
+console.log(`  public/data/inventory.json:  ${inventory.length} items, ${stainRows} finishes (${oosRows} unavailable)`);
 console.log(`  public/data/products.json:   ${productIndex.length} products`);
 console.log(`  public/data/images.json:     ${allImages.length} images`);
 console.log(`  src/data/search-docs.json:   ${searchDocs.length} docs`);

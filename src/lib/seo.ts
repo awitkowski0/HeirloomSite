@@ -112,6 +112,33 @@ export function productJsonLd(opts: {
       availability: anyInStock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
+      /*
+       * The furniture is made to order with a six-to-eight week lead time, and
+       * until now nothing in the markup said so - the page promised one thing
+       * and the structured data implied stock on a shelf.
+       *
+       * schema.org/MadeToOrder would be the literal term, but Google does not
+       * support it in the `availability` enum (BackOrder, Discontinued,
+       * InStock, InStoreOnly, LimitedAvailability, OnlineOnly, OutOfStock,
+       * PreOrder, PreSale, SoldOut). InStock remains correct - the item IS
+       * orderable - so the lead time is expressed where Google actually reads
+       * it, as handling time. Delivery is included in the price, hence a
+       * shippingRate of 0; see SHIPPING_CENTS in src/lib/pricing.ts.
+       */
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'USD' },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'US' },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 42,
+            maxValue: 56,
+            unitCode: 'DAY',
+          },
+        },
+      },
       url: absoluteUrl(`/product/${opts.slug}`),
     },
   };
