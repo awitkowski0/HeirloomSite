@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Noto_Serif, Manrope } from 'next/font/google';
+import { Playfair_Display, Manrope } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
@@ -8,13 +8,26 @@ import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
-const notoSerif = Noto_Serif({
+/*
+ * Playfair Display is the high-contrast old-style serif the editorial look is
+ * built on: headlines, prices, and the tracked small-caps used for nav, labels
+ * and buttons.
+ *
+ * No `weight` array on purpose - Playfair Display is a variable font, so
+ * omitting it ships the whole 400-900 axis in a single file. Enumerating
+ * weights would download four separate static instances instead.
+ */
+const playfair = Playfair_Display({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-serif',
+  variable: '--font-playfair',
   display: 'swap',
 });
 
+/*
+ * Kept for body copy, forms, checkout and search. Setting a high-contrast
+ * display serif at 13-16px on a checkout field reads as a downgrade, not as
+ * editorial, so the dense UI surfaces stay on a humanist sans.
+ */
 const manrope = Manrope({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -61,14 +74,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#322214',
+  themeColor: '#3A2A20',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${notoSerif.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${playfair.variable} ${manrope.variable}`}>
       <head>
         {/*
           Material Symbols stays a plain <link> rather than next/font: it is a

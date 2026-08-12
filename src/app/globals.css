@@ -86,8 +86,32 @@
   --shadow-soft: 0 4px 20px -4px rgba(74, 55, 40, 0.08);
   --shadow-ambient: 0 8px 30px rgba(74, 55, 40, 0.05);
 
-  --font-label: var(--font-manrope), var(--font-label);
-  --font-serif: var(--font-noto-serif), var(--font-serif);
+  /*
+   * Three type roles.
+   *
+   * These previously read:
+   *   --font-label: var(--font-manrope), var(--font-label);
+   *   --font-serif: var(--font-noto-serif), var(--font-serif);
+   * which is a self-reference. Per CSS Variables 3, a custom property that
+   * depends on itself - including through a var() fallback - is invalid at
+   * computed-value time (the spec's own example is that `--foo: var(--foo,
+   * 10px)` is invalid, not 10px). Both therefore resolved to nothing,
+   * `body { font-family: var(--font-label) }` was invalid, and the whole site
+   * rendered in the browser default: measured as Times on body AND headlines,
+   * while still downloading two webfonts that were never used.
+   *
+   * The generics live here rather than in next/font's `fallback` option,
+   * because passing that option REPLACES the metric-adjusted local fallback
+   * next/font generates ("Playfair Display Fallback"), which is what keeps
+   * layout shift down while the webfont loads.
+   */
+  --font-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
+  --font-caps: var(--font-playfair), Georgia, serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  /* Legacy names, kept because ~2900 lines below still reference them. */
+  --font-serif: var(--font-display);
+  --font-label: var(--font-body);
 }
 
 html {
