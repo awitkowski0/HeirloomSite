@@ -243,7 +243,6 @@ body {
 }
 
 
-
 .text-primary {
   color: var(--primary);
 }
@@ -357,14 +356,6 @@ main {
 
 .image-container:hover img {
   transform: scale(1.05);
-}
-
-
-
-
-
-
-@media (min-width: 768px) {
 }
 
 
@@ -511,6 +502,20 @@ main {
   flex-shrink: 0;
   flex-direction: column;
   width: auto;
+  padding: 2px;
+  /* The row separator belongs to the list layout only; in the rail it would
+     draw a stray hairline under each swatch. */
+  border-bottom: none;
+}
+/* Selection in the rail is a ring on the swatch itself - the list layout's
+   inset marker rule would sit against the button's left edge, detached from
+   the thing it marks. */
+.stain-list .stain-button.selected {
+  box-shadow: none;
+}
+.stain-list .stain-button.selected .stain-swatch {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 .stain-list .stain-info {
   position: absolute;
@@ -544,6 +549,15 @@ main {
     flex-direction: row;
     width: 100%;
     scroll-snap-align: none;
+    /* Restore what the rail variant above suppressed. */
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .stain-list .stain-button.selected {
+    box-shadow: inset 3px 0 0 0 var(--accent);
+  }
+  .stain-list .stain-button.selected .stain-swatch {
+    outline: none;
   }
   /* Reveal the text: undo the visually-hidden clip. */
   .stain-list .stain-info {
@@ -566,13 +580,16 @@ main {
 .stain-button {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 10px 12px;
   border-radius: 0;
-  background-color: var(--surface);
-  border: 1px solid var(--outline-variant);
-  gap: 16px;
+  background-color: transparent;
+  /* Only the bottom rule: a full box per row turned the list into a stack of
+     boxes. Hairline separators read as a catalog swatch list. */
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  gap: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease;
   text-align: left;
 }
 
@@ -584,36 +601,63 @@ main {
   transform: scale(0.98);
 }
 
+/* Selection is an oxblood marker rule plus a weight change, not a background
+   tint - on a cream ground a tint is nearly invisible. */
 .stain-button.selected {
-  background-color: var(--surface-container-lowest);
+  background-color: transparent;
+  box-shadow: inset 3px 0 0 0 var(--accent);
 }
 
+/*
+ * position/overflow are load-bearing, not decoration.
+ *
+ * .stain-swatch-img is `position: absolute; inset: 0`, so it resolves against
+ * the nearest POSITIONED ancestor. Without these two declarations that
+ * ancestor was .stain-button (which is position: relative for the rail
+ * layout), and the stain photograph stretched across the entire row on top of
+ * the name and description. They were lost when two components were merged
+ * into one - the old markup carried them as inline styles on the swatch div.
+ *
+ * Square rather than round: a wood finish is a material sample, and every
+ * physical fan-deck in this category is rectangular. It also lets the photo
+ * fill the chip instead of being masked into a disc.
+ */
 .stain-swatch {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
   width: 48px;
   height: 48px;
   border-radius: 0;
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--rule-strong);
 }
 
 .stain-info {
   flex-grow: 1;
 }
 
+/* Both of these are <span>s inside a <button> (a block-level <div> would be
+   invalid content there), so without an explicit display the name, the
+   surcharge and the descriptor all ran together on one line. */
 .stain-name {
-  font-weight: 700;
-  color: var(--on-surface-variant);
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--on-surface);
 }
 
 .stain-button.selected .stain-name {
-  color: var(--primary);
+  color: var(--accent);
 }
 
 .stain-desc {
+  display: block;
+  margin-top: 2px;
   color: var(--on-surface-variant);
 }
 
 .stain-check {
-  color: var(--primary);
+  color: var(--accent);
 }
 
 .action-section {
@@ -648,13 +692,6 @@ main {
   text-align: center;
   color: var(--on-surface-variant);
 }
-
-
-
-
-
-
-
 
 
 /* Bottom Nav */
@@ -737,7 +774,6 @@ main {
   justify-content: center;
   transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
-
 
 
 .product-card-wrapper:hover .product-card-img-wrap {
@@ -840,9 +876,6 @@ main {
   }
 }
 
-
-@media (max-width: 767px) {
-}
 
 /* Journey timeline */
 .journey-timeline {
@@ -1291,10 +1324,6 @@ main {
 /* Admin editing overlay */
 
 
-
-
-
-
 .product-title {
   text-align: center;
   padding: 10px 16px;
@@ -1341,8 +1370,6 @@ main {
 
 /* Checkout trust badges */
 
-@media (max-width: 767px) {
-}
 
 @media (max-width: 767px) {
   .footer-grid {
@@ -1353,9 +1380,6 @@ main {
 
 /* ========== MOBILE RESPONSIVE ========== */
 
-
-@media (min-width: 768px) {
-}
 
 /* Mobile typography & spacing */
 @media (max-width: 767px) {
@@ -1408,8 +1432,6 @@ main {
   }
 }
 
-@media (max-width: 767px) {
-}
 
 @media (min-width: 768px) {
   .bottom-nav {
