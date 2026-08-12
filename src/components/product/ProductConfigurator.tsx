@@ -8,6 +8,7 @@ import ProductGallery from './ProductGallery';
 import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
+import PurchaseAssurances from './PurchaseAssurances';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
 import { variantHref } from '@/lib/variants';
@@ -262,11 +263,11 @@ export default function ProductConfigurator({
               Add to Babylist
             </button>
 
-            {showDeliveryMessage && (
-              <p className="label-caps delivery-info">
-                Expected delivery: 6-8 weeks &bull; Handcrafted for you
-              </p>
-            )}
+            {/* Replaces a single "Expected delivery: 6-8 weeks" line. That
+                answered the least important of the four questions a first-time
+                buyer has, and left the other three - cost of delivery, safety,
+                who to ask - unanswered at the point of decision. */}
+            {showDeliveryMessage && <PurchaseAssurances />}
           </section>
         </div>
       </div>

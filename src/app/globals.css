@@ -377,6 +377,21 @@ main {
   padding-bottom: var(--spacing-sm);
 }
 
+/*
+ * Grid items default to min-width: auto, meaning they refuse to shrink below
+ * their content's intrinsic width.
+ *
+ * The stain rail holds eleven flex-shrink: 0 swatches, so its intrinsic width
+ * is ~650px. That propagated up: the configuration panel could not be narrower
+ * than its content, so on a 390px phone the whole product page laid out 668px
+ * wide and Add to Cart was cut off past the right edge. The rail's own
+ * overflow-x: auto could never engage, because nothing was ever constraining
+ * it.
+ */
+.grid-layout > * {
+  min-width: 0;
+}
+
 @media (min-width: 1024px) {
   .grid-layout {
     grid-template-columns: repeat(12, 1fr);
@@ -2677,4 +2692,63 @@ main {
 .mobile-search-overlay input::-webkit-search-cancel-button {
   -webkit-appearance: none;
   appearance: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Purchase assurances, under Add to Cart
+   --------------------------------------------------------------------------- */
+
+.assurances {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 22px 0 0;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  gap: 18px;
+}
+
+.assurance {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.assurance-icon {
+  font-size: 20px;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.assurance-body {
+  display: block;
+}
+
+.assurance-title {
+  display: block;
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.assurance-link {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 1px;
+}
+
+.assurance-link:hover {
+  color: var(--accent);
+}
+
+.assurance-copy {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
 }

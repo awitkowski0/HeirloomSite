@@ -71,8 +71,8 @@ export default function CarePage() {
         <h2 className="headline-md">Delivery and lead time</h2>
         <p>
           Pieces are built after you order rather than pulled from a warehouse, so expect roughly
-          six to eight weeks before delivery. Shipping is a flat $150 within the continental United
-          States.
+          six to eight weeks before delivery. Delivery is included in the price — there is no
+          separate shipping charge at checkout, and no surprise freight bill on arrival.
         </p>
         <p>
           Inspect the piece before you assemble it. If anything is damaged in transit, photograph

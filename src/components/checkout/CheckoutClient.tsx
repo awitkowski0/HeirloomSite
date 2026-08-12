@@ -22,7 +22,10 @@ import ShippingForm, {
 import TermsBlock from './TermsBlock';
 import PaymentSection from './PaymentSection';
 
-const SHIPPING_CENTS = 15_000;
+// Must match src/lib/pricing.ts, which is the authority: this is only the
+// estimate shown before the server returns real totals. Delivery is included
+// in the product price.
+const SHIPPING_CENTS = 0;
 const TAX_RATE = 0.08;
 
 export default function CheckoutClient() {
@@ -292,8 +295,13 @@ export default function CheckoutClient() {
                 <dd>{formatPrice(fromCents(totals.subtotalCents))}</dd>
               </div>
               <div>
-                <dt>Shipping</dt>
-                <dd>{formatPrice(fromCents(totals.shippingCents))}</dd>
+                <dt>Delivery</dt>
+                {/* "$0.00" invites the question; "Included" answers it. */}
+                <dd>
+                  {totals.shippingCents === 0
+                    ? 'Included'
+                    : formatPrice(fromCents(totals.shippingCents))}
+                </dd>
               </div>
               <div>
                 <dt>{serverTotals ? 'Tax' : 'Estimated tax'}</dt>
