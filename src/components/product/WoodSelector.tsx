@@ -1,3 +1,7 @@
+'use client';
+
+import { humanizeWood } from '@/lib/labels';
+
 interface Props {
   woods: string[];
   selected: string;
@@ -6,25 +10,40 @@ interface Props {
   label?: string;
 }
 
-export default function WoodSelector({ woods, selected, onSelect, disabled, label = 'Select Option' }: Props) {
+export default function WoodSelector({
+  woods,
+  selected,
+  onSelect,
+  disabled,
+  label = 'Select Option',
+}: Props) {
   return (
     <section className="config-section">
       <div className="config-header">
         <h3 className="label-caps">01. {label}</h3>
       </div>
-      <div className="wood-grid">
+      <div className="wood-grid" role="radiogroup" aria-label={label}>
         {woods.map(wood => {
           const isDisabled = disabled(wood);
+          const isSelected = selected === wood;
           return (
             <button
               key={wood}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
               disabled={isDisabled}
-              style={{ opacity: isDisabled ? 0.5 : 1, cursor: isDisabled ? 'not-allowed' : 'pointer' }}
-              className={`wood-chip ${selected === wood ? 'selected' : ''}`}
+              className={[
+                'wood-chip',
+                isSelected ? 'selected' : '',
+                isDisabled ? 'is-out-of-stock' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
               onClick={() => onSelect(wood)}
             >
-              {wood.replace(/([A-Z])/g, ' $1').trim()}
-              {isDisabled && <span style={{ fontSize: '9px', color: 'var(--error)', marginLeft: '4px' }}>Sold Out</span>}
+              {humanizeWood(wood)}
+              {isDisabled && <span className="wood-chip-oos">Sold Out</span>}
             </button>
           );
         })}

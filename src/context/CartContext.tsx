@@ -1,52 +1,82 @@
-import { useState, useEffect, type ReactNode } from 'react';
-import { CartContext } from './useCart';
-import type { CartItem } from '../types';
+'use client';
 
-function itemKey(item: CartItem): string {
-  const addonKey = (item.addons || [])
-    .map(a => `${a.name}:${a.price}:${a.stainName || ''}`)
-    .sort()
-    .join('|');
-  return `${item.productName}|${item.wood}|${item.stainName}|${addonKey}`;
-}
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { CartContext } from './useCart';
+import {
+  cartItemId,
+  getServerSnapshot,
+  getSnapshot,
+  itemKey,
+  subscribe,
+  updateCart,
+} from './cartStore';
+import type { CartItem } from '@/types';
+
+export { cartItemId, itemKey } from './cartStore';
+
+const MAX_QUANTITY = 99;
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>(() => {
-    try {
-      const saved = localStorage.getItem('heirloom_cart');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  // Server renders getServerSnapshot() (empty); the client swaps to the real
+  // cart after hydration without a setState-in-effect cascade.
+  const cart = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
-  useEffect(() => {
-    localStorage.setItem('heirloom_cart', JSON.stringify(cart));
-  }, [cart]);
+  // `hydrated` gates any UI whose output depends on cart contents. Without it,
+  // the server HTML ("cart empty") and the first client render disagree, which
+  // is a hydration mismatch, and every visitor sees an empty-cart flash.
+  const [hydrated, setHydrated] = useState(false);
+  // This is the canonical "has hydration finished" flag: it must flip exactly
+  // once, after the first client render, which is by definition a setState in a
+  // mount effect. There is no external system to subscribe to here.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => setHydrated(true), []);
 
-  const addToCart = (item: CartItem) => {
-    setCart(prev => {
+  const addToCart = useCallback((item: CartItem) => {
+    updateCart(prev => {
       const key = itemKey(item);
       const existing = prev.find(i => itemKey(i) === key);
       if (existing) {
-        return prev.map(i => itemKey(i) === key ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i =>
+          itemKey(i) === key
+            ? { ...i, quantity: Math.min(i.quantity + (item.quantity || 1), MAX_QUANTITY) }
+            : i
+        );
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [
+        ...prev,
+        { ...item, id: cartItemId(item), quantity: Math.min(item.quantity || 1, MAX_QUANTITY) },
+      ];
     });
-  };
+  }, []);
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(i => i.id !== id));
-  };
+  const removeFromCart = useCallback((id: string) => {
+    updateCart(prev => prev.filter(i => i.id !== id));
+  }, []);
 
-  const clearCart = () => setCart([]);
+  const updateQuantity = useCallback((id: string, quantity: number) => {
+    if (!Number.isInteger(quantity) || quantity < 1) return;
+    updateCart(prev =>
+      prev.map(i => (i.id === id ? { ...i, quantity: Math.min(quantity, MAX_QUANTITY) } : i))
+    );
+  }, []);
 
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const clearCart = useCallback(() => updateCart(() => []), []);
 
-  return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, totalItems, subtotal }}>
-      {children}
-    </CartContext.Provider>
+  // Memoised: this was previously a fresh object literal on every render, so
+  // every consumer (header, configurator, checkout) re-rendered each time.
+  const value = useMemo(
+    () => ({
+      cart,
+      hydrated,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      totalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
+      subtotal: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    }),
+    [cart, hydrated, addToCart, removeFromCart, updateQuantity, clearCart]
   );
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from "fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, statSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -7,9 +7,35 @@ const root = join(__dirname, "..");
 const PUBLIC = join(root, "public");
 const PRODUCTS = join(PUBLIC, "data", "products");
 
+// The site statically prerenders one page per product slug. If this script
+// silently produces a short or slug-less product list, the build succeeds and
+// ships a deploy where every /product/<slug> URL 404s -- including URLs that
+// are already indexed by Google and linked from Babylist registries. Failing
+// loudly here is the only cheap place to catch that.
+//
+// This is a tripwire, not a guess: it is the exact current product count.
+// Adding products raises the count and passes. Intentionally REMOVING a
+// product is a deliberate one-line edit here, which is the point -- an
+// accidental removal should never build.
+const MIN_EXPECTED_PRODUCTS = 73;
+
+function fail(message) {
+  console.error(`\n  FATAL: ${message}\n`);
+  console.error("  Refusing to emit data artifacts. The site would build but");
+  console.error("  serve 404s for product pages that are already indexed.\n");
+  process.exit(1);
+}
+
 function readJSON(filePath) {
   if (!existsSync(filePath)) return null;
-  return JSON.parse(readFileSync(filePath, "utf-8"));
+  try {
+    return JSON.parse(readFileSync(filePath, "utf-8"));
+  } catch (err) {
+    // Surfacing this as a clean failure rather than a raw Node stack trace:
+    // malformed product data is a content problem, and whoever hits it in CI
+    // needs the offending path, not a module-loader trace.
+    fail(`${filePath.replace(root + "/", "")} is not valid JSON\n    ${err.message}`);
+  }
 }
 
 function getProductDirs() {
@@ -20,11 +46,14 @@ function getProductDirs() {
   });
 }
 
-// Read all product files and generate combined index
 const productDirs = getProductDirs();
+if (productDirs.length === 0) {
+  fail(`no product directories found under ${PRODUCTS}`);
+}
+
 const inventory = [];
 const productIndex = [];
-let totalImages = 0;
+const allImages = [];
 
 for (const dirName of productDirs) {
   const dir = join(PRODUCTS, dirName);
@@ -32,7 +61,10 @@ for (const dirName of productDirs) {
   const variants = readJSON(join(dir, "variants.json")) || [];
   const media = readJSON(join(dir, "media.json")) || {};
 
-  if (!meta) continue;
+  // A directory that survived getProductDirs() has a product.json, so a null
+  // here means it failed to parse. Skipping it silently would drop a product
+  // from the index and 404 its already-indexed URL.
+  if (!meta) fail(`${dirName}/product.json exists but could not be parsed`);
 
   const productName = meta.productName;
   const imageBase = `/data/products/${encodeURIComponent(dirName)}/`;
@@ -89,29 +121,14 @@ for (const dirName of productDirs) {
     defaultImage,
   });
 
-  // Count images
-  for (const paths of Object.values(media)) {
-    totalImages += paths.length;
-  }
-}
-
-// Write combined inventory.json (for search index)
-writeFileSync(join(PUBLIC, "data", "inventory.json"), JSON.stringify(inventory, null, 2) + "\n");
-
-// Write product index (for fast listing)
-writeFileSync(join(PUBLIC, "data", "products.json"), JSON.stringify(productIndex, null, 2) + "\n");
-
-// Also write images index
-const allImages = [];
-for (const dirName of productDirs) {
-  const dir = join(PRODUCTS, dirName);
-  const media = readJSON(join(dir, "media.json")) || {};
+  // Build the image index in this same pass. Previously this was a second loop
+  // that re-read and re-parsed product.json from disk once per media entry
+  // just to recover productName, which is already in hand here.
   for (const [key, paths] of Object.entries(media)) {
     const [wood, stainName] = key.split("||");
-    (paths).forEach((path, idx) => {
-      const imageBase = `/data/products/${encodeURIComponent(dirName)}/`;
+    paths.forEach((path, idx) => {
       allImages.push({
-        productName: productNameFromDir(dirName),
+        productName,
         wood,
         stainName: stainName || null,
         path: imageBase + path,
@@ -120,14 +137,91 @@ for (const dirName of productDirs) {
     });
   }
 }
+
+// ---------------------------------------------------------------------------
+// Guards. These run before anything is written.
+// ---------------------------------------------------------------------------
+
+if (productIndex.length < MIN_EXPECTED_PRODUCTS) {
+  fail(
+    `only ${productIndex.length} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
+      `    If a product was removed on purpose, lower MIN_EXPECTED_PRODUCTS in this file.`
+  );
+}
+
+const slugless = productIndex.filter(p => !p.slug);
+if (slugless.length > 0) {
+  fail(
+    `${slugless.length} product(s) have no slug and would be unreachable:\n` +
+      slugless.map(p => `    - ${p.productName}`).join("\n")
+  );
+}
+
+const slugCounts = new Map();
+for (const p of productIndex) {
+  slugCounts.set(p.slug, (slugCounts.get(p.slug) || 0) + 1);
+}
+const duplicates = [...slugCounts.entries()].filter(([, n]) => n > 1);
+if (duplicates.length > 0) {
+  fail(
+    `duplicate slugs (later products would silently shadow earlier ones):\n` +
+      duplicates.map(([slug, n]) => `    - ${slug} (x${n})`).join("\n")
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Artifacts
+// ---------------------------------------------------------------------------
+
+writeFileSync(join(PUBLIC, "data", "inventory.json"), JSON.stringify(inventory, null, 2) + "\n");
+writeFileSync(join(PUBLIC, "data", "products.json"), JSON.stringify(productIndex, null, 2) + "\n");
 writeFileSync(join(PUBLIC, "data", "images.json"), JSON.stringify(allImages, null, 2) + "\n");
 
-console.log(`Generated from ${productDirs.length} product directories`);
-console.log(`  inventory.json: ${inventory.length} items`);
-console.log(`  products.json: ${productIndex.length} products`);
-console.log(`  images.json: ${allImages.length} images`);
-
-function productNameFromDir(dirName) {
-  const meta = readJSON(join(PRODUCTS, dirName, "product.json"));
-  return meta?.productName || dirName;
+// Search corpus: shipped to the browser as a lazily-imported chunk, so it holds
+// only what MiniSearch indexes or what a result row renders. Deliberately not
+// the full inventory.json (525 KB) and not a prebuilt MiniSearch index (larger
+// than the docs, and stale-index-after-deploy becomes our problem).
+const searchDocs = [];
+const seenSearchDoc = new Set();
+for (const item of inventory) {
+  const id = `${item.productName}||${item.wood}`;
+  if (seenSearchDoc.has(id)) continue;
+  seenSearchDoc.add(id);
+  searchDocs.push({
+    id,
+    productName: item.productName,
+    slug: item.slug,
+    wood: item.wood,
+    category: item.category || "",
+    stainNames: item.stains.map(s => s.name).join(" "),
+    description: (item.description || "").slice(0, 300),
+    basePrice: item.basePrice,
+    stainImages: Object.fromEntries(item.stains.map(s => [s.name, s.image || ""])),
+  });
 }
+mkdirSync(join(root, "src", "data"), { recursive: true });
+writeFileSync(join(root, "src", "data", "search-docs.json"), JSON.stringify(searchDocs) + "\n");
+
+// Pricing table: the only thing the payment-intent route needs. Imported
+// statically by the route so it is always in the function bundle -- public/ is
+// uploaded to the CDN, not traced into the lambda, so a runtime readFileSync
+// of public/data/inventory.json is not reliable under Next on Vercel.
+const pricing = inventory.map(item => ({
+  productName: item.productName,
+  wood: item.wood,
+  basePrice: item.basePrice,
+  addons: (item.addons || []).map(a => ({ name: a.name, price: a.price ?? 0 })),
+  stains: item.stains.map(s => ({
+    name: s.name,
+    priceAddition: s.priceAddition || 0,
+    inStock: s.inStock !== false,
+  })),
+}));
+writeFileSync(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
+
+console.log(`Generated from ${productDirs.length} product directories`);
+console.log(`  public/data/inventory.json:  ${inventory.length} items`);
+console.log(`  public/data/products.json:   ${productIndex.length} products`);
+console.log(`  public/data/images.json:     ${allImages.length} images`);
+console.log(`  src/data/search-docs.json:   ${searchDocs.length} docs`);
+console.log(`  data/pricing.json:           ${pricing.length} rows`);

@@ -1,42 +1,38 @@
 {
-  "name": "temp-app",
+  "name": "heirloom-cribs",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "node scripts/build-data.mjs && tsc -b && vite build",
+    "dev": "node scripts/build-data.mjs && next dev",
+    "build": "node scripts/build-data.mjs && next build",
+    "start": "next start",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "data:split": "node scripts/split-data.mjs",
+    "typecheck": "tsc --noEmit",
     "data:build": "node scripts/build-data.mjs"
   },
   "dependencies": {
-    "@paypal/react-paypal-js": "^9.2.0",
-    "@posthog/react": "^1.9.0",
     "@stripe/react-stripe-js": "^6.3.0",
     "@stripe/stripe-js": "^9.3.1",
     "minisearch": "^7.2.0",
+    "next": "16.3.0",
     "posthog-js": "^1.372.10",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-helmet-async": "^3.0.0",
-    "react-router-dom": "^7.14.2",
+    "server-only": "^0.0.1",
     "stripe": "^22.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "^16.3.0",
     "@types/node": "^22.13.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.1",
     "dotenv": "^17.4.2",
     "eslint": "^10.2.1",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "typescript": "~6.0.2",
-    "typescript-eslint": "^8.58.2",
-    "vite": "^8.0.10"
+    "typescript-eslint": "^8.58.2"
   }
 }
