@@ -1,43 +1,84 @@
 :root {
-  --surface: #fbf9f4;
-  --surface-dim: #dbdad5;
-  --surface-bright: #fbf9f4;
-  --surface-container-lowest: #ffffff;
-  --surface-container-low: #f5f3ee;
-  --surface-container: #f0eee9;
-  --surface-container-high: #eae8e3;
-  --surface-container-highest: #e4e2dd;
-  --on-surface: #1b1c19;
-  --on-surface-variant: #4e453e;
-  --inverse-surface: #30312e;
-  --inverse-on-surface: #f2f1ec;
-  --outline: #80756d;
-  /* #80756d is 4.26:1 on --surface: fine as a border (3:1 non-text) but it
-     fails AA as text. Use this when the outline colour is used for copy. */
-  --outline-text: #6b625a;
-  /* Muted foreground that still clears AA (5.82:1 on the nav background). */
-  --on-surface-muted: #6b625a;
-  --outline-variant: #d2c4bb;
-  --surface-tint: #705a49;
-  --primary: #322214;
-  --on-primary: #ffffff;
-  --primary-container: #4a3728;
-  --on-primary-container: #bba08c;
-  --inverse-primary: #dec1ac;
-  --secondary: #56642b;
-  --on-secondary: #ffffff;
-  --secondary-container: #d6e7a1;
-  --on-secondary-container: #5a682f;
-  --tertiary: #32230a;
-  --on-tertiary: #ffffff;
-  --tertiary-container: #4a381e;
-  --on-tertiary-container: #bba180;
-  --error: #ba1a1a;
-  --on-error: #ffffff;
+  /* ===========================================================================
+   * LAYER 1 - primitives. The whole palette is these nine values.
+   *
+   * Editorial catalog: warm cream ground, espresso text, oxblood for anything
+   * that asks to be acted on. Hairline rules instead of borders and shadows.
+   *
+   * Measured contrast against --paper: ink 12.18, accent 8.98, ink-muted 5.45.
+   * On --ink: paper 12.18, muted-on-dark 6.92. All clear WCAG AA.
+   * =========================================================================== */
+  --paper: #f6f1e7;
+  --paper-2: #efe9db;
+  --plate: #fcfaf5;
+  --ink: #3a2a20;
+  --ink-muted: #6e5f53;
+  --accent: #7e1c22;
+  --accent-on: #f6f1e7;
+  --rule: #dcd3c3;
+  --rule-strong: #8a7c6d;
+  /* Muted cream for copy on the dark band. 6.92:1 on --ink. */
+  --on-ink-muted: #c4b6a7;
+
+  /*
+   * Interactive boundaries are NOT --rule.
+   *
+   * A decorative divider is exempt from contrast requirements; the border that
+   * tells you where a text input begins is not - WCAG 1.4.11 wants 3:1. --rule
+   * is 1.32:1 on --paper, so using it on form fields would make every input on
+   * /checkout look borderless and fail. --rule-strong is 3.4:1.
+   */
+  --control-border: var(--rule-strong);
+
+  /*
+   * Error red has to stay distinguishable from the oxblood accent, or a failed
+   * card payment reads as a promotional flourish. Kept brighter and oranger.
+   */
+  --error: #b3261e;
   --error-container: #ffdad6;
   --on-error-container: #93000a;
-  --background: #fbf9f4;
-  --surface-raised: #fdfcfb;
+
+  /* ===========================================================================
+   * LAYER 2 - legacy Material-Design names, aliased onto the primitives.
+   *
+   * These are referenced ~230 times across the file. Remapping the VALUES lets
+   * every page that is not being redesigned inherit the new palette for free;
+   * renaming them would mean touching every call site and re-verifying eight
+   * pages that are explicitly out of scope. New code should use layer 1.
+   *
+   * Two of these names lie about their role and are worth knowing:
+   *   --surface-container-highest is only ever used as a border colour
+   *   --secondary was an olive green; it is the price/CTA accent, so it is
+   *     now oxblood - that single line re-colours every price on the site.
+   * =========================================================================== */
+  --background: var(--paper);
+  --surface: var(--paper);
+  --surface-raised: var(--paper);
+  --surface-bright: var(--paper);
+  --surface-container-low: var(--paper);
+  --surface-container: var(--paper-2);
+  --surface-container-high: var(--paper-2);
+  --surface-dim: var(--paper-2);
+  --surface-container-lowest: var(--plate);
+  --surface-container-highest: var(--rule);
+
+  --on-surface: var(--ink);
+  --on-background: var(--ink);
+  --primary: var(--ink);
+  --primary-container: var(--ink);
+  --on-primary: var(--paper);
+
+  --on-surface-variant: var(--ink-muted);
+  --on-surface-muted: var(--ink-muted);
+  --outline-text: var(--ink-muted);
+
+  --outline: var(--rule-strong);
+  --outline-variant: var(--rule);
+
+  --secondary: var(--accent);
+  --on-secondary: var(--accent-on);
+  --secondary-container: var(--ink);
+  --on-secondary-container: var(--paper);
 
   /*
    * Breakpoints. Single source of truth, mobile-first (min-width).
@@ -64,15 +105,25 @@
   --text-body-lg: clamp(1rem, 0.94rem + 0.26vw, 1.125rem);
   --text-body-md: 1rem;
   --text-label: 0.75rem;
-  --on-background: #1b1c19;
-  --surface-variant: #e4e2dd;
 
-  --radius-sm: 0.25rem;
-  --radius: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-full: 9999px;
+  /*
+   * No rounded corners anywhere. The radius tokens are kept rather than
+   * deleted so the ~28 call sites that reference them do not all have to be
+   * edited, and so a future decision to soften an edge is one line.
+   */
+  --radius-sm: 0;
+  --radius: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-full: 0;
+  /* The two things that stay round: the cart count and gallery pagination.
+     A square status counter reads as a rendering bug, not as a choice. */
+  --radius-circle: 50%;
+
+  /* Header height, referenced by .app-header and main's top padding so the
+     fixed header and the space reserved for it cannot drift apart. */
+  --header-h: 60px;
 
   --spacing-base: 8px;
   --spacing-xs: 4px;
@@ -82,9 +133,9 @@
   --spacing-xl: 80px;
   --spacing-container-max: 1280px;
   --spacing-gutter: 24px;
-  
-  --shadow-soft: 0 4px 20px -4px rgba(74, 55, 40, 0.08);
-  --shadow-ambient: 0 8px 30px rgba(74, 55, 40, 0.05);
+
+  /* --shadow-soft / --shadow-ambient deleted: the editorial look separates
+     surfaces with hairline rules, never with elevation. */
 
   /*
    * Three type roles.
@@ -1559,7 +1610,7 @@ main {
     width: 100%;
     padding: 14px 16px;
     border-radius: 12px;
-    border: 1px solid var(--outline-variant);
+    border: 1px solid var(--control-border);
     font-size: 16px;
       box-sizing: border-box;
   }
@@ -1981,7 +2032,7 @@ main {
 .search-bar-input {
   padding: 6px 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--control-border);
   font-size: 13px;
   width: 220px;
   background: var(--surface-container-lowest);
@@ -2103,7 +2154,7 @@ main {
   flex: 1;
   padding: 10px 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--control-border);
   font-size: 16px; /* >=16px stops iOS Safari zooming on focus */
   background: var(--surface-container-lowest);
   color: var(--on-surface);
@@ -2639,7 +2690,10 @@ main {
   width: 100%;
   padding: 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--outline-variant);
+  /* --control-border, not --outline-variant: the hairline token is 1.32:1 on
+     the cream ground, which is fine for a decorative divider but fails WCAG
+     1.4.11 (3:1) for the boundary of a form control. */
+  border: 1px solid var(--control-border);
   background: var(--surface-container-lowest);
   color: var(--on-surface);
   font-family: var(--font-label);
