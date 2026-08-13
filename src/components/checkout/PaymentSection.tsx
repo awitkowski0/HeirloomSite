@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { getStripe } from '@/lib/stripe-client';
-import { checkoutPaymentSubmitted } from '@/lib/analytics';
+import { checkoutFailed, paymentSubmitted } from '@/lib/analytics';
 
 interface Props {
   clientSecret: string;
@@ -34,7 +34,7 @@ function StripeForm({
     setError('');
     setNotice('');
     setIsProcessing(true);
-    checkoutPaymentSubmitted();
+    paymentSubmitted();
 
     const result = await stripe.confirmPayment({
       elements,
@@ -47,6 +47,10 @@ function StripeForm({
 
     if (result.error) {
       // Replaces alert(), which was the only error surface.
+      checkoutFailed({
+        step: 'payment',
+        reason: result.error.code || result.error.type || 'unknown',
+      });
       setError(result.error.message || 'Payment could not be completed. Please try again.');
       setIsProcessing(false);
       return;

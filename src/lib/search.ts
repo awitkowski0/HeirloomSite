@@ -9,9 +9,14 @@ export interface SearchResult {
   slug: string;
   wood: string;
   category: string;
+  /** Lowest base price across the product's matching variants. */
   basePrice: number;
   image: string;
   matchedStain?: string;
+  /** True when the finish the query matched is currently withdrawn. */
+  matchedStainUnavailable?: boolean;
+  /** How many variants of this product matched, for a "6 finishes" hint. */
+  variantCount: number;
 }
 
 interface SearchDoc {
@@ -21,6 +26,7 @@ interface SearchDoc {
   wood: string;
   category: string;
   stainNames: string;
+  unavailableStains: string[];
   description: string;
   basePrice: number;
   stainImages: Record<string, string>;
@@ -31,7 +37,16 @@ const MAX_RESULTS = 8;
 function createIndex() {
   return new MiniSearch<SearchDoc>({
     fields: ['productName', 'wood', 'category', 'stainNames', 'description'],
-    storeFields: ['productName', 'slug', 'wood', 'category', 'basePrice', 'stainImages', 'stainNames'],
+    storeFields: [
+      'productName',
+      'slug',
+      'wood',
+      'category',
+      'basePrice',
+      'stainImages',
+      'stainNames',
+      'unavailableStains',
+    ],
     searchOptions: {
       boost: { productName: 3, wood: 2, stainNames: 2, category: 2, description: 1 },
       prefix: true,
@@ -79,23 +94,52 @@ function findMatchedStain(stainNames: string, query: string): string | undefined
   });
 }
 
-function toResults(ms: MiniSearch<SearchDoc>, query: string): SearchResult[] {
+function toResults(
+  ms: MiniSearch<SearchDoc>,
+  query: string,
+  limit = MAX_RESULTS
+): SearchResult[] {
   const raw = ms.search(query, { prefix: true, fuzzy: 0.2 });
-  const results: SearchResult[] = [];
-  const seen = new Set<string>();
+
+  /*
+   * One row per PRODUCT, not per variant.
+   *
+   * The key used to be `productName||wood`, so searching "hudson" returned
+   * eight rows for two actual products: Hudson in three woods and Hudson Style
+   * in five finishes, every row carrying the same name and the same price. The
+   * list looked broken and pushed the second real product off the end of an
+   * eight-row cap.
+   *
+   * Hits arrive in descending relevance, so the first hit for a name is the
+   * best representative; the rest only contribute a variant count and the
+   * lowest price.
+   */
+  const byProduct = new Map<string, SearchResult>();
 
   for (const hit of raw) {
     const doc = hit as unknown as SearchDoc;
-    const key = `${doc.productName}||${doc.wood}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+    const existing = byProduct.get(doc.productName);
+
+    if (existing) {
+      existing.variantCount += 1;
+      if (doc.basePrice < existing.basePrice) existing.basePrice = doc.basePrice;
+      // A later variant may be the one that actually matched the stain term.
+      if (!existing.matchedStain) {
+        existing.matchedStain = findMatchedStain(doc.stainNames, query);
+        existing.matchedStainUnavailable =
+          !!existing.matchedStain && (doc.unavailableStains || []).includes(existing.matchedStain);
+      }
+      continue;
+    }
+
+    if (byProduct.size >= limit) continue;
 
     const matchedStain = findMatchedStain(doc.stainNames, query);
     const stainImages = doc.stainImages || {};
     const fallbackKey = Object.keys(stainImages)[0] || '';
     const image = (matchedStain && stainImages[matchedStain]) || stainImages[fallbackKey] || '';
 
-    results.push({
+    byProduct.set(doc.productName, {
       id: doc.id,
       productName: doc.productName,
       slug: doc.slug || '',
@@ -104,11 +148,13 @@ function toResults(ms: MiniSearch<SearchDoc>, query: string): SearchResult[] {
       basePrice: doc.basePrice,
       image,
       matchedStain,
+      matchedStainUnavailable:
+        !!matchedStain && (doc.unavailableStains || []).includes(matchedStain),
+      variantCount: 1,
     });
-
-    if (results.length >= MAX_RESULTS) break;
   }
-  return results;
+
+  return [...byProduct.values()];
 }
 
 /**
@@ -163,32 +209,13 @@ export function useSearchAll(query: string): { results: SearchResult[]; loading:
     };
   }, []);
 
-  const results = useMemo(() => {
-    if (!index || !trimmed) return [];
-    const raw = index.search(trimmed, { prefix: true, fuzzy: 0.2 });
-    const seen = new Set<string>();
-    const out: SearchResult[] = [];
-    for (const hit of raw) {
-      const doc = hit as unknown as SearchDoc;
-      // The dedicated search page lists products, not wood variants.
-      if (!doc.slug || seen.has(doc.slug)) continue;
-      seen.add(doc.slug);
-      const stainImages = doc.stainImages || {};
-      const matchedStain = findMatchedStain(doc.stainNames, trimmed);
-      const fallbackKey = Object.keys(stainImages)[0] || '';
-      out.push({
-        id: doc.id,
-        productName: doc.productName,
-        slug: doc.slug,
-        wood: doc.wood,
-        category: doc.category,
-        basePrice: doc.basePrice,
-        image: (matchedStain && stainImages[matchedStain]) || stainImages[fallbackKey] || '',
-        matchedStain,
-      });
-    }
-    return out;
-  }, [index, trimmed]);
+  // Same grouping as the dropdown, uncapped. This used to be a third,
+  // hand-rolled copy of the result-building logic that deduplicated by slug
+  // instead of product name and produced a different shape.
+  const results = useMemo(
+    () => (index && trimmed ? toResults(index, trimmed, Number.MAX_SAFE_INTEGER) : []),
+    [index, trimmed]
+  );
 
   return { results, loading: !index && Boolean(trimmed) };
 }

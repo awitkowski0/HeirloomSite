@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getProductIndex, getCategories } from '@/lib/content';
-import { itemListJsonLd } from '@/lib/seo';
+import { itemListJsonLd,
+  jsonLdScript,
+} from '@/lib/seo';
 import CategoryPills from '@/components/products/CategoryPills';
 import ProductCard from '@/components/products/ProductCard';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
@@ -20,7 +22,7 @@ export default function ProductsPage() {
     <div className="container products-page">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd(products, '/products')) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(itemListJsonLd(products, '/products')) }}
       />
 
       <header className="page-header">

@@ -71,8 +71,9 @@ export default function GalleryCard({
           </span>
         </Link>
 
+        {/* The price used to be printed here AND again below the card. One
+            price, in the text block where the name is. */}
         <div className="product-info-overlay">
-          <p className="product-overlay-price">{priceLabel}</p>
           <div className="product-overlay-woods">
             {product.woods.slice(0, 4).map(w => (
               <span key={w} className="wood-tag">
@@ -87,16 +88,11 @@ export default function GalleryCard({
       </div>
 
       <div className="product-card-text">
-        <h3 className="headline-lg text-primary">
-          <Link
-            href={`/product/${product.slug}`}
-            onClick={() =>
-              productSelected({ product_name: product.name, source: 'gallery_view_details' })
-            }
-          >
-            {product.name}
-          </Link>
-        </h3>
+        {/* Plain text, not a second <Link>. The image above already links to
+            this product; two links to one destination in a single card is
+            noise for keyboard and screen-reader users, and it was firing two
+            differently-named analytics events for the same navigation. */}
+        <h3 className="headline-lg text-primary">{product.name}</h3>
         <div className="product-card-price-row">
           <span className="product-card-rule" aria-hidden="true" />
           <p className="body-lg">{priceLabel}</p>

@@ -50,6 +50,25 @@ export function priceRange(configurations: InventoryItem[]): { low: number; high
   return { low: Math.min(...prices), high: Math.max(...prices) };
 }
 
+/**
+ * Serialise JSON-LD for injection into a <script> block.
+ *
+ * `JSON.stringify` does not escape `<`, so a value containing the literal
+ * `</script>` closes the block early and everything after it is parsed as
+ * markup. Nothing request-derived reaches these sinks today - the inputs are
+ * build-time catalogue files - so this is a trust boundary rather than a live
+ * hole, but the catalogue copy is re-imported from a supplier feed and the
+ * boundary is one line wide.
+ *
+ * The three escapes stay valid JSON, so consumers parse them identically.
+ */
+export function jsonLdScript(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+}
+
 interface JsonLd {
   '@context': string;
   [key: string]: unknown;
@@ -112,6 +131,33 @@ export function productJsonLd(opts: {
       availability: anyInStock
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
+      /*
+       * The furniture is made to order with a six-to-eight week lead time, and
+       * until now nothing in the markup said so - the page promised one thing
+       * and the structured data implied stock on a shelf.
+       *
+       * schema.org/MadeToOrder would be the literal term, but Google does not
+       * support it in the `availability` enum (BackOrder, Discontinued,
+       * InStock, InStoreOnly, LimitedAvailability, OnlineOnly, OutOfStock,
+       * PreOrder, PreSale, SoldOut). InStock remains correct - the item IS
+       * orderable - so the lead time is expressed where Google actually reads
+       * it, as handling time. Delivery is included in the price, hence a
+       * shippingRate of 0; see SHIPPING_CENTS in src/lib/pricing.ts.
+       */
+      shippingDetails: {
+        '@type': 'OfferShippingDetails',
+        shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'USD' },
+        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'US' },
+        deliveryTime: {
+          '@type': 'ShippingDeliveryTime',
+          handlingTime: {
+            '@type': 'QuantitativeValue',
+            minValue: 42,
+            maxValue: 56,
+            unitCode: 'DAY',
+          },
+        },
+      },
       url: absoluteUrl(`/product/${opts.slug}`),
     },
   };

@@ -2,10 +2,18 @@ import MobileSearchTrigger from '@/components/search/MobileSearchTrigger';
 import NavLink from './NavLink';
 import BottomNavCart from './BottomNavCart';
 
+/*
+ * Five items, not six.
+ *
+ * The bar previously carried Showroom, Gallery, Products, Search, Contact and
+ * Cart. At 390px that is six tracked-caps labels in 360 usable pixels, and the
+ * last one was clipped off the right edge. "Showroom" goes: the wordmark in
+ * the header is already the link home, and it is the only item here that
+ * duplicates something always on screen.
+ */
 const ITEMS = [
-  { href: '/', icon: 'store', label: 'Showroom' },
-  { href: '/gallery', icon: 'photo_library', label: 'Gallery' },
-  { href: '/products', icon: 'collections_bookmark', label: 'Products' },
+  { href: '/products', icon: 'collections_bookmark', label: 'Shop' },
+  { href: '/gallery', icon: 'photo_library', label: 'Collections' },
 ] as const;
 
 /**
@@ -31,7 +39,7 @@ export default function BottomNav() {
         <span className="material-symbols-outlined" aria-hidden="true">
           mail
         </span>
-        <span className="nav-label">Contact</span>
+        <span className="nav-label">Help</span>
       </NavLink>
       <BottomNavCart />
     </nav>

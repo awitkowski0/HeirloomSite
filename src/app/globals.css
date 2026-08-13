@@ -1,43 +1,84 @@
 :root {
-  --surface: #fbf9f4;
-  --surface-dim: #dbdad5;
-  --surface-bright: #fbf9f4;
-  --surface-container-lowest: #ffffff;
-  --surface-container-low: #f5f3ee;
-  --surface-container: #f0eee9;
-  --surface-container-high: #eae8e3;
-  --surface-container-highest: #e4e2dd;
-  --on-surface: #1b1c19;
-  --on-surface-variant: #4e453e;
-  --inverse-surface: #30312e;
-  --inverse-on-surface: #f2f1ec;
-  --outline: #80756d;
-  /* #80756d is 4.26:1 on --surface: fine as a border (3:1 non-text) but it
-     fails AA as text. Use this when the outline colour is used for copy. */
-  --outline-text: #6b625a;
-  /* Muted foreground that still clears AA (5.82:1 on the nav background). */
-  --on-surface-muted: #6b625a;
-  --outline-variant: #d2c4bb;
-  --surface-tint: #705a49;
-  --primary: #322214;
-  --on-primary: #ffffff;
-  --primary-container: #4a3728;
-  --on-primary-container: #bba08c;
-  --inverse-primary: #dec1ac;
-  --secondary: #56642b;
-  --on-secondary: #ffffff;
-  --secondary-container: #d6e7a1;
-  --on-secondary-container: #5a682f;
-  --tertiary: #32230a;
-  --on-tertiary: #ffffff;
-  --tertiary-container: #4a381e;
-  --on-tertiary-container: #bba180;
-  --error: #ba1a1a;
-  --on-error: #ffffff;
+  /* ===========================================================================
+   * LAYER 1 - primitives. The whole palette is these nine values.
+   *
+   * Editorial catalog: warm cream ground, espresso text, oxblood for anything
+   * that asks to be acted on. Hairline rules instead of borders and shadows.
+   *
+   * Measured contrast against --paper: ink 12.18, accent 8.98, ink-muted 5.45.
+   * On --ink: paper 12.18, muted-on-dark 6.92. All clear WCAG AA.
+   * =========================================================================== */
+  --paper: #f6f1e7;
+  --paper-2: #efe9db;
+  --plate: #fcfaf5;
+  --ink: #3a2a20;
+  --ink-muted: #6e5f53;
+  --accent: #7e1c22;
+  --accent-on: #f6f1e7;
+  --rule: #dcd3c3;
+  --rule-strong: #8a7c6d;
+  /* Muted cream for copy on the dark band. 6.92:1 on --ink. */
+  --on-ink-muted: #c4b6a7;
+
+  /*
+   * Interactive boundaries are NOT --rule.
+   *
+   * A decorative divider is exempt from contrast requirements; the border that
+   * tells you where a text input begins is not - WCAG 1.4.11 wants 3:1. --rule
+   * is 1.32:1 on --paper, so using it on form fields would make every input on
+   * /checkout look borderless and fail. --rule-strong is 3.4:1.
+   */
+  --control-border: var(--rule-strong);
+
+  /*
+   * Error red has to stay distinguishable from the oxblood accent, or a failed
+   * card payment reads as a promotional flourish. Kept brighter and oranger.
+   */
+  --error: #b3261e;
   --error-container: #ffdad6;
   --on-error-container: #93000a;
-  --background: #fbf9f4;
-  --surface-raised: #fdfcfb;
+
+  /* ===========================================================================
+   * LAYER 2 - legacy Material-Design names, aliased onto the primitives.
+   *
+   * These are referenced ~230 times across the file. Remapping the VALUES lets
+   * every page that is not being redesigned inherit the new palette for free;
+   * renaming them would mean touching every call site and re-verifying eight
+   * pages that are explicitly out of scope. New code should use layer 1.
+   *
+   * Two of these names lie about their role and are worth knowing:
+   *   --surface-container-highest is only ever used as a border colour
+   *   --secondary was an olive green; it is the price/CTA accent, so it is
+   *     now oxblood - that single line re-colours every price on the site.
+   * =========================================================================== */
+  --background: var(--paper);
+  --surface: var(--paper);
+  --surface-raised: var(--paper);
+  --surface-bright: var(--paper);
+  --surface-container-low: var(--paper);
+  --surface-container: var(--paper-2);
+  --surface-container-high: var(--paper-2);
+  --surface-dim: var(--paper-2);
+  --surface-container-lowest: var(--plate);
+  --surface-container-highest: var(--rule);
+
+  --on-surface: var(--ink);
+  --on-background: var(--ink);
+  --primary: var(--ink);
+  --primary-container: var(--ink);
+  --on-primary: var(--paper);
+
+  --on-surface-variant: var(--ink-muted);
+  --on-surface-muted: var(--ink-muted);
+  --outline-text: var(--ink-muted);
+
+  --outline: var(--rule-strong);
+  --outline-variant: var(--rule);
+
+  --secondary: var(--accent);
+  --on-secondary: var(--accent-on);
+  --secondary-container: var(--ink);
+  --on-secondary-container: var(--paper);
 
   /*
    * Breakpoints. Single source of truth, mobile-first (min-width).
@@ -64,15 +105,25 @@
   --text-body-lg: clamp(1rem, 0.94rem + 0.26vw, 1.125rem);
   --text-body-md: 1rem;
   --text-label: 0.75rem;
-  --on-background: #1b1c19;
-  --surface-variant: #e4e2dd;
 
-  --radius-sm: 0.25rem;
-  --radius: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-full: 9999px;
+  /*
+   * No rounded corners anywhere. The radius tokens are kept rather than
+   * deleted so the ~28 call sites that reference them do not all have to be
+   * edited, and so a future decision to soften an edge is one line.
+   */
+  --radius-sm: 0;
+  --radius: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-full: 0;
+  /* The two things that stay round: the cart count and gallery pagination.
+     A square status counter reads as a rendering bug, not as a choice. */
+  --radius-circle: 50%;
+
+  /* Header height, referenced by .app-header and main's top padding so the
+     fixed header and the space reserved for it cannot drift apart. */
+  --header-h: 60px;
 
   --spacing-base: 8px;
   --spacing-xs: 4px;
@@ -82,12 +133,36 @@
   --spacing-xl: 80px;
   --spacing-container-max: 1280px;
   --spacing-gutter: 24px;
-  
-  --shadow-soft: 0 4px 20px -4px rgba(74, 55, 40, 0.08);
-  --shadow-ambient: 0 8px 30px rgba(74, 55, 40, 0.05);
 
-  --font-label: var(--font-manrope), var(--font-label);
-  --font-serif: var(--font-noto-serif), var(--font-serif);
+  /* --shadow-soft / --shadow-ambient deleted: the editorial look separates
+     surfaces with hairline rules, never with elevation. */
+
+  /*
+   * Three type roles.
+   *
+   * These previously read:
+   *   --font-label: var(--font-manrope), var(--font-label);
+   *   --font-serif: var(--font-noto-serif), var(--font-serif);
+   * which is a self-reference. Per CSS Variables 3, a custom property that
+   * depends on itself - including through a var() fallback - is invalid at
+   * computed-value time (the spec's own example is that `--foo: var(--foo,
+   * 10px)` is invalid, not 10px). Both therefore resolved to nothing,
+   * `body { font-family: var(--font-label) }` was invalid, and the whole site
+   * rendered in the browser default: measured as Times on body AND headlines,
+   * while still downloading two webfonts that were never used.
+   *
+   * The generics live here rather than in next/font's `fallback` option,
+   * because passing that option REPLACES the metric-adjusted local fallback
+   * next/font generates ("Playfair Display Fallback"), which is what keeps
+   * layout shift down while the webfont loads.
+   */
+  --font-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
+  --font-caps: var(--font-playfair), Georgia, serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  /* Legacy names, kept because ~2900 lines below still reference them. */
+  --font-serif: var(--font-display);
+  --font-label: var(--font-body);
 }
 
 html {
@@ -153,12 +228,21 @@ body {
   line-height: 1.6;
 }
 
+/*
+ * Tracked small caps, set in the display serif rather than the body sans.
+ * Playfair Display's variable font ships no `smcp` feature, so real small
+ * caps would be browser-synthesised - scaled-down capitals at the wrong
+ * stroke weight, varying by engine. Uppercase plus tracking instead.
+ *
+ * Changing this one rule re-skins every eyebrow, category, card title and
+ * button label on all nine routes.
+ */
 .label-caps {
-  font-family: var(--font-label);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.0;
-  letter-spacing: 0.1em;
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
@@ -167,13 +251,6 @@ body {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-.soft-shadow {
-  box-shadow: var(--shadow-soft);
-}
-
-.ambient-shadow {
-  box-shadow: var(--shadow-ambient);
-}
 
 .text-primary {
   color: var(--primary);
@@ -190,22 +267,76 @@ body {
   padding: 0 var(--spacing-gutter);
 }
 
+/*
+ * Three cells: nav | wordmark | nav+tools. Grid, not flex space-between,
+ * because the wordmark has to be optically centred and the two side clusters
+ * are never the same width - under space-between the mark drifts.
+ *
+ * Opaque, never translucent: a 1px rule under a blurred bar reads as a
+ * rendering artefact rather than as a rule.
+ */
 .app-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 3000;
-  background-color: var(--surface-raised);
-  border-bottom: 1px solid var(--outline-variant);
-  box-shadow: var(--shadow-soft);
-  height: 80px;
-  display: flex;
-  justify-content: space-between;
+  background-color: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  height: var(--header-h);
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   padding: 0 24px;
   max-width: 100vw;
   overflow: visible;
+}
+
+/*
+ * Cells are assigned explicitly rather than by source order, so that hiding
+ * the left nav on phones does not slide the wordmark into column 1 and take
+ * the whole bar off centre.
+ */
+.header-nav--start {
+  grid-column: 1;
+}
+.wordmark {
+  grid-column: 2;
+}
+.header-end {
+  grid-column: 3;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.header-nav--end {
+  justify-content: flex-end;
+}
+.header-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 18px;
+}
+
+/*
+ * text-indent compensates for letter-spacing, which adds its full value AFTER
+ * the last glyph. Without it a centred tracked string sits ~half a track to
+ * the left of true centre - the standard tell of carelessly set tracked caps.
+ */
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-indent: 0.28em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  color: var(--ink);
 }
 
 .header-left, .header-right {
@@ -233,16 +364,8 @@ body {
   transform: scale(0.95);
 }
 
-.brand-title {
-  font-family: var(--font-serif);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--primary-container);
-}
-
 main {
-  padding-top: 80px;
+  padding-top: var(--header-h);
   padding-bottom: 128px;
 }
 
@@ -252,6 +375,21 @@ main {
   gap: var(--spacing-lg);
   padding-top: var(--spacing-sm);
   padding-bottom: var(--spacing-sm);
+}
+
+/*
+ * Grid items default to min-width: auto, meaning they refuse to shrink below
+ * their content's intrinsic width.
+ *
+ * The stain rail holds eleven flex-shrink: 0 swatches, so its intrinsic width
+ * is ~650px. That propagated up: the configuration panel could not be narrower
+ * than its content, so on a 390px phone the whole product page laid out 668px
+ * wide and Add to Cart was cut off past the right edge. The rail's own
+ * overflow-x: auto could never engage, because nothing was ever constraining
+ * it.
+ */
+.grid-layout > * {
+  min-width: 0;
 }
 
 @media (min-width: 1024px) {
@@ -276,76 +414,23 @@ main {
 .image-container {
   position: relative;
   aspect-ratio: 4 / 5;
-  border-radius: 32px;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: var(--shadow-soft);
+  background: transparent;
+}
+
+/* Same treatment as the catalogue cards: multiply drops the white plate the
+   photograph was shot on into the cream behind it. */
+.image-container img {
+  mix-blend-mode: multiply;
 }
 
 .image-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.7s ease;
 }
 
-.image-container:hover img {
-  transform: scale(1.05);
-}
-
-.badges {
-  position: absolute;
-  top: 24px;
-  left: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.badge {
-  padding: 4px 16px;
-  border-radius: 9999px;
-  font-family: var(--font-label);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.badge-outline {
-  background-color: rgba(251, 249, 244, 0.8);
-  backdrop-filter: blur(12px);
-  color: var(--primary);
-}
-
-.badge-filled {
-  background-color: var(--primary-container);
-  color: var(--on-primary);
-}
-
-.bento-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-@media (min-width: 768px) {
-  .bento-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.bento-card {
-  padding: 24px;
-  background-color: var(--surface-container-low);
-  border-radius: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  gap: 8px;
-  box-shadow: var(--shadow-ambient);
-}
 
 .configuration-panel {
   display: flex;
@@ -378,10 +463,6 @@ main {
   color: var(--primary);
 }
 
-.price-old {
-  color: var(--on-surface-variant);
-  text-decoration: line-through;
-}
 
 .config-section {
   display: flex;
@@ -411,7 +492,7 @@ main {
 
 .wood-chip {
   padding: 8px 14px;
-  border-radius: 9999px;
+  border-radius: 0;
   background: none;
   border: 1px solid var(--outline-variant);
   cursor: pointer;
@@ -450,7 +531,7 @@ main {
 .stain-strip-swatch {
   background: none;
   border: 2px solid transparent;
-  border-radius: 50%;
+  border-radius: 0;
   padding: 2px;
   cursor: pointer;
   transition: border-color 0.15s;
@@ -494,6 +575,20 @@ main {
   flex-shrink: 0;
   flex-direction: column;
   width: auto;
+  padding: 2px;
+  /* The row separator belongs to the list layout only; in the rail it would
+     draw a stray hairline under each swatch. */
+  border-bottom: none;
+}
+/* Selection in the rail is a ring on the swatch itself - the list layout's
+   inset marker rule would sit against the button's left edge, detached from
+   the thing it marks. */
+.stain-list .stain-button.selected {
+  box-shadow: none;
+}
+.stain-list .stain-button.selected .stain-swatch {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 .stain-list .stain-info {
   position: absolute;
@@ -527,6 +622,15 @@ main {
     flex-direction: row;
     width: 100%;
     scroll-snap-align: none;
+    /* Restore what the rail variant above suppressed. */
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .stain-list .stain-button.selected {
+    box-shadow: inset 3px 0 0 0 var(--accent);
+  }
+  .stain-list .stain-button.selected .stain-swatch {
+    outline: none;
   }
   /* Reveal the text: undo the visually-hidden clip. */
   .stain-list .stain-info {
@@ -549,13 +653,16 @@ main {
 .stain-button {
   display: flex;
   align-items: center;
-  padding: 16px;
-  border-radius: 12px;
-  background-color: var(--surface);
-  border: 1px solid var(--outline-variant);
-  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 0;
+  background-color: transparent;
+  /* Only the bottom rule: a full box per row turned the list into a stack of
+     boxes. Hairline separators read as a catalog swatch list. */
+  border: none;
+  border-bottom: 1px solid var(--rule);
+  gap: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease;
   text-align: left;
 }
 
@@ -567,37 +674,63 @@ main {
   transform: scale(0.98);
 }
 
+/* Selection is an oxblood marker rule plus a weight change, not a background
+   tint - on a cream ground a tint is nearly invisible. */
 .stain-button.selected {
-  background-color: var(--surface-container-lowest);
+  background-color: transparent;
+  box-shadow: inset 3px 0 0 0 var(--accent);
 }
 
+/*
+ * position/overflow are load-bearing, not decoration.
+ *
+ * .stain-swatch-img is `position: absolute; inset: 0`, so it resolves against
+ * the nearest POSITIONED ancestor. Without these two declarations that
+ * ancestor was .stain-button (which is position: relative for the rail
+ * layout), and the stain photograph stretched across the entire row on top of
+ * the name and description. They were lost when two components were merged
+ * into one - the old markup carried them as inline styles on the swatch div.
+ *
+ * Square rather than round: a wood finish is a material sample, and every
+ * physical fan-deck in this category is rectangular. It also lets the photo
+ * fill the chip instead of being masked into a disc.
+ */
 .stain-swatch {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
   width: 48px;
   height: 48px;
-  border-radius: 50%;
-  border: 1px solid var(--outline-variant);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 0;
+  border: 1px solid var(--rule-strong);
 }
 
 .stain-info {
   flex-grow: 1;
 }
 
+/* Both of these are <span>s inside a <button> (a block-level <div> would be
+   invalid content there), so without an explicit display the name, the
+   surcharge and the descriptor all ran together on one line. */
 .stain-name {
-  font-weight: 700;
-  color: var(--on-surface-variant);
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--on-surface);
 }
 
 .stain-button.selected .stain-name {
-  color: var(--primary);
+  color: var(--accent);
 }
 
 .stain-desc {
+  display: block;
+  margin-top: 2px;
   color: var(--on-surface-variant);
 }
 
 .stain-check {
-  color: var(--primary);
+  color: var(--accent);
 }
 
 .action-section {
@@ -612,11 +745,10 @@ main {
   padding: 20px 0;
   background-color: var(--secondary);
   color: var(--on-secondary);
-  border-radius: 9999px;
+  border-radius: 0;
   border: none;
   font-weight: 700;
   letter-spacing: 0.1em;
-  box-shadow: 0 10px 15px -3px rgba(86, 100, 43, 0.2);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -634,46 +766,6 @@ main {
   color: var(--on-surface-variant);
 }
 
-.features-section {
-  padding-top: var(--spacing-lg);
-  border-top: 1px solid var(--outline-variant);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.features-section h3 {
-  color: var(--primary);
-}
-
-.feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.feature-item {
-  display: flex;
-  gap: 16px;
-}
-
-.feature-item .icon {
-  color: var(--primary);
-}
-
-.feature-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.feature-title {
-  font-weight: 700;
-  color: var(--primary);
-}
-
-.feature-desc {
-  color: var(--on-surface-variant);
-}
 
 /* Bottom Nav */
 .bottom-nav {
@@ -682,16 +774,14 @@ main {
   left: 0;
   width: 100%;
   z-index: 50;
-  background-color: rgba(253, 252, 251, 0.9);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid var(--outline-variant);
-  box-shadow: 0 -8px 30px rgba(74, 55, 40, 0.05);
-  border-top-left-radius: 32px;
-  border-top-right-radius: 32px;
+  /* Opaque and square, matching the header bar. A blurred translucent panel
+     makes its own hairline read as an artefact. */
+  background-color: var(--paper);
+  border-top: 1px solid var(--rule);
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 8px 16px 12px;
+  padding: 8px 12px 10px;
 }
 
 .nav-item {
@@ -699,14 +789,24 @@ main {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  /* Even basis so five items share the bar and none is clipped at 360px. */
+  flex: 1 1 0;
+  min-width: 0;
   color: var(--on-surface-muted);
-  padding: 8px 16px;
+  padding: 8px 4px;
   text-decoration: none;
   transition: color 0.3s, transform 0.3s;
+  /* Four of these are <a> and one - Search - is a <button>. Without this the
+     button alone picked up the UA's grey field and border and rendered as a
+     box sitting in the middle of the bar. */
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
 }
 
 .nav-item:hover {
-  color: var(--primary-container);
+  color: var(--ink);
 }
 
 .nav-item:active {
@@ -714,17 +814,19 @@ main {
 }
 
 .nav-item.active {
-  color: var(--primary-container);
-  border-top: 2px solid var(--primary-container);
+  color: var(--accent);
+  box-shadow: inset 0 1px 0 0 var(--accent);
 }
 
 .nav-label {
-  font-family: var(--font-serif);
-  font-size: 11px;
+  font-family: var(--font-caps);
+  font-size: 9px;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
   text-transform: uppercase;
-  margin-top: 4px;
+  margin-top: 5px;
+  white-space: nowrap;
 }
 
 /* Gallery Grid */
@@ -735,8 +837,10 @@ main {
 }
 
 .product-card {
-  background-color: var(--surface-container-lowest);
-  border-radius: 16px;
+  /* Transparent plus multiply on the image, matching the catalogue cards:
+     the white plate the photograph was shot on dissolves into the cream. */
+  background-color: transparent;
+  border-radius: 0;
   overflow: hidden;
   position: relative;
   display: flex;
@@ -745,60 +849,38 @@ main {
   padding: 24px;
   border: 1px solid var(--surface-container-highest);
   height: 420px;
-  box-shadow: 0 4px 10px rgba(50, 34, 20, 0.02);
   transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/*
+ * DO NOT put a transform on this element, or on any ancestor of a product
+ * photograph.
+ *
+ * The images use mix-blend-mode: multiply to dissolve the white plate they
+ * were shot on into the cream. A blend composites against its backdrop within
+ * its own stacking context, and `transform` creates a stacking context - so a
+ * hover zoom here isolated the image, left it nothing to multiply against, and
+ * the white plate reappeared for as long as the transform was applied. With a
+ * 0.7s transition that meant the card flashed white on hover and stayed white
+ * for most of a second after the pointer left.
+ *
+ * The hover is a hairline colour change instead, which is what the rest of the
+ * catalogue does.
+ */
 .product-card-img-wrap {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.view-details-btn {
-  opacity: 0;
-  transform: translate(-50%, 20px);
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  background-color: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(8px);
-  padding: 12px 24px;
-  border-radius: 100px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 3;
-}
-
-.product-card-wrapper:hover .view-details-btn {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
-.product-card-wrapper:hover .product-card-img-wrap {
-  transform: scale(1.05);
+.product-card {
+  transition: border-color 0.25s ease;
 }
 
 .product-card-wrapper:hover .product-card {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(50, 34, 20, 0.08);
-}
-
-/* Show view details on touch devices */
-@media (hover: none) {
-  .view-details-btn {
-    opacity: 1;
-    transform: translate(-50%, 0);
-  }
-  .product-card-wrapper:hover .product-card {
-    transform: none;
-  }
+  border-color: var(--ink);
 }
 
 /* Mobile info overlay inside card */
@@ -850,8 +932,7 @@ main {
   flex-wrap: wrap;
   background-color: var(--surface-container-lowest);
   padding: 8px;
-  border-radius: 100px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+  border-radius: 0;
   border: 1px solid var(--surface-container-highest);
   width: fit-content;
   margin: 0 auto;
@@ -871,7 +952,7 @@ main {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    border-radius: 100px;
+    border-radius: 0;
     width: 100%;
     justify-content: flex-start;
     padding: 6px;
@@ -884,400 +965,6 @@ main {
 @media (max-width: 480px) {
   .product-card {
     height: 280px;
-  }
-}
-
-@media (max-width: 767px) {
-  .gallery-hero {
-    padding: 96px 16px 48px !important;
-  }
-  .gallery-hero .body-lg {
-    display: none;
-  }
-  .showroom-hero-text {
-    bottom: 24px !important;
-    left: 16px !important;
-    right: 16px !important;
-    text-align: center !important;
-  }
-  .showroom-hero-text .body-lg {
-    max-width: 100% !important;
-  }
-  .hero-showroom {
-    height: 70vh !important;
-  }
-}
-
-/* Showroom features grid */
-.showroom-features {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
-}
-
-@media (max-width: 767px) {
-  .showroom-features {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-}
-
-/* Journey timeline */
-.journey-timeline {
-  position: relative;
-  max-width: 960px;
-  margin: 0 auto;
-}
-
-.journey-timeline::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--outline-variant);
-  transform: translateX(-50%);
-}
-
-.journey-step {
-  position: relative;
-  display: flex;
-  margin-bottom: 48px;
-}
-
-.journey-step:last-child {
-  margin-bottom: 0;
-}
-
-.journey-step-icon {
-  position: absolute;
-  left: 50%;
-  top: 28px;
-  transform: translateX(-50%);
-  z-index: 2;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 16px rgba(50, 34, 20, 0.18);
-}
-
-.journey-step-icon .material-symbols-outlined {
-  font-size: 24px;
-  color: white;
-}
-
-.journey-step-content {
-  width: calc(50% - 56px - 40px);
-  padding: 32px;
-  border-radius: 16px;
-  background: var(--surface-container-low);
-}
-
-.journey-step:nth-child(odd) .journey-step-content {
-  margin-right: auto;
-}
-
-.journey-step:nth-child(even) .journey-step-content {
-  margin-left: auto;
-}
-
-@media (hover: hover) {
-  .journey-step-content {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .journey-step:hover .journey-step-content {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-soft);
-  }
-}
-
-.journey-step-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.journey-step-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 14px;
-  background: var(--primary);
-  color: white;
-  font-family: var(--font-label);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
-
-.journey-step-content h3 {
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--primary);
-  margin: 0;
-}
-
-.journey-step-content p {
-  font-family: var(--font-label);
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--on-surface-variant);
-  margin: 0;
-}
-
-@media (max-width: 767px) {
-  .journey-timeline::before {
-    left: 24px;
-  }
-
-  .journey-step {
-    margin-bottom: 36px;
-  }
-
-  .journey-step-icon {
-    left: 0;
-    width: 44px;
-    height: 44px;
-    top: 24px;
-  }
-
-  .journey-step-icon .material-symbols-outlined {
-    font-size: 20px;
-  }
-
-  .journey-step-content {
-    width: calc(100% - 60px);
-    margin-left: auto !important;
-    margin-right: 0 !important;
-    padding: 24px;
-  }
-
-  @media (hover: hover) {
-    .journey-step:hover .journey-step-content {
-      transform: none;
-      box-shadow: none;
-    }
-  }
-}
-
-/* Showroom slideshow */
-.showroom-slideshow {
-  position: relative;
-  width: 100%;
-  height: 75vh;
-  overflow: hidden;
-  background: var(--surface-container-high);
-}
-
-.showroom-slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-  cursor: pointer;
-}
-
-.showroom-slide.active {
-  opacity: 1;
-}
-
-.showroom-slide img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.showroom-slide-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.showroom-slide-info {
-  position: absolute;
-  bottom: 160px;
-  left: 48px;
-  color: white;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  pointer-events: none;
-}
-
-.showroom-slide-actions {
-  position: absolute;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 16px;
-  z-index: 10;
-  pointer-events: auto;
-}
-
-.showroom-action-primary,
-.showroom-action-secondary {
-  padding: 12px 24px;
-  border-radius: 9999px;
-  font-family: var(--font-label);
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.05em;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.showroom-action-primary {
-  background: white;
-  color: var(--primary);
-  border: 2px solid white;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.showroom-action-primary:hover {
-  background: var(--surface-container-low);
-  border-color: var(--surface-container-low);
-  transform: translateY(-2px);
-}
-
-.showroom-action-primary:active {
-  transform: translateY(0);
-}
-
-.showroom-action-secondary {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 2px solid white;
-  backdrop-filter: blur(8px);
-}
-
-.showroom-action-secondary:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
-}
-
-.showroom-action-secondary:active {
-  transform: translateY(0);
-}
-
-.showroom-slide-info .label-caps {
-  color: white;
-  opacity: 0.85;
-  margin-bottom: 8px;
-}
-
-.showroom-slide-info h2 {
-  font-family: var(--font-serif);
-  font-size: 36px;
-  font-weight: 500;
-  margin: 0;
-}
-
-.showroom-slide-info p {
-  font-size: 16px;
-  opacity: 0.85;
-  margin-top: 8px;
-  max-width: 400px;
-}
-
-.showroom-slideshow-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(4px);
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s;
-  font-size: 24px;
-}
-
-.showroom-slideshow-arrow:hover {
-  background: rgba(255,255,255,0.35);
-}
-
-.showroom-slideshow-arrow.prev { left: 16px; }
-.showroom-slideshow-arrow.next { right: 16px; }
-
-.showroom-slideshow-dots {
-  position: absolute;
-  bottom: 32px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  z-index: 10;
-}
-
-.showroom-slideshow-dots button {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.6);
-  background: transparent;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.2s;
-}
-
-.showroom-slideshow-dots button.active {
-  background: white;
-  border-color: white;
-  width: 28px;
-  border-radius: 5px;
-}
-
-@media (max-width: 767px) {
-  .showroom-slideshow {
-    height: 55vh;
-  }
-  .showroom-slide-info {
-    bottom: 140px;
-    left: 24px;
-    right: 24px;
-    text-align: center;
-  }
-  .showroom-slide-actions {
-    bottom: 40px;
-    width: 90%;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .showroom-action-primary,
-  .showroom-action-secondary {
-    width: 100%;
-  }
-  .showroom-slide-info h2 {
-    font-size: 28px;
-  }
-  .showroom-slide-info p {
-    max-width: 100%;
-  }
-  .showroom-slideshow-arrow {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
   }
 }
 
@@ -1295,17 +982,16 @@ main {
 }
 
 .featured-card {
-  background: var(--surface-container-lowest);
-  border-radius: 16px;
+  background: transparent;
+  border-radius: 0;
   overflow: hidden;
   cursor: pointer;
-  border: 1px solid var(--surface-container-highest);
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  border: 1px solid var(--rule);
+  transition: border-color 0.25s ease;
 }
-
+/* A hairline that darkens, in place of a lift-and-shadow hover. */
 .featured-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(50, 34, 20, 0.08);
+  border-color: var(--ink);
 }
 
 .featured-card-img {
@@ -1316,18 +1002,21 @@ main {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: var(--surface-container-lowest);
+  background: transparent;
 }
 
+/*
+ * multiply dissolves the white plate every product photo was shot on into
+ * whatever it sits over, so the catalogue reads as printed on the cream
+ * rather than as cut-outs pasted onto it. The contact shadow baked into the
+ * source pixels survives and lands on the paper, which is the effect the
+ * shadow-free rule elsewhere cannot give us.
+ */
 .featured-card-img img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.featured-card:hover .featured-card-img img {
-  transform: scale(1.03);
+  mix-blend-mode: multiply;
 }
 
 .featured-card-body {
@@ -1335,18 +1024,20 @@ main {
 }
 
 .featured-card-body h3 {
-  font-family: var(--font-serif);
-  font-size: 18px;
+  font-family: var(--font-display);
+  font-size: 19px;
   font-weight: 500;
-  color: var(--primary);
-  margin: 0 0 4px;
+  color: var(--ink);
+  margin: 0 0 6px;
 }
 
+/* Prices are set in the display serif, the way a printed catalogue sets
+   figures, and in oxblood so they read as the actionable number. */
 .featured-card-body .price {
-  font-family: var(--font-label);
-  font-size: 15px;
-  color: var(--secondary);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--accent);
+  font-weight: 500;
   margin: 0;
 }
 
@@ -1368,56 +1059,7 @@ main {
 }
 
 /* Admin editing overlay */
-.admin-edit-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 20;
-  pointer-events: none;
-}
 
-.admin-edit-overlay > * {
-  pointer-events: auto;
-}
-
-.admin-edit-btn {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  background: var(--primary);
-  color: white;
-  font-family: var(--font-label);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.admin-edit-btn:hover {
-  opacity: 0.85;
-}
-
-.admin-edit-btn.danger {
-  background: var(--error);
-}
-
-.admin-edit-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: var(--primary);
-  color: white;
-  padding: 12px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  font-family: var(--font-label);
-  font-size: 13px;
-}
 
 .product-title {
   text-align: center;
@@ -1464,18 +1106,7 @@ main {
 }
 
 /* Checkout trust badges */
-.checkout-trust {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
-}
 
-@media (max-width: 767px) {
-  .checkout-trust {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-}
 
 @media (max-width: 767px) {
   .footer-grid {
@@ -1487,23 +1118,34 @@ main {
 /* ========== MOBILE RESPONSIVE ========== */
 
 
-@media (min-width: 768px) {
-}
-
 /* Mobile typography & spacing */
 @media (max-width: 767px) {
   .app-header {
-    padding: 0 8px;
-    height: 64px;
+    padding: 0 14px;
+    /* --header-h, not a second literal: one number, one place. */
+    --header-h: 52px;
+    height: var(--header-h);
     position: static;
   }
 
+  /*
+   * Both text navs go away on phones: five tracked-caps labels plus a
+   * wordmark cannot share a 390px bar, and the bottom nav already carries
+   * this IA. Safety and Care remain reachable from the footer.
+   */
+  .app-header .header-nav,
   .app-header .nav-links {
     display: none;
   }
 
-  .app-header .header-right form {
+  .app-header .header-end form {
     display: none;
+  }
+
+  /* With the side navs gone the grid has nothing to balance, so let the
+     wordmark take the middle and the cart sit hard right. */
+  .app-header {
+    grid-template-columns: 1fr auto 1fr;
   }
 
   .container {
@@ -1534,74 +1176,24 @@ main {
   .mobile-search-overlay input {
     width: 100%;
     padding: 14px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--outline-variant);
+    border-radius: 0;
+    border: 1px solid var(--control-border);
     font-size: 16px;
       box-sizing: border-box;
   }
 }
 
-@media (max-width: 767px) {
-}
 
 @media (min-width: 768px) {
   .bottom-nav {
     display: none;
   }
-}
 
-/* Gallery & Lightbox */
-.gallery-nav-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.8);
-  border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.gallery-nav-prev {
-  left: 12px;
-}
-
-.gallery-nav-next {
-  right: 12px;
-}
-
-.gallery-pagination {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 2;
-}
-
-.gallery-dot {
-  height: 8px;
-  border-radius: 4px;
-  border: none;
-  background-color: var(--outline-variant);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.gallery-dot.active {
-  width: 20px;
-  background-color: var(--primary);
-}
-
-.gallery-dot:not(.active) {
-  width: 8px;
+  /* The 128px bottom padding exists to clear the mobile bottom nav. With the
+     nav gone it is just a gap between the last section and the footer rule. */
+  main {
+    padding-bottom: 0;
+  }
 }
 
 .lightbox-overlay {
@@ -1637,7 +1229,7 @@ main {
   transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.2);
   border: none;
-  border-radius: 50%;
+  border-radius: 0;
   width: 48px;
   height: 48px;
   cursor: pointer;
@@ -1667,18 +1259,18 @@ main {
 
 .cart-popup-content {
   background-color: var(--surface);
-  border-radius: 16px;
+  border-radius: 0;
   padding: 40px;
   max-width: 420px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--rule-strong);
 }
 
 /* Filter Pill & Stain Styles */
 .filter-pill-btn {
   padding: 12px 24px;
-  border-radius: 100px;
+  border-radius: 0;
   border: none;
   background: transparent;
   color: var(--on-surface-variant);
@@ -1712,7 +1304,7 @@ main {
 
 .stain-pill-btn {
   padding: 8px 20px;
-  border-radius: 100px;
+  border-radius: 0;
   border: 1px solid var(--outline-variant);
   background: transparent;
   color: var(--on-surface-variant);
@@ -1743,14 +1335,6 @@ main {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
-}
-
-/* Controls sitting on dark photography need a ring that survives the backdrop. */
-.showroom-slideshow-arrow:focus-visible,
-.showroom-slideshow-dots button:focus-visible,
-.gallery-nav-btn:focus-visible {
-  outline: 2px solid var(--surface-container-lowest);
-  outline-offset: 3px;
 }
 
 .visually-hidden {
@@ -1815,12 +1399,24 @@ main {
 
 .nav-text-link {
   text-decoration: none;
-  color: var(--on-surface-variant);
-  font-size: 13px;
+  color: var(--ink-muted);
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
 }
+.nav-text-link:hover {
+  color: var(--ink);
+}
+/* The current page is marked with a rule, not a weight change - a bolder
+   tracked cap at 11px shifts the whole cluster's width as you navigate. */
 .nav-text-link.active {
-  color: var(--primary);
-  font-weight: 600;
+  color: var(--ink);
+  border-bottom-color: var(--accent);
 }
 
 .header-right {
@@ -1835,7 +1431,7 @@ main {
   right: -4px;
   background-color: var(--primary);
   color: var(--on-primary);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-circle);
   min-width: 18px;
   height: 18px;
   padding: 0 4px;
@@ -1851,9 +1447,11 @@ main {
 }
 
 .site-footer {
-  background-color: var(--surface-container-low);
-  margin-top: 96px;
-  border-top: 1px solid var(--outline-variant);
+  background-color: var(--paper);
+  /* No margin: the footer's own hairline and 64px padding are the separation.
+     A 96px gap on top of a section's own bottom padding read as dead space. */
+  margin-top: 0;
+  border-top: 1px solid var(--rule);
   padding: 64px 24px;
 }
 .footer-grid {
@@ -1863,9 +1461,14 @@ main {
   align-items: start;
 }
 .footer-brand {
-  font-size: 24px;
   display: block;
   margin-bottom: 16px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink);
 }
 .footer-tagline {
   max-width: 300px;
@@ -1915,32 +1518,36 @@ main {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 28px;
-  border-radius: var(--radius);
-  font-family: var(--font-label);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  padding: 14px 30px;
+  border-radius: 0;
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  /* Absorbs the trailing track so the label sits centred in the button. */
+  text-indent: 0.18em;
   text-transform: uppercase;
   text-decoration: none;
   cursor: pointer;
   transition: background-color 0.2s, color 0.2s;
 }
 .button-primary {
-  background-color: var(--primary);
-  color: var(--on-primary);
-  border: 1px solid var(--primary);
+  background-color: var(--accent);
+  color: var(--accent-on);
+  border: 1px solid var(--accent);
 }
 .button-primary:hover {
-  background-color: var(--primary-container);
+  background-color: var(--ink);
+  border-color: var(--ink);
 }
 .button-secondary {
   background-color: transparent;
-  color: var(--primary);
-  border: 1px solid var(--outline);
+  color: var(--ink);
+  border: 1px solid var(--ink);
 }
 .button-secondary:hover {
-  background-color: var(--surface-container-high);
+  background-color: var(--ink);
+  color: var(--paper);
 }
 
 /* ===========================================================================
@@ -1957,7 +1564,7 @@ main {
 .search-bar-input {
   padding: 6px 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--control-border);
   font-size: 13px;
   width: 220px;
   background: var(--surface-container-lowest);
@@ -1972,7 +1579,7 @@ main {
   max-width: 90vw;
   background-color: var(--surface-container-lowest);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--rule-strong);
   border: 1px solid var(--outline-variant);
   z-index: 1000;
   padding: 8px;
@@ -2004,7 +1611,7 @@ main {
 .search-result-thumb {
   width: 48px;
   height: 48px;
-  border-radius: 6px;
+  border-radius: 0;
   object-fit: cover;
   flex-shrink: 0;
   background-color: var(--surface-container-lowest);
@@ -2079,7 +1686,7 @@ main {
   flex: 1;
   padding: 10px 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--outline-variant);
+  border: 1px solid var(--control-border);
   font-size: 16px; /* >=16px stops iOS Safari zooming on focus */
   background: var(--surface-container-lowest);
   color: var(--on-surface);
@@ -2214,16 +1821,39 @@ main {
   font-size: 14px;
 }
 
+/*
+ * The link must be given a definite size by the flex container, not ask its
+ * own content for one.
+ *
+ * .product-card is display:flex, so this <a> is a flex item. Its only in-flow
+ * child is .product-card-img-wrap at width:100% - a percentage resolved
+ * against this element's width, which under `flex-basis: auto` is itself
+ * derived from content. That is circular, and the next/image `fill` inside is
+ * position:absolute so it contributes no intrinsic size to break it. The whole
+ * chain resolved to 0x0: every gallery image downloaded correctly and then
+ * rendered into a zero-sized box.
+ *
+ * `flex: 1 1 0` gives the item a definite main size from the container instead,
+ * and align-self: stretch does the same on the cross axis.
+ */
 .product-card-link-area {
   display: block;
+  flex: 1 1 0;
+  align-self: stretch;
+  min-width: 0;
   text-decoration: none;
   color: inherit;
+}
+.product-card-img-wrap img {
+  mix-blend-mode: multiply;
 }
 .product-card-img-wrap {
   position: relative; /* next/image fill */
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 5;
+  /* Fills the card, which already has a fixed height; an aspect-ratio here
+     would overflow that height and be clipped by the card's overflow:hidden. */
+  height: 100%;
 }
 
 .product-card-text {
@@ -2252,12 +1882,6 @@ main {
   width: 24px;
   background-color: var(--primary);
   opacity: 0.2;
-}
-
-.product-overlay-price {
-  font-family: var(--font-label);
-  font-weight: 600;
-  color: var(--primary);
 }
 .product-overlay-woods {
   display: flex;
@@ -2358,7 +1982,7 @@ main {
 .product-image {
   position: relative;
   min-height: 420px;
-  background-color: var(--surface-container-lowest);
+  background-color: transparent;
 }
 .product-image--empty {
   display: flex;
@@ -2408,7 +2032,7 @@ main {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 0;
 }
 
 .babylist-btn {
@@ -2615,7 +2239,10 @@ main {
   width: 100%;
   padding: 12px;
   border-radius: var(--radius);
-  border: 1px solid var(--outline-variant);
+  /* --control-border, not --outline-variant: the hairline token is 1.32:1 on
+     the cream ground, which is fine for a decorative divider but fails WCAG
+     1.4.11 (3:1) for the boundary of a form control. */
+  border: 1px solid var(--control-border);
   background: var(--surface-container-lowest);
   color: var(--on-surface);
   font-family: var(--font-label);
@@ -2795,7 +2422,6 @@ main {
   padding: 32px;
   background-color: var(--surface-container-lowest);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-ambient);
   border: 1px solid var(--surface-container-highest);
 }
 .payment-section h2 {
@@ -2819,7 +2445,6 @@ main {
   background-color: var(--surface-container);
   padding: 32px;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-ambient);
 }
 .order-summary h2 {
   margin-bottom: 24px;
@@ -2977,4 +2602,189 @@ main {
   .footer-support .footer-links {
     align-items: flex-end;
   }
+}
+
+/* ===========================================================================
+   Long-form document pages (/safety, /care)
+   =========================================================================== */
+
+.doc-page {
+  /* A measure, not the full 1280px container: long-form copy set the width of
+     a product grid is unreadable. */
+  max-width: 68ch;
+  padding-top: 56px;
+  padding-bottom: 24px;
+}
+
+.doc-page h1 {
+  margin: 8px 0 0;
+}
+
+.doc-lede {
+  margin: 20px 0 44px;
+  color: var(--on-surface-variant);
+}
+
+.doc-page section {
+  margin-bottom: 8px;
+}
+
+.doc-page h2 {
+  margin: 0 0 14px;
+}
+
+.doc-page p {
+  margin: 0 0 16px;
+  color: var(--on-surface);
+  line-height: 1.7;
+}
+
+.doc-rule {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 40px 0;
+}
+
+.doc-list {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  line-height: 1.7;
+}
+
+.doc-list li {
+  margin-bottom: 10px;
+}
+
+.doc-list strong {
+  font-weight: 600;
+}
+
+.doc-link {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   Search: keyboard highlight and native chrome
+   --------------------------------------------------------------------------- */
+
+/*
+ * Arrow-key highlight. Distinct from :hover, because both can be true at once
+ * and the keyboard position is the one that Enter acts on.
+ */
+/* Same treatment as every other product photograph on the site. */
+.search-result-thumb {
+  mix-blend-mode: multiply;
+}
+
+.search-result.is-active {
+  background-color: var(--paper-2);
+  box-shadow: inset 2px 0 0 0 var(--accent);
+}
+
+/*
+ * WebKit paints its own clear button inside type="search", in the UA's blue.
+ * On a cream and oxblood page it reads as a rendering error, and the form
+ * already has an explicit submit control.
+ */
+.search-bar-input::-webkit-search-cancel-button,
+.mobile-search-input::-webkit-search-cancel-button,
+.mobile-search-overlay input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* ---------------------------------------------------------------------------
+   Purchase assurances, under Add to Cart
+   --------------------------------------------------------------------------- */
+
+.assurances {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 22px 0 0;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  gap: 18px;
+}
+
+.assurance {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.assurance-icon {
+  font-size: 20px;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.assurance-body {
+  display: block;
+}
+
+.assurance-title {
+  display: block;
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.assurance-link {
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 1px;
+}
+
+.assurance-link:hover {
+  color: var(--accent);
+}
+
+.assurance-copy {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+/* A search hit whose matched finish is currently withdrawn. */
+.search-result-oos {
+  color: var(--error);
+}
+
+/* Quantity stepper in the checkout order summary. */
+.qty-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+.qty-stepper button {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+.qty-stepper button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.qty-stepper span {
+  min-inline-size: 1.5rem;
+  text-align: center;
+}
+
+/* Cloudflare Turnstile. Absent entirely when no site key is configured. */
+.turnstile-widget {
+  margin-block: var(--spacing-sm);
 }

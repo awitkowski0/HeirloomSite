@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { getOrder, type OrderData } from '@/lib/api-client';
+import { useCart } from '@/context/useCart';
 import { formatPrice, fromCents } from '@/lib/format';
 import { variantLabel } from '@/lib/labels';
 
@@ -45,25 +45,23 @@ function statusPresentation(order: OrderData): { heading: string; blurb: string;
 }
 
 export default function OrderConfirmationClient({ paymentIntentId }: { paymentIntentId: string }) {
-  const searchParams = useSearchParams();
+  const { clearCart } = useCart();
   const [state, setState] = useState<State>({ kind: 'loading' });
-
-  const queryToken = searchParams.get('token') || '';
 
   useEffect(() => {
     const controller = new AbortController();
 
     // Resolved inside the async flow so no setState runs synchronously in the
-    // effect body. Prefers sessionStorage, falling back to ?token= so
-    // confirmation links already sent to customers keep working.
+    // effect body. sessionStorage only: the token is a bearer credential and
+    // PostHog captures $current_url with its query string, so it must never
+    // travel in the URL.
     const load = async () => {
       let token = '';
       try {
         token = sessionStorage.getItem(`order_token_${paymentIntentId}`) || '';
       } catch {
-        // sessionStorage unavailable; fall through to the query parameter.
+        // Safari private mode or blocked storage.
       }
-      if (!token) token = queryToken;
       if (!token) return { kind: 'unauthorized' } as const;
 
       try {
@@ -80,7 +78,21 @@ export default function OrderConfirmationClient({ paymentIntentId }: { paymentIn
     });
 
     return () => controller.abort();
-  }, [paymentIntentId, queryToken]);
+  }, [paymentIntentId]);
+
+  /*
+   * Empty the cart once the order is confirmed paid.
+   *
+   * Checkout clears it on the inline path, but a redirect payment method
+   * (Klarna, Affirm, Cash App) never returns to that code - the browser leaves
+   * the site and comes back here. Those customers were charged and then kept
+   * looking at a full cart. Keyed on `paid` rather than on arrival, so an
+   * abandoned or failed payment leaves the cart alone.
+   */
+  const paid = state.kind === 'ready' && state.order.paid;
+  useEffect(() => {
+    if (paid) clearCart();
+  }, [paid, clearCart]);
 
   if (state.kind === 'loading') {
     return (
@@ -96,7 +108,7 @@ export default function OrderConfirmationClient({ paymentIntentId }: { paymentIn
         <h1 className="headline-lg">We couldn&rsquo;t load that order</h1>
         <p className="body-lg text-on-surface-variant">
           {state.kind === 'unauthorized'
-            ? 'This link is missing its access token. Please use the link from your confirmation email.'
+            ? 'This order can only be opened in the browser session that placed it. Please contact us and we will look it up for you.'
             : state.message}
         </p>
         <div className="not-found-actions">

@@ -22,16 +22,27 @@ export interface Addon {
   stainable: boolean;
 }
 
+/**
+ * What the `wood` field actually means for a product.
+ *
+ * One field carries four different things across the catalogue - a wood species,
+ * a rug size, a paint/stain finish, or nothing at all ("Default Title", a
+ * Shopify export artifact). This used to be guessed at render time by sniffing
+ * the string for quote marks; it is now declared in product.json and validated
+ * against the data by scripts/build-data.mjs.
+ */
+export type VariantType = 'wood' | 'size' | 'finish' | 'none';
+
 export interface InventoryItem {
   productName: string;
   wood: string;
   category: string | null;
+  variantType: VariantType;
   description: string | null;
   extendedDescription: string | null;
   title: string | null;
   metaDescription: string | null;
   basePrice: number;
-  order: number | null;
   tags: string[];
   sku: string | null;
   slug: string | null;

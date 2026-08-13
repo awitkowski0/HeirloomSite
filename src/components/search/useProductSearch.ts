@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearch, type SearchResult } from '@/lib/search';
+import { variantHref } from '@/lib/variants';
 import { productSelected, searchSubmitted } from '@/lib/analytics';
 
 /**
@@ -35,10 +36,13 @@ export function useProductSearch(
       });
       setQuery('');
       onNavigate?.();
-      const params = new URLSearchParams();
-      if (result.matchedStain) params.set('stain', result.matchedStain);
-      const qs = params.toString();
-      router.push(`/product/${result.slug}${qs ? `?${qs}` : ''}`);
+      // A finish that matched the query gets its own URL, so searching
+      // "driftwood" lands on that finish rather than the default one.
+      router.push(
+        result.matchedStain
+          ? variantHref(result.slug, result.wood, result.matchedStain)
+          : `/product/${result.slug}`
+      );
     },
     [router, onNavigate, surface]
   );
@@ -52,5 +56,61 @@ export function useProductSearch(
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   }, [query, router, onNavigate, results.length, surface]);
 
-  return { query, setQuery, results, selectResult, submitQuery };
+  /*
+   * Arrow-key navigation.
+   *
+   * The input already declared role="combobox" with aria-expanded and
+   * aria-controls, but only Escape was handled - so it announced a listbox
+   * that could not be reached from the keyboard at all. Focus stays in the
+   * input throughout and the active option is pointed at with
+   * aria-activedescendant, which is the pattern screen readers expect.
+   */
+  /*
+   * The highlight is stored WITH the query it belongs to, and derived during
+   * render, rather than reset from an effect. A new query invalidates it -
+   * otherwise Enter would act on whatever now sits at that position - and
+   * doing it in state means there is no frame where a stale row is still
+   * highlighted against new results.
+   */
+  const [active, setActive] = useState<{ q: string; i: number }>({ q: '', i: -1 });
+  const activeIndex = active.q === query ? active.i : -1;
+  const setActiveIndex = useCallback((i: number) => setActive({ q: query, i }), [query]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>): 'close' | undefined => {
+      if (e.key === 'Escape') return 'close';
+      if (results.length === 0) return;
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex((activeIndex + 1) % results.length);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex(activeIndex <= 0 ? results.length - 1 : activeIndex - 1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        setActiveIndex(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        setActiveIndex(results.length - 1);
+      } else if (e.key === 'Enter' && activeIndex >= 0) {
+        // Only intercept Enter when something is highlighted; otherwise the
+        // form submits and takes the visitor to the full results page.
+        e.preventDefault();
+        selectResult(results[activeIndex]);
+      }
+    },
+    [results, activeIndex, selectResult, setActiveIndex]
+  );
+
+  return {
+    query,
+    setQuery,
+    results,
+    selectResult,
+    submitQuery,
+    activeIndex,
+    setActiveIndex,
+    handleKeyDown,
+  };
 }

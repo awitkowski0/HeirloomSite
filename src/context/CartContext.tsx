@@ -11,10 +11,9 @@ import {
   updateCart,
 } from './cartStore';
 import type { CartItem } from '@/types';
+import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 
 export { cartItemId, itemKey } from './cartStore';
-
-const MAX_QUANTITY = 99;
 
 export function CartProvider({ children }: { children: ReactNode }) {
   // Server renders getServerSnapshot() (empty); the client swaps to the real
@@ -38,13 +37,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (existing) {
         return prev.map(i =>
           itemKey(i) === key
-            ? { ...i, quantity: Math.min(i.quantity + (item.quantity || 1), MAX_QUANTITY) }
+            ? { ...i, quantity: Math.min(i.quantity + (item.quantity || 1), MAX_QUANTITY_PER_LINE) }
             : i
         );
       }
       return [
         ...prev,
-        { ...item, id: cartItemId(item), quantity: Math.min(item.quantity || 1, MAX_QUANTITY) },
+        { ...item, id: cartItemId(item), quantity: Math.min(item.quantity || 1, MAX_QUANTITY_PER_LINE) },
       ];
     });
   }, []);
@@ -56,7 +55,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateQuantity = useCallback((id: string, quantity: number) => {
     if (!Number.isInteger(quantity) || quantity < 1) return;
     updateCart(prev =>
-      prev.map(i => (i.id === id ? { ...i, quantity: Math.min(quantity, MAX_QUANTITY) } : i))
+      prev.map(i => (i.id === id ? { ...i, quantity: Math.min(quantity, MAX_QUANTITY_PER_LINE) } : i))
     );
   }, []);
 

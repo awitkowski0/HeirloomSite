@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { getInventory } from '@/lib/content';
-import { itemListJsonLd } from '@/lib/seo';
+import { itemListJsonLd,
+  jsonLdScript,
+} from '@/lib/seo';
 import GalleryBrowser from '@/components/gallery/GalleryBrowser';
 import type { GalleryProduct } from '@/components/gallery/types';
 
@@ -57,7 +59,7 @@ export default function GalleryPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
+          __html: jsonLdScript(
             itemListJsonLd(
               products.map(p => ({
                 productName: p.name,

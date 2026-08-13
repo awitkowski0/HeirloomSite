@@ -35,12 +35,17 @@ export async function GET(
 ) {
   const { paymentIntentId } = await params;
 
-  // Accept the token from a header first so it stays out of the URL, the
-  // browser's history, the Referer header of any outbound link on the
-  // confirmation page, and analytics $current_url. The query parameter remains
-  // supported so links already issued keep working.
-  const url = new URL(req.url);
-  const token = req.headers.get('x-order-token') || url.searchParams.get('token');
+  /*
+   * Header only.
+   *
+   * The token is a bearer credential for a response containing name, street
+   * address and email. A `?token=` fallback used to be accepted "so links
+   * already issued keep working" - but nothing in this project has ever sent an
+   * email, so no such link was ever issued, and the fallback's only real effect
+   * was that PostHog captures $current_url INCLUDING the query string on every
+   * pageview. Any use of it shipped the credential to a third party.
+   */
+  const token = req.headers.get('x-order-token');
 
   if (!paymentIntentId || !/^pi_[A-Za-z0-9_]+$/.test(paymentIntentId)) {
     return NextResponse.json({ error: 'Invalid payment intent id' }, { status: 400 });

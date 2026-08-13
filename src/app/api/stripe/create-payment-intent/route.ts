@@ -1,7 +1,9 @@
+import { createHash } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { getStripe, StripeNotConfiguredError } from '@/lib/stripe-server';
 import { mintOrderToken } from '@/lib/orderToken';
-import { priceCart, validateShipping, PricingError } from '@/lib/pricing';
+import { priceCart, validateShipping, requireTermsAcceptance, PricingError } from '@/lib/pricing';
+import { verifyTurnstile, TurnstileError } from '@/lib/turnstile';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,7 +20,15 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Before anything else: this endpoint creates real PaymentIntents and is
+    // reachable by anyone. No-op unless TURNSTILE_SECRET_KEY is configured.
+    await verifyTurnstile(
+      body.turnstileToken,
+      req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for')
+    );
+
     const shipping = validateShipping(body);
+    requireTermsAcceptance(body);
     const priced = priceCart(body.cart);
 
     /*
@@ -57,6 +67,26 @@ export async function POST(req: Request) {
     }
     if (current) itemChunks[`items_${chunkIndex}`] = `[${current}]`;
 
+    /*
+     * Idempotency, derived from the order rather than from a client-supplied id.
+     *
+     * Every submit created a brand new PaymentIntent and abandoned the previous
+     * one, so a double-click, a flaky connection retry, or editing the address
+     * and resubmitting all littered Stripe with intents for the same order. The
+     * key is a hash of exactly what determines the charge - the priced lines and
+     * the destination - so an identical resubmit returns the SAME intent, and a
+     * genuinely different order gets a new one.
+     */
+    const idempotencyKey = createHash('sha256')
+      .update(
+        JSON.stringify({
+          lines: priced.lines,
+          total: priced.totalCents,
+          shipping,
+        })
+      )
+      .digest('hex');
+
     const stripe = getStripe();
     const paymentIntent = await stripe.paymentIntents.create({
       // Integer cents. `total * 100` on float dollars produced values like
@@ -84,8 +114,9 @@ export async function POST(req: Request) {
         total_cents: String(priced.totalCents),
         item_count: String(priced.lines.length),
         ...itemChunks,
+        terms_accepted: 'true',
       },
-    });
+    }, { idempotencyKey });
 
     if (!paymentIntent.client_secret) {
       throw new Error('Stripe returned no client_secret');
@@ -117,6 +148,9 @@ export async function POST(req: Request) {
         },
         { status: 503 }
       );
+    }
+    if (err instanceof TurnstileError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
     }
     if (err instanceof PricingError) {
       // Validation problems are the caller's to fix, and the message is safe

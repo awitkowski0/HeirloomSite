@@ -6,9 +6,9 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <span className="brand-title footer-brand">Heirloom Cribs and More</span>
+            <span className="footer-brand">Heirloom</span>
             <p className="body-md text-on-surface-variant footer-tagline">
-              Handcrafted for generations.
+              Solid hardwood nursery furniture, built to convert and to last.
             </p>
           </div>
           <div>
@@ -18,13 +18,22 @@ export default function Footer() {
                 <Link href="/products">All Products</Link>
               </li>
               <li>
-                <Link href="/gallery">Gallery</Link>
+                <Link href="/products/cribs">Cribs</Link>
+              </li>
+              <li>
+                <Link href="/gallery">Collections</Link>
               </li>
             </ul>
           </div>
           <div className="footer-support">
             <h2 className="label-caps text-primary footer-heading">Support</h2>
             <ul className="footer-links">
+              <li>
+                <Link href="/safety">Safety</Link>
+              </li>
+              <li>
+                <Link href="/care">Care &amp; Finishes</Link>
+              </li>
               <li>
                 <Link href="/contact">Contact Us</Link>
               </li>

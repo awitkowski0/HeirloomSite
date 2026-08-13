@@ -1,30 +1,36 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { productAddedToCart } from '@/lib/analytics';
+import { productAddedToCart, productViewed, variantConfigured } from '@/lib/analytics';
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
 import ProductGallery from './ProductGallery';
 import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
+import PurchaseAssurances from './PurchaseAssurances';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
-import type { InventoryItem, Stain } from '@/types';
+import { variantHref } from '@/lib/variants';
+import type { InventoryItem, Stain, VariantType } from '@/types';
 
-const WOOD_SPECIES = ['brownmaple', 'cherrywood', 'redoak'];
-
-function getVariantLabel(woods: string[]): string | null {
-  if (woods.length <= 1 && woods[0] === 'Default Title') return null;
-  if (woods.some(w => WOOD_SPECIES.includes(w.toLowerCase().replace(/\s/g, '')))) return 'Select Wood Species';
-  if (woods.some(w => w.includes('"') || w.includes('x ') || w.includes('FT') || w.toLowerCase().includes('feet')))
-    return 'Select Size';
-  return 'Select Option';
-}
-
-function isHandcraftedWood(woods: string[]): boolean {
-  return woods.some(w => WOOD_SPECIES.includes(w.toLowerCase().replace(/\s/g, '')));
-}
+/**
+ * What to call the variant selector, keyed on the product's declared type.
+ *
+ * This was a heuristic that sniffed the variant strings for quote marks, "x ",
+ * "FT" and "feet". It mislabelled everything it did not anticipate as the
+ * generic "Select Option" - which is what the eleven finish-variant products
+ * got - and on the seven products whose variants had been flattened to
+ * "BrownMaple / Antique Slate" it also meant `showStainStep` was false, so the
+ * finish selector never rendered at all. The type is now declared in
+ * product.json and validated against the data at build time.
+ */
+const VARIANT_LABELS: Record<VariantType, string | null> = {
+  wood: 'Select Wood Species',
+  size: 'Select Size',
+  finish: 'Select Finish',
+  none: null,
+};
 
 function firstInStock(config: InventoryItem | undefined): string {
   return config?.stains.find((s: Stain) => s.inStock)?.name || '';
@@ -33,28 +39,42 @@ function firstInStock(config: InventoryItem | undefined): string {
 interface Props {
   productName: string;
   configurations: InventoryItem[];
+  slug: string;
+  /** Resolved on the server from the URL path, so the correct configuration is
+      in the initial HTML rather than applied after hydration. */
+  initialWood: string;
+  initialStain: string | null;
 }
 
-export default function ProductConfigurator({ productName, configurations }: Props) {
+export default function ProductConfigurator({
+  productName,
+  configurations,
+  slug,
+  initialWood,
+  initialStain,
+}: Props) {
   const { addToCart } = useCart();
-  const [userWood, setUserWood] = useState<string | null>(null);
-  const [userStain, setUserStain] = useState<string | null>(null);
+  const [userWood, setUserWood] = useState<string | null>(initialWood);
+  const [userStain, setUserStain] = useState<string | null>(initialStain);
   const [showCartPopup, setShowCartPopup] = useState(false);
 
   const woods = useMemo(() => configurations.map(c => c.wood), [configurations]);
-  const variantLabel = getVariantLabel(woods);
-  const showStainStep = variantLabel === 'Select Wood Species';
-  const showDeliveryMessage = isHandcraftedWood(woods);
+  const variantType = configurations[0]?.variantType ?? 'none';
+  const variantLabel = VARIANT_LABELS[variantType];
+  // Only a wood-variant product has a separate finish axis; for a finish-variant
+  // product the variant selector IS the finish selector.
+  const showStainStep = variantType === 'wood';
+  const showDeliveryMessage = variantType === 'wood';
 
   /**
-   * ?wood= / ?stain= deep links are applied in a mount effect, not during
-   * render.
+   * Legacy ?wood= / ?stain= links only.
    *
-   * Two reasons. Reading window.location.search during render (what the old
-   * code did) is not safe under SSR. And reading it via useSearchParams would
-   * opt this whole route out of static prerendering, which is the point of the
-   * migration. Server HTML therefore shows the default variant - correct for
-   * the canonical URL - and the deep link applies after hydration.
+   * The current form is a path - /product/bloomington/cherry_wood/antique_slate
+   * - resolved on the server, so the right configuration is in the HTML a
+   * crawler sees. This effect exists for links shared before that change.
+   *
+   * It stays an effect rather than useSearchParams(), which would opt the whole
+   * route out of static prerendering.
    */
   /* eslint-disable react-hooks/set-state-in-effect --
      A one-shot read of browser-only state applied after hydration; there is no
@@ -95,11 +115,22 @@ export default function ProductConfigurator({ productName, configurations }: Pro
     return out;
   }, [currentStain, currentConfig]);
 
-  // A 'product_view' capture used to live here, keyed on wood and stain, so it
-  // re-fired every time the visitor clicked a swatch - one page visit produced
-  // a dozen "views". PR #77 on dev removed it; $pageview already records the
-  // visit, and configurator interaction is better measured by what gets added
-  // to the cart.
+  /*
+   * Funnel step 1, fired once per product page.
+   *
+   * The old 'product_view' capture was keyed on wood and stain, so it re-fired
+   * on every swatch click and one visit produced a dozen "views" - which made
+   * the top of the funnel meaningless. The dependency array is the product
+   * name alone, deliberately: changing a finish is step 2, not another view.
+   */
+  useEffect(() => {
+    if (!productName) return;
+    productViewed({
+      product_name: productName,
+      product_category: configurations[0]?.category ?? null,
+      price: (configurations[0]?.basePrice as number) ?? 0,
+    });
+  }, [productName, configurations]);
 
   if (!currentConfig) return null;
 
@@ -107,9 +138,39 @@ export default function ProductConfigurator({ productName, configurations }: Pro
   const addition = Number(currentStain?.priceAddition) || 0;
   const totalPrice = basePrice + addition;
 
+  /*
+   * Keep the address bar on the configuration being shown, so the URL is
+   * always the one worth copying.
+   *
+   * history.replaceState, not router.replace: this is the same page with a
+   * different variant already in memory, so a Next navigation would re-render
+   * the tree to reach a state we are already in. replaceState also does not
+   * stack a history entry per swatch, so Back still leaves the product rather
+   * than walking eleven finishes.
+   */
+  const syncUrl = (wood: string, stain: string | null) => {
+    window.history.replaceState(null, '', variantHref(slug, wood, stain));
+  };
+
+  // Funnel step 2. Fires on interaction rather than on render, so it measures
+  // intent - a visitor who touched a control - not merely arriving on a page.
+  const handleStainChange = (stain: string) => {
+    setUserStain(stain);
+    syncUrl(selection.wood, stain);
+    variantConfigured({
+      product_name: productName,
+      wood: selection.wood,
+      stain,
+      field: 'stain',
+    });
+  };
+
   const handleWoodChange = (wood: string) => {
+    variantConfigured({ product_name: productName, wood, stain: selection.stain, field: 'wood' });
+    const nextStain = firstInStock(configurations.find(c => c.wood === wood)) || null;
     setUserWood(wood);
-    setUserStain(firstInStock(configurations.find(c => c.wood === wood)) || null);
+    setUserStain(nextStain);
+    syncUrl(wood, nextStain);
   };
 
   const isWoodSoldOut = (wood: string) => {
@@ -164,7 +225,7 @@ export default function ProductConfigurator({ productName, configurations }: Pro
             <StainSelector
               stains={currentConfig.stains}
               selected={selection.stain}
-              onSelect={setUserStain}
+              onSelect={handleStainChange}
             />
           )}
 
@@ -209,11 +270,11 @@ export default function ProductConfigurator({ productName, configurations }: Pro
               Add to Babylist
             </button>
 
-            {showDeliveryMessage && (
-              <p className="label-caps delivery-info">
-                Expected delivery: 6-8 weeks &bull; Handcrafted for you
-              </p>
-            )}
+            {/* Replaces a single "Expected delivery: 6-8 weeks" line. That
+                answered the least important of the four questions a first-time
+                buyer has, and left the other three - cost of delivery, safety,
+                who to ask - unanswered at the point of decision. */}
+            {showDeliveryMessage && <PurchaseAssurances />}
           </section>
         </div>
       </div>

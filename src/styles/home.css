@@ -1,0 +1,536 @@
+/* ===========================================================================
+   Homepage.
+   Every class is prefixed .home- so nothing here depends on cascade order
+   against globals.css, which loads first as the layout's stylesheet.
+   =========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   Hero: four asymmetric columns, edge to edge.
+   No .container wrapper, so it is full-bleed by construction rather than by a
+   100vw bleed hack (which overflows by the scrollbar width).
+   --------------------------------------------------------------------------- */
+
+.home-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  border-bottom: 1px solid var(--rule);
+}
+
+.home-hero > * {
+  min-width: 0;
+}
+
+.home-hero-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 56px 28px 60px;
+}
+
+.home-hero-headline {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(2rem, 1.3rem + 2.9vw, 3.1rem);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+}
+
+/* Small oxblood rule with a diamond at its centre. */
+.home-ornament {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0;
+}
+
+.home-ornament-rule {
+  display: block;
+  width: 28px;
+  height: 1px;
+  background: var(--accent);
+}
+
+.home-ornament-diamond {
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+
+.home-hero-sub {
+  margin: 0 0 30px;
+  max-width: 34ch;
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--ink-muted);
+}
+
+.home-hero-cta {
+  align-self: flex-start;
+}
+
+/* The lifestyle photograph. Cropped tall and offset toward the crib, which
+   sits left of centre in the source frame. */
+.home-hero-photo {
+  position: relative;
+  min-height: 340px;
+  background: var(--paper-2);
+}
+
+/* --- Detail crops -------------------------------------------------------- */
+
+/*
+ * Two across on phones, not stacked.
+ *
+ * These are supporting detail: in the desktop layout they sit in a narrow
+ * column and read as marginalia. Stacked full-width on a 390px screen they
+ * became two near-full-height blocks, so the hero cost four screens of
+ * scrolling before a single product appeared.
+ */
+.home-hero-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--rule);
+}
+
+.home-detail {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-decoration: none;
+  padding: 16px;
+}
+
+.home-detail + .home-detail {
+  border-left: 1px solid var(--rule);
+}
+
+/*
+ * There is no macro photography in the catalogue, so these scale hard into a
+ * full product shot to reach a region that is all wood.
+ *
+ * background-position rather than <Image> plus transform: with object-fit:
+ * cover the frame crops the source FIRST, so a transform-origin aimed at the
+ * top rail was pointing at a band that had already been cropped away - which
+ * is why both frames landed on slats and bedding. Percentage
+ * background-position aligns the same point of the image with the same point
+ * of the box, so it addresses the source directly.
+ *
+ * The trade-off is the full-size JPEG instead of an optimised one. It is the
+ * same file the Mission Style card below already loads, so it comes from cache.
+ */
+.home-detail-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  /* multiply drops the white plate into the cream, as on the catalogue cards. */
+  mix-blend-mode: multiply;
+  background-color: transparent;
+  background-repeat: no-repeat;
+}
+
+/* The flat top rail crossing the headboard, and the front-left corner post
+   and lower rail. Both are solid wood in the source; the middle of the frame
+   is bedding and the outer thirds are empty plate. */
+.home-detail-frame--rail {
+  background-size: 300%;
+  /* Shifted right of the headboard centre to clear the soft toy propped
+     against the rail in the source frame. */
+  background-position: 66% 13%;
+}
+
+.home-detail-frame--post {
+  background-size: 340%;
+  background-position: 15% 78%;
+}
+
+.home-detail-caption {
+  margin-top: 10px;
+  font-size: 9px;
+  color: var(--ink-muted);
+}
+
+.home-detail:hover .home-detail-caption {
+  color: var(--accent);
+}
+
+/* --- Conversion diagram column ------------------------------------------- */
+
+.home-hero-conversions {
+  border-top: 1px solid var(--rule);
+  padding: 26px 24px 30px;
+}
+
+.home-conversions-title {
+  margin: 0 0 18px;
+  color: var(--ink-muted);
+}
+
+/*
+ * Four across on phones, a vertical run with a dashed spine from 1200px up.
+ * As a stacked list on a narrow screen this was a whole screen of its own for
+ * what is a single idea: the crib becomes three other beds.
+ */
+.home-conversion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+}
+
+/* The dashed line linking the stages: horizontal here, vertical when the
+   list is. It sits behind the art tiles, which carry a paper background. */
+.home-conversion-list::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 20px;
+  border-top: 1px dashed var(--rule-strong);
+}
+
+.home-conversion {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.home-conversion-art {
+  position: relative;
+  width: 54px;
+  height: 40px;
+  flex-shrink: 0;
+  color: var(--ink);
+  /* Sits on the paper so the dashed spine passes behind, not through. */
+  background: var(--paper);
+}
+
+.home-conversion-label {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 9px;
+  color: var(--ink);
+}
+
+.home-conversion-num {
+  color: var(--accent);
+}
+
+.home-conversions-link {
+  display: inline-block;
+  margin-top: 16px;
+  font-family: var(--font-caps);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Dark provenance band
+   --------------------------------------------------------------------------- */
+
+.home-band {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 44px 24px 48px;
+}
+
+.home-band-line {
+  margin: 0 0 40px;
+  text-align: center;
+  color: var(--paper);
+  /* Absorbs the trailing track so the centred string is optically centred. */
+  text-indent: 0.18em;
+}
+
+.home-band-cols {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: var(--spacing-container-max);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+.home-band-col {
+  text-align: center;
+  padding: 0 20px;
+}
+
+.home-band-icon {
+  font-size: 26px;
+  color: var(--on-ink-muted);
+}
+
+.home-band-label {
+  margin: 12px 0 8px;
+  color: var(--paper);
+}
+
+.home-band-copy {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--on-ink-muted);
+}
+
+.home-band-copy span {
+  display: block;
+}
+
+/* ---------------------------------------------------------------------------
+   Style cards
+   --------------------------------------------------------------------------- */
+
+.home-styles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  padding: 64px 24px 80px;
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+}
+
+.home-styles-heading {
+  margin: 0 0 18px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.2rem);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.home-styles-copy {
+  margin: 0 0 14px;
+  max-width: 38ch;
+  line-height: 1.7;
+  color: var(--ink-muted);
+}
+
+.home-styles-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-family: var(--font-caps);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent);
+  padding-bottom: 3px;
+}
+
+.home-styles-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.home-style-card {
+  /* Vertical hairlines between cards, not around them. */
+  border-top: 1px solid var(--rule);
+}
+
+.home-style-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  padding: 20px 18px 24px;
+}
+
+/* Capped on phones: at full width a 1:1 image made every card a full screen,
+   so three styles cost three screens to skim. */
+.home-style-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 240px;
+  aspect-ratio: 1;
+  margin-bottom: 14px;
+}
+
+.home-style-img img {
+  mix-blend-mode: multiply;
+}
+
+.home-style-name {
+  color: var(--ink);
+  text-indent: 0.18em;
+}
+
+.home-style-desc {
+  margin-top: 8px;
+  max-width: 26ch;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.home-style-price {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.home-style-from {
+  color: var(--ink-muted);
+  text-indent: 0.18em;
+}
+
+.home-style-figure {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--accent);
+}
+
+.home-style-link:hover .home-style-name {
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+   768px and up: hero becomes 2x2, band and cards go horizontal
+   --------------------------------------------------------------------------- */
+
+@media (min-width: 768px) {
+  .home-hero {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .home-hero-copy {
+    padding: 72px 44px;
+  }
+
+  .home-hero-photo {
+    min-height: 420px;
+  }
+
+  .home-hero-details {
+    border-right: 1px solid var(--rule);
+  }
+
+  .home-style-img {
+    max-width: none;
+  }
+
+  .home-band-cols {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+
+  .home-band-col + .home-band-col {
+    border-left: 1px solid rgba(196, 182, 167, 0.28);
+  }
+
+  .home-styles-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .home-style-card {
+    border-top: none;
+  }
+
+  .home-style-card + .home-style-card {
+    border-left: 1px solid var(--rule);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   1200px and up: the full four-column hero, and a two-column bottom section
+   --------------------------------------------------------------------------- */
+
+@media (min-width: 1200px) {
+  .home-hero {
+    grid-template-columns: 1.15fr 1.5fr 0.72fr 0.85fr;
+  }
+
+  .home-hero-copy {
+    padding: 84px 48px;
+    border-right: 1px solid var(--rule);
+  }
+
+  .home-hero-details,
+  .home-hero-conversions {
+    border-top: none;
+  }
+
+  .home-hero-conversions {
+    padding: 40px 26px;
+  }
+
+  /* Back to a vertical run with a dashed spine once the hero has a column
+     tall enough to hold it. */
+  .home-conversion-list {
+    display: block;
+  }
+
+  .home-conversion-list::before {
+    left: 26px;
+    right: auto;
+    top: 8px;
+    bottom: 26px;
+    border-top: none;
+    border-left: 1px dashed var(--rule-strong);
+  }
+
+  .home-conversion {
+    flex-direction: row;
+    align-items: center;
+    gap: 14px;
+    padding: 5px 0;
+    text-align: left;
+  }
+
+  .home-conversion-label {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 11px;
+  }
+
+  /* The two detail crops stack again once they have their own column. */
+  .home-hero-details {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .home-detail + .home-detail {
+    border-left: none;
+    border-top: 1px solid var(--rule);
+  }
+
+  .home-detail-caption {
+    font-size: 10px;
+  }
+
+  .home-styles {
+    grid-template-columns: 0.85fr 2fr;
+    gap: 56px;
+    align-items: start;
+  }
+}

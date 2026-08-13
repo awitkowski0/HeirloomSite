@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Modal from '@/components/ui/Modal';
 import { productSelected } from '@/lib/analytics';
+import { variantHref } from '@/lib/variants';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 import { formatPriceApprox } from '@/lib/format';
 import { humanizeWood } from '@/lib/labels';
@@ -133,7 +134,7 @@ export default function GalleryCarousel({ product, onClose }: Props) {
         </p>
 
         <Link
-          href={`/product/${product.slug}`}
+          href={variantHref(product.slug, activeWood, activeStain?.name)}
           className="gallery-carousel-cta button-primary"
           onClick={() =>
             productSelected({ product_name: product.name, source: 'gallery_carousel' })
