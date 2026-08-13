@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>v2 · French Country 6 Drawer Dresser with Changing Table</title>
+<style>
+:root {
+  --bg:#0f1419; --panel:#1a2332; --panel2:#243044; --text:#e7ecf3; --muted:#9aa8bc;
+  --accent:#5b9fd4; --good:#3dbe7a; --warn:#e0a935; --bad:#e05d5d; --line:#2c3a4f;
+  --chip:#2a384c; --max:1200px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif; overflow-x:hidden; max-width:100vw;}
+a{color:var(--accent); word-break:break-word;}
+header{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel); position:sticky; top:0; z-index:20;}
+.badge{display:inline-flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;}
+.ver{background:#1e3d2f;color:#8dffc1;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+.task{background:#24304a;color:#a8c4ff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+h1{margin:0 0 6px;font-size:1.15rem; line-height:1.3; word-wrap:break-word;}
+.meta{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:10px;}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.stat{background:var(--panel2);padding:6px 10px;border-radius:8px;font-size:12px;}
+.stat b{color:var(--accent);}
+.changelog{margin:12px 16px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px; max-width:var(--max);}
+.changelog h2{margin:0 0 8px;font-size:14px;color:var(--accent);}
+.changelog ul{margin:0;padding-left:18px;color:var(--muted);}
+.changelog li{margin:4px 0;}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);align-items:center;}
+input,select,button,textarea{
+  background:var(--panel2);color:var(--text);border:1px solid var(--line);
+  border-radius:6px;padding:7px 10px;font:inherit;max-width:100%;
+}
+button{cursor:pointer;}
+button.primary{background:var(--accent);color:#041018;border:0;font-weight:600;}
+.wrap{padding:12px 12px 40px; max-width:100%;}
+/* Card list instead of wide table — no horizontal scroll */
+.card-list{display:flex;flex-direction:column;gap:10px; max-width:var(--max); margin:0 auto;}
+.row-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px; overflow:hidden;}
+.row-top{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.row-title{font-weight:600; font-size:14px; word-break:break-word; flex:1; min-width:0;}
+.chips{display:flex;flex-wrap:wrap;gap:4px;}
+.chip{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--chip);font-size:11px; white-space:normal;}
+.chip.matched{background:#1e3d2f;color:#8dffc1;}
+.chip.low-confidence{background:#3d3420;color:#ffd888;}
+.chip.unmatched-shopify{background:#3d2222;color:#ffb0b0;}
+.chip.unmatched-vercel{background:#24304a;color:#a8c4ff;}
+.chip.changed{background:#1e3d2f;color:#8dffc1;}
+.chip.imgs{background:#2a384c;color:#c5d4e8;}
+.chip.high{background:#4a2020;color:#ffb4b4;}
+.chip.medium{background:#3d3420;color:#ffe0a0;}
+/* Equal columns */
+.cols{display:grid; grid-template-columns:1fr 1fr; gap:12px; min-width:0;}
+@media (max-width:820px){ .cols{grid-template-columns:1fr;} }
+.col{min-width:0; background:var(--panel2); border-radius:8px; padding:10px; overflow:hidden;}
+.col h3{margin:0 0 8px; font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted);}
+.col .name{font-weight:600; word-break:break-word;}
+.col .sub{color:var(--muted); font-size:12px; word-break:break-word; margin:2px 0 8px;}
+.snippet{font-size:12px; color:var(--text); word-wrap:break-word; overflow-wrap:anywhere; white-space:pre-wrap;
+  max-height:7.5em; overflow:hidden; line-height:1.4;}
+.thumbs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.thumbs img{width:40px;height:40px;object-fit:cover;border-radius:4px;background:#000;}
+.change-box{margin-top:10px;padding:8px 10px;background:#121a24;border-radius:8px;border:1px solid var(--line); font-size:12px; word-break:break-word;}
+.change-box b{color:var(--good);}
+.delta{color:var(--warn);}
+footer{padding:16px;color:var(--muted);border-top:1px solid var(--line);font-size:12px; word-break:break-word;}
+/* Detail page */
+.detail-header{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel);}
+.detail-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px; max-width:var(--max); margin:0 auto;}
+@media (max-width:820px){ .detail-grid{grid-template-columns:1fr;} }
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px; min-width:0; overflow:hidden;}
+.card h2{margin:0 0 8px;font-size:14px;color:var(--accent);}
+.card pre, .body-text{
+  white-space:pre-wrap; word-wrap:break-word; overflow-wrap:anywhere;
+  background:#0c1016;padding:10px;border-radius:8px; max-height:280px; overflow:auto;
+  font-size:13px; line-height:1.45; margin:0;
+}
+.imgs{display:flex;flex-wrap:wrap;gap:6px;}
+.imgs img{width:72px;height:72px;object-fit:cover;border-radius:6px;background:#000;}
+table{width:100%;border-collapse:collapse;font-size:12px; table-layout:fixed;}
+th,td{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top; word-wrap:break-word; overflow-wrap:anywhere;}
+.help{color:var(--muted);padding:8px 16px;font-size:12px; max-width:var(--max);}
+</style>
+</head>
+<body>
+<div class="detail-header">
+  <div class="badge">
+    <span class="ver">v2</span>
+    <span class="task">Task 1 — Site Product Audit</span>
+  </div>
+  <a href="../audit.html">← Back to matrix</a>
+  <h1>French Country 6 Drawer Dresser with Changing Table</h1>
+  <div class="meta">
+    <span>ID 9d8c0a1ddc52</span>
+    <span class="chip matched">matched</span>
+    <span>98% · sku-exact</span>
+  </div>
+  <div class="change-box" style="margin-top:10px">Description → <b>957</b> chars (was 957)<br/>Title → French Country 6 Drawer Dresser with Changing Table — Heirloom Cribs and More<br/>Meta → <b>125</b> chars (was 125)<br/>Images added → 0 (dupes skipped or already present)</div>
+</div>
+
+<div class="detail-grid">
+  <div class="card">
+    <h2>Shopify (source)</h2>
+    <div class="name">French Country 6 Drawer Dresser with Changing Table</div>
+      <div class="sub">french-country-6-drawer-dresser-with-changing-table · Dressers · ACTIVE</div>
+      <p class="sub">SEO title: French Country 6 Drawer Dresser with Changing Table - OTO Solid Wood</p>
+      <p class="sub">SEO meta: The French Country 6 Drawer Dresser with Changing Table offers abundant storage and changing convenience. Solid wood heirloom quality. Shop Heirloom Cribs today.</p>
+      <h3 style="font-size:12px;color:var(--muted)">Description</h3>
+      <div class="body-text">Combine abundant storage with daily convenience in the French Country 6 Drawer Dresser with Changing Table from Old Time Oak. Six spacious drawers provide room for everything your baby needs, while the attached changing table creates a dedicated, comfortable diaper station. The changing table features safety rails and a comfortable changing height, making diaper changes easier on your back. Below, six dovetailed drawers with smooth-gliding hardware offer organized storage for clothing, blankets, diapers, and wipes. The solid wood construction and French Country detailing, including turned legs and decorative hardware, make this a piece you will be proud to have in your nursery. When your little one outgrows the diaper stage, the changing table can be removed, leaving a beautiful six-drawer dresser that serves your child through the teenage years. Non-toxic, baby-safe finishes throughout. Coordinates with the complete French Country collection.</div>
+      <h3 style="font-size:12px;color:var(--muted);margin-top:10px">Images (1 shown / 1)</h3>
+      <div class="imgs"><img src="../../images/shopify/french-country-6-drawer-dresser-with-changing-table/media-001.jpg" loading="lazy" alt=""/></div>
+      <h3 style="font-size:12px;color:var(--muted);margin-top:10px">Variants (sample)</h3>
+      <table><thead><tr><th>Title</th><th>SKU</th><th>Price</th></tr></thead>
+      <tbody><tr><td>Default Title</td><td>OTO-406-425</td><td>3302.00</td></tr></tbody></table>
+  </div>
+  <div class="card">
+    <h2>Vercel (after merge)</h2>
+    <div class="name">French Country 6 Drawer Dresser with Changing Table</div>
+      <div class="sub">french-country-6-drawer-dresser-with-changing-table · Dressers · dir: French Country 6 Drawer Dresser with Changing Table</div>
+      <p class="sub"><b>Title now:</b> French Country 6 Drawer Dresser with Changing Table — Heirloom Cribs and More</p>
+      <p class="sub"><b>Meta now:</b> Combine abundant storage with daily convenience in the French Country 6 Drawer Dresser with Changing Table from Old Time Oak.</p>
+      <p class="sub"><b>Title before audit snapshot:</b> French Country 6 Drawer Dresser with Changing Table — Heirloom Cribs and More</p>
+      <p class="sub"><b>Desc before:</b> 957 chars → <b>now</b> 957 chars</p>
+      <h3 style="font-size:12px;color:var(--muted)">Description (live on disk)</h3>
+      <div class="body-text">Combine abundant storage with daily convenience in the French Country 6 Drawer Dresser with Changing Table from Old Time Oak. Six spacious drawers provide room for everything your baby needs, while the attached changing table creates a dedicated, comfortable diaper station. The changing table features safety rails and a comfortable changing height, making diaper changes easier on your back. Below, six dovetailed drawers with smooth-gliding hardware offer organized storage for clothing, blankets, diapers, and wipes. The solid wood construction and French Country detailing, including turned legs and decorative hardware, make this a piece you will be proud to have in your nursery. When your little one outgrows the diaper stage, the changing table can be removed, leaving a beautiful six-drawer dresser that serves your child through the teenage years. Non-toxic, baby-safe finishes throughout. Coordinates with the complete French Country collection.</div>
+      <h3 style="font-size:12px;color:var(--muted);margin-top:10px">Images now (2)</h3>
+      <div class="imgs"><img src="../../../public/data/products/French Country 6 Drawer Dresser with Changing Table/french_country_6_drawer_dresser_with_changing_table_0.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/French Country 6 Drawer Dresser with Changing Table/french_country_6_drawer_dresser_with_changing_table_1.jpg" loading="lazy" alt=""/></div>
+  </div>
+</div>
+<footer>v2 · Task 1 — Site Product Audit · Content + image merge review · 2026-08-13T13:42:03.532Z</footer>
+</body></html>

@@ -1,0 +1,422 @@
+{
+  "at": "2026-08-13T15:24:11.956Z",
+  "mattress": {
+    "source": "https://cdn.shopify.com/s/files/1/0745/0024/3630/files/Crib-Mattress.jpg?width=1200&v=1780698661",
+    "bytes": 6575,
+    "path": "public/data/products/Crib Mattress/crib_mattress_0.jpg"
+  },
+  "renames": [
+    {
+      "dir": "3-4 Guard Rail",
+      "from": "3/4 Guard Rail",
+      "to": "3/4 Guard Rail Kit"
+    },
+    {
+      "dir": "Addison Toddler Bed",
+      "from": "Addison Toddler Bed",
+      "to": "Addison Toddler Bed Rail Kit"
+    },
+    {
+      "dir": "Full Guard Rail",
+      "from": "Full Guard Rail",
+      "to": "Full Guard Rail Kit"
+    },
+    {
+      "dir": "Guard Rail",
+      "from": "Guard Rail",
+      "to": "Guard Rail Kit"
+    },
+    {
+      "dir": "Mackenzie Toddler Bed",
+      "from": "Mackenzie Toddler Bed",
+      "to": "Mackenzie Toddler Bed Rail Kit"
+    },
+    {
+      "dir": "Newport Toddler Bed",
+      "from": "Newport Toddler Bed",
+      "to": "Newport Toddler Bed Rail Kit"
+    },
+    {
+      "dir": "Toddler Conversion Rail",
+      "from": "Toddler Conversion Rail",
+      "to": "Toddler Bed Rail Kit"
+    },
+    {
+      "dir": "West Lake Toddler Bed",
+      "from": "West Lake Toddler Bed",
+      "to": "West Lake Toddler Bed Rail Kit"
+    }
+  ],
+  "bedSize": [
+    {
+      "dir": "3-4 Guard Rail",
+      "productName": "3/4 Guard Rail Kit",
+      "bedKind": "guard",
+      "slug": "34-guard-rail"
+    },
+    {
+      "dir": "Addison 3 Drawer Nightstand",
+      "productName": "Addison 3 Drawer Nightstand",
+      "bedKind": "other",
+      "slug": "addison-3-drawer-nightstand"
+    },
+    {
+      "dir": "Addison 6 Drawer Dresser",
+      "productName": "Addison 6 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "addison-6-drawer-dresser"
+    },
+    {
+      "dir": "Addison 7 Drawer Dresser",
+      "productName": "Addison 7 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "addison-7-drawer-dresser"
+    },
+    {
+      "dir": "Addison Chest Dresser",
+      "productName": "Addison Chest Dresser",
+      "bedKind": "other",
+      "slug": "addison-chest-dresser"
+    },
+    {
+      "dir": "Addison Crib",
+      "productName": "Addison Crib",
+      "bedKind": "crib-converts-full",
+      "slug": "addison-crib"
+    },
+    {
+      "dir": "Addison Crib with Raised Panel Headboard",
+      "productName": "Addison Crib with Raised Panel Headboard",
+      "bedKind": "crib-converts-full",
+      "slug": "addison-crib-with-raised-panel-headboard"
+    },
+    {
+      "dir": "Addison Full Bed Rail Kit",
+      "productName": "Addison Full Bed Rail Kit",
+      "bedKind": "full",
+      "slug": "addison-full-bed-rail-kit"
+    },
+    {
+      "dir": "Addison Toddler Bed",
+      "productName": "Addison Toddler Bed Rail Kit",
+      "bedKind": "toddler",
+      "slug": "addison-toddler-bed"
+    },
+    {
+      "dir": "Arched Top",
+      "productName": "Arched Top",
+      "bedKind": "other",
+      "slug": "arched-top"
+    },
+    {
+      "dir": "Bloomington",
+      "productName": "Bloomington",
+      "bedKind": "other",
+      "slug": "bloomington"
+    },
+    {
+      "dir": "Changing Table - 6 Drawer",
+      "productName": "Changing Table - 6 Drawer",
+      "bedKind": "other",
+      "slug": "changing-table-6-drawer"
+    },
+    {
+      "dir": "Crib Mattress",
+      "productName": "Crib Mattress",
+      "bedKind": "other",
+      "slug": "crib-mattress"
+    },
+    {
+      "dir": "Darlington",
+      "productName": "Darlington",
+      "bedKind": "other",
+      "slug": "darlington"
+    },
+    {
+      "dir": "French Country 3 Drawer Dresser with Door",
+      "productName": "French Country 3 Drawer Dresser with Door",
+      "bedKind": "other",
+      "slug": "french-country-3-drawer-dresser-with-door"
+    },
+    {
+      "dir": "French Country 3 Drawer Dresser with Door and Changing Table",
+      "productName": "French Country 3 Drawer Dresser with Door and Changing Table",
+      "bedKind": "other",
+      "slug": "french-country-3-drawer-dresser-with-door-and-changing-table"
+    },
+    {
+      "dir": "French Country 3 Drawer Nightstand",
+      "productName": "French Country 3 Drawer Nightstand",
+      "bedKind": "other",
+      "slug": "french-country-3-drawer-nightstand"
+    },
+    {
+      "dir": "French Country 4 Drawer Dresser",
+      "productName": "French Country 4 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "french-country-4-drawer-dresser"
+    },
+    {
+      "dir": "French Country 4 Drawer Dresser with Changing Table",
+      "productName": "French Country 4 Drawer Dresser with Changing Table",
+      "bedKind": "other",
+      "slug": "french-country-4-drawer-dresser-with-changing-table"
+    },
+    {
+      "dir": "French Country 6 Drawer Dresser",
+      "productName": "French Country 6 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "french-country-6-drawer-dresser"
+    },
+    {
+      "dir": "French Country 6 Drawer Dresser with Changing Table",
+      "productName": "French Country 6 Drawer Dresser with Changing Table",
+      "bedKind": "other",
+      "slug": "french-country-6-drawer-dresser-with-changing-table"
+    },
+    {
+      "dir": "French Country 6 Drawer Dresser with Hutch Top",
+      "productName": "French Country 6 Drawer Dresser with Hutch Top",
+      "bedKind": "other",
+      "slug": "french-country-6-drawer-dresser-with-hutch-top"
+    },
+    {
+      "dir": "French Country 7 Drawer Dresser with Changing Table",
+      "productName": "French Country 7 Drawer Dresser with Changing Table",
+      "bedKind": "other",
+      "slug": "french-country-7-drawer-dresser-with-changing-table"
+    },
+    {
+      "dir": "French Country 7 Drawer Dresser with Top Mirror",
+      "productName": "French Country 7 Drawer Dresser with Top Mirror",
+      "bedKind": "other",
+      "slug": "french-country-7-drawer-dresser-with-top-mirror"
+    },
+    {
+      "dir": "French Country Chest",
+      "productName": "French Country Chest",
+      "bedKind": "other",
+      "slug": "french-country-chest"
+    },
+    {
+      "dir": "French Country Crib (Panel Style Front)",
+      "productName": "French Country Crib (Panel Style Front)",
+      "bedKind": "crib-converts-full",
+      "slug": "french-country-crib-panel-style-front"
+    },
+    {
+      "dir": "French Country Crib (Slat Style Front)",
+      "productName": "French Country Crib (Slat Style Front)",
+      "bedKind": "crib-converts-full",
+      "slug": "french-country-crib-slat-style-front"
+    },
+    {
+      "dir": "Full Bed Rail Kit",
+      "productName": "Full Bed Rail Kit",
+      "bedKind": "full",
+      "slug": "full-bed-rail-kit"
+    },
+    {
+      "dir": "Full Guard Rail",
+      "productName": "Full Guard Rail Kit",
+      "bedKind": "guard",
+      "slug": "full-guard-rail"
+    },
+    {
+      "dir": "Guard Rail",
+      "productName": "Guard Rail Kit",
+      "bedKind": "guard",
+      "slug": "guard-rail"
+    },
+    {
+      "dir": "Hudson",
+      "productName": "Hudson",
+      "bedKind": "other",
+      "slug": "hudson"
+    },
+    {
+      "dir": "Mackenzie 6 Drawer Dresser",
+      "productName": "Mackenzie 6 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "mackenzie-6-drawer-dresser"
+    },
+    {
+      "dir": "Mackenzie 7 Drawer Dresser",
+      "productName": "Mackenzie 7 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "mackenzie-7-drawer-dresser"
+    },
+    {
+      "dir": "Mackenzie Chest",
+      "productName": "Mackenzie Chest",
+      "bedKind": "other",
+      "slug": "mackenzie-chest"
+    },
+    {
+      "dir": "Mackenzie Crib (Panel Back)",
+      "productName": "Mackenzie Crib (Panel Back)",
+      "bedKind": "crib-converts-full",
+      "slug": "mackenzie-crib-panel-back"
+    },
+    {
+      "dir": "Mackenzie Crib (Slat Back)",
+      "productName": "Mackenzie Crib (Slat Back)",
+      "bedKind": "crib-converts-full",
+      "slug": "mackenzie-crib-slat-back"
+    },
+    {
+      "dir": "Mackenzie Full Bed Rail Kit",
+      "productName": "Mackenzie Full Bed Rail Kit",
+      "bedKind": "full",
+      "slug": "mackenzie-full-bed-rail-kit"
+    },
+    {
+      "dir": "Mackenzie Nightstand",
+      "productName": "Mackenzie Nightstand",
+      "bedKind": "other",
+      "slug": "mackenzie-nightstand"
+    },
+    {
+      "dir": "Mackenzie Toddler Bed",
+      "productName": "Mackenzie Toddler Bed Rail Kit",
+      "bedKind": "toddler",
+      "slug": "mackenzie-toddler-bed"
+    },
+    {
+      "dir": "Mini Newport with Mattress",
+      "productName": "Mini Newport with Mattress",
+      "bedKind": "twin",
+      "slug": "mini-newport-with-mattress"
+    },
+    {
+      "dir": "Mission",
+      "productName": "Mission",
+      "bedKind": "other",
+      "slug": "mission"
+    },
+    {
+      "dir": "Moyerton",
+      "productName": "Moyerton",
+      "bedKind": "other",
+      "slug": "moyerton"
+    },
+    {
+      "dir": "Newport 4 Drawer Chest",
+      "productName": "Newport 4 Drawer Chest",
+      "bedKind": "other",
+      "slug": "newport-4-drawer-chest"
+    },
+    {
+      "dir": "Newport 7 Drawer Dresser",
+      "productName": "Newport 7 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "newport-7-drawer-dresser"
+    },
+    {
+      "dir": "Newport Crib",
+      "productName": "Newport Crib",
+      "bedKind": "crib-converts-full",
+      "slug": "newport-crib"
+    },
+    {
+      "dir": "Newport Full Bed Rail Kit",
+      "productName": "Newport Full Bed Rail Kit",
+      "bedKind": "full",
+      "slug": "newport-full-bed-rail-kit"
+    },
+    {
+      "dir": "Newport Nightstand",
+      "productName": "Newport Nightstand",
+      "bedKind": "other",
+      "slug": "newport-nightstand"
+    },
+    {
+      "dir": "Newport Toddler Bed",
+      "productName": "Newport Toddler Bed Rail Kit",
+      "bedKind": "toddler",
+      "slug": "newport-toddler-bed"
+    },
+    {
+      "dir": "Nightstand - 2 Drawer",
+      "productName": "Nightstand - 2 Drawer",
+      "bedKind": "other",
+      "slug": "nightstand-2-drawer"
+    },
+    {
+      "dir": "Princeton",
+      "productName": "Princeton",
+      "bedKind": "other",
+      "slug": "princeton"
+    },
+    {
+      "dir": "Toddler Conversion Rail",
+      "productName": "Toddler Bed Rail Kit",
+      "bedKind": "toddler",
+      "slug": "toddler-conversion-rail"
+    },
+    {
+      "dir": "West Lake 3 Drawer Nightstand",
+      "productName": "West Lake 3 Drawer Nightstand",
+      "bedKind": "other",
+      "slug": "west-lake-3-drawer-nightstand"
+    },
+    {
+      "dir": "West Lake 4 Drawer Dresser",
+      "productName": "West Lake 4 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "west-lake-4-drawer-dresser"
+    },
+    {
+      "dir": "West Lake 6 Drawer Dresser",
+      "productName": "West Lake 6 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "west-lake-6-drawer-dresser"
+    },
+    {
+      "dir": "West Lake 7 Drawer Dresser",
+      "productName": "West Lake 7 Drawer Dresser",
+      "bedKind": "other",
+      "slug": "west-lake-7-drawer-dresser"
+    },
+    {
+      "dir": "West Lake Chest",
+      "productName": "West Lake Chest",
+      "bedKind": "other",
+      "slug": "west-lake-chest"
+    },
+    {
+      "dir": "West Lake Crib",
+      "productName": "West Lake Crib",
+      "bedKind": "crib-converts-full",
+      "slug": "west-lake-crib"
+    },
+    {
+      "dir": "West Lake Full Bed Rail Kit",
+      "productName": "West Lake Full Bed Rail Kit",
+      "bedKind": "full",
+      "slug": "west-lake-full-bed-rail-kit"
+    },
+    {
+      "dir": "West Lake Toddler Bed",
+      "productName": "West Lake Toddler Bed Rail Kit",
+      "bedKind": "toddler",
+      "slug": "west-lake-toddler-bed"
+    }
+  ],
+  "notes": [
+    "OTO pricebook: most -B rails are Double Bed Rail / Full Bed Conversion / Bed Rail (not twin).",
+    "OTO Mini Newport 1380-B is Twin Bed Conversion only.",
+    "FQP packages include 102 (toddler) + 103 (Full Bedrails) — full-size path, not twin.",
+    "Each Vercel kit SKU has one price — copy must not imply twin vs full choice on the same product."
+  ],
+  "variantMediaIssues": [
+    {
+      "dir": "Guard Rail",
+      "issue": "missing-media-key",
+      "key": "Default Title||Default",
+      "variant": "Default Title",
+      "stain": "Default"
+    }
+  ],
+  "variantMediaIssueCount": 1
+}

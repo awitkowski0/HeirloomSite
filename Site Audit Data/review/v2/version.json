@@ -1,0 +1,23 @@
+{
+  "id": "v2",
+  "task": "Task 1 — Site Product Audit",
+  "title": "Content + image merge review",
+  "generatedAt": "2026-08-13T13:42:03.532Z",
+  "changelog": [
+    "Merged Shopify + Vercel product copy (warm, human tone; SEO titles/meta)",
+    "Grammar/punctuation polish; reduced AI-cliché phrasing",
+    "Imported 213 good Shopify images into Vercel product folders",
+    "Build image count 385 → 597; data rebuild OK",
+    "HTML v2: balanced columns, word-wrap, versioned files, “what changed” panel"
+  ],
+  "stats": {
+    "matched": 59,
+    "updatedCopy": 59,
+    "imagesAddedTotal": 213,
+    "shopifyOnly": 3,
+    "vercelOnly": 0,
+    "imageCountNow": 597,
+    "imageCountBefore": 385
+  },
+  "path": "review/v2/audit.html"
+}

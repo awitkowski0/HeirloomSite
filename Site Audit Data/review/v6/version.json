@@ -1,0 +1,19 @@
+{
+  "id": "v6",
+  "task": "Task 1 — Site Product Audit",
+  "title": "v6: mattress image, Kit titles, conversion wording, bed-size vs pricebooks",
+  "generatedAt": "2026-08-13T15:28:32.077Z",
+  "changelog": [
+    "Crib Mattress now has product image + media mapping",
+    "Shopify Kit titles aligned on Vercel (Toddler Bed Rail Kit, Guard Rail Kit, etc.)",
+    "Conversion kits clarified as kits, not standalone toddler beds",
+    "Bed size wording vs OTO/FQP pricebooks: full/double for main -B rails; twin only Mini Newport",
+    "Variant/media keys verified (0 missing media keys/files)"
+  ],
+  "stats": {
+    "total": 59,
+    "allPass": 59,
+    "anyFail": 0,
+    "shopifyOnly": 3
+  }
+}
