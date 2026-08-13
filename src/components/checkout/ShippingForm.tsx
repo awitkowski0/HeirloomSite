@@ -1,5 +1,7 @@
 'use client';
 
+import { US_STATES, isUsState } from '@/lib/order-terms';
+
 export interface ShippingValues {
   email: string;
   firstName: string;
@@ -26,13 +28,17 @@ const FIELDS: Array<{
   type: string;
   autoComplete: string;
   span?: boolean;
+  /* `state` is the only control that is not a text input. Declared here rather
+     than special-cased in the JSX so the field list stays the one description
+     of this form. */
+  control?: 'select';
 }> = [
   { key: 'email', label: 'Email address', type: 'email', autoComplete: 'email', span: true },
   { key: 'firstName', label: 'First name', type: 'text', autoComplete: 'given-name' },
   { key: 'lastName', label: 'Last name', type: 'text', autoComplete: 'family-name' },
   { key: 'address', label: 'Street address', type: 'text', autoComplete: 'street-address', span: true },
   { key: 'city', label: 'City', type: 'text', autoComplete: 'address-level2' },
-  { key: 'state', label: 'State', type: 'text', autoComplete: 'address-level1' },
+  { key: 'state', label: 'State', type: 'text', autoComplete: 'address-level1', control: 'select' },
   { key: 'zip', label: 'ZIP code', type: 'text', autoComplete: 'postal-code' },
 ];
 
@@ -48,6 +54,13 @@ export function validateShipping(values: ShippingValues): Partial<Record<keyof S
   }
   if (values.zip.trim() && !/^[A-Za-z0-9][A-Za-z0-9\- ]{2,11}$/.test(values.zip.trim())) {
     errors.zip = 'Enter a valid ZIP code';
+  }
+  // Mirrors the server check in src/lib/pricing.ts. The select cannot produce
+  // an invalid code, so this only fires if the field is somehow cleared - but
+  // the state now decides whether sales tax is charged, so it is worth saying
+  // out loud rather than letting the server be the first to notice.
+  if (values.state.trim() && !isUsState(values.state.trim().toUpperCase())) {
+    errors.state = 'Select a US state';
   }
   return errors;
 }
@@ -72,17 +85,37 @@ export default function ShippingForm({ values, errors, disabled, onChange }: Pro
               <label htmlFor={field.key} className="label-caps">
                 {field.label}
               </label>
-              <input
-                id={field.key}
-                name={field.key}
-                type={field.type}
-                autoComplete={field.autoComplete}
-                value={values[field.key]}
-                onChange={e => onChange(field.key, e.target.value)}
-                aria-invalid={error ? true : undefined}
-                aria-describedby={error ? errorId : undefined}
-                required
-              />
+              {field.control === 'select' ? (
+                <select
+                  id={field.key}
+                  name={field.key}
+                  autoComplete={field.autoComplete}
+                  value={values[field.key]}
+                  onChange={e => onChange(field.key, e.target.value)}
+                  aria-invalid={error ? true : undefined}
+                  aria-describedby={error ? errorId : undefined}
+                  required
+                >
+                  <option value="">Select a state</option>
+                  {US_STATES.map(s => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id={field.key}
+                  name={field.key}
+                  type={field.type}
+                  autoComplete={field.autoComplete}
+                  value={values[field.key]}
+                  onChange={e => onChange(field.key, e.target.value)}
+                  aria-invalid={error ? true : undefined}
+                  aria-describedby={error ? errorId : undefined}
+                  required
+                />
+              )}
               {error && (
                 <p id={errorId} className="field-error" role="alert">
                   {error}

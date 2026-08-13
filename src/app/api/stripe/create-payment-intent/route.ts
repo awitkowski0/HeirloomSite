@@ -29,7 +29,9 @@ export async function POST(req: Request) {
 
     const shipping = validateShipping(body);
     requireTermsAcceptance(body);
-    const priced = priceCart(body.cart);
+    // Tax depends on the destination, so pricing has to run after the address
+    // is validated, not alongside it.
+    const priced = priceCart(body.cart, shipping.state);
 
     /*
      * Item detail is deliberately compact.

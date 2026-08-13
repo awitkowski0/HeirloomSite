@@ -3,7 +3,15 @@
 import { humanizeWood } from '@/lib/labels';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 
-export const ALL_WOODS = 'All Collections';
+/*
+ * A sentinel for "no wood filter applied", not a label.
+ *
+ * Its value used to be 'All Collections' while the button that selects it read
+ * "Our Cribs" - so the string was simultaneously a third meaning of the word
+ * "Collections" (the other two being /gallery and /products) and not shown to
+ * anyone. Named as what it is, so it cannot be mistaken for copy again.
+ */
+export const ALL_WOODS = '__all_woods__';
 export const ALL_STAINS = 'All Stains';
 
 interface WoodFilterProps {

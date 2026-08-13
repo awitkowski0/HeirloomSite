@@ -26,9 +26,12 @@ export default function ProductsPage() {
       />
 
       <header className="page-header">
-        <h1 className="headline-lg text-primary">Our Collections</h1>
+        {/* "Shop All", matching the nav label that leads here. This said "Our
+            Collections" while the nav item labelled "Collections" pointed at
+            /gallery instead - so the one word named two different pages. */}
+        <h1 className="headline-lg text-primary">Shop All</h1>
         <p className="body-lg text-on-surface-variant">
-          {products.length} handcrafted pieces across {categories.length} collections.
+          {products.length} handcrafted pieces across {categories.length} categories.
         </p>
       </header>
 

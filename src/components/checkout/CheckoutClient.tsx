@@ -7,6 +7,7 @@ import { useCart } from '@/context/useCart';
 import { createPaymentIntent, type OrderTotals } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
+import { SHIPPING_CENTS, TAXED_STATE, taxCentsFor } from '@/lib/order-terms';
 import { variantLabel } from '@/lib/labels';
 import {
   cartItemRemoved,
@@ -23,12 +24,6 @@ import ShippingForm, {
 import TermsBlock from './TermsBlock';
 import TurnstileWidget from './TurnstileWidget';
 import PaymentSection from './PaymentSection';
-
-// Must match src/lib/pricing.ts, which is the authority: this is only the
-// estimate shown before the server returns real totals. Delivery is included
-// in the product price.
-const SHIPPING_CENTS = 0;
-const TAX_RATE = 0.08;
 
 export default function CheckoutClient() {
   const { cart, hydrated, subtotal, clearCart, removeFromCart, updateQuantity } = useCart();
@@ -66,14 +61,24 @@ export default function CheckoutClient() {
     });
   }, [hydrated, cart, subtotal]);
 
-  // Estimates only, replaced by the server's numbers once the intent exists.
+  /*
+   * Estimates only, replaced by the server's numbers once the intent exists.
+   *
+   * The rate itself is no longer duplicated here: this calls the same
+   * taxCentsFor() that src/lib/pricing.ts calls, so the summary and the amount
+   * charged cannot disagree about the rate. They can still disagree about
+   * PRICES, because a cart line carries the price snapshotted into
+   * localStorage at add-to-cart time - which is exactly what serverTotals
+   * overriding this is for.
+   */
   const estSubtotalCents = toCents(subtotal);
-  const estTaxCents = Math.round(estSubtotalCents * TAX_RATE);
-  const estTotalCents = estSubtotalCents + (cart.length > 0 ? SHIPPING_CENTS : 0) + estTaxCents;
+  const estShippingCents = cart.length > 0 ? SHIPPING_CENTS : 0;
+  const estTaxCents = taxCentsFor(shipping.state, estSubtotalCents + estShippingCents);
+  const estTotalCents = estSubtotalCents + estShippingCents + estTaxCents;
 
   const totals: OrderTotals = serverTotals ?? {
     subtotalCents: estSubtotalCents,
-    shippingCents: cart.length > 0 ? SHIPPING_CENTS : 0,
+    shippingCents: estShippingCents,
     taxCents: estTaxCents,
     totalCents: estTotalCents,
   };
@@ -366,8 +371,20 @@ export default function CheckoutClient() {
                     : formatPrice(fromCents(totals.shippingCents))}
                 </dd>
               </div>
+              {/*
+                The label carries the reason. Sales tax is charged only where
+                the shop has nexus, so for most customers this row is $0.00 -
+                and an unexplained zero reads as something that has not
+                calculated yet rather than a number.
+              */}
               <div>
-                <dt>{serverTotals ? 'Tax' : 'Estimated tax'}</dt>
+                <dt>
+                  {shipping.state === ''
+                    ? 'Estimated tax'
+                    : shipping.state === TAXED_STATE
+                      ? `Sales tax (${TAXED_STATE} 6%)`
+                      : `Sales tax (none outside ${TAXED_STATE})`}
+                </dt>
                 <dd>{formatPrice(fromCents(totals.taxCents))}</dd>
               </div>
               <div className="order-total-row">

@@ -7,14 +7,25 @@ import GalleryBrowser from '@/components/gallery/GalleryBrowser';
 import type { GalleryProduct } from '@/components/gallery/types';
 
 export const metadata: Metadata = {
-  title: 'Gallery',
+  // The page's own name, matching its h1 and the nav label. The route stays
+  // /gallery; only what the page calls itself changed.
+  title: 'Collections',
   description:
-    'Browse every crib finish we offer. Compare Brown Maple, Cherry and Red Oak across our full range of hand-applied stains.',
+    'Browse every crib finish we offer, in hand-stained solid Brown Maple.',
   alternates: { canonical: '/gallery' },
 };
 
-/** The gallery shows only the three solid-hardwood crib lines. */
-const GALLERY_WOODS = ['BrownMaple', 'CherryWood', 'RedOak'];
+/*
+ * The gallery shows the solid-hardwood crib lines -- the products whose variant
+ * is a wood species rather than a finish or a rug size.
+ *
+ * Brown Maple is the only species the shop actually sells. Cherry and Red Oak
+ * are still in the source data but are marked `hidden` in variants.json, so
+ * they never reach the inventory artifact this reads; this list is the second
+ * half of that decision and would need to grow again before either could
+ * reappear here.
+ */
+const GALLERY_WOODS = ['BrownMaple'];
 
 function buildGalleryProducts(): { products: GalleryProduct[]; woods: string[] } {
   const items = getInventory().filter(i => GALLERY_WOODS.includes(i.wood) && i.slug);
@@ -77,9 +88,10 @@ export default function GalleryPage() {
       <div className="container page-header">
         {/* The gallery previously had no h1 or h2 at all - its highest heading
             was the h3 inside each card. */}
-        <h1 className="headline-lg text-primary">The Gallery</h1>
+        {/* Matches the "Collections" nav label that leads here. */}
+        <h1 className="headline-lg text-primary">Collections</h1>
         <p className="body-lg text-on-surface-variant">
-          Every crib, in every wood and finish we offer.
+          Every crib, in every finish we offer.
         </p>
       </div>
 

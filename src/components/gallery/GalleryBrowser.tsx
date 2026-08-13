@@ -73,25 +73,37 @@ export default function GalleryBrowser({ products, woods }: Props) {
     <>
       <div className="container gallery-header">
         <div className="gallery-filter-stack">
-          <WoodFilter
-            woods={woods}
-            selected={selectedWood}
-            onSelect={w => {
-              setSelectedWood(w);
-              setSelectedStain(ALL_STAINS);
-            }}
-            onReset={() => {
-              setSelectedWood(ALL_WOODS);
-              setSelectedStain(ALL_STAINS);
-            }}
-          />
-          {selectedWood !== ALL_WOODS && (
-            <StainFilter
-              stains={availableStains}
-              selected={selectedStain}
-              onSelect={s => setSelectedStain(selectedStain === s ? ALL_STAINS : s)}
+          {/*
+            A filter with one option is not a filter. The shop sells Brown Maple
+            only, so this renders nothing today -- but the gallery is defined by
+            variant type rather than by a hardcoded species, so a second wood
+            would bring the control back rather than needing it rebuilt.
+          */}
+          {woods.length > 1 && (
+            <WoodFilter
+              woods={woods}
+              selected={selectedWood}
+              onSelect={w => {
+                setSelectedWood(w);
+                setSelectedStain(ALL_STAINS);
+              }}
+              onReset={() => {
+                setSelectedWood(ALL_WOODS);
+                setSelectedStain(ALL_STAINS);
+              }}
             />
           )}
+          {/*
+            Unconditional. This used to be gated on a wood being selected, which
+            with a single wood -- never selected, because the control that would
+            select it is gone -- would have hidden the stain filter entirely and
+            left the gallery with no filters at all.
+          */}
+          <StainFilter
+            stains={availableStains}
+            selected={selectedStain}
+            onSelect={s => setSelectedStain(selectedStain === s ? ALL_STAINS : s)}
+          />
         </div>
       </div>
 

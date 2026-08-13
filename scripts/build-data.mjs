@@ -72,6 +72,8 @@ function inferVariantType(names) {
 
 const variantTypeProblems = [];
 const availabilityProblems = [];
+const hiddenProblems = [];
+const hiddenVariants = [];
 function checkVariantType(dirName, declared, names) {
   if (!declared) {
     variantTypeProblems.push(`${dirName}: product.json has no variantType`);
@@ -148,11 +150,45 @@ for (const dirName of productDirs) {
   if (!meta) fail(`${dirName}/product.json exists but could not be parsed`);
 
   const productName = meta.productName;
-  checkVariantType(dirName, meta.variantType, variants.map(v => v.variant));
+
+  /*
+   * `hidden` withdraws a variant from the catalogue entirely, which is a
+   * different thing from `unavailable`.
+   *
+   * `unavailable` means "we make this, you cannot order it right now": the
+   * variant still emits an inventory row, still renders a selector chip, still
+   * generates a URL, and shows as sold out. `hidden` means "we do not make
+   * this": no row, no chip, no URL, no sitemap entry. Cherry Wood and Red Oak
+   * are the latter -- the shop sells Brown Maple only, and the placeholder
+   * $2499 those two carried was also dragging Moyerton's advertised price
+   * below the price of the only version anyone can actually buy.
+   *
+   * Filtered here, once, rather than at each render site: every downstream
+   * artifact is generated from this loop, so a variant dropped here is absent
+   * from inventory, search, pricing, the image index and generateStaticParams
+   * without any of them needing to know the concept exists.
+   */
+  const visibleVariants = variants.filter(v => v.hidden !== true);
+  const hidden = variants.filter(v => v.hidden === true);
+  if (hidden.length > 0) {
+    hiddenVariants.push(`${dirName}: ${hidden.map(v => v.variant).join(", ")}`);
+  }
+  if (visibleVariants.length === 0 && variants.length > 0) {
+    // Every route for this product is generated from its variants, so hiding
+    // all of them leaves a product in the index whose every URL 404s.
+    hiddenProblems.push(`${dirName}: every variant is hidden, so the product would have no page`);
+  }
+  const visibleNames = new Set(visibleVariants.map(v => v.variant));
+
+  // Checked against what is actually emitted, not what is on disk: hiding the
+  // two woods leaves ["BrownMaple"], which must still satisfy variantType.
+  if (visibleVariants.length > 0) {
+    checkVariantType(dirName, meta.variantType, visibleVariants.map(v => v.variant));
+  }
   const imageBase = `/data/products/${encodeURIComponent(dirName)}/`;
   let minPrice = Infinity;
 
-  for (const v of variants) {
+  for (const v of visibleVariants) {
     /*
      * Availability, sourced rather than invented.
      *
@@ -220,8 +256,8 @@ for (const dirName of productDirs) {
     });
   }
 
-  const firstStain = variants[0]?.stains?.[0];
-  const defaultKey = firstStain ? `${variants[0].variant}||${firstStain}` : null;
+  const firstStain = visibleVariants[0]?.stains?.[0];
+  const defaultKey = firstStain ? `${visibleVariants[0].variant}||${firstStain}` : null;
   const defaultImage = defaultKey && media[defaultKey]?.[0] ? imageBase + media[defaultKey][0] : null;
 
   productIndex.push({
@@ -237,6 +273,8 @@ for (const dirName of productDirs) {
   // just to recover productName, which is already in hand here.
   for (const [key, paths] of Object.entries(media)) {
     const [wood, stainName] = key.split("||");
+    // A hidden variant's photographs are of a product that is not for sale.
+    if (!visibleNames.has(wood)) continue;
     paths.forEach((path, idx) => {
       allImages.push({
         productName,
@@ -258,6 +296,10 @@ if (productIndex.length < MIN_EXPECTED_PRODUCTS) {
     `only ${productIndex.length} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
       `    If a product was removed on purpose, lower MIN_EXPECTED_PRODUCTS in this file.`
   );
+}
+
+if (hiddenProblems.length > 0) {
+  fail(`hidden leaves a product with no variants:\n` + hiddenProblems.map(p => `    - ${p}`).join("\n"));
 }
 
 if (availabilityProblems.length > 0) {
@@ -345,6 +387,12 @@ mkdirSync(join(root, "data"), { recursive: true });
 writeFileSync(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
 
 console.log(`Generated from ${productDirs.length} product directories`);
+if (hiddenVariants.length > 0) {
+  // Logged rather than silent: a variant vanishing from the catalogue should be
+  // visible in the build output, not something you discover from a 404.
+  console.log(`  hid ${hiddenVariants.length} product(s)' variants:`);
+  for (const h of hiddenVariants) console.log(`    ${h}`);
+}
 if (dedupedWords.length > 0) {
   console.log(`  collapsed ${dedupedWords.length} repeated word(s):`);
   for (const d of dedupedWords) console.log(`    ${d}`);
