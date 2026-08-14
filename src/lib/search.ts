@@ -2,6 +2,7 @@
 
 import MiniSearch from 'minisearch';
 import { useEffect, useMemo, useState } from 'react';
+import { useDelistedProducts } from './useDelistedProducts';
 
 export interface SearchResult {
   id: string;
@@ -166,6 +167,7 @@ function toResults(
 export function useSearch(query: string): SearchResult[] {
   const [index, setIndex] = useState<MiniSearch<SearchDoc> | null>(null);
   const trimmed = query.trim();
+  const { isDelisted } = useDelistedProducts();
 
   useEffect(() => {
     if (!trimmed || index) return;
@@ -183,16 +185,20 @@ export function useSearch(query: string): SearchResult[] {
     };
   }, [trimmed, index]);
 
+  // Filtered in both search hooks rather than at each render site: the
+  // dropdown and the /search page are the two consumers, and a de-listed
+  // product surfacing in either would be the most direct route to it.
   return useMemo(() => {
     if (!index || !trimmed) return [];
-    return toResults(index, trimmed);
-  }, [index, trimmed]);
+    return toResults(index, trimmed).filter(r => !isDelisted(r.slug));
+  }, [index, trimmed, isDelisted]);
 }
 
 /** Full result list (no MAX_RESULTS cap) for the dedicated /search page. */
 export function useSearchAll(query: string): { results: SearchResult[]; loading: boolean } {
   const [index, setIndex] = useState<MiniSearch<SearchDoc> | null>(null);
   const trimmed = query.trim();
+  const { isDelisted } = useDelistedProducts();
 
   useEffect(() => {
     let cancelled = false;
@@ -213,8 +219,11 @@ export function useSearchAll(query: string): { results: SearchResult[]; loading:
   // hand-rolled copy of the result-building logic that deduplicated by slug
   // instead of product name and produced a different shape.
   const results = useMemo(
-    () => (index && trimmed ? toResults(index, trimmed, Number.MAX_SAFE_INTEGER) : []),
-    [index, trimmed]
+    () =>
+      index && trimmed
+        ? toResults(index, trimmed, Number.MAX_SAFE_INTEGER).filter(r => !isDelisted(r.slug))
+        : [],
+    [index, trimmed, isDelisted]
   );
 
   return { results, loading: !index && Boolean(trimmed) };

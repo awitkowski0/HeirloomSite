@@ -4,6 +4,7 @@ import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
 import { formatPrice } from '@/lib/format';
 import { productAddedToCart } from '@/lib/analytics';
+import { useDelistedProducts } from '@/lib/useDelistedProducts';
 
 /**
  * "You may also like" -- the conversion kits and mattress for whatever crib is
@@ -39,6 +40,7 @@ const MAX_SHOWN = 3;
 
 export default function AlsoLike({ recommendations, disabled }: Props) {
   const { cart, addToCart } = useCart();
+  const { isDelisted } = useDelistedProducts();
 
   const inCart = new Set(cart.map(i => i.productName));
 
@@ -51,6 +53,10 @@ export default function AlsoLike({ recommendations, disabled }: Props) {
   for (const line of cart) {
     for (const rec of recommendations[line.productName] || []) {
       if (inCart.has(rec.productName) || seen.has(rec.slug)) continue;
+      // Never recommend something that has been de-listed: an Add button is
+      // the one place where offering a withdrawn product is worse than
+      // merely showing it.
+      if (isDelisted(rec.slug)) continue;
       if (!rec.wood || !rec.stainName) continue;
       seen.add(rec.slug);
       items.push(rec);

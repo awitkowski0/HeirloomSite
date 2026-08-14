@@ -14,6 +14,7 @@ import RelatedProducts from './RelatedProducts';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
 import { variantHref } from '@/lib/variants';
+import { useDelistedProducts } from '@/lib/useDelistedProducts';
 import type { InventoryItem, Stain, VariantType } from '@/types';
 
 /**
@@ -66,8 +67,11 @@ export default function ProductConfigurator({
    * line both need, and it is stable across a wood or finish change - the
    * conversion kits do not depend on the crib's finish.
    */
-  const bundleItems = configurations[0]?.bundle ?? [];
-  const relatedItems = configurations[0]?.related ?? [];
+  const { isDelisted } = useDelistedProducts();
+  // A de-listed kit must not be offered as a tickbox, and a de-listed dresser
+  // must not be recommended; both would add it straight to a cart.
+  const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
+  const relatedItems = (configurations[0]?.related ?? []).filter(r => !isDelisted(r.slug));
   const [bundleSelected, setBundleSelected] = useState<Set<string>>(
     () => new Set(bundleItems.map(i => i.slug))
   );

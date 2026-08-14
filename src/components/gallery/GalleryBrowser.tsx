@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import GalleryCard from './GalleryCard';
 import GalleryCarousel from './GalleryCarousel';
 import { FinishFilter, ALL_FINISHES } from './GalleryFilters';
+import { useDelistedProducts } from '@/lib/useDelistedProducts';
 import type { GalleryProduct } from './types';
 
 interface Props {
@@ -22,6 +23,7 @@ interface Props {
 export default function GalleryBrowser({ products }: Props) {
   const [selectedFinish, setSelectedFinish] = useState(ALL_FINISHES);
   const [carouselSlug, setCarouselSlug] = useState<string | null>(null);
+  const { isDelisted } = useDelistedProducts();
 
   const availableFinishes = useMemo(() => {
     const set = new Set<string>();
@@ -35,6 +37,7 @@ export default function GalleryBrowser({ products }: Props) {
     const hasActiveSelection = selectedFinish !== ALL_FINISHES;
 
     return products
+      .filter(product => !isDelisted(product.slug))
       .map(product => {
         /*
          * Searches every finish, not just the first variant's.
@@ -63,7 +66,7 @@ export default function GalleryBrowser({ products }: Props) {
         };
       })
       .filter((v): v is NonNullable<typeof v> => v !== null);
-  }, [products, selectedFinish]);
+  }, [products, selectedFinish, isDelisted]);
 
   const carouselProduct = carouselSlug
     ? products.find(p => p.slug === carouselSlug) ?? null

@@ -4,7 +4,7 @@ import { itemListJsonLd,
   jsonLdScript,
 } from '@/lib/seo';
 import CategoryPills from '@/components/products/CategoryPills';
-import ProductCard from '@/components/products/ProductCard';
+import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 export const metadata: Metadata = {
@@ -38,19 +38,7 @@ export default function ProductsPage() {
       <CategoryPills categories={categories} activeSlug={null} />
 
       <section aria-label="Product grid">
-        <div className="featured-grid">
-          {products.map((p, i) => (
-            <ProductCard
-              key={p.slug}
-              slug={p.slug}
-              name={p.productName}
-              category={p.category}
-              minPrice={p.minPrice}
-              img={p.defaultImage}
-              priority={i < 4}
-            />
-          ))}
-        </div>
+        <VisibleProductGrid products={products} />
         <ListingAnalytics />
       </section>
     </div>

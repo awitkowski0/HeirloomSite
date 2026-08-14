@@ -41,6 +41,14 @@ export default function BundleBuilder({
 
   const total =
     basePrice + items.reduce((sum, i) => (selected.has(i.slug) ? sum + i.price : sum), 0);
+  /*
+   * Counted from the rows on screen, not from the size of the selection.
+   *
+   * The selection is seeded once at mount and a row can leave `items` later -
+   * a PostHog de-listing arrives after flags load - which left the selection
+   * holding a slug with no row and the header reading "4 of 3 added".
+   */
+  const selectedCount = items.filter(i => selected.has(i.slug)).length;
 
   return (
     <section className="bundle" aria-labelledby="bundle-heading">
@@ -49,7 +57,7 @@ export default function BundleBuilder({
           Build Your Bundle
         </h2>
         <span className="body-md text-on-surface-variant">
-          {selected.size} of {items.length} added
+          {selectedCount} of {items.length} added
         </span>
       </div>
 

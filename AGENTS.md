@@ -72,6 +72,36 @@ intentionally remove a product, lower it.
 2. Implement, verify (`npm run lint`, `npm run typecheck`, `npm run build`)
 3. Commit, push, then `node scripts/create-pr.mjs "<title>"`
 
+## Hiding a product
+
+Two mechanisms, and they are not interchangeable.
+
+**`"hidden": true` in `product.json` is a withdrawal.** The build skips the
+product entirely, so there is no inventory row, no route, no sitemap entry, no
+search document and no row in `data/pricing.json`. That last one is the point:
+`src/lib/pricing.ts` prices every checkout line from that table and rejects
+anything missing from it, so a hidden product cannot be bought even by posting
+a hand-made cart straight at the API. The same key works on a variant in
+`variants.json` to withdraw a single wood. Hidden products are dropped from
+other products' `bundle`/`related` with a logged notice rather than failing the
+build - a shared accessory is in fifteen bundles - while a slug that is merely
+*wrong* still fails. Changing it needs a deploy.
+
+**A `product-<slug>` PostHog flag set to false is a de-listing.** It removes the
+product from grids, the cribs finish browser, search results, bundles and
+recommendations, without a deploy. It does NOT remove the product page, the
+sitemap entry, or the ability to buy it - every content route is statically
+prerendered and flags are read in the browser after that HTML is built, and
+evaluating them server-side would need `posthog-node` plus dynamic rendering,
+which is the trade this site refuses. It also fails OPEN: an unknown flag, a
+PostHog outage or a blocked script all leave the product visible, deliberately,
+because failing closed would empty the catalogue the moment analytics broke.
+A de-listed product is in the prerendered HTML and disappears when flags
+arrive, so it flashes.
+
+Use the flag for a soft launch or a quick de-list. Use `hidden` when it must
+not be sellable. See `src/lib/useDelistedProducts.ts`.
+
 ## Env vars
 - `NEXT_PUBLIC_SITE_URL` — canonical origin for canonicals/sitemap/og:image
 - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
