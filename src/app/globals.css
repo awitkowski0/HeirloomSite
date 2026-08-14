@@ -318,7 +318,10 @@ body {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 32px;
+  /* One rhythm across the bar. Help and the cart used to sit 8px apart while
+     everything else was 32px, so the right-hand pair read as one clumped
+     object rather than two controls. */
+  gap: 24px;
 }
 
 .header-search {
@@ -329,7 +332,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 24px;
 }
 
 /*
@@ -344,6 +347,19 @@ body {
   background: var(--paper-2);
 }
 
+/*
+ * Distributed, not clustered.
+ *
+ * The nine labels measure ~857px and sat at the left of a 1232px row with 26px
+ * gaps, leaving ~167px of dead space against the right edge - so the bar ended
+ * under the search field while the bar above it ran to the cart, and the two
+ * rows visibly failed to line up. space-between spends that 167px on the gaps
+ * instead, which puts the first category under the wordmark and the last under
+ * the cart.
+ *
+ * `gap` stays as a floor so the labels cannot collide on a narrow desktop
+ * window, where space-between has nothing spare to distribute.
+ */
 .category-bar-inner {
   height: var(--category-bar-h);
   max-width: var(--spacing-container-max);
@@ -351,6 +367,7 @@ body {
   padding: 0 24px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 26px;
 }
 
@@ -1685,21 +1702,32 @@ main {
   position: relative;
   width: 100%;
 }
+/*
+ * A filled plate with the icon inside it, and no submit block.
+ *
+ * The dark block on the right was the heaviest element in the header, which
+ * put the most visual weight on the least consequential control - Enter
+ * already submits, and nobody hunts for a search button. A flat --plate fill
+ * reads as a field without a border box, which suits a system whose stated
+ * rule is hairline rules and no elevation.
+ */
 .search-bar-form {
   display: flex;
   align-items: center;
-  border: 1px solid var(--control-border);
-  background: var(--surface-container-lowest);
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--plate);
+  border: 1px solid transparent;
 }
-/* The focus ring belongs on the whole control, not on the input inside it -
-   the border the user sees is the form's. */
+/* The whole control takes the focus treatment, because the boundary the user
+   perceives is the fill, not the input inside it. */
 .search-bar-form:focus-within {
   border-color: var(--ink);
 }
 .search-bar-input {
   flex: 1;
   min-width: 0;
-  padding: 11px 14px;
+  padding: 12px 0;
   border: 0;
   border-radius: var(--radius);
   /* >=16px stops iOS Safari zooming on focus. */
@@ -1710,55 +1738,79 @@ main {
 .search-bar-input:focus {
   outline: none;
 }
-/* A filled block rather than a bare icon, so the affordance reads as "search"
-   at a glance the way the retail pattern this borrows from does. */
+.search-bar-input::placeholder {
+  color: var(--ink-muted);
+}
+/*
+ * Rendered first, but still the last thing in the DOM.
+ *
+ * `order` and not a markup reorder: a submit button placed before the input in
+ * source order is the first thing Tab lands on when entering the header, so a
+ * keyboard user meets "submit search" before the field they would type into.
+ * Input then submit is the meaningful sequence; left-of-the-field is only
+ * where it should be drawn.
+ */
 .search-bar-form .icon-btn {
+  order: -1;
   flex: none;
-  align-self: stretch;
-  padding: 0 18px;
-  background: var(--ink);
-  color: var(--paper);
+  padding: 0;
+  color: var(--ink-muted);
 }
 .search-bar-form .icon-btn:hover {
-  background: var(--accent);
+  color: var(--ink);
 }
 
+/*
+ * The dropdown is the width of the field, not a 380px card floated under its
+ * right edge.
+ *
+ * It also carried `border` twice - --rule-strong then --outline-variant - so
+ * the second silently won and the panel was outlined in the hairline token the
+ * stylesheet elsewhere documents as too weak for a control boundary (1.32:1 on
+ * the cream ground, against WCAG 1.4.11's 3:1). One border, the strong one.
+ *
+ * Flush to the field: no margin-top gap, no radius, no inner padding, so rows
+ * run edge to edge and the panel reads as the field continuing downward rather
+ * than a separate floating object.
+ */
 .search-dropdown {
   position: absolute;
   top: 100%;
+  left: 0;
   right: 0;
-  width: 380px;
-  max-width: 90vw;
-  background-color: var(--surface-container-lowest);
-  border-radius: var(--radius-md);
+  background-color: var(--paper);
   border: 1px solid var(--rule-strong);
-  border: 1px solid var(--outline-variant);
+  border-top: 0;
   z-index: 1000;
-  padding: 8px;
-  margin-top: 4px;
 }
 
+/*
+ * Rows separated by a hairline rather than by a 4px gap between rounded
+ * cards. Same vocabulary as the bundle, related and also-like lists, which is
+ * what "matching the site" means here - the site has one way of drawing a list.
+ */
 .search-result {
   display: flex;
   gap: 12px;
-  padding: 12px;
-  border-radius: var(--radius);
+  padding: 12px 14px;
   border: none;
+  border-bottom: 1px solid var(--rule);
   background: none;
   cursor: pointer;
   width: 100%;
   text-align: left;
   align-items: center;
-  margin-bottom: 4px;
   transition: background 0.15s;
   font-family: inherit;
 }
 .search-result--compact {
-  padding: 10px;
-  margin-bottom: 0;
+  padding: 10px 14px;
 }
+/* Hover only. The arrow-key highlight has its own treatment further down -
+   both can be true at once, and the keyboard position is the one Enter acts
+   on, so they must not look identical. */
 .search-result:hover {
-  background: var(--surface-container-high);
+  background: var(--plate);
 }
 .search-result-thumb {
   width: 48px;
@@ -1766,10 +1818,10 @@ main {
   border-radius: 0;
   object-fit: cover;
   flex-shrink: 0;
-  background-color: var(--surface-container-lowest);
+  background-color: var(--plate);
 }
 .search-result-thumb--empty {
-  background-color: var(--surface-container-high);
+  background-color: var(--plate);
 }
 .search-result-body {
   flex: 1;
@@ -1779,8 +1831,8 @@ main {
 .search-result-name {
   display: block;
   font-size: 14px;
-  font-weight: 600;
-  color: var(--on-surface);
+  font-weight: 500;
+  color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1791,38 +1843,39 @@ main {
 .search-result-meta {
   display: block;
   font-size: 12px;
-  color: var(--on-surface-variant);
+  color: var(--ink-muted);
   margin-top: 2px;
 }
 .search-result-price {
   display: block;
   font-size: 14px;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
   margin-top: 2px;
 }
 
+/* The last row of the list, not a footer stuck under it. */
 .search-see-all {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 10px;
-  border-radius: var(--radius);
+  gap: 6px;
+  padding: 12px 14px;
   border: none;
   background: none;
   cursor: pointer;
   width: 100%;
-  font-family: var(--font-label);
-  font-size: 12px;
-  color: var(--on-surface-variant);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  border-top: 1px solid var(--outline-variant);
-  margin-top: 4px;
+  font-family: var(--font-caps);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-muted);
+  font-weight: 500;
 }
 .search-see-all:hover {
-  background: var(--surface-container-high);
+  background: var(--plate);
+  color: var(--ink);
 }
 
 .mobile-search-panel {
