@@ -512,6 +512,12 @@ main {
   padding-bottom: 128px;
 }
 
+/*
+ * The generic two-column page grid. Used by /checkout: form left, order
+ * summary right. The product page has its own grid below - it was sharing this
+ * one, which is why the child spans are scoped with `>` now rather than
+ * matching .product-showcase anywhere on the site.
+ */
 .grid-layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -540,11 +546,94 @@ main {
     grid-template-columns: repeat(12, 1fr);
     gap: var(--spacing-xl);
   }
-  .product-showcase {
+  .grid-layout > .product-showcase {
     grid-column: span 7;
   }
-  .configuration-panel {
+  .grid-layout > .configuration-panel {
     grid-column: span 5;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Product page grid
+
+   Photograph left, decision column right, name in whichever place reads first.
+
+   Named areas rather than column spans, because the name has to sit ABOVE the
+   photograph on a phone and BESIDE it from 1024px, and mounting the heading
+   twice to achieve that is the arrangement AGENTS.md rules out. One <h1>, two
+   placements.
+
+   Its own class rather than /checkout's .grid-layout, which it used to share.
+   Two rows against a spanning left column is not the shape a checkout wants:
+   with no title element to fill the first row, the order summary would have
+   been pushed down by an empty one.
+   --------------------------------------------------------------------------- */
+
+.product-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'title'
+    'image'
+    'panel';
+  /* The 48px stack gap is right between the photograph and the panel, and far
+     too much between a heading and the thing it names. */
+  column-gap: var(--spacing-lg);
+  row-gap: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+}
+
+/* Same reasoning as .grid-layout > *: the stain rail's eleven non-shrinking
+   swatches would otherwise set an ~650px floor for the whole page. */
+.product-layout > * {
+  min-width: 0;
+}
+
+.product-layout > .product-title {
+  grid-area: title;
+}
+.product-layout > .product-showcase {
+  grid-area: image;
+}
+.product-layout > .configuration-panel {
+  grid-area: panel;
+}
+
+@media (min-width: 1024px) {
+  .product-layout {
+    /* 7/5 of twelve, stated directly now that the areas do the placing. */
+    grid-template-columns: 7fr 5fr;
+    grid-template-areas:
+      'image title'
+      'image panel';
+    /*
+     * `auto 1fr`, not implicit `auto auto`.
+     *
+     * With two auto rows and the photograph spanning both, a photograph taller
+     * than name + panel has its surplus distributed across BOTH tracks - so
+     * the name's row grows too and the heading floats in a void above the
+     * price. An `fr` track is sized after the spanning item is accounted for,
+     * so row one pins to the name and row two absorbs the rest.
+     */
+    grid-template-rows: auto 1fr;
+    column-gap: var(--spacing-xl);
+    /* Not the 48px stack gap: this is the space between the name and the
+       price directly under it, which is one heading and its own value. */
+    row-gap: var(--spacing-md);
+  }
+
+  /*
+   * The photograph spans both rows, so whichever side is taller sets the
+   * height. When it is the photograph, the surplus is handed to the two
+   * spanned rows - and a grid item stretches by default, so the panel would
+   * grow and its 48px internal gaps would open up to fill space it does not
+   * want. Sized to content instead; the surplus becomes room below.
+   */
+  .product-layout > .product-title,
+  .product-layout > .configuration-panel {
+    align-self: start;
   }
 }
 
@@ -575,10 +664,18 @@ main {
 }
 
 
+/*
+ * 32px, not the 48px stack gap.
+ *
+ * The panel used to hold two or three blocks; it now holds five - price,
+ * variant picker, finish picker, buy controls, description - and 48px between
+ * each put ~200px of pure gap in a column whose whole job is to be read in one
+ * go. The sections are already separated by their own headings and rules.
+ */
 .configuration-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 32px;
 }
 
 .pricing-section {
@@ -876,8 +973,9 @@ main {
   color: var(--accent);
 }
 
+/* No extra padding on top of the panel's own 32px gap - together they were
+   72px above the most important control on the page. */
 .action-section {
-  padding-top: var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -886,6 +984,11 @@ main {
 .add-to-cart {
   width: 100%;
   padding: 20px 0;
+  /* A <button> does not inherit the page font, and there is no global button
+     reset here - so the site's most important control was the only thing on
+     the page set in the browser's default UI font. */
+  font-family: var(--font-caps);
+  font-size: 11px;
   background-color: var(--secondary);
   color: var(--on-secondary);
   border-radius: 0;
@@ -1204,20 +1307,17 @@ main {
 /* Admin editing overlay */
 
 
-.product-title {
-  text-align: center;
-  padding: 10px 16px;
-}
-
-@media (max-width: 767px) {
-  .product-title {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: var(--surface);
-    border-bottom: 1px solid var(--outline-variant);
-  }
-}
+/*
+ * The title's centring, padding and mobile sticky treatment lived here, two
+ * screens away from the rule that sizes it, so an edit to one silently left
+ * the other behind. All of it is now in the single .product-title rule under
+ * "Product detail".
+ *
+ * The sticky was the real casualty: it pinned the name to the top of the
+ * viewport, which made sense when the name was the first thing on the page.
+ * It is now a grid item directly above the photograph, so sticking it would
+ * park the heading over the picture for the whole scroll.
+ */
 
 /* Product details - mobile */
 @media (max-width: 767px) {
@@ -1355,14 +1455,36 @@ main {
   cursor: pointer;
 }
 
+/*
+ * A real target, not a bare glyph.
+ *
+ * This was `background: none; border: none; color: white` in a corner - a thin
+ * white outline on a near-black backdrop, with no boundary to aim at. The
+ * overlay does close on a backdrop click, but .lightbox-img-wrap covers
+ * 90vw x 80vh, so there was barely any backdrop left to hit and the practical
+ * way out was Escape, which is not an affordance anyone can see.
+ */
 .lightbox-close-btn {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  background: none;
-  border: none;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   color: white;
   cursor: pointer;
+}
+.lightbox-close-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: white;
+}
+.lightbox-close-btn .material-symbols-outlined {
+  font-size: 26px;
 }
 
 .lightbox-img {
@@ -1373,6 +1495,8 @@ main {
 
 .lightbox-nav-btn {
   position: absolute;
+  /* Above the dismiss surface, or the arrows would close instead of paginate. */
+  z-index: 1;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.2);
@@ -1964,12 +2088,17 @@ main {
   margin-top: 8px;
 }
 
+/*
+ * 24px, not 40px. The header is two bars now, so `main`'s padding-top already
+ * reserves 112px before any of this; another 40 put the breadcrumb a sixth of
+ * a laptop screen down the page.
+ */
 .products-page,
 .checkout-page,
 .contact-page,
 .order-page,
 .product-page {
-  padding-top: 40px;
+  padding-top: 24px;
   padding-bottom: 64px;
 }
 
@@ -2200,20 +2329,32 @@ main {
    Product detail
    =========================================================================== */
 
-/* PDP title + body — single standard (see Site Audit Data/PRODUCT-DESCRIPTION-STANDARDS.md) */
+/*
+ * PDP title + body — single standard (see Site Audit Data/PRODUCT-DESCRIPTION-STANDARDS.md)
+ *
+ * headline-lg rather than headline-xl: at 28-48px, centred and full-bleed
+ * above the grid, the name read as a page banner rather than as the label of
+ * the thing beside it. In the decision column it is a heading over a price, so
+ * it takes the size of one.
+ */
 .product-title {
-  margin: 0 0 12px;
-  text-align: center;
+  margin: 0;
+  /* `.product-layout > * { min-width: 0 }` lets this shrink below its content,
+     so an unbroken name would overflow the column rather than widen it. */
+  overflow-wrap: anywhere;
   font-family: var(--font-serif);
-  font-size: var(--text-headline-xl);
+  font-size: var(--text-headline-lg);
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--ink);
 }
 .product-description {
+  /* No longer centred with `margin: 0 auto`: it is the last block in a ~440px
+     column now, so 65ch never binds and auto margins have nothing to centre
+     within. */
   max-width: 65ch;
-  margin: 0 auto 28px;
+  margin: 0;
   color: var(--ink-muted);
   font-family: var(--font-label);
   font-size: var(--text-body-lg);
@@ -2396,10 +2537,25 @@ a.product-inline-link:focus-visible {
   align-items: center;
   justify-content: center;
 }
+/* Sits behind everything and fills the dialog, so a click anywhere that is not
+   the photograph or a control dismisses. `zoom-out` because the image was
+   opened with `zoom-in`. */
+.lightbox-dismiss {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: zoom-out;
+}
+
 .lightbox-img-wrap {
   position: relative;
-  width: 90vw;
-  height: 80vh;
+  z-index: 1;
+  width: 86vw;
+  height: 78vh;
 }
 
 .gallery-carousel-content {
@@ -3350,5 +3506,41 @@ a.product-inline-link:focus-visible {
   .also-like-add {
     grid-column: 2 / -1;
     justify-self: start;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Product page: the band below the fold-grid
+
+   Build Your Bundle and "Complete the set". Both were in the right-hand
+   column: the bundle sat between the finish picker and the price, so a
+   five-row box with its own total pushed the price of the thing being
+   configured most of a screen down the page, and the related list was a
+   48px-thumb column squeezed into ~440px.
+
+   Here they are a second, optional decision taken after the first one.
+   --------------------------------------------------------------------------- */
+
+.product-bottom {
+  margin-top: var(--spacing-lg);
+}
+.product-related {
+  margin-top: var(--spacing-lg);
+}
+
+.product-bottom-head {
+  margin-bottom: var(--spacing-md);
+  color: var(--ink-muted);
+}
+
+/* Recommendations run the full width; .featured-grid is four columns here and
+   the list is capped at four, so it is exactly one row. */
+
+@media (max-width: 767px) {
+  .product-bottom {
+    margin-top: var(--spacing-md);
+  }
+  .product-related {
+    margin-top: var(--spacing-md);
   }
 }

@@ -15,6 +15,7 @@ import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
+import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import type { ReactNode } from 'react';
 
 // Unknown slugs - and unknown wood/finish segments - 404 instead of rendering
@@ -215,6 +216,20 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
       : []),
   ];
 
+  /*
+   * Shaped for ProductCard: the relation carries `price`/`image` and the card
+   * wants `minPrice`/`defaultImage`. Four, because .featured-grid is four
+   * columns at this width and a second row of near-misses is not a
+   * recommendation.
+   */
+  const relatedProducts = (primary.related ?? []).slice(0, 4).map(r => ({
+    slug: r.slug,
+    productName: r.productName,
+    category: r.category,
+    minPrice: r.price,
+    defaultImage: r.image,
+  }));
+
   return (
     <div className="container product-page">
       <script
@@ -252,29 +267,55 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
       </nav>
 
       {/*
-        The product name is the page's h1. It was previously an <h2
-        className="headline-xl"> with no h1 anywhere on the page, so the visual
-        hierarchy contradicted the semantic one.
-      */}
-      <h1 className="product-title">{product.productName}</h1>
+        The name and the description are built here, on the server, and handed
+        to the configurator to POSITION.
 
-      {/*
-        Rendered on the server so the description is in the initial HTML for
-        crawlers, rather than appearing only after the configurator hydrates.
-        Multi-paragraph body + standard inline links (Safety page, Get Personal
-        Assistance) — see Site Audit Data/PRODUCT-DESCRIPTION-STANDARDS.md.
+        Both used to be siblings of it, stacked centred above the grid. They
+        belong to the layout it owns - the name sits above the photograph on a
+        phone and beside it on a desktop, the description ends the decision
+        column - but neither needs client JS, and the description especially
+        should not: it is split into paragraphs and given real inline <Link>s
+        below, and that work stays in the server component this way.
       */}
-      {primary.description && (
-        <div className="product-description">{renderProductDescription(primary.description)}</div>
-      )}
-
       <ProductConfigurator
         productName={product.productName}
         configurations={product.configurations}
         slug={slug}
+        title={
+          /* The page's h1. It was previously an <h2 className="headline-xl">
+             with no h1 anywhere on the page, so the visual hierarchy
+             contradicted the semantic one. */
+          <h1 className="product-title">{product.productName}</h1>
+        }
+        description={
+          primary.description ? (
+            <div className="product-description">
+              {renderProductDescription(primary.description)}
+            </div>
+          ) : null
+        }
         initialWood={resolved.wood ?? data.config.wood}
         initialStain={resolved.stain}
       />
+
+      {/*
+        "Complete the set" - the matching family, rendered here rather than
+        inside the configurator on purpose.
+
+        ProductCard is a server component, and deliberately so: its analytics
+        attribution lives in data attributes precisely so that a listing does
+        not hydrate. Rendering it from inside the client configurator would
+        undo that. VisibleProductGrid is the thin client shell that applies
+        the PostHog de-listing filter and nothing else.
+      */}
+      {relatedProducts.length > 0 && (
+        <section className="product-bottom product-related" aria-labelledby="complete-the-set">
+          <h2 id="complete-the-set" className="label-caps product-bottom-head">
+            Complete the set
+          </h2>
+          <VisibleProductGrid products={relatedProducts} />
+        </section>
+      )}
 
       {primary.extendedDescription && (
         <section className="product-extended">

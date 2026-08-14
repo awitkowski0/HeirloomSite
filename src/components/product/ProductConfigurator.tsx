@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, type ReactNode } from 'react';
 import { productAddedToCart, productViewed, variantConfigured } from '@/lib/analytics';
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
@@ -10,7 +10,6 @@ import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
 import BundleBuilder from './BundleBuilder';
-import RelatedProducts from './RelatedProducts';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
 import { variantHref } from '@/lib/variants';
@@ -43,6 +42,19 @@ interface Props {
   productName: string;
   configurations: InventoryItem[];
   slug: string;
+  /*
+   * The <h1> and the description, rendered by the server page and slotted in.
+   *
+   * They belong to this component's LAYOUT - the name sits above the photo on
+   * a phone and beside it on a desktop, and the description is the last thing
+   * in the decision column - but not to its behaviour. Passing them as nodes
+   * keeps them server-rendered, which matters for the description: the page
+   * splits its paragraphs and substitutes real <Link>s for "Safety page" and
+   * "Get Personal Assistance", and none of that should cross into the client
+   * bundle just to be positioned.
+   */
+  title: ReactNode;
+  description: ReactNode;
   /** Resolved on the server from the URL path, so the correct configuration is
       in the initial HTML rather than applied after hydration. */
   initialWood: string;
@@ -53,6 +65,8 @@ export default function ProductConfigurator({
   productName,
   configurations,
   slug,
+  title,
+  description,
   initialWood,
   initialStain,
 }: Props) {
@@ -71,10 +85,15 @@ export default function ProductConfigurator({
   // A de-listed kit must not be offered as a tickbox, and a de-listed dresser
   // must not be recommended; both would add it straight to a cart.
   const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
-  const relatedItems = (configurations[0]?.related ?? []).filter(r => !isDelisted(r.slug));
   const [bundleSelected, setBundleSelected] = useState<Set<string>>(
     () => new Set(bundleItems.map(i => i.slug))
   );
+  /*
+   * What pressing Add to Cart will actually put in the cart. Derived rather
+   * than tracked, so it cannot drift from the loop in handleAddToCart.
+   */
+  const selectedBundleItems = bundleItems.filter(i => bundleSelected.has(i.slug));
+
   const toggleBundleItem = (slug: string) =>
     setBundleSelected(prev => {
       const next = new Set(prev);
@@ -162,6 +181,10 @@ export default function ProductConfigurator({
   const basePrice = Number(currentConfig.basePrice) || 0;
   const addition = Number(currentStain?.priceAddition) || 0;
   const totalPrice = basePrice + addition;
+
+  // What the Add to Cart button will add, and what it will come to.
+  const addedCount = 1 + selectedBundleItems.length;
+  const cartTotal = totalPrice + selectedBundleItems.reduce((sum, i) => sum + i.price, 0);
 
   /*
    * Keep the address bar on the configuration being shown, so the URL is
@@ -264,12 +287,60 @@ export default function ProductConfigurator({
 
   return (
     <>
-      <div className="grid-layout">
+      <div className="product-layout">
+        {/*
+          The name is a direct child of the grid, not part of either column.
+          On a phone it is the first thing on the page, above the photograph;
+          from 1024px it is the top of the decision column beside it. Named
+          grid areas put one element in both places, rather than mounting the
+          heading twice and hiding one, which is the arrangement AGENTS.md
+          rules out.
+        */}
+        {title}
+
         <div className="product-showcase">
           <ProductGallery images={galleryImages} productName={productName} priority />
+
+          {/*
+            Under the photograph, not in the decision column and not at the
+            foot of the page.
+            
+            In the column it sat between the finish picker and the price, so a
+            five-row box with its own total pushed the price of the thing being
+            configured most of a screen down. At the foot of the page it was
+            below the buy button - and every row is ticked by default, so a
+            customer who never scrolled that far would have had four extra
+            products added by a button they pressed before seeing them.
+          */}
+          <BundleBuilder
+            productName={currentConfig.productName}
+            basePrice={totalPrice}
+            baseImage={galleryImages[0] || ''}
+            items={bundleItems}
+            selected={bundleSelected}
+            onToggle={toggleBundleItem}
+          />
         </div>
 
+        {/*
+          One column, in the order the decision is actually made: what it
+          costs, what it comes in, buy it, then the copy that justifies it.
+          The price used to sit BELOW the variant pickers and the bundle,
+          which put the two things being weighed against each other - the
+          photograph and the price - at opposite ends of a scroll.
+        */}
         <div className="configuration-panel">
+          <section className="pricing-section">
+            <div className="price-row">
+              <span className="headline-lg price-current">{formatPrice(totalPrice)}</span>
+            </div>
+            <p role="status" aria-live="polite" className="visually-hidden">
+              {selection.stain
+                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. ${formatPrice(totalPrice)}.`
+                : ''}
+            </p>
+          </section>
+
           {variantLabel && (
             <WoodSelector
               woods={woods}
@@ -290,42 +361,28 @@ export default function ProductConfigurator({
             />
           )}
 
-          <BundleBuilder
-            productName={currentConfig.productName}
-            basePrice={totalPrice}
-            baseImage={galleryImages[0] || ''}
-            items={bundleItems}
-            selected={bundleSelected}
-            onToggle={toggleBundleItem}
-          />
-
-          {/*
-            One or the other, never both. A crib's column is filled by its
-            bundle; a dresser has no bundle, and its column is the empty one
-            this is for. Stacking both would push the price below the fold on
-            exactly the products that convert best.
-          */}
-          {bundleItems.length === 0 && <RelatedProducts items={relatedItems.slice(0, 4)} />}
-
-          <section className="pricing-section">
-            <div className="price-row">
-              <span className="headline-lg price-current">{formatPrice(totalPrice)}</span>
-            </div>
-            <p role="status" aria-live="polite" className="visually-hidden">
-              {selection.stain
-                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. ${formatPrice(totalPrice)}.`
-                : ''}
-            </p>
-          </section>
-
           <section className="action-section">
+            {/*
+              The label counts what the click will actually add.
+              
+              Bundle rows are ticked by default and the button adds every
+              ticked one, so on an Addison that is five products and $4,088,
+              not one product and $2,868. The bundle sits under the photograph
+              rather than beside the button, and on a laptop it is below the
+              fold - so the button has to be the thing that tells the truth
+              about its own consequences.
+            */}
             <button
               type="button"
               className="add-to-cart"
               disabled={!selection.stain}
               onClick={handleAddToCart}
             >
-              {selection.stain ? 'ADD TO CART' : 'OUT OF STOCK'}
+              {!selection.stain
+                ? 'OUT OF STOCK'
+                : addedCount > 1
+                  ? `ADD ${addedCount} ITEMS — ${formatPrice(cartTotal)}`
+                  : 'ADD TO CART'}
             </button>
 
             <button
@@ -354,6 +411,8 @@ export default function ProductConfigurator({
                 who to ask - unanswered at the point of decision. */}
             {showDeliveryMessage && <PurchaseAssurances />}
           </section>
+
+          {description}
         </div>
       </div>
 
