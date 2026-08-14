@@ -15,10 +15,65 @@ import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
+import type { ReactNode } from 'react';
 
 // Unknown slugs - and unknown wood/finish segments - 404 instead of rendering
 // an empty shell, or the default configuration, with HTTP 200.
 export const dynamicParams = false;
+
+/** Split body copy into paragraphs and auto-link standard phrases (same on every PDP). */
+function renderProductDescription(text: string): ReactNode {
+  const paragraphs = text
+    .split(/\n\n+/)
+    .map((p) => p.replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+
+  return paragraphs.map((para, i) => (
+    <p key={i}>{linkifyProductCopy(para)}</p>
+  ));
+}
+
+const LINK_RULES: { re: RegExp; href: string }[] = [
+  { re: /Get Personal Assistance/g, href: '/contact' },
+  { re: /Safety page/g, href: '/safety' },
+];
+
+function linkifyProductCopy(text: string): ReactNode[] {
+  // Build match list of non-overlapping standard phrases
+  type Hit = { start: number; end: number; href: string; label: string };
+  const hits: Hit[] = [];
+  for (const { re, href } of LINK_RULES) {
+    re.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(text)) !== null) {
+      hits.push({ start: m.index, end: m.index + m[0].length, href, label: m[0] });
+    }
+  }
+  hits.sort((a, b) => a.start - b.start);
+  const picked: Hit[] = [];
+  let cursor = 0;
+  for (const h of hits) {
+    if (h.start < cursor) continue;
+    picked.push(h);
+    cursor = h.end;
+  }
+  if (!picked.length) return [text];
+
+  const nodes: ReactNode[] = [];
+  let i = 0;
+  let key = 0;
+  for (const h of picked) {
+    if (h.start > i) nodes.push(text.slice(i, h.start));
+    nodes.push(
+      <Link key={`l-${key++}`} href={h.href} className="product-inline-link">
+        {h.label}
+      </Link>,
+    );
+    i = h.end;
+  }
+  if (i < text.length) nodes.push(text.slice(i));
+  return nodes;
+}
 
 type Params = { slug: string; variant: string[] };
 
@@ -201,14 +256,16 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         className="headline-xl"> with no h1 anywhere on the page, so the visual
         hierarchy contradicted the semantic one.
       */}
-      <h1 className="headline-xl product-title">{product.productName}</h1>
+      <h1 className="product-title">{product.productName}</h1>
 
       {/*
         Rendered on the server so the description is in the initial HTML for
         crawlers, rather than appearing only after the configurator hydrates.
+        Multi-paragraph body + standard inline links (Safety page, Get Personal
+        Assistance) — see Site Audit Data/PRODUCT-DESCRIPTION-STANDARDS.md.
       */}
       {primary.description && (
-        <p className="body-lg subtitle product-description">{primary.description}</p>
+        <div className="product-description">{renderProductDescription(primary.description)}</div>
       )}
 
       <ProductConfigurator

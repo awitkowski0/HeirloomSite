@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-08-13T12:34:12.457Z",
+  "shopifyHardGoods": 62,
+  "vercelHardGoods": 59,
+  "matched": 59,
+  "lowConfidence": 0,
+  "unmatchedShopify": 3,
+  "unmatchedVercel": 0,
+  "totalRows": 62
+}

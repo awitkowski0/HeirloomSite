@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>v4 · Bloomington</title>
+<style>
+:root {
+  --bg:#0f1419; --panel:#1a2332; --panel2:#243044; --text:#e7ecf3; --muted:#9aa8bc;
+  --accent:#5b9fd4; --good:#3dbe7a; --warn:#e0a935; --bad:#e05d5d; --line:#2c3a4f;
+  --chip:#2a384c; --max:1100px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;overflow-x:hidden;max-width:100vw;}
+a{color:var(--accent);word-break:break-word;}
+header{padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:20;}
+.badge{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+.ver{background:#1e3d2f;color:#8dffc1;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+.task{background:#24304a;color:#a8c4ff;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;}
+h1{margin:0 0 6px;font-size:1.15rem;line-height:1.3;word-wrap:break-word;}
+.meta{color:var(--muted);font-size:12px;display:flex;flex-wrap:wrap;gap:10px;}
+.stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.stat{background:var(--panel2);padding:6px 10px;border-radius:8px;font-size:12px;}
+.stat b{color:var(--accent);}
+.stat.good b{color:var(--good);}
+.stat.bad b{color:var(--bad);}
+.changelog{margin:12px 16px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;max-width:var(--max);}
+.changelog h2{margin:0 0 8px;font-size:14px;color:var(--accent);}
+.changelog ul{margin:0;padding-left:18px;color:var(--muted);}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px;border-bottom:1px solid var(--line);}
+input,select{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px 10px;font:inherit;max-width:100%;}
+.wrap{padding:12px;max-width:100%;}
+.card-list{display:flex;flex-direction:column;gap:10px;max-width:var(--max);margin:0 auto;}
+.row-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;overflow:hidden;}
+.row-top{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-bottom:8px;}
+.row-title{font-weight:600;word-break:break-word;flex:1;min-width:0;}
+.chips{display:flex;flex-wrap:wrap;gap:4px;}
+.chip{display:inline-block;padding:2px 7px;border-radius:999px;background:var(--chip);font-size:11px;}
+.chip.pass{background:#1e3d2f;color:#8dffc1;}
+.chip.fail{background:#3d2222;color:#ffb0b0;}
+.chip.matched{background:#1e3d2f;color:#8dffc1;}
+.chip.unmatched-shopify{background:#3d2222;color:#ffb0b0;}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-width:0;}
+@media(max-width:820px){.cols{grid-template-columns:1fr;}}
+.col{min-width:0;background:var(--panel2);border-radius:8px;padding:10px;overflow:hidden;}
+.col h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);}
+.col .name{font-weight:600;word-break:break-word;}
+.col .sub{color:var(--muted);font-size:12px;word-break:break-word;margin:2px 0 8px;}
+.body{
+  white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere;
+  font-size:12.5px;line-height:1.45;max-height:12em;overflow:auto;
+  background:#0c1016;padding:8px;border-radius:6px;
+}
+.qa{margin-top:10px;display:flex;flex-wrap:wrap;gap:4px;}
+.qa .chip.ok{background:#1e3d2f;color:#8dffc1;}
+.qa .chip.no{background:#3d2222;color:#ffb0b0;}
+.thumbs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.thumbs img{width:40px;height:40px;object-fit:cover;border-radius:4px;background:#000;}
+footer{padding:16px;color:var(--muted);border-top:1px solid var(--line);font-size:12px;}
+.help{color:var(--muted);padding:8px 16px;font-size:12px;max-width:var(--max);}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px;max-width:var(--max);margin:0 auto;}
+@media(max-width:820px){.detail-grid{grid-template-columns:1fr;}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px;min-width:0;overflow:hidden;}
+.card h2{margin:0 0 8px;font-size:14px;color:var(--accent);}
+.fullbody{
+  white-space:pre-wrap;word-wrap:break-word;overflow-wrap:anywhere;
+  background:#0c1016;padding:12px;border-radius:8px;font-size:13px;line-height:1.5;
+  max-height:none;
+}
+.imgs{display:flex;flex-wrap:wrap;gap:6px;}
+.imgs img{width:72px;height:72px;object-fit:cover;border-radius:6px;background:#000;}
+.checklist{list-style:none;padding:0;margin:0;}
+.checklist li{padding:4px 0;border-bottom:1px solid var(--line);font-size:13px;}
+.checklist .yes{color:var(--good);}
+.checklist .no{color:var(--bad);}
+</style>
+</head><body>
+<header>
+  <div class="badge"><span class="ver">v4</span><span class="task">Task 1 — Site Product Audit</span></div>
+  <a href="../audit.html">← Matrix</a>
+  <h1>Bloomington</h1>
+  <div class="meta">
+    <span>matched</span>
+    <span class="chip pass">QA 15/15</span>
+    <span>11 sentences</span>
+  </div>
+</header>
+<div class="detail-grid">
+  <div class="card">
+    <h2>Shopify source</h2>
+    <div class="name">Solid Hardwood 4-in-1 Convertible Crib - Bloomington Style</div>
+      <div class="sub">bloomington-style</div>
+      <p class="sub"><b>SEO title:</b> Bloomington Style Convertible Crib - 4-in-1 Solid Hardwood</p>
+      <p class="sub"><b>SEO meta:</b> The Bloomington Convertible Crib delivers classic warmth and practicality from solid premium hardwoods. Converts 4-in-1 for years of use. Shop Heirloom Cribs today.</p>
+      <h3 style="font-size:12px;color:var(--muted)">Full description</h3>
+      <div class="fullbody">Solid hardwood 4-in-1 convertible crib made in the USA. The Bloomington Style is crafted from real solid hardwood - no particle board, no MDF, no veneer - delivering classic warmth and the substantial feel that distinguish custom nursery furniture from mass-market alternatives.It converts through four stages: crib to toddler bed, daybed, and full-size bed. Where conversion kits are included in the listed price they are noted on this page. Adjustable mattress heights support safe sleep positioning as your child grows while preserving a firm, flat sleep surface that meets applicable federal standards.Finished with non-toxic, water-based, lead-free materials. Meets ASTM F1169 full-size crib standard, JPMA specifications, and CPSIA requirements. Full details are listed on our Safety page.How ordering works: select wood species and stain, place a 50% deposit to begin production, and retain a 48-hour written cancellation window for a full refund less credit-card fees. After 48 hours the deposit is non-refundable because production has started. We confirm lead-time and delivery estimates for your zip code; balance is due only before shipping. Inspect on delivery.Prefer to talk through options or request a current planning estimate before depositing? Use Get Personal Assistance - we reply the same or next business day.</div>
+      <div class="imgs" style="margin-top:10px"><img src="../../images/shopify/bloomington-style/media-001.png" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-002.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-003.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-004.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-005.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-006.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-007.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-008.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-009.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-010.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-011.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-012.jpg" loading="lazy" alt=""/><img src="../../images/shopify/bloomington-style/media-013.jpg" loading="lazy" alt=""/></div>
+  </div>
+  <div class="card">
+    <h2>Vercel — polished live copy</h2>
+    <div class="name">Bloomington</div>
+      <div class="sub">bloomington · Cribs</div>
+      <p class="sub"><b>Title:</b> Bloomington Convertible Crib — Heirloom Cribs and More</p>
+      <p class="sub"><b>Meta (141 chars):</b> Built the old-fashioned way with premium solid hardwoods, the Bloomington Convertible Crib delivers classic warmth and everyday practicality.</p>
+      <h3 style="font-size:12px;color:var(--muted)">Full description (1452 chars · read entire block)</h3>
+      <div class="fullbody">Built the old-fashioned way with premium solid hardwoods, the Bloomington Convertible Crib delivers classic warmth and everyday practicality. It transforms effortlessly from crib to toddler bed, daybed, and full-size bed so your child's sleep space evolves without ever losing that cozy, familiar feel.
+
+Safe, sturdy, and finished in the wood tone you love, it's the kind of furniture that turns a nursery into a room your family will remember. It converts through four stages: crib to toddler bed, daybed, and full-size bed. Where conversion kits are included in the listed price they are noted on this page.
+
+Adjustable mattress heights support safe sleep positioning as your child grows while preserving a firm, flat sleep surface that meets applicable federal standards. Finished with non-toxic, water-based, lead-free materials. You can read full details on our Safety page. Imagine it as the quiet center of the room — the place your newborn rests today, and the bed that can grow with them through toddler nights and toward a full-size bed when they are ready. Built for durability, safety, and everyday family life, it is meant to feel like part of home for years, not a piece you replace each season.
+
+If you would like help choosing a finish, confirming timing, or picturing how this piece fits your nursery plans, use Get Personal Assistance — we reply the same or next business day so you can decide with full information, at your own pace.</div>
+      <div class="imgs" style="margin-top:10px"><img src="../../../public/data/products/Bloomington/bloomington_0.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_1.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_10.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_11.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_12.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_13.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_14.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_15.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_16.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_17.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_18.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_19.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_2.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_20.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_21.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_22.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_23.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_24.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_25.jpg" loading="lazy" alt=""/><img src="../../../public/data/products/Bloomington/bloomington_26.jpg" loading="lazy" alt=""/></div>
+  </div>
+</div>
+<div class="card" style="margin:12px auto;max-width:var(--max)">
+  <h2>Copy QA checklist</h2>
+  <ul class="checklist"><li class="yes">✓ Description present</li><li class="yes">✓ Description ends with . ! or ?</li><li class="yes">✓ No ellipsis in description</li><li class="yes">✓ Description not dangling</li><li class="yes">✓ Space after periods</li><li class="yes">✓ Meta present</li><li class="yes">✓ Meta length 141 (70–165)</li><li class="yes">✓ Meta ends with punctuation</li><li class="yes">✓ No ellipsis in meta</li><li class="yes">✓ Meta not dangling</li><li class="yes">✓ Title includes brand</li><li class="yes">✓ 11 complete sentence(s)</li><li class="yes">✓ No dangling sentence endings</li><li class="yes">✓ No order/deposit policy language</li><li class="yes">✓ Includes soft Get Personal Assistance invite</li></ul>
+</div>
+<footer>v4 · Soft-sell voice rewrite — no order policy on PDPs · 2026-08-13T14:44:36.989Z</footer>
+</body></html>

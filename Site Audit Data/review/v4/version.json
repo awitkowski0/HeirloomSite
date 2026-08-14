@@ -1,0 +1,19 @@
+{
+  "id": "v4",
+  "task": "Task 1 — Site Product Audit",
+  "title": "Soft-sell voice rewrite — no order policy on PDPs",
+  "generatedAt": "2026-08-13T14:44:36.989Z",
+  "changelog": [
+    "Removed deposit, cancellation, and checkout-policy language from product descriptions",
+    "Rewrote PDPs for warm, inviting nursery storytelling (grow-with-child, safety, quality)",
+    "Soft CTA only: Get Personal Assistance — same/next business day, no hard sell",
+    "Deduped repetitive merged sentences; complete thoughts only",
+    "HTML v4: balanced columns + full polished copy for voice review"
+  ],
+  "stats": {
+    "total": 59,
+    "allPass": 59,
+    "anyFail": 0,
+    "shopifyOnly": 3
+  }
+}
