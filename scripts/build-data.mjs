@@ -74,7 +74,9 @@ const variantTypeProblems = [];
 const availabilityProblems = [];
 const hiddenProblems = [];
 const hiddenVariants = [];
+const hiddenProducts = [];
 const relationProblems = [];
+const relationNotices = [];
 function checkVariantType(dirName, declared, names) {
   if (!declared) {
     variantTypeProblems.push(`${dirName}: product.json has no variantType`);
@@ -150,6 +152,23 @@ for (const dirName of productDirs) {
   // here means it failed to parse. Skipping it silently would drop a product
   // from the index and 404 its already-indexed URL.
   if (!meta) fail(`${dirName}/product.json exists but could not be parsed`);
+
+  /*
+   * `hidden` on the product withdraws the whole thing, the same way `hidden`
+   * on a variant withdraws one wood.
+   *
+   * Nothing downstream has to know: every artifact is generated from this
+   * loop, so skipping here means no inventory row, no route, no sitemap entry,
+   * no search document and - the one that matters - no row in pricing.json.
+   * That last is what makes this a real withdrawal rather than a visual one.
+   * src/lib/pricing.ts prices every checkout line from that table and rejects
+   * anything absent from it, so a hidden product cannot be bought even by
+   * posting a hand-made cart at the API.
+   */
+  if (meta.hidden === true) {
+    hiddenProducts.push({ dirName, slug: meta.slug || null });
+    continue;
+  }
 
   const productName = meta.productName;
 
@@ -328,6 +347,13 @@ for (const dirName of productDirs) {
  */
 const bySlug = new Map(productIndex.filter(p => p.slug).map(p => [p.slug, p]));
 
+/*
+ * Hidden slugs are tracked separately so a relation pointing at one can be
+ * told apart from a relation pointing at a typo. The first is a consequence of
+ * a deliberate act and is dropped; the second is a mistake and fails the build.
+ */
+const hiddenSlugs = new Set(hiddenProducts.map(p => p.slug).filter(Boolean));
+
 const rowsBySlug = new Map();
 for (const item of inventory) {
   if (!item.slug) continue;
@@ -369,6 +395,18 @@ function resolveRelation(dirName, field, slugs, ownSlug) {
       relationProblems.push(`${dirName}: ${field} lists "${slug}" twice`);
       continue;
     }
+    if (hiddenSlugs.has(slug)) {
+      /*
+       * Dropped, not fatal. Hiding a shared accessory - the mattress is in
+       * fifteen bundles - would otherwise refuse the build for fifteen
+       * products that are each individually fine. Logged so the consequence
+       * of the hide is visible in the build output rather than discovered as
+       * a bundle that quietly lost a row.
+       */
+      relationNotices.push(`${dirName}: ${field} drops "${slug}", which is hidden`);
+      continue;
+    }
+
     const target = bySlug.get(slug);
     if (!target) {
       // The failure this guard exists for: a typo'd or renamed slug would
@@ -426,9 +464,19 @@ if (relationProblems.length > 0) {
   fail(`bundle/related do not match the catalogue:\n` + relationProblems.map(p => `    - ${p}`).join("\n"));
 }
 
-if (productIndex.length < MIN_EXPECTED_PRODUCTS) {
+/*
+ * The tripwire counts what PARSED, not what shipped.
+ *
+ * It exists to catch the pipeline silently emptying the catalogue, and hiding
+ * a product on purpose is not that. Counting only the visible ones would mean
+ * every deliberate hide also demanded an edit to this constant, which trains
+ * whoever hits it to lower the number without thinking - and that is exactly
+ * the reflex the guard depends on not existing.
+ */
+const parsedProducts = productIndex.length + hiddenProducts.length;
+if (parsedProducts < MIN_EXPECTED_PRODUCTS) {
   fail(
-    `only ${productIndex.length} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
+    `only ${parsedProducts} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
       `    If a product was removed on purpose, lower MIN_EXPECTED_PRODUCTS in this file.`
   );
 }
@@ -554,6 +602,13 @@ mkdirSync(join(root, "data"), { recursive: true });
 writeFileSync(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
 
 console.log(`Generated from ${productDirs.length} product directories`);
+if (hiddenProducts.length > 0) {
+  console.log(`  hid ${hiddenProducts.length} product(s) entirely:`);
+  for (const h of hiddenProducts) console.log(`    ${h.dirName}`);
+}
+if (relationNotices.length > 0) {
+  for (const n of relationNotices) console.log(`    ${n}`);
+}
 if (hiddenVariants.length > 0) {
   // Logged rather than silent: a variant vanishing from the catalogue should be
   // visible in the build output, not something you discover from a 404.
