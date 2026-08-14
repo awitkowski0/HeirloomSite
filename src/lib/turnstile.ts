@@ -9,12 +9,24 @@ import 'server-only';
  * validates stolen cards against the resulting client secrets - and it also
  * lets anyone set `receipt_email` to an address they do not own.
  *
+ * siteverify is called from here and only from here. It takes the secret key,
+ * so a browser can never be trusted to make this call.
+ *
  * Inert until TURNSTILE_SECRET_KEY is set, so a deployment without Cloudflare
- * keeps working. Once set it fails CLOSED: a missing or invalid token is
- * rejected rather than waved through.
+ * keeps working. Once set it fails CLOSED: a missing, invalid, replayed or
+ * mismatched token is rejected rather than waved through.
  */
 
+import { TURNSTILE_ACTION } from './turnstile-action';
+
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+
+/**
+ * The widget's `action`, asserted on both ends. Defined in its own non-
+ * server-only module so the client half can import it without dragging this
+ * file - and the secret handling in it - into the browser bundle.
+ */
+export { TURNSTILE_ACTION } from './turnstile-action';
 
 export function turnstileEnabled(): boolean {
   return Boolean(process.env.TURNSTILE_SECRET_KEY);
@@ -28,16 +40,91 @@ export class TurnstileError extends Error {
   }
 }
 
+/**
+ * Hostnames a token may legitimately come from.
+ *
+ * Derived from configuration rather than hardcoded: the production domain is
+ * not known to this repo, and a stale literal here would reject every real
+ * customer. Mirrors the SITE_URL derivation in src/lib/seo.ts.
+ */
+function allowedHostnames(): Set<string> {
+  const hosts = new Set<string>();
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (siteUrl) {
+    try {
+      hosts.add(new URL(siteUrl).hostname);
+    } catch {
+      // A malformed SITE_URL is a config error elsewhere; do not fail here.
+    }
+  }
+
+  const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  if (vercelHost) hosts.add(vercelHost);
+
+  if (process.env.NODE_ENV !== 'production') {
+    hosts.add('localhost');
+    hosts.add('127.0.0.1');
+  }
+
+  return hosts;
+}
+
+interface SiteverifyOutcome {
+  success?: boolean;
+  action?: string;
+  hostname?: string;
+  'error-codes'?: string[];
+  metadata?: { result_with_testing_key?: boolean };
+}
+
+/**
+ * Cloudflare's published always-pass / always-block key pairs, used in local
+ * development so the full path runs in dev exactly as it does in production.
+ *
+ * They need their own branch because siteverify answers them differently from
+ * a real key: `action` is absent entirely and `hostname` is the literal
+ * "example.com". Both assertions below would therefore reject every request,
+ * which is worse than not having them - it would make the checkout untestable
+ * locally and send whoever hit it hunting for a bug that is not there.
+ *
+ * Trusting this flag is not a hole. It is echoed by Cloudflare over TLS in
+ * response to OUR secret, and a real secret never produces it - the only way
+ * to see it is to have configured a testing secret, which is a misconfiguration
+ * rather than an attack, and one that shouts on the line below.
+ */
+let warnedTestingKey = false;
+
+/**
+ * Half-configured is the dangerous state.
+ *
+ * With a site key but no secret, the widget renders, the customer solves it,
+ * and nothing on the server checks the result - the protection looks present
+ * in the UI and does not exist. That is worse than no widget at all, because
+ * it reads as done. Warned once per process rather than per request.
+ */
+let warnedHalfConfigured = false;
+
 export async function verifyTurnstile(token: unknown, ip: string | null): Promise<void> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
-  if (!secret) return;
+  if (!secret) {
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !warnedHalfConfigured) {
+      warnedHalfConfigured = true;
+      console.error(
+        'Turnstile is HALF-CONFIGURED: NEXT_PUBLIC_TURNSTILE_SITE_KEY is set but ' +
+          'TURNSTILE_SECRET_KEY is not. The widget renders and is never verified, ' +
+          'so /api/stripe/create-payment-intent has no bot protection.'
+      );
+    }
+    return;
+  }
 
   if (typeof token !== 'string' || token === '') throw new TurnstileError();
 
   const body = new URLSearchParams({ secret, response: token });
   if (ip) body.set('remoteip', ip);
 
-  let outcome: { success?: boolean; 'error-codes'?: string[] };
+  let outcome: SiteverifyOutcome;
   try {
     const res = await fetch(VERIFY_URL, {
       method: 'POST',
@@ -45,7 +132,7 @@ export async function verifyTurnstile(token: unknown, ip: string | null): Promis
       // Cloudflare being slow or unreachable must not hang a checkout request.
       signal: AbortSignal.timeout(5000),
     });
-    outcome = await res.json();
+    outcome = (await res.json()) as SiteverifyOutcome;
   } catch (err) {
     // Fail closed. An outage here means we cannot tell a customer from a bot,
     // and the endpoint being protected creates charges.
@@ -53,8 +140,42 @@ export async function verifyTurnstile(token: unknown, ip: string | null): Promis
     throw new TurnstileError('Could not verify your browser. Please try again.');
   }
 
-  if (!outcome.success) {
-    console.warn('Turnstile rejected a request:', outcome['error-codes']);
+  // Turnstile is boolean - there is no reCAPTCHA-style score to threshold on.
+  if (outcome.success !== true) {
+    console.warn('Turnstile rejected a token:', outcome['error-codes']);
+    throw new TurnstileError();
+  }
+
+  if (outcome.metadata?.result_with_testing_key === true) {
+    if (!warnedTestingKey) {
+      warnedTestingKey = true;
+      const where =
+        process.env.NODE_ENV === 'production'
+          ? 'THIS IS A PRODUCTION BUILD: checkout has no bot protection at all. ' +
+            'Set the real TURNSTILE_SECRET_KEY.'
+          : 'Fine for local development.';
+      console.warn(`Turnstile is using a Cloudflare TESTING key, which passes anything. ${where}`);
+    }
+    // The action and hostname assertions cannot be made against a testing key.
+    return;
+  }
+
+  if (outcome.action !== TURNSTILE_ACTION) {
+    console.warn(`Turnstile action mismatch: expected ${TURNSTILE_ACTION}, got ${outcome.action}`);
+    throw new TurnstileError();
+  }
+
+  const allowed = allowedHostnames();
+  // An empty allowlist means nothing is configured to compare against; failing
+  // every request would be worse than the check being absent, so skip it and
+  // say so rather than silently passing a check that never ran.
+  if (allowed.size === 0) {
+    console.warn(
+      'Turnstile hostname check skipped: neither NEXT_PUBLIC_SITE_URL nor ' +
+        'VERCEL_PROJECT_PRODUCTION_URL is set.'
+    );
+  } else if (!outcome.hostname || !allowed.has(outcome.hostname)) {
+    console.warn(`Turnstile hostname not allowed: ${outcome.hostname}`);
     throw new TurnstileError();
   }
 }
