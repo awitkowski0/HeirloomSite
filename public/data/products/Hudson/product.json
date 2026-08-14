@@ -9,5 +9,11 @@
   "defaultVariant": "BrownMaple",
   "slug": "hudson",
   "title": "Hudson — Heirloom Cribs and More",
-  "metaDescription": "Clean, contemporary lines meet old-world strength in the Hudson Convertible Crib. Handcrafted from solid American hardwoods, this 4-in-1 design offers smooth transitions from crib to toddler bed, daybed, and full-size bed while delivering the safety and stability every parent wants. Modern enough for today’s nurseries yet built to last a lifetime, it’s the smart, stylish choice that grows with your family."
+  "metaDescription": "Clean, contemporary lines meet old-world strength in the Hudson Convertible Crib. Handcrafted from solid American hardwoods, this 4-in-1 design offers smooth transitions from crib to toddler bed, daybed, and full-size bed while delivering the safety and stability every parent wants. Modern enough for today’s nurseries yet built to last a lifetime, it’s the smart, stylish choice that grows with your family.",
+  "bundle": [
+    "toddler-conversion-rail",
+    "full-bed-rail-kit",
+    "34-guard-rail",
+    "crib-mattress"
+  ]
 }

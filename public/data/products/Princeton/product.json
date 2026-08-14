@@ -9,5 +9,11 @@
   "defaultVariant": "BrownMaple",
   "slug": "princeton",
   "title": "Princeton — Heirloom Cribs and More",
-  "metaDescription": "Handcrafted from solid American hardwoods by skilled artisans, the Princeton Convertible Crib brings timeless raised-panel style and rock-solid durability to your nursery. This 4-in-1 design converts smoothly from a safe baby crib to a toddler bed, daybed, and full-size bed—growing right alongside your little one and saving you money down the road. Clean lines, heirloom quality, and beautiful wood finishes make it the piece parents keep for years and proudly pass along."
+  "metaDescription": "Handcrafted from solid American hardwoods by skilled artisans, the Princeton Convertible Crib brings timeless raised-panel style and rock-solid durability to your nursery. This 4-in-1 design converts smoothly from a safe baby crib to a toddler bed, daybed, and full-size bed—growing right alongside your little one and saving you money down the road. Clean lines, heirloom quality, and beautiful wood finishes make it the piece parents keep for years and proudly pass along.",
+  "bundle": [
+    "toddler-conversion-rail",
+    "full-bed-rail-kit",
+    "34-guard-rail",
+    "crib-mattress"
+  ]
 }

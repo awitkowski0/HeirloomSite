@@ -12,6 +12,24 @@ export interface Stain {
   gallery?: StainGalleryItem[];
 }
 
+/** A product referenced by another product's `bundle` or `related`. */
+export interface RelatedProduct {
+  slug: string;
+  productName: string;
+  /** Lowest price across the target's variants, in dollars, as elsewhere in the catalogue. */
+  price: number;
+  image: string | null;
+  category: string | null;
+  /*
+   * The single configuration this product has, or null when it has real
+   * choices. A cart line needs product + variant + stain, so only a target
+   * with exactly one of each can be added by a checkbox; build-data.mjs
+   * rejects any `bundle` entry where this would be null.
+   */
+  wood: string | null;
+  stainName: string | null;
+}
+
 export interface Addon {
   name: string;
   description: string | null;
@@ -49,6 +67,24 @@ export interface InventoryItem {
   dimensions: string | null;
   weight: number | null;
   addons: Addon[];
+  /*
+   * Other products this one relates to, resolved from slugs at build time by
+   * scripts/build-data.mjs.
+   *
+   * `bundle` is what a crib needs to be the 4-in-1 it is sold as - the
+   * conversion rails, the bed rail kit, the mattress. Each entry is a real
+   * product with its own page and price, so selecting one adds its own cart
+   * line rather than inflating the crib's; that keeps src/lib/pricing.ts
+   * authoritative with no new pricing concept, and makes an invoice itemise
+   * correctly.
+   *
+   * `related` is the rest of the matching family - the dressers, nightstands
+   * and chests that complete the nursery.
+   *
+   * Empty for any product that declares neither.
+   */
+  bundle: RelatedProduct[];
+  related: RelatedProduct[];
   stains: Stain[];
 }
 

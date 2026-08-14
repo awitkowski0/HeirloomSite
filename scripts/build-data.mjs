@@ -74,6 +74,7 @@ const variantTypeProblems = [];
 const availabilityProblems = [];
 const hiddenProblems = [];
 const hiddenVariants = [];
+const relationProblems = [];
 function checkVariantType(dirName, declared, names) {
   if (!declared) {
     variantTypeProblems.push(`${dirName}: product.json has no variantType`);
@@ -137,6 +138,7 @@ if (productDirs.length === 0) {
 const inventory = [];
 const productIndex = [];
 const allImages = [];
+const declaredRelations = [];
 
 for (const dirName of productDirs) {
   const dir = join(PRODUCTS, dirName);
@@ -252,6 +254,8 @@ for (const dirName of productDirs) {
       dimensions: v.dimensions || null,
       weight: v.weight ?? null,
       addons: meta.addons || [],
+      bundle: [],
+      related: [],
       stains,
     });
   }
@@ -266,6 +270,19 @@ for (const dirName of productDirs) {
     category: meta.category || null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,
+  });
+
+  /*
+   * Relations are declared as slugs and resolved in a second pass below,
+   * because `bundle` routinely points forward at a product this loop has not
+   * built yet -- Addison Crib names crib-mattress, and directories are read in
+   * whatever order the filesystem returns.
+   */
+  declaredRelations.push({
+    dirName,
+    slug: meta.slug || null,
+    bundle: meta.bundle || [],
+    related: meta.related || [],
   });
 
   // Build the image index in this same pass. Previously this was a second loop
@@ -288,8 +305,126 @@ for (const dirName of productDirs) {
 }
 
 // ---------------------------------------------------------------------------
+// Relations, resolved.
+// ---------------------------------------------------------------------------
+
+/*
+ * `bundle` and `related` are the first relational structure in the catalogue.
+ *
+ * Both are arrays of slugs of OTHER products. `bundle` is what a crib needs to
+ * actually be the 4-in-1 it is sold as -- the conversion rails, the bed rail
+ * kit, the mattress -- and drives the "Build Your Bundle" selector. `related`
+ * is the rest of the matching family, the dressers and nightstands.
+ *
+ * Deliberately curated per product rather than inferred from the name prefix.
+ * Inference looks obvious (Addison, Mackenzie, Newport, West Lake) right up
+ * until the seven cribs with no family kits at all, which have to fall back to
+ * the generic rails -- and a heuristic that silently guesses wrong here puts
+ * the wrong $481 kit in someone's cart.
+ *
+ * Resolved to whole objects here rather than at render time so that no
+ * component has to look a slug up, and so an unknown slug is a build failure
+ * rather than a blank row in a bundle.
+ */
+const bySlug = new Map(productIndex.filter(p => p.slug).map(p => [p.slug, p]));
+
+const rowsBySlug = new Map();
+for (const item of inventory) {
+  if (!item.slug) continue;
+  if (!rowsBySlug.has(item.slug)) rowsBySlug.set(item.slug, []);
+  rowsBySlug.get(item.slug).push(item);
+}
+
+/*
+ * The exact configuration a relation refers to, or null when it is ambiguous.
+ *
+ * A cart line is identified by product + variant + stain, so a bundle checkbox
+ * has to know all three to add anything. It can only know them when the target
+ * has exactly one of each - which every conversion kit and the mattress do,
+ * being `variantType: "none"`. A target with real choices cannot be expressed
+ * as a checkbox at all, so `bundle` rejects it rather than silently adding an
+ * arbitrary finish to someone's cart.
+ */
+function soleConfig(slug) {
+  const rows = rowsBySlug.get(slug) || [];
+  if (rows.length !== 1) return null;
+  const stains = rows[0].stains || [];
+  if (stains.length !== 1) return null;
+  return { wood: rows[0].wood, stainName: stains[0].name };
+}
+
+function resolveRelation(dirName, field, slugs, ownSlug) {
+  if (!Array.isArray(slugs)) {
+    relationProblems.push(`${dirName}: ${field} must be an array of product slugs`);
+    return [];
+  }
+  const out = [];
+  const seen = new Set();
+  for (const slug of slugs) {
+    if (slug === ownSlug) {
+      relationProblems.push(`${dirName}: ${field} lists its own slug "${slug}"`);
+      continue;
+    }
+    if (seen.has(slug)) {
+      relationProblems.push(`${dirName}: ${field} lists "${slug}" twice`);
+      continue;
+    }
+    const target = bySlug.get(slug);
+    if (!target) {
+      // The failure this guard exists for: a typo'd or renamed slug would
+      // otherwise just disappear from the bundle, and a crib would quietly
+      // stop offering its conversion kit.
+      relationProblems.push(`${dirName}: ${field} names "${slug}", which is not a product slug`);
+      continue;
+    }
+    const config = soleConfig(slug);
+    if (field === 'bundle' && !config) {
+      const rows = rowsBySlug.get(slug) || [];
+      relationProblems.push(
+        `${dirName}: bundle names "${slug}", which has ${rows.length} variant(s) and ` +
+          `${rows[0]?.stains?.length ?? 0} finish(es) on the first - a bundle checkbox ` +
+          `cannot choose one, so it must be a single-configuration product`
+      );
+      continue;
+    }
+    seen.add(slug);
+    out.push({
+      slug: target.slug,
+      productName: target.productName,
+      price: target.minPrice,
+      image: target.defaultImage,
+      category: target.category,
+      // Null for a `related` target with real choices; those are links, not
+      // add-to-cart controls, so the visitor picks on the product's own page.
+      wood: config ? config.wood : null,
+      stainName: config ? config.stainName : null,
+    });
+  }
+  return out;
+}
+
+let bundleCount = 0;
+for (const declared of declaredRelations) {
+  const bundle = resolveRelation(declared.dirName, 'bundle', declared.bundle, declared.slug);
+  const related = resolveRelation(declared.dirName, 'related', declared.related, declared.slug);
+  if (bundle.length > 0) bundleCount++;
+  // Every inventory row for this product carries the same relations: they are
+  // a property of the product, not of the wood or finish chosen.
+  for (const item of inventory) {
+    if (item.slug === declared.slug) {
+      item.bundle = bundle;
+      item.related = related;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Guards. These run before anything is written.
 // ---------------------------------------------------------------------------
+
+if (relationProblems.length > 0) {
+  fail(`bundle/related do not match the catalogue:\n` + relationProblems.map(p => `    - ${p}`).join("\n"));
+}
 
 if (productIndex.length < MIN_EXPECTED_PRODUCTS) {
   fail(
@@ -366,6 +501,38 @@ for (const item of inventory) {
 mkdirSync(join(root, "src", "data"), { recursive: true });
 writeFileSync(join(root, "src", "data", "search-docs.json"), JSON.stringify(searchDocs) + "\n");
 
+/*
+ * Checkout recommendations: "you may also like".
+ *
+ * Deliberately the BUNDLE entries only, not `related`. Two reasons. A bundle
+ * entry is a single-configuration product, so it can be added from the
+ * checkout in one click; a related dresser has a finish to choose and would
+ * have to bounce the buyer out of the checkout to pick it. And the useful
+ * recommendation at this point is the $310 mattress someone forgot, not a
+ * $3,000 dresser - a cart-abandoning distraction at the exact moment they
+ * were about to pay.
+ *
+ * Keyed on productName because that is what a CartItem carries. 0.6 KB
+ * gzipped, so it is handed to the page rather than fetched.
+ */
+const recommendations = {};
+for (const item of inventory) {
+  if (recommendations[item.productName]) continue;
+  const recs = (item.bundle || []).map(r => ({
+    slug: r.slug,
+    productName: r.productName,
+    price: r.price,
+    image: r.image,
+    wood: r.wood,
+    stainName: r.stainName,
+  }));
+  if (recs.length > 0) recommendations[item.productName] = recs;
+}
+writeFileSync(
+  join(root, "src", "data", "recommendations.json"),
+  JSON.stringify(recommendations) + "\n"
+);
+
 // Pricing table: the only thing the payment-intent route needs. Imported
 // statically by the route so it is always in the function bundle -- public/ is
 // uploaded to the CDN, not traced into the lambda, so a runtime readFileSync
@@ -397,10 +564,15 @@ if (dedupedWords.length > 0) {
   console.log(`  collapsed ${dedupedWords.length} repeated word(s):`);
   for (const d of dedupedWords) console.log(`    ${d}`);
 }
+if (bundleCount > 0) {
+  const items = inventory.reduce((n, i) => n + (i.bundle?.length || 0), 0);
+  console.log(`  relations: ${bundleCount} product(s) with a bundle, ${items} bundle rows`);
+}
 const stainRows = inventory.reduce((n, i) => n + i.stains.length, 0);
 const oosRows = inventory.reduce((n, i) => n + i.stains.filter(s => !s.inStock).length, 0);
 console.log(`  public/data/inventory.json:  ${inventory.length} items, ${stainRows} finishes (${oosRows} unavailable)`);
 console.log(`  public/data/products.json:   ${productIndex.length} products`);
 console.log(`  public/data/images.json:     ${allImages.length} images`);
 console.log(`  src/data/search-docs.json:   ${searchDocs.length} docs`);
+console.log(`  src/data/recommendations.json: ${Object.keys(recommendations).length} products`);
 console.log(`  data/pricing.json:           ${pricing.length} rows`);

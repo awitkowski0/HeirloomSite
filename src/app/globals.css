@@ -2839,3 +2839,264 @@ main {
 .turnstile-widget {
   margin-block: var(--spacing-sm);
 }
+
+/* ---------------------------------------------------------------------------
+   Build Your Bundle (product page)
+
+   Lives in the configuration panel, which on products with few choices was
+   ~200px of content against a ~910px photo. This is what that column is for.
+   --------------------------------------------------------------------------- */
+
+.bundle {
+  border: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+}
+
+.bundle-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.bundle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Grid, not flex: the thumbnails, checkboxes and prices have to line up in
+ * columns down the list, and with flex each row sizes itself independently so
+ * a long product name shunts that row's price out of line with the others.
+ */
+.bundle-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.bundle-list .bundle-row:last-child {
+  border-bottom: 0;
+}
+
+/* The crib itself. Tinted to read as context rather than another option. */
+.bundle-row--base {
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--rule);
+}
+.bundle-row--base .bundle-name {
+  font-weight: 500;
+}
+/* Keeps the base row's price in the same column as the ticked rows' prices,
+   which carry a checkbox this row does not have. */
+.bundle-row--base .bundle-price {
+  grid-column: 4;
+}
+
+.bundle-thumb {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--plate);
+}
+.bundle-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bundle-name {
+  min-width: 0;
+  cursor: pointer;
+}
+
+.bundle-check {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.bundle-price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bundle-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 14px 16px;
+  border-top: 1px solid var(--rule-strong);
+}
+
+@media (max-width: 767px) {
+  /* The thumbnail is the first thing to go: on a 390px screen the name and
+     the price are what the decision actually needs. */
+  .bundle-row {
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+  }
+  .bundle-thumb {
+    display: none;
+  }
+  .bundle-row--base .bundle-price {
+    grid-column: 3;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Related products ("Completes the collection")
+   --------------------------------------------------------------------------- */
+
+.related {
+  border-top: 1px solid var(--rule);
+  padding-top: 16px;
+}
+
+.related-head {
+  margin-bottom: 8px;
+  color: var(--ink-muted);
+}
+
+.related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Same 48px / 1fr / auto rhythm as .bundle-row, so a page showing one and a
+ * page showing the other read as the same component in the same slot.
+ */
+.related-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  color: inherit;
+}
+.related-list li:last-child .related-row {
+  border-bottom: 0;
+}
+.related-row:hover .related-name {
+  color: var(--accent);
+}
+
+.related-thumb {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--plate);
+}
+.related-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.related-name {
+  min-width: 0;
+}
+
+.related-price {
+  white-space: nowrap;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   "You may also like" (checkout)
+
+   Same row rhythm as .bundle-row and .related-row, with an Add button in place
+   of the checkbox: by this point the buyer has already decided, so the control
+   commits rather than configures.
+   --------------------------------------------------------------------------- */
+
+.also-like {
+  margin-top: var(--spacing-md);
+  border: 1px solid var(--rule);
+}
+
+.also-like-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+}
+
+.also-like-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.also-like-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.also-like-list li:last-child {
+  border-bottom: 0;
+}
+
+.also-like-thumb {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--plate);
+}
+.also-like-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.also-like-name {
+  min-width: 0;
+}
+
+.also-like-price {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Smaller than a primary action: adding a $310 mattress must never compete
+   with continuing to payment. */
+.also-like-add {
+  padding: 6px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .also-like-row {
+    grid-template-columns: 40px 1fr auto;
+    gap: 10px;
+  }
+  .also-like-thumb {
+    width: 40px;
+    height: 40px;
+  }
+  /* The button drops to its own line rather than squeezing the name to a few
+     characters. */
+  .also-like-add {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
+}

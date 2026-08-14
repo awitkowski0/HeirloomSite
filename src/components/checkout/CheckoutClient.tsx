@@ -22,10 +22,16 @@ import ShippingForm, {
   type ShippingValues,
 } from './ShippingForm';
 import TermsBlock from './TermsBlock';
-import TurnstileWidget from './TurnstileWidget';
+import TurnstileWidget, { type TurnstileStatus } from './TurnstileWidget';
 import PaymentSection from './PaymentSection';
+import AlsoLike, { type Recommendation } from './AlsoLike';
 
-export default function CheckoutClient() {
+interface Props {
+  /** productName -> its bundle items, from the build-time catalogue. */
+  recommendations: Record<string, Recommendation[]>;
+}
+
+export default function CheckoutClient({ recommendations }: Props) {
   const { cart, hydrated, subtotal, clearCart, removeFromCart, updateQuantity } = useCart();
   const router = useRouter();
 
@@ -33,6 +39,13 @@ export default function CheckoutClient() {
   const [errors, setErrors] = useState<Partial<Record<keyof ShippingValues, string>>>({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
+  /*
+   * Starts 'pending', not 'disabled': until the widget has reported, we do not
+   * know whether this deployment gates checkout, and guessing "no" would be
+   * the guess that lets an unverified submit through. The widget reports on
+   * mount, so the closed state lasts a tick when Turnstile is not configured.
+   */
+  const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>('pending');
 
   const [clientSecret, setClientSecret] = useState('');
   const [paymentIntentId, setPaymentIntentId] = useState('');
@@ -240,15 +253,51 @@ export default function CheckoutClient() {
             <TermsBlock agreed={agreedToTerms} onChange={setAgreedToTerms} />
 
             {/* Renders nothing unless NEXT_PUBLIC_TURNSTILE_SITE_KEY is set. */}
-            <TurnstileWidget onToken={setTurnstileToken} />
+            <TurnstileWidget onToken={setTurnstileToken} onStatus={setTurnstileStatus} />
+
+            {/*
+              Says which of the two problems it is.
+              
+              The server rejects an empty token with 403 "Verification failed.
+              Please try again." - true, unhelpful, and unactionable when the
+              cause is a content blocker, because trying again does the same
+              nothing. The submit is blocked here instead, before the request,
+              and names the fix.
+            */}
+            {turnstileStatus === 'error' && (
+              <div className="checkout-error" role="alert">
+                <p>
+                  We could not load the browser check that protects this form. It is
+                  usually a privacy extension or ad blocker. Allow
+                  challenges.cloudflare.com for this page and reload, or{' '}
+                  <Link href="/contact">contact us</Link> and we will take your order
+                  directly.
+                </p>
+              </div>
+            )}
 
             {!detailsLocked && (
               <button
                 type="submit"
                 className="add-to-cart checkout-continue"
-                disabled={submitting || !agreedToTerms}
+                /*
+                 * Gated on the check having passed, so a submit that the server
+                 * is certain to reject with a 403 is never made. 'disabled'
+                 * means Turnstile is not configured on this deployment, which
+                 * is not the customer's problem and must not block them.
+                 */
+                disabled={
+                  submitting ||
+                  !agreedToTerms ||
+                  turnstileStatus === 'pending' ||
+                  turnstileStatus === 'error'
+                }
               >
-                {submitting ? 'Preparing payment…' : 'Continue to payment'}
+                {submitting
+                  ? 'Preparing payment…'
+                  : turnstileStatus === 'pending'
+                    ? 'Checking your browser…'
+                    : 'Continue to payment'}
               </button>
             )}
           </form>
@@ -401,6 +450,15 @@ export default function CheckoutClient() {
               </p>
             )}
           </div>
+
+          {/*
+            Below the summary, never above the total: this is a reminder about
+            parts, not a merchandising unit, and it must not push the number
+            the buyer came here to check below the fold. Locked once the
+            payment intent exists, like every other control that would change
+            the amount.
+          */}
+          <AlsoLike recommendations={recommendations} disabled={detailsLocked} />
         </div>
       </div>
     </div>

@@ -9,6 +9,8 @@ import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
+import BundleBuilder from './BundleBuilder';
+import RelatedProducts from './RelatedProducts';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
 import { variantHref } from '@/lib/variants';
@@ -57,6 +59,25 @@ export default function ProductConfigurator({
   const [userWood, setUserWood] = useState<string | null>(initialWood);
   const [userStain, setUserStain] = useState<string | null>(initialStain);
   const [showCartPopup, setShowCartPopup] = useState(false);
+
+  /*
+   * Bundle items start ticked, so this is seeded from the catalogue rather
+   * than empty. Keyed on slug because that is what the toggle and the cart
+   * line both need, and it is stable across a wood or finish change - the
+   * conversion kits do not depend on the crib's finish.
+   */
+  const bundleItems = configurations[0]?.bundle ?? [];
+  const relatedItems = configurations[0]?.related ?? [];
+  const [bundleSelected, setBundleSelected] = useState<Set<string>>(
+    () => new Set(bundleItems.map(i => i.slug))
+  );
+  const toggleBundleItem = (slug: string) =>
+    setBundleSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
 
   const woods = useMemo(() => configurations.map(c => c.wood), [configurations]);
   const variantType = configurations[0]?.variantType ?? 'none';
@@ -198,6 +219,42 @@ export default function ProductConfigurator({
       image: galleryImages[0] || '',
       quantity: 1,
     });
+
+    /*
+     * Each ticked kit is added as its OWN line, at its own price, not folded
+     * into the crib's. They are separate products with separate SKUs, and an
+     * invoice that says "Addison Crib $4,088" instead of naming the rail kits
+     * is not a document anyone can check against what arrives.
+     *
+     * `wood` and `stainName` are non-null for every bundle entry - build-data
+     * rejects a bundle target that has real choices, precisely so this cannot
+     * put an arbitrary finish in the cart - but they are typed nullable
+     * because `related` shares the type, so this narrows rather than asserts.
+     */
+    for (const bundleItem of bundleItems) {
+      if (!bundleSelected.has(bundleItem.slug)) continue;
+      if (!bundleItem.wood || !bundleItem.stainName) continue;
+      const line = {
+        productName: bundleItem.productName,
+        wood: bundleItem.wood,
+        stainName: bundleItem.stainName,
+      };
+      productAddedToCart({
+        product_name: line.productName,
+        wood: line.wood,
+        stain: line.stainName,
+        price: bundleItem.price,
+        quantity: 1,
+      });
+      addToCart({
+        ...line,
+        id: cartItemId(line),
+        price: bundleItem.price,
+        image: bundleItem.image || '',
+        quantity: 1,
+      });
+    }
+
     setShowCartPopup(true);
   };
 
@@ -228,6 +285,23 @@ export default function ProductConfigurator({
               onSelect={handleStainChange}
             />
           )}
+
+          <BundleBuilder
+            productName={currentConfig.productName}
+            basePrice={totalPrice}
+            baseImage={galleryImages[0] || ''}
+            items={bundleItems}
+            selected={bundleSelected}
+            onToggle={toggleBundleItem}
+          />
+
+          {/*
+            One or the other, never both. A crib's column is filled by its
+            bundle; a dresser has no bundle, and its column is the empty one
+            this is for. Stacking both would push the price below the fold on
+            exactly the products that convert best.
+          */}
+          {bundleItems.length === 0 && <RelatedProducts items={relatedItems.slice(0, 4)} />}
 
           <section className="pricing-section">
             <div className="price-row">
