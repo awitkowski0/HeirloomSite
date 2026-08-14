@@ -11,9 +11,11 @@
   "title": "Mission",
   "metaDescription": "The Mission Style Crib draws inspiration from the early 20th-century Arts and Crafts movement, a design era known for its emphasis on craftsmanship.",
   "bundle": [
+    "crib-mattress"
+  ],
+  "includes": [
     "toddler-conversion-rail",
     "full-bed-rail-kit",
-    "34-guard-rail",
-    "crib-mattress"
+    "34-guard-rail"
   ]
 }

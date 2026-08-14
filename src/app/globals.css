@@ -3303,8 +3303,30 @@ a.product-inline-link:focus-visible {
 }
 /* Keeps the base row's price in the same column as the ticked rows' prices,
    which carry a checkbox this row does not have. */
+/* Pinned to the last column rather than a hard-coded 4, so it survives the
+   mobile rule dropping the thumbnail column. */
 .bundle-row--base .bundle-price {
-  grid-column: 4;
+  grid-column: -2 / -1;
+}
+
+/* Group labels. The two halves of this box are different in kind - one is what
+   you have already bought, the other is what you can still add - and without a
+   label the "Included" rows read as unticked options someone forgot. */
+.bundle-group {
+  margin: 0;
+  padding: 12px 16px 6px;
+  color: var(--ink-muted);
+}
+
+.bundle-row--included .bundle-name {
+  color: var(--ink-muted);
+}
+
+/* Sits in the price column so the two groups line up down the right edge. */
+.bundle-included {
+  grid-column: -2 / -1;
+  color: var(--ink-muted);
+  white-space: nowrap;
 }
 
 .bundle-thumb {
@@ -3356,9 +3378,7 @@ a.product-inline-link:focus-visible {
   .bundle-thumb {
     display: none;
   }
-  .bundle-row--base .bundle-price {
-    grid-column: 3;
-  }
+
 }
 
 /* ---------------------------------------------------------------------------

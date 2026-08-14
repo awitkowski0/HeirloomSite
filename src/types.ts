@@ -71,18 +71,23 @@ export interface InventoryItem {
    * Other products this one relates to, resolved from slugs at build time by
    * scripts/build-data.mjs.
    *
-   * `bundle` is what a crib needs to be the 4-in-1 it is sold as - the
-   * conversion rails, the bed rail kit, the mattress. Each entry is a real
-   * product with its own page and price, so selecting one adds its own cart
-   * line rather than inflating the crib's; that keeps src/lib/pricing.ts
-   * authoritative with no new pricing concept, and makes an invoice itemise
-   * correctly.
+   * `includes` is what already ships with the crib and is already inside its
+   * price - the conversion rails and the guard rail. Shown so a buyer can see
+   * what the 4-in-1 claim consists of, and never added to the cart: those are
+   * not being sold a second time.
+   *
+   * `bundle` is the genuinely optional paid add-on - for a crib, the mattress.
+   * Each entry is a real product with its own page and price, so ticking one
+   * adds its own cart line rather than inflating the crib's; that keeps
+   * src/lib/pricing.ts authoritative with no new pricing concept, and makes an
+   * invoice itemise correctly.
    *
    * `related` is the rest of the matching family - the dressers, nightstands
    * and chests that complete the nursery.
    *
    * Empty for any product that declares neither.
    */
+  includes: RelatedProduct[];
   bundle: RelatedProduct[];
   related: RelatedProduct[];
   stains: Stain[];

@@ -273,6 +273,7 @@ for (const dirName of productDirs) {
       dimensions: v.dimensions || null,
       weight: v.weight ?? null,
       addons: meta.addons || [],
+      includes: [],
       bundle: [],
       related: [],
       stains,
@@ -300,6 +301,7 @@ for (const dirName of productDirs) {
   declaredRelations.push({
     dirName,
     slug: meta.slug || null,
+    includes: meta.includes || [],
     bundle: meta.bundle || [],
     related: meta.related || [],
   });
@@ -328,12 +330,19 @@ for (const dirName of productDirs) {
 // ---------------------------------------------------------------------------
 
 /*
- * `bundle` and `related` are the first relational structure in the catalogue.
+ * `includes`, `bundle` and `related` are the relational structure of the
+ * catalogue. All three are arrays of slugs of OTHER products.
  *
- * Both are arrays of slugs of OTHER products. `bundle` is what a crib needs to
- * actually be the 4-in-1 it is sold as -- the conversion rails, the bed rail
- * kit, the mattress -- and drives the "Build Your Bundle" selector. `related`
- * is the rest of the matching family, the dressers and nightstands.
+ * `includes` is what already ships with the crib and is already inside its
+ * price -- the conversion rails and the guard rail. It is listed so a buyer can
+ * see what the 4-in-1 claim actually consists of, and it is NEVER added to the
+ * cart: those are not things being sold a second time, and charging for them
+ * billed $4,088 for what is a $3,178 order.
+ *
+ * `bundle` is the genuinely optional, genuinely extra paid add-on. For a crib
+ * that is the mattress and nothing else.
+ *
+ * `related` is the rest of the matching family, the dressers and nightstands.
  *
  * Deliberately curated per product rather than inferred from the name prefix.
  * Inference looks obvious (Addison, Mackenzie, Newport, West Lake) right up
@@ -443,6 +452,7 @@ function resolveRelation(dirName, field, slugs, ownSlug) {
 
 let bundleCount = 0;
 for (const declared of declaredRelations) {
+  const includes = resolveRelation(declared.dirName, 'includes', declared.includes, declared.slug);
   const bundle = resolveRelation(declared.dirName, 'bundle', declared.bundle, declared.slug);
   const related = resolveRelation(declared.dirName, 'related', declared.related, declared.slug);
   if (bundle.length > 0) bundleCount++;
@@ -450,6 +460,7 @@ for (const declared of declaredRelations) {
   // a property of the product, not of the wood or finish chosen.
   for (const item of inventory) {
     if (item.slug === declared.slug) {
+      item.includes = includes;
       item.bundle = bundle;
       item.related = related;
     }

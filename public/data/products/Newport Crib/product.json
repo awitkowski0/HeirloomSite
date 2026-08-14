@@ -11,14 +11,16 @@
   "title": "Newport Crib",
   "metaDescription": "Bring classic charm to your nursery with the Newport Crib, a timeless 4-in-1 convertible design crafted from solid hardwood.",
   "bundle": [
-    "newport-toddler-bed",
-    "newport-full-bed-rail-kit",
-    "34-guard-rail",
     "crib-mattress"
   ],
   "related": [
     "newport-4-drawer-chest",
     "newport-7-drawer-dresser",
     "newport-nightstand"
+  ],
+  "includes": [
+    "newport-toddler-bed",
+    "newport-full-bed-rail-kit",
+    "34-guard-rail"
   ]
 }

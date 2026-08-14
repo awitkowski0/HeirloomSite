@@ -11,9 +11,11 @@
   "title": "Bloomington",
   "metaDescription": "Built the old-fashioned way with premium solid hardwoods, the Bloomington Convertible Crib delivers classic warmth and everyday practicality.",
   "bundle": [
+    "crib-mattress"
+  ],
+  "includes": [
     "toddler-conversion-rail",
     "full-bed-rail-kit",
-    "34-guard-rail",
-    "crib-mattress"
+    "34-guard-rail"
   ]
 }

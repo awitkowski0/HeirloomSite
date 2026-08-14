@@ -85,6 +85,8 @@ export default function ProductConfigurator({
   // A de-listed kit must not be offered as a tickbox, and a de-listed dresser
   // must not be recommended; both would add it straight to a cart.
   const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
+  // Display only - already inside the crib's price, never added to the cart.
+  const includedItems = (configurations[0]?.includes ?? []).filter(i => !isDelisted(i.slug));
   const [bundleSelected, setBundleSelected] = useState<Set<string>>(
     () => new Set(bundleItems.map(i => i.slug))
   );
@@ -316,6 +318,7 @@ export default function ProductConfigurator({
             productName={currentConfig.productName}
             basePrice={totalPrice}
             baseImage={galleryImages[0] || ''}
+            included={includedItems}
             items={bundleItems}
             selected={bundleSelected}
             onToggle={toggleBundleItem}

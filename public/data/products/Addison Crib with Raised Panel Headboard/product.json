@@ -11,9 +11,6 @@
   "title": "Addison Crib with Raised Panel Headboard",
   "metaDescription": "Make a bold, beautiful statement in the nursery with the Addison Crib featuring a raised panel headboard.",
   "bundle": [
-    "addison-toddler-bed",
-    "addison-full-bed-rail-kit",
-    "34-guard-rail",
     "crib-mattress"
   ],
   "related": [
@@ -21,5 +18,10 @@
     "addison-7-drawer-dresser",
     "addison-6-drawer-dresser",
     "addison-3-drawer-nightstand"
+  ],
+  "includes": [
+    "addison-toddler-bed",
+    "addison-full-bed-rail-kit",
+    "34-guard-rail"
   ]
 }

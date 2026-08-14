@@ -11,9 +11,11 @@
   "title": "Princeton",
   "metaDescription": "Handcrafted from solid American hardwoods by skilled artisans, the Princeton Convertible Crib brings timeless raised-panel style and sturdy.",
   "bundle": [
+    "crib-mattress"
+  ],
+  "includes": [
     "toddler-conversion-rail",
     "full-bed-rail-kit",
-    "34-guard-rail",
-    "crib-mattress"
+    "34-guard-rail"
   ]
 }
