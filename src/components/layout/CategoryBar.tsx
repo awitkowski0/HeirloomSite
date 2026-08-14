@@ -21,6 +21,15 @@ export default function CategoryBar() {
   return (
     <nav className="category-bar" aria-label="Product categories">
       <div className="category-bar-inner">
+        {/*
+          "All" is not a category, but without it /products has no route from
+          the desktop header at all: the redesign replaced the Shop link with
+          this bar, and the bar lists only categories. It was reachable from
+          the footer and from nowhere else.
+        */}
+        <NavLink href="/products" className="category-bar-link category-bar-link--all">
+          All
+        </NavLink>
         {categories.map(category => (
           <NavLink
             key={category.slug}

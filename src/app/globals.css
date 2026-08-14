@@ -386,6 +386,12 @@ body {
 .category-bar-link:hover {
   color: var(--ink);
 }
+/* Set off by a rule, because it is the odd one out: everything after it names
+   a category and this names their absence. */
+.category-bar-link--all {
+  padding-right: 26px;
+  border-right: 1px solid var(--rule);
+}
 /* The current category is marked, which the old header never did for any
    route despite the stylesheet having carried an .active rule for years. */
 .category-bar-link.active {
@@ -1247,6 +1253,25 @@ main {
 
 /* ========== MOBILE RESPONSIVE ========== */
 
+
+/*
+ * The in-page category pills are the phone's copy of the header category bar.
+ *
+ * Both list the same nine categories and both mark the active one, so on
+ * desktop the page carried the row twice - once fixed at the top and again
+ * under the heading. The header bar is hidden on phones, though, where the
+ * bottom nav offers only Shop and Cribs, so removing the pills outright would
+ * leave a phone with no way to reach Dressers.
+ *
+ * One DOM tree, switched in CSS, per the responsive rule in AGENTS.md: exactly
+ * one of the two is ever exposed, so the duplicate "Product categories"
+ * landmark is never announced twice either.
+ */
+@media (min-width: 768px) {
+  .category-pills {
+    display: none;
+  }
+}
 
 /* Mobile typography & spacing */
 @media (max-width: 767px) {

@@ -20,9 +20,6 @@ export default function Footer() {
               <li>
                 <Link href="/products/cribs">Cribs</Link>
               </li>
-              <li>
-                <Link href="/products/cribs">Cribs</Link>
-              </li>
             </ul>
           </div>
           <div className="footer-support">
