@@ -27,7 +27,7 @@ export default function CategoryBar() {
           this bar, and the bar lists only categories. It was reachable from
           the footer and from nowhere else.
         */}
-        <NavLink href="/products" className="category-bar-link category-bar-link--all">
+        <NavLink href="/products" className="category-bar-link category-bar-link--all" exact>
           All
         </NavLink>
         {categories.map(category => (

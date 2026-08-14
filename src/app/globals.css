@@ -386,11 +386,17 @@ body {
 .category-bar-link:hover {
   color: var(--ink);
 }
-/* Set off by a rule, because it is the odd one out: everything after it names
-   a category and this names their absence. */
+/*
+ * Set apart by weight, not by a divider.
+ *
+ * A border-right sat oddly here: the row is space-between, so the gap either
+ * side of the rule changes with the viewport and the divider drifted away from
+ * the item it was meant to separate. Weight and colour say "this one is
+ * different" without depending on the geometry.
+ */
 .category-bar-link--all {
-  padding-right: 26px;
-  border-right: 1px solid var(--rule);
+  color: var(--ink);
+  font-weight: 600;
 }
 /* The current category is marked, which the old header never did for any
    route despite the stylesheet having carried an .active rule for years. */
@@ -1253,25 +1259,6 @@ main {
 
 /* ========== MOBILE RESPONSIVE ========== */
 
-
-/*
- * The in-page category pills are the phone's copy of the header category bar.
- *
- * Both list the same nine categories and both mark the active one, so on
- * desktop the page carried the row twice - once fixed at the top and again
- * under the heading. The header bar is hidden on phones, though, where the
- * bottom nav offers only Shop and Cribs, so removing the pills outright would
- * leave a phone with no way to reach Dressers.
- *
- * One DOM tree, switched in CSS, per the responsive rule in AGENTS.md: exactly
- * one of the two is ever exposed, so the duplicate "Product categories"
- * landmark is never announced twice either.
- */
-@media (min-width: 768px) {
-  .category-pills {
-    display: none;
-  }
-}
 
 /* Mobile typography & spacing */
 @media (max-width: 767px) {
@@ -2166,6 +2153,26 @@ main {
   gap: 8px;
   flex-wrap: wrap;
   margin-bottom: 40px;
+}
+
+/*
+ * The in-page pills are the phone's copy of the header category bar.
+ *
+ * Both list the same nine categories and both mark the active one, so on
+ * desktop the page carried the row twice - once fixed at the top and again
+ * under the heading. The header bar is itself hidden on phones, where the
+ * bottom nav offers only Shop and Cribs, so removing the pills outright would
+ * leave a phone with no route to Dressers.
+ *
+ * Immediately after the base rule, and not up with the other breakpoints,
+ * because `display: flex` above would otherwise be declared later at equal
+ * specificity and win - which is exactly what happened: the pills were never
+ * hidden and the categories really were rendered twice.
+ */
+@media (min-width: 768px) {
+  .category-pills {
+    display: none;
+  }
 }
 .category-pill {
   padding: 8px 20px;
