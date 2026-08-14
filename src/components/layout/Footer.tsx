@@ -21,7 +21,7 @@ export default function Footer() {
                 <Link href="/products/cribs">Cribs</Link>
               </li>
               <li>
-                <Link href="/gallery">Collections</Link>
+                <Link href="/products/cribs">Cribs</Link>
               </li>
             </ul>
           </div>

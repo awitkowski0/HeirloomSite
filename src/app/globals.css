@@ -123,7 +123,10 @@
 
   /* Header height, referenced by .app-header and main's top padding so the
      fixed header and the space reserved for it cannot drift apart. */
-  --header-h: 60px;
+  /* Derived, not restated: the header is two rows now, and `main` reserves
+     exactly what they occupy. The row heights are declared next to the header
+     rules that use them. */
+  --header-h: calc(var(--header-row-h) + var(--category-bar-h));
 
   --spacing-base: 8px;
   --spacing-xs: 4px;
@@ -283,73 +286,154 @@ body {
   z-index: 3000;
   background-color: var(--paper);
   border-bottom: 1px solid var(--rule);
-  height: var(--header-h);
   max-width: 100vw;
   overflow: visible;
 }
 
 /*
- * The grid moved off .app-header and onto this wrapper.
+ * Two rows, so --header-h is their sum rather than a single bar's height.
+ * `main` reserves this much space; get it wrong and the first heading on every
+ * page hides under the header.
+ */
+:root {
+  --header-row-h: 68px;
+  --category-bar-h: 44px;
+}
+
+/*
+ * Row one: identity, search, help, cart.
  *
- * .app-header still spans the full viewport, because the background and the
- * bottom rule have to reach the screen edges. Its contents did too, which on a
- * wide monitor pinned "Shop / Collections" to the far left and the five-item
- * right cluster to the far right with a quarter of the screen of nothing
- * between them and the wordmark - the right side reading as cramped precisely
- * because it was carrying five items into a corner.
- *
- * Capping here at the same width as .container aligns the nav with the page
- * content beneath it, which is the alignment the eye is actually looking for.
+ * `auto 1fr auto` and not `1fr auto 1fr`. The old bar centred the wordmark
+ * between two 1fr cells, which forced the two navs to be treated as equal
+ * weights when they were 167px and 504px of content - the mark measured dead
+ * centre and looked shoved against the right-hand group. Here the middle
+ * column is the search field, so 1fr goes to the thing that should absorb
+ * every spare pixel, and the two fixed clusters take exactly what they need.
  */
 .header-inner {
-  height: 100%;
+  height: var(--header-row-h);
   max-width: var(--spacing-container-max);
   margin: 0 auto;
   padding: 0 24px;
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  gap: 32px;
+}
+
+.header-search {
+  min-width: 0;
+}
+
+.header-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 /*
- * Cells are assigned explicitly rather than by source order, so that hiding
- * the left nav on phones does not slide the wordmark into column 1 and take
- * the whole bar off centre.
+ * Row two: the catalogue.
+ *
+ * Nine categories at 11px tracked caps fit a 1232px row comfortably, so this
+ * does not scroll on desktop. It is hidden on phones rather than made
+ * scrollable - see the note in CategoryBar.tsx.
  */
-.header-nav--start {
-  grid-column: 1;
-}
-.wordmark {
-  grid-column: 2;
-}
-.header-end {
-  grid-column: 3;
+.category-bar {
+  border-top: 1px solid var(--rule);
+  background: var(--paper-2);
 }
 
-.header-nav {
+.category-bar-inner {
+  height: var(--category-bar-h);
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 0 24px;
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: 26px;
 }
 
-/* At the cap the bar has spare width, so the labels can breathe rather than
-   staying at the gap that a 1024px screen needs. */
-@media (min-width: 1280px) {
-  .header-nav {
-    gap: 28px;
-  }
-  .header-end {
-    gap: 24px;
-  }
+.category-bar-link {
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
 }
-.header-nav--end {
-  justify-content: flex-end;
+.category-bar-link:hover {
+  color: var(--ink);
 }
-.header-end {
-  display: flex;
+/* The current category is marked, which the old header never did for any
+   route despite the stylesheet having carried an .active rule for years. */
+.category-bar-link.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+   Help menu
+   --------------------------------------------------------------------------- */
+
+.help-menu {
+  position: relative;
+}
+
+/*
+ * A button, not another 11px tracked-caps link. Help is the one control here
+ * someone reaches for when something has gone wrong, and it should not take
+ * the same visual effort to find as a category.
+ */
+.help-button {
+  display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 18px;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.help-button:hover {
+  background: var(--plate);
+}
+.help-button .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.help-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 3100;
+  min-width: 232px;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+}
+
+.help-panel-link {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-size: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.help-panel-link:last-child {
+  border-bottom: 0;
+}
+.help-panel-link:hover {
+  background: var(--plate);
 }
 
 /*
@@ -1150,32 +1234,37 @@ main {
 /* Mobile typography & spacing */
 @media (max-width: 767px) {
   .app-header {
-    padding: 0 14px;
-    /* --header-h, not a second literal: one number, one place. */
-    --header-h: 52px;
-    height: var(--header-h);
+    /* One row on phones, so the sum collapses to that row. */
+    --header-row-h: 52px;
+    --category-bar-h: 0px;
     position: static;
   }
 
   /*
-   * Both text navs go away on phones: five tracked-caps labels plus a
-   * wordmark cannot share a 390px bar, and the bottom nav already carries
-   * this IA. Safety and Care remain reachable from the footer.
+   * Search, help and the whole category bar go away on phones, and the bottom
+   * nav carries all three: it already has a search trigger, a Help link, and
+   * the shop and category entry points. Nine tracked-caps category labels
+   * cannot share a 390px bar, and a second scrolling strip under the header
+   * would eat a third of the screen before any product appeared.
    */
-  .app-header .header-nav,
-  .app-header .nav-links {
+  .app-header .category-bar,
+  .app-header .header-search,
+  .app-header .help-menu {
     display: none;
   }
 
-  .app-header .header-end form {
-    display: none;
-  }
-
-  /* With the side navs gone the grid has nothing to balance, so let the
-     wordmark take the middle and the cart sit hard right. */
+  /* Explicit cells, so the wordmark stays optically centred with only the
+     cart beside it rather than sliding into column 1. */
   .header-inner {
     grid-template-columns: 1fr auto 1fr;
     padding: 0 16px;
+    gap: 0;
+  }
+  .header-inner .wordmark {
+    grid-column: 2;
+  }
+  .header-inner .header-end {
+    grid-column: 3;
   }
 
   .container {
@@ -1584,21 +1673,54 @@ main {
    Search
    =========================================================================== */
 
+/*
+ * The search field is the widest thing in the header, on purpose.
+ *
+ * It was a 220px box wedged between three nav links and the cart. On a
+ * catalogue of 67 pieces across nine categories, search is how someone who
+ * already knows what they want gets there, and it was being treated as an
+ * afterthought. It now takes the whole middle column.
+ */
 .search-bar {
   position: relative;
+  width: 100%;
 }
 .search-bar-form {
   display: flex;
   align-items: center;
+  border: 1px solid var(--control-border);
+  background: var(--surface-container-lowest);
+}
+/* The focus ring belongs on the whole control, not on the input inside it -
+   the border the user sees is the form's. */
+.search-bar-form:focus-within {
+  border-color: var(--ink);
 }
 .search-bar-input {
-  padding: 6px 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 11px 14px;
+  border: 0;
   border-radius: var(--radius);
-  border: 1px solid var(--control-border);
-  font-size: 13px;
-  width: 220px;
-  background: var(--surface-container-lowest);
+  /* >=16px stops iOS Safari zooming on focus. */
+  font-size: 16px;
+  background: transparent;
   color: var(--on-surface);
+}
+.search-bar-input:focus {
+  outline: none;
+}
+/* A filled block rather than a bare icon, so the affordance reads as "search"
+   at a glance the way the retail pattern this borrows from does. */
+.search-bar-form .icon-btn {
+  flex: none;
+  align-self: stretch;
+  padding: 0 18px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.search-bar-form .icon-btn:hover {
+  background: var(--accent);
 }
 
 .search-dropdown {

@@ -4,7 +4,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { productSelected } from '@/lib/analytics';
 import { formatPriceApprox } from '@/lib/format';
-import { humanizeWood } from '@/lib/labels';
 import { PRODUCT_IMAGE_SIZES } from '@/lib/images';
 import type { GalleryProduct } from './types';
 
@@ -73,16 +72,17 @@ export default function GalleryCard({
 
         {/* The price used to be printed here AND again below the card. One
             price, in the text block where the name is. */}
+        {/*
+          Was a row of wood tags, which said "Brown Maple" on every card once
+          the shop stopped selling Cherry and Red Oak - the same word on all of
+          them, carrying no information and costing a row of chrome. The finish
+          count is what actually differs between these products.
+        */}
         <div className="product-info-overlay">
           <div className="product-overlay-woods">
-            {product.woods.slice(0, 4).map(w => (
-              <span key={w} className="wood-tag">
-                {humanizeWood(w)}
-              </span>
-            ))}
-            {product.woods.length > 4 && (
-              <span className="wood-tag wood-tag--more">+{product.woods.length - 4}</span>
-            )}
+            <span className="wood-tag">
+              {product.finishes.length} {product.finishes.length === 1 ? 'finish' : 'finishes'}
+            </span>
           </div>
         </div>
       </div>

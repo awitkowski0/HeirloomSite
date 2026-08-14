@@ -20,6 +20,18 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      {
+        /*
+         * /gallery is retired: it showed six of the sixteen cribs - the ones
+         * the supplier feed encoded as wood variants - under a nav label that
+         * also named /products. Its finish browser now lives on the cribs
+         * category page, showing all of them. Permanent, because the URL was
+         * in the sitemap.
+         */
+        source: '/gallery',
+        destination: '/products/cribs',
+        permanent: true,
+      },
       // The old SPA used /products?search=q; search now has its own route.
       {
         source: '/products',

@@ -210,7 +210,7 @@ export default function CheckoutClient({ recommendations }: Props) {
           Start exploring our handcrafted collection to build your legacy.
         </p>
         <div className="not-found-actions">
-          <Link href="/gallery" className="button-primary">Browse Gallery</Link>
+          <Link href="/products/cribs" className="button-primary">Browse Cribs</Link>
           <Link href="/products" className="button-secondary">All Products</Link>
         </div>
       </div>

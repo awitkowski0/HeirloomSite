@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getCategories, getCategoryBySlug, getProductsInCategory } from '@/lib/content';
+import { getCategories, getCategoryBySlug, getProductsInCategory, getInventory } from '@/lib/content';
+import { buildGalleryProducts } from '@/lib/gallery';
+import GalleryBrowser from '@/components/gallery/GalleryBrowser';
 import { itemListJsonLd, breadcrumbJsonLd,
   jsonLdScript,
 } from '@/lib/seo';
@@ -60,6 +62,11 @@ export default async function CategoryPage({
   const categories = getCategories();
   const blurb = CATEGORY_BLURBS[slug];
 
+  const isCribs = slug === 'cribs';
+  const cribFinishes = isCribs
+    ? buildGalleryProducts(getInventory().filter(i => i.category === category.name))
+    : [];
+
   return (
     <div className="container products-page">
       <script
@@ -88,22 +95,43 @@ export default async function CategoryPage({
 
       <CategoryPills categories={categories} activeSlug={slug} />
 
-      <section aria-label={`${category.name} products`}>
-        <div className="featured-grid">
-          {products.map((p, i) => (
-            <ProductCard
-              key={p.slug}
-              slug={p.slug}
-              name={p.productName}
-              category={p.category}
-              minPrice={p.minPrice}
-              img={p.defaultImage}
-              priority={i < 4}
-            />
-          ))}
-        </div>
-        <ListingAnalytics />
-      </section>
+      {/*
+        Cribs get the finish browser that used to live at /gallery, and every
+        other category gets the plain grid.
+
+        The gallery was a separate route showing six of the sixteen cribs -
+        only the ones the supplier feed happened to encode as wood variants -
+        under a nav label, "Collections", that also named /products. One page
+        for cribs, showing all of them, with the finish filtering that was the
+        gallery's actual value.
+
+        Only cribs, because only cribs have a finish worth filtering on. The 43
+        `variantType: "none"` products have a single "Default" finish, and a
+        filter with one option that matches everything is furniture.
+      */}
+      {isCribs ? (
+        <section aria-label={`${category.name} products`}>
+          <GalleryBrowser products={cribFinishes} />
+          <ListingAnalytics />
+        </section>
+      ) : (
+        <section aria-label={`${category.name} products`}>
+          <div className="featured-grid">
+            {products.map((p, i) => (
+              <ProductCard
+                key={p.slug}
+                slug={p.slug}
+                name={p.productName}
+                category={p.category}
+                minPrice={p.minPrice}
+                img={p.defaultImage}
+                priority={i < 4}
+              />
+            ))}
+          </div>
+          <ListingAnalytics />
+        </section>
+      )}
     </div>
   );
 }

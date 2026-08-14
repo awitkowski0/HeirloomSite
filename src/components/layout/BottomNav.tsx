@@ -13,7 +13,7 @@ import BottomNavCart from './BottomNavCart';
  */
 const ITEMS = [
   { href: '/products', icon: 'collections_bookmark', label: 'Shop' },
-  { href: '/gallery', icon: 'photo_library', label: 'Collections' },
+  { href: '/products/cribs', icon: 'crib', label: 'Cribs' },
 ] as const;
 
 /**

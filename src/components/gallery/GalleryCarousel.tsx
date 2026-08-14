@@ -8,7 +8,6 @@ import { productSelected } from '@/lib/analytics';
 import { variantHref } from '@/lib/variants';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 import { formatPriceApprox } from '@/lib/format';
-import { humanizeWood } from '@/lib/labels';
 import type { GalleryProduct } from './types';
 
 interface Props {
@@ -26,18 +25,16 @@ interface Props {
  * product whose stains carry no surcharge - which is all of them.
  */
 export default function GalleryCarousel({ product, onClose }: Props) {
-  const [wood, setWood] = useState<string | null>(null);
-  const [stain, setStain] = useState<string | null>(null);
+  const [finishName, setFinishName] = useState<string | null>(null);
 
   if (!product) return null;
 
-  const activeWood = wood && product.woods.includes(wood) ? wood : product.woods[0] || '';
-  const stains = product.woodStains[activeWood] || [];
-  const activeStain =
-    (stain && stains.find(s => s.name === stain)) || stains.find(s => s.inStock) || stains[0];
-
-  const basePrice = product.woodPrices[activeWood] ?? product.minPrice;
-  const price = basePrice + (activeStain?.priceAddition || 0);
+  const finishes = product.finishes;
+  const active =
+    (finishName && finishes.find(f => f.name === finishName)) ||
+    finishes.find(f => f.inStock) ||
+    finishes[0];
+  const price = active?.price ?? product.minPrice;
 
   return (
     <Modal
@@ -57,10 +54,10 @@ export default function GalleryCarousel({ product, onClose }: Props) {
       </button>
 
       <div className="gallery-carousel-image-wrap">
-        {activeStain?.image ? (
+        {active?.image ? (
           <Image
-            src={activeStain.image}
-            alt={`${product.name} in ${humanizeWood(activeWood)}, ${stainLabel(activeStain.name)}`}
+            src={active.image}
+            alt={`${product.name} in ${stainLabel(active.name)}`}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             style={{ objectFit: 'contain' }}
@@ -74,46 +71,23 @@ export default function GalleryCarousel({ product, onClose }: Props) {
         <p className="headline-md text-primary">{product.name}</p>
         <p className="body-lg gallery-carousel-price">{formatPriceApprox(price)}</p>
 
-        {product.woods.length > 1 && (
+        {finishes.length > 1 && (
           <div className="gallery-carousel-group">
-            <p className="label-caps" id="carousel-wood-label">Wood</p>
-            <div className="wood-grid" role="radiogroup" aria-labelledby="carousel-wood-label">
-              {product.woods.map(w => (
-                <button
-                  key={w}
-                  type="button"
-                  role="radio"
-                  aria-checked={w === activeWood}
-                  className={`wood-chip ${w === activeWood ? 'selected' : ''}`}
-                  onClick={() => {
-                    setWood(w);
-                    setStain(null);
-                  }}
-                >
-                  {humanizeWood(w)}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {stains.length > 1 && (
-          <div className="gallery-carousel-group">
-            <p className="label-caps" id="carousel-stain-label">Stain</p>
-            <div className="stain-strip-list" role="radiogroup" aria-labelledby="carousel-stain-label">
-              {stains.map(s => {
-                const color = getStainColor(s.name);
-                const label = stainLabel(s.name);
+            <p className="label-caps" id="carousel-finish-label">Finish</p>
+            <div className="stain-strip-list" role="radiogroup" aria-labelledby="carousel-finish-label">
+              {finishes.map(f => {
+                const color = getStainColor(f.name);
+                const label = stainLabel(f.name);
                 return (
                   <button
-                    key={s.name}
+                    key={f.name}
                     type="button"
                     role="radio"
-                    aria-checked={s.name === activeStain?.name}
-                    aria-label={`${label}${s.inStock ? '' : ', out of stock'}`}
-                    disabled={!s.inStock}
-                    className={`stain-strip-swatch ${s.name === activeStain?.name ? 'selected' : ''}`}
-                    onClick={() => setStain(s.name)}
+                    aria-checked={f.name === active?.name}
+                    aria-label={`${label}${f.inStock ? '' : ', out of stock'}`}
+                    disabled={!f.inStock}
+                    className={`stain-strip-swatch ${f.name === active?.name ? 'selected' : ''}`}
+                    onClick={() => setFinishName(f.name)}
                   >
                     {color === null ? (
                       <span className="stain-size-chip">{label}</span>
@@ -128,13 +102,11 @@ export default function GalleryCarousel({ product, onClose }: Props) {
         )}
 
         <p role="status" aria-live="polite" className="visually-hidden">
-          {activeStain
-            ? `${humanizeWood(activeWood)}, ${stainLabel(activeStain.name)}, ${formatPriceApprox(price)}`
-            : ''}
+          {active ? `${stainLabel(active.name)}, ${formatPriceApprox(price)}` : ''}
         </p>
 
         <Link
-          href={variantHref(product.slug, activeWood, activeStain?.name)}
+          href={variantHref(product.slug, active?.variant, active?.stainName)}
           className="gallery-carousel-cta button-primary"
           onClick={() =>
             productSelected({ product_name: product.name, source: 'gallery_carousel' })
