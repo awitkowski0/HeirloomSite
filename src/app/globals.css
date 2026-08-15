@@ -3309,6 +3309,13 @@ a.product-inline-link:focus-visible {
   grid-column: -2 / -1;
 }
 
+/* Sits directly under the bundle box, aligned to it. The .product-showcase
+   column already puts 24px between them. */
+.bundle-cta {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Group labels. The two halves of this box are different in kind - one is what
    you have already bought, the other is what you can still add - and without a
    label the "Included" rows read as unticked options someone forgot. */

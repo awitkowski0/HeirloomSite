@@ -187,6 +187,8 @@ export default function ProductConfigurator({
   // What the Add to Cart button will add, and what it will come to.
   const addedCount = 1 + selectedBundleItems.length;
   const cartTotal = totalPrice + selectedBundleItems.reduce((sum, i) => sum + i.price, 0);
+  const hasBundle = includedItems.length > 0 || bundleItems.length > 0;
+
 
   /*
    * Keep the address bar on the configuration being shown, so the URL is
@@ -287,6 +289,37 @@ export default function ProductConfigurator({
     setShowCartPopup(true);
   };
 
+  /*
+   * One button, rendered twice.
+   *
+   * The primary sits in the decision column; the second sits under the bundle,
+   * because that is where the last decision is actually taken - you tick the
+   * mattress and then you are done, and the first button is a column away and
+   * usually off-screen by then.
+   *
+   * Deliberately the SAME action, not a separate "add the bundle": two buttons
+   * that add different subsets of one order is how someone ends up with two
+   * cribs. Both add the crib and whatever is ticked, and CartPopup confirms
+   * what went in either way.
+   *
+   * Described once so the label - which counts what the click will add - can
+   * never say one thing in one place and something else in the other.
+   */
+  const addToCartButton = (
+    <button
+      type="button"
+      className="add-to-cart"
+      disabled={!selection.stain}
+      onClick={handleAddToCart}
+    >
+      {!selection.stain
+        ? 'OUT OF STOCK'
+        : addedCount > 1
+          ? `ADD ${addedCount} ITEMS — ${formatPrice(cartTotal)}`
+          : 'ADD TO CART'}
+    </button>
+  );
+
   return (
     <>
       <div className="product-layout">
@@ -323,6 +356,10 @@ export default function ProductConfigurator({
             selected={bundleSelected}
             onToggle={toggleBundleItem}
           />
+
+          {/* The bundle is where the last decision gets made, so the commit
+              belongs here too rather than only a column away. */}
+          {hasBundle && <div className="bundle-cta">{addToCartButton}</div>}
         </div>
 
         {/*
@@ -367,26 +404,14 @@ export default function ProductConfigurator({
           <section className="action-section">
             {/*
               The label counts what the click will actually add.
-              
-              Bundle rows are ticked by default and the button adds every
-              ticked one, so on an Addison that is five products and $4,088,
-              not one product and $2,868. The bundle sits under the photograph
-              rather than beside the button, and on a laptop it is below the
-              fold - so the button has to be the thing that tells the truth
-              about its own consequences.
+
+              A ticked add-on adds its own cart line, so the button can be
+              putting two products and $3,178 in the cart rather than one and
+              $2,868 - and the bundle it was ticked in is a column away, below
+              the fold on a laptop. The button has to be the thing that tells
+              the truth about its own consequences.
             */}
-            <button
-              type="button"
-              className="add-to-cart"
-              disabled={!selection.stain}
-              onClick={handleAddToCart}
-            >
-              {!selection.stain
-                ? 'OUT OF STOCK'
-                : addedCount > 1
-                  ? `ADD ${addedCount} ITEMS — ${formatPrice(cartTotal)}`
-                  : 'ADD TO CART'}
-            </button>
+            {addToCartButton}
 
             <button
               type="button"
