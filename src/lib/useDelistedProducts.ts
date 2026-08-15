@@ -14,7 +14,7 @@ import { initPostHog } from './posthog-client';
  *
  *   /product/<slug>          still loads
  *   sitemap.xml              still lists it
- *   POST create-payment-intent  still prices and sells it
+ *   POST /api/quotes            still prices and invoices it
  *
  * The reason is structural rather than an oversight. Every content route here
  * is statically prerendered, which AGENTS.md calls the one thing this site

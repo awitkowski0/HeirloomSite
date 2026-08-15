@@ -22,26 +22,33 @@ export const dynamic = 'force-dynamic';
  */
 
 interface OrderRecord {
-  paymentIntentId: string;
+  invoiceId: string;
+  orderRef: string | null;
   status: string;
-  amountCents: number;
+  amountDueCents: number;
+  amountPaidCents: number;
+  dueLaterCents: string | null;
   currency: string;
   email: string | null;
   name: string | null;
-  itemCount: string | null;
+  hostedInvoiceUrl: string | null;
   livemode: boolean;
 }
 
-function summarise(pi: Stripe.PaymentIntent): OrderRecord {
+function summarise(invoice: Stripe.Invoice): OrderRecord {
+  const meta = invoice.metadata ?? {};
   return {
-    paymentIntentId: pi.id,
-    status: pi.status,
-    amountCents: pi.amount,
-    currency: pi.currency,
-    email: pi.receipt_email,
-    name: pi.shipping?.name ?? null,
-    itemCount: pi.metadata?.item_count ?? null,
-    livemode: pi.livemode,
+    invoiceId: invoice.id as string,
+    orderRef: meta.order_ref ?? null,
+    status: invoice.status ?? 'unknown',
+    amountDueCents: invoice.amount_due,
+    amountPaidCents: invoice.amount_paid,
+    dueLaterCents: meta.due_later_cents ?? null,
+    currency: invoice.currency,
+    email: invoice.customer_email,
+    name: invoice.customer_name,
+    hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+    livemode: invoice.livemode,
   };
 }
 
@@ -90,24 +97,23 @@ export async function POST(req: Request) {
   }
 
   switch (event.type) {
-    case 'payment_intent.succeeded':
-    case 'payment_intent.payment_failed':
+    /*
+     * Invoices, not PaymentIntents.
+     *
+     * Checkout no longer creates a PaymentIntent - it records a draft invoice
+     * that a person reviews and sends. Invoices do create their own
+     * PaymentIntents when paid, so keeping the old payment_intent.* cases
+     * subscribed would fire twice for every payment and send duplicate
+     * notifications. invoice.paid is the authoritative signal.
+     */
+    case 'invoice.paid':
+    case 'invoice.payment_failed':
+    case 'invoice.sent':
+    case 'invoice.finalized':
+    case 'invoice.voided':
+    case 'invoice.marked_uncollectible':
       await deliver(event.type, summarise(event.data.object));
       break;
-    case 'charge.refunded': {
-      const charge = event.data.object;
-      await deliver(event.type, {
-        paymentIntentId: typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.id,
-        status: 'refunded',
-        amountCents: charge.amount_refunded,
-        currency: charge.currency,
-        email: charge.receipt_email,
-        name: charge.shipping?.name ?? null,
-        itemCount: null,
-        livemode: charge.livemode,
-      });
-      break;
-    }
     default:
       // Acknowledged, not handled. Returning non-2xx would make Stripe retry an
       // event we were never going to act on.

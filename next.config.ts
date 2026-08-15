@@ -62,14 +62,16 @@ const nextConfig: NextConfig = {
       // 'unsafe-inline' is required by the JSON-LD blocks and Next's inline
       // bootstrap. A nonce would need middleware, which would opt every route
       // out of static prerendering - the one thing this site cannot trade away.
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com https://babylist.com https://us.i.posthog.com https://challenges.cloudflare.com",
+      "script-src 'self' 'unsafe-inline' https://babylist.com https://us.i.posthog.com https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
       "connect-src 'self' https://api.stripe.com https://us.i.posthog.com",
       // Stripe Elements render in iframes we embed; m.stripe.network is used
       // for its fraud signals.
-      "frame-src https://js.stripe.com https://hooks.stripe.com https://m.stripe.network https://challenges.cloudflare.com",
+      // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
+      // any more, and payment happens on Stripe's own hosted invoice page.
+      "frame-src https://challenges.cloudflare.com",
       "form-action 'self'",
       "base-uri 'self'",
       "object-src 'none'",

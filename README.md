@@ -47,7 +47,11 @@ Server only:
 | Variable | Purpose |
 | --- | --- |
 | `STRIPE_SECRET_KEY` | Stripe secret key |
-| `ORDER_TOKEN_SECRET` | HMAC key for order-lookup capability tokens. Generate with `openssl rand -hex 32`. Keep it independent of the Stripe key so rotating Stripe does not invalidate outstanding order links. |
+| `STRIPE_WEBHOOK_SECRET` | Verifies `/api/stripe/webhook`. The route returns 503 rather than trusting an unsigned body. |
+| `TURNSTILE_SECRET_KEY` | Required in production: `/api/quotes` is anonymous and sends mail to a caller-supplied address. |
+| `RESEND_API_KEY` | Transactional email. Fails soft — the quote is already a draft invoice in Stripe. |
+| `ORDER_FROM_EMAIL` | Sender, on a Resend-verified domain. |
+| `ORDER_NOTIFICATION_EMAIL` | Where "new quote received" lands. |
 
 ## Deploying to Vercel
 

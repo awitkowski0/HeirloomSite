@@ -5,7 +5,7 @@ import { SITE_URL } from '@/lib/seo';
 
 /**
  * Every indexable URL. Deliberately excludes /checkout,
- * /order-confirmation/* and /search, which are all noindex.
+ * /search, which is noindex.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

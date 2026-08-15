@@ -3,11 +3,12 @@ import 'server-only';
 /**
  * Cloudflare Turnstile verification for the payment-intent endpoint.
  *
- * POST /api/stripe/create-payment-intent is anonymous, unauthenticated and
- * unthrottled, and it mints a real Stripe PaymentIntent on demand. That is the
- * standard shape for card-testing abuse - an attacker drives it in a loop and
- * validates stolen cards against the resulting client secrets - and it also
- * lets anyone set `receipt_email` to an address they do not own.
+ * POST /api/quotes is anonymous, unauthenticated and unthrottled, and it
+ * creates a Stripe Customer and a draft invoice on demand AND sends email from
+ * our verified domain to an address the caller supplies. Unprotected, that is
+ * an email-bombing amplifier: it burns the sending domain's reputation and
+ * fills the shop's own inbox, and it litters the Stripe account with junk
+ * customers that poison the find-by-email reuse the invoicing flow depends on.
  *
  * siteverify is called from here and only from here. It takes the secret key,
  * so a browser can never be trusted to make this call.
@@ -113,7 +114,7 @@ export async function verifyTurnstile(token: unknown, ip: string | null): Promis
       console.error(
         'Turnstile is HALF-CONFIGURED: NEXT_PUBLIC_TURNSTILE_SITE_KEY is set but ' +
           'TURNSTILE_SECRET_KEY is not. The widget renders and is never verified, ' +
-          'so /api/stripe/create-payment-intent has no bot protection.'
+          'so /api/quotes has no bot protection.'
       );
     }
     return;

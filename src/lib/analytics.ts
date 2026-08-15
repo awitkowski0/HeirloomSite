@@ -66,22 +66,27 @@ export function searchSubmitted(props: {
 /* ===========================================================================
  * The purchase funnel.
  *
- * These seven events are ordered, and every one of them fires from exactly
- * one place. Before this there was product_added_to_cart and then
+ * These five events are ordered, and every one of them fires from exactly one
+ * place. Before this there was product_added_to_cart and then
  * checkout_completed with NOTHING in between, so a cart abandoned at the
- * shipping form and one abandoned at the card field were indistinguishable -
+ * shipping form and one abandoned at the last step were indistinguishable -
  * which is the single question you actually want answered.
  *
  *   1 product_viewed        reached a product page
  *   2 variant_configured    changed wood or stain (intent, not just landing)
  *   3 product_added_to_cart
  *   4 checkout_started      reached /checkout with a non-empty cart
- *   5 shipping_submitted    address validated, PaymentIntent created
- *   6 payment_submitted     pressed pay
- *   7 order_completed       Stripe confirmed
+ *   5 quote_submitted       order recorded as a draft invoice
+ *
+ * IT ENDS THERE, and that is not an omission. Payment happens on Stripe's
+ * hosted invoice page, on Stripe's domain, days later - so this funnel can no
+ * longer see revenue at all, and anyone reading the dashboard after the switch
+ * from card checkout will otherwise conclude conversions went to zero.
+ * Conversion-to-paid lives in Stripe. If it is wanted here, the webhook can
+ * capture server-side on invoice.paid.
  *
  * checkout_failed carries the step it died at, so a misconfigured deployment
- * and a declined card are not the same row in the dashboard.
+ * and a rejected cart are not the same row in the dashboard.
  * =========================================================================== */
 
 export function productViewed(props: {
@@ -106,16 +111,14 @@ export function checkoutStarted(props: { item_count: number; cart_value: number 
   capture("checkout_started", props);
 }
 
-export function shippingSubmitted(props: { item_count: number; order_total: number }) {
-  capture("shipping_submitted", props);
-}
-
-export function paymentSubmitted() {
-  capture("payment_submitted");
-}
-
-export function orderCompleted(props: { item_count: number; order_total: number }) {
-  capture("order_completed", props);
+export function quoteSubmitted(props: {
+  item_count: number;
+  order_total: number;
+  /** What the deposit invoice will ask for, which is the number that converts. */
+  due_now: number;
+  payment_option: "deposit" | "full";
+}) {
+  capture("quote_submitted", props);
 }
 
 /**
@@ -125,7 +128,7 @@ export function orderCompleted(props: { item_count: number; order_total: number 
  * bug at all.
  */
 export function checkoutFailed(props: {
-  step: "shipping" | "payment";
+  step: "shipping" | "quote";
   reason: string;
   status?: number;
 }) {

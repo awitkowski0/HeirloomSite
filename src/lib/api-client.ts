@@ -13,12 +13,14 @@ export interface OrderTotals {
   totalCents: number;
 }
 
-export interface CreatePaymentIntentRequest {
+export interface CreateQuoteRequest {
   cart: CartItemPayload[];
-  /** Recorded on the PaymentIntent; the server rejects anything but `true`. */
+  /** Recorded on the invoice; the server rejects anything but `true`. */
   agreedToTerms: boolean;
   /** Cloudflare Turnstile token; required only when the server has a secret. */
   turnstileToken?: string;
+  /** 'deposit' (50% now) or 'full'. Defaults to 'deposit' server-side. */
+  paymentOption: 'deposit' | 'full';
   email: string;
   firstName: string;
   lastName: string;
@@ -28,33 +30,13 @@ export interface CreatePaymentIntentRequest {
   zip: string;
 }
 
-export interface CreatePaymentIntentResponse {
-  clientSecret: string;
-  paymentIntentId: string;
-  token: string;
+export interface CreateQuoteResponse {
+  orderRef: string;
   totals: OrderTotals;
-}
-
-export interface OrderItem {
-  productName: string;
-  wood: string;
-  stainName: string;
-  quantity: number;
-  unitCents: number;
-  addons: string[];
-}
-
-export interface OrderData extends OrderTotals {
-  paymentIntentId: string;
-  status: string;
-  paid: boolean;
-  email: string;
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  items: OrderItem[];
+  dueNowCents: number;
+  dueLaterCents: number;
+  /** Always null: Stripe only mints it when a draft is finalised. */
+  hostedInvoiceUrl: string | null;
 }
 
 export class ApiError extends Error {
@@ -104,29 +86,16 @@ async function parse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-export async function createPaymentIntent(
-  req: CreatePaymentIntentRequest,
+export async function createQuote(
+  req: CreateQuoteRequest,
   signal?: AbortSignal
-): Promise<CreatePaymentIntentResponse> {
-  const res = await fetch('/api/stripe/create-payment-intent', {
+): Promise<CreateQuoteResponse> {
+  const res = await fetch('/api/quotes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(req),
     signal,
   });
-  return parse<CreatePaymentIntentResponse>(res);
+  return parse<CreateQuoteResponse>(res);
 }
 
-export async function getOrder(
-  paymentIntentId: string,
-  token: string,
-  signal?: AbortSignal
-): Promise<OrderData> {
-  const res = await fetch(`/api/orders/${encodeURIComponent(paymentIntentId)}`, {
-    // Sent as a header so the capability token never enters the URL, browser
-    // history, the Referer of outbound links, or analytics $current_url.
-    headers: { 'x-order-token': token },
-    signal,
-  });
-  return parse<OrderData>(res);
-}

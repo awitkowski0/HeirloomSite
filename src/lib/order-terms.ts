@@ -134,3 +134,36 @@ export function taxCentsFor(state: string, taxableCents: number): number {
   if (state.toUpperCase() !== TAXED_STATE) return 0;
   return Math.round((taxableCents * PA_TAX_RATE_BPS) / 10_000);
 }
+
+/*
+ * How much is due now.
+ *
+ * The terms (src/components/checkout/TermsBlock.tsx) require "a minimum 50%
+ * non-refundable deposit of the total order price", and the balance is
+ * invoiced once staining is done.
+ */
+export type PaymentOption = 'deposit' | 'full';
+
+export function isPaymentOption(value: unknown): value is PaymentOption {
+  return value === 'deposit' || value === 'full';
+}
+
+export interface PaymentSplit {
+  dueNowCents: number;
+  dueLaterCents: number;
+}
+
+/**
+ * Split a total into what is invoiced now and what is invoiced on completion.
+ *
+ * `ceil` on the deposit, not `round`: the terms say a MINIMUM of 50%, so an odd
+ * cent belongs to the half being collected up front. The balance is derived by
+ * subtraction rather than computed independently, which is what guarantees the
+ * two invoices sum to the total exactly - there is no rounding to disagree
+ * about, because the second number is defined as "the rest".
+ */
+export function splitPayment(totalCents: number, option: PaymentOption): PaymentSplit {
+  if (option === 'full') return { dueNowCents: totalCents, dueLaterCents: 0 };
+  const dueNowCents = Math.ceil(totalCents / 2);
+  return { dueNowCents, dueLaterCents: totalCents - dueNowCents };
+}

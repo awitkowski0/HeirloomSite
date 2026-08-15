@@ -104,20 +104,26 @@ not be sellable. See `src/lib/useDelistedProducts.ts`.
 
 ## Env vars
 - `NEXT_PUBLIC_SITE_URL` — canonical origin for canonicals/sitemap/og:image
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`
 - `STRIPE_SECRET_KEY` — server only
 - `STRIPE_WEBHOOK_SECRET` — server only; verifies `/api/stripe/webhook`. The
   route returns 503 rather than trusting an unsigned body.
-- `ORDER_TOKEN_SECRET` — server only; HMAC key for order-lookup tokens. Required,
-  with no fallback (`openssl rand -hex 32`). The token is passed to
-  `/api/orders/*` in the `x-order-token` header only — never in the URL, because
-  PostHog captures `$current_url` with its query string.
+- `RESEND_API_KEY`, `ORDER_FROM_EMAIL`, `ORDER_NOTIFICATION_EMAIL` — server only;
+  the quote confirmation to the customer and the alert to the shop. All fail
+  **soft** with a loud warning: by the time email is attempted the quote is
+  already a draft invoice in Stripe, so failing the request would tell a
+  customer their order failed when it did not, and hand them a retry that
+  creates a second invoice. `ORDER_FROM_EMAIL` must be on a Resend-verified
+  domain.
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` — Cloudflare
   Turnstile on the checkout submit. Both are optional and the integration is
-  inert without them, but while they are unset the payment-intent endpoint has
-  no bot protection at all. Verified against Cloudflare's documented test
-  secrets: fails closed on `2x0000...`, passes on `1x0000...`.
+  inert without them. **Required in production**: `/api/quotes` is anonymous and
+  both creates Stripe Customers and sends email from a verified domain to an
+  address the caller supplies, so an unprotected endpoint is an email-bombing
+  amplifier that would burn the sending domain's reputation. The route already
+  refuses to send the customer-facing email when Turnstile is unconfigured in
+  production. Verified against Cloudflare's documented test secrets: fails
+  closed on `2x0000...`, passes on `1x0000...`.
 - `GITHUB_TOKEN`, `VERCEL_TOKEN` — local tooling only
 
 ## Security posture

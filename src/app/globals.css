@@ -3571,3 +3571,62 @@ a.product-inline-link:focus-visible {
     margin-top: var(--spacing-md);
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Checkout: how you'd like to pay
+   --------------------------------------------------------------------------- */
+
+.deposit-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/*
+ * The whole row is the label, so the target is the option rather than a 16px
+ * radio. Same reasoning as the bundle rows.
+ */
+.deposit-option {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+.deposit-option:hover {
+  border-color: var(--rule-strong);
+}
+.deposit-option[data-selected='true'] {
+  border-color: var(--accent);
+}
+
+.deposit-option input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.deposit-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* "Due at completion" is real but secondary - it must not compete with the
+   number the customer is about to be invoiced for. */
+.order-total-row--muted dt,
+.order-total-row--muted dd {
+  color: var(--ink-muted);
+}
+
+.checkout-done {
+  max-width: 60ch;
+}
+.checkout-done p {
+  margin-bottom: 16px;
+}
