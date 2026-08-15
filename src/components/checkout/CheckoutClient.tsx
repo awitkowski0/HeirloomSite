@@ -355,9 +355,11 @@ export default function CheckoutClient({ recommendations }: Props) {
                   </div>
                   <div className="order-summary-detail">
                     <h3 className="body-lg">{item.productName}</h3>
-                    <p className="label-caps text-on-surface-variant">
-                      {variantLabel(item.wood, item.stainName)}
-                    </p>
+                    {variantLabel(item.wood, item.stainName) && (
+                      <p className="label-caps text-on-surface-variant">
+                        {variantLabel(item.wood, item.stainName)}
+                      </p>
+                    )}
                     <p className="body-md">{formatPrice(item.price)}</p>
                     {/* The cart had no quantity control anywhere on the site -
                         updateQuantity was written, typed and exported with no

@@ -28,7 +28,30 @@ export function humanizeWood(wood: string): string {
  * "Natural • Natural" and "Brown Maple / Antique Slate • Antique Slate".
  * Returns one label when the second adds nothing.
  */
+/*
+ * The placeholder a single-variant product carries.
+ *
+ * "Default Title" is a Shopify export artifact, not a choice anyone made -
+ * src/lib/variants.ts already refuses to emit it as a URL segment for the same
+ * reason. It reached customers anyway: variantLabel returned it verbatim,
+ * because "defaulttitle" contains "default" and the duplicate-collapsing
+ * branch treats that as the pair saying one thing. It does say one thing. The
+ * thing it says is nothing, so the cart read "Addison Chest Dresser — Default
+ * Title" on all 43 products that have no variant to choose.
+ */
+const NO_VARIANT = new Set(['default title', 'default', 'default title / default']);
+
+function isPlaceholder(value: string): boolean {
+  return NO_VARIANT.has(value.trim().toLowerCase());
+}
+
+/**
+ * Empty when the product has no variant worth naming. Callers must handle
+ * that rather than printing a separator around it.
+ */
 export function variantLabel(wood: string, stainName: string): string {
+  if (isPlaceholder(wood) && isPlaceholder(stainName)) return '';
+
   const woodText = humanizeWood(wood);
   const stainText = stainLabel(stainName);
 

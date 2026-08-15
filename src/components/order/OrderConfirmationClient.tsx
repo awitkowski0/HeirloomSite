@@ -177,9 +177,11 @@ export default function OrderConfirmationClient({ paymentIntentId }: { paymentIn
             <li key={`${item.productName}-${item.wood}-${item.stainName}-${i}`}>
               <div className="order-item-detail">
                 <h3 className="body-lg">{item.productName}</h3>
-                <p className="label-caps text-on-surface-variant">
+                {variantLabel(item.wood, item.stainName) && (
+                  <p className="label-caps text-on-surface-variant">
                   {variantLabel(item.wood, item.stainName)}
                 </p>
+                )}
                 {item.addons.length > 0 && (
                   <p className="label-caps text-on-surface-variant">
                     Add-ons: {item.addons.join(', ')}
