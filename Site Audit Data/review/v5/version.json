@@ -1,0 +1,19 @@
+{
+  "id": "v5",
+  "task": "Task 1 — Site Product Audit",
+  "title": "Team review v5: titles, natural voice, bed size, image dedupe",
+  "generatedAt": "2026-08-13T15:10:49.590Z",
+  "changelog": [
+    "Product titles are product names only (removed business name suffix)",
+    "Reduced em-dashes and AI-sounding cadence for more natural prose",
+    "Manufacturer names removed from description body copy",
+    "Near-duplicate images removed; media.json cleaned",
+    "Bed size verified via OTO pricebook: full/double for main cribs; twin only for Mini Newport"
+  ],
+  "stats": {
+    "total": 59,
+    "allPass": 59,
+    "anyFail": 0,
+    "shopifyOnly": 3
+  }
+}

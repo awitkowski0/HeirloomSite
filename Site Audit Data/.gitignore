@@ -1,0 +1,5 @@
+# Heavy local pulls / staged image copies — regenerate with scripts
+images/
+raw/shopify/by-handle/
+raw/vercel/
+*.log

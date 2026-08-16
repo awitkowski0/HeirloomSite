@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   alternates: { canonical: '/contact' },
 };
 
-const EMAIL = 'support@heirloomcribsandmore.com';
-const PHONE = '(555) 123-4567';
+const EMAIL = 'HeirloomCribs.Care@HeirloomCribsandMore.com';
+const PHONE = '(484) 293-1840';
 
 export default function ContactPage() {
   return (

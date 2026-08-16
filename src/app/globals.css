@@ -1064,7 +1064,6 @@ main {
 .product-title {
   text-align: center;
   padding: 10px 16px;
-  margin: 0;
 }
 
 @media (max-width: 767px) {
@@ -1963,13 +1962,51 @@ main {
    Product detail
    =========================================================================== */
 
+/* PDP title + body — single standard (see Site Audit Data/PRODUCT-DESCRIPTION-STANDARDS.md) */
 .product-title {
-  margin-bottom: 8px;
+  margin: 0 0 12px;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: var(--text-headline-xl);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
 .product-description {
-  color: var(--on-surface-variant);
   max-width: 65ch;
-  margin-bottom: 32px;
+  margin: 0 auto 28px;
+  color: var(--ink-muted);
+  font-family: var(--font-label);
+  font-size: var(--text-body-lg);
+  font-weight: 400;
+  line-height: 1.65;
+}
+.product-description p {
+  margin: 0 0 0.9em;
+  font: inherit;
+  color: inherit;
+}
+.product-description p:last-child {
+  margin-bottom: 0;
+}
+/* In-copy links: Safety page, Get Personal Assistance — same treatment everywhere */
+.product-description a,
+a.product-inline-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+  font: inherit;
+}
+.product-description a:hover,
+a.product-inline-link:hover {
+  color: var(--ink);
+}
+.product-description a:focus-visible,
+a.product-inline-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 .product-extended {
   margin-top: 64px;
@@ -1977,6 +2014,14 @@ main {
 }
 .product-extended h2 {
   margin-bottom: 12px;
+  font-family: var(--font-serif);
+  font-size: var(--text-headline-md);
+}
+.product-extended p {
+  font-family: var(--font-label);
+  font-size: var(--text-body-md);
+  line-height: 1.6;
+  color: var(--ink-muted);
 }
 
 .product-image {

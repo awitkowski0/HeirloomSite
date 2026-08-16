@@ -1,0 +1,20 @@
+{
+  "id": "v3",
+  "task": "Task 1 — Site Product Audit",
+  "title": "Deep copy validation (complete sentences, grammar, punctuation)",
+  "generatedAt": "2026-08-13T13:51:28.256Z",
+  "changelog": [
+    "Full writing pass on all matched hard-goods product copy",
+    "Every description ends in complete sentences (no cut-off thoughts)",
+    "Meta descriptions rebuilt from complete sentences only — no ellipsis cutoffs",
+    "Grammar/punctuation sweep; AI-cliché softening; paragraph flow",
+    "Validator: 0 hard-goods products still flagged after pass",
+    "HTML v3: full body text on detail pages; copy QA chips on matrix"
+  ],
+  "stats": {
+    "total": 59,
+    "allPass": 59,
+    "anyFail": 0,
+    "shopifyOnly": 3
+  }
+}
