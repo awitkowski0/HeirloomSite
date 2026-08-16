@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useImperativeHandle, useRef } from 'react';
 import { TURNSTILE_ACTION } from '@/lib/turnstile-action';
 
 /**
@@ -44,6 +44,7 @@ const LOAD_TIMEOUT_MS = 12_000;
 interface TurnstileApi {
   render: (el: HTMLElement, opts: Record<string, unknown>) => string;
   remove: (id: string) => void;
+  reset: (id: string) => void;
 }
 
 declare global {
@@ -56,14 +57,36 @@ declare global {
 const SCRIPT_ID = 'cf-turnstile-script';
 const SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit';
 
+/**
+ * What the checkout can ask of the widget.
+ *
+ * A Turnstile token is single-use. /api/quotes verifies it BEFORE it prices the
+ * cart, so an order rejected for any other reason - a product hidden since
+ * add-to-cart, a stale localStorage cart, a stain no longer sold - comes back
+ * 400 with the token already spent. Without a reset the retry resends that dead
+ * token, siteverify answers `timeout-or-duplicate`, and the customer is stuck on
+ * "Verification failed. Please try again." with trying again being the one thing
+ * that cannot work.
+ */
+export interface TurnstileHandle {
+  /** Discard the spent token and ask Cloudflare for a fresh one. */
+  reset: () => void;
+}
+
 interface Props {
   onToken: (token: string) => void;
   onStatus: (status: TurnstileStatus) => void;
+  ref?: React.Ref<TurnstileHandle>;
 }
 
-export default function TurnstileWidget({ onToken, onStatus }: Props) {
+export default function TurnstileWidget({ onToken, onStatus, ref }: Props) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const boxRef = useRef<HTMLDivElement>(null);
+  /*
+   * At component scope, not inside the effect, because the imperative reset
+   * below needs the id too. The effect remains the only thing that WRITES it.
+   */
+  const widgetIdRef = useRef<string | undefined>(undefined);
   // Kept in a ref so re-renders never re-run the effect and duplicate the
   // widget. Synced in its own effect: writing a ref during render is a real
   // React violation, not a lint quibble - it can run twice under StrictMode and
@@ -86,7 +109,6 @@ export default function TurnstileWidget({ onToken, onStatus }: Props) {
 
   useEffect(() => {
     if (!siteKey || !boxRef.current) return;
-    let widgetId: string | undefined;
     const box = boxRef.current;
 
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -98,8 +120,8 @@ export default function TurnstileWidget({ onToken, onStatus }: Props) {
 
     const render = () => {
       if (timer) clearTimeout(timer);
-      if (!window.turnstile || !box || widgetId !== undefined) return;
-      widgetId = window.turnstile.render(box, {
+      if (!window.turnstile || !box || widgetIdRef.current !== undefined) return;
+      widgetIdRef.current = window.turnstile.render(box, {
         sitekey: siteKey,
         // Asserted server-side, so a token minted by this site key on some
         // other surface cannot be replayed against checkout.
@@ -137,9 +159,31 @@ export default function TurnstileWidget({ onToken, onStatus }: Props) {
 
     return () => {
       if (timer) clearTimeout(timer);
-      if (widgetId !== undefined) window.turnstile?.remove(widgetId);
+      if (widgetIdRef.current !== undefined) {
+        window.turnstile?.remove(widgetIdRef.current);
+        widgetIdRef.current = undefined;
+      }
     };
   }, [siteKey]);
+
+  /*
+   * Back to 'pending', not 'error': reset() makes Cloudflare issue a new
+   * challenge, whose callback re-fires with a fresh token in a moment. The
+   * submit button stays disabled for exactly that long, which is correct - the
+   * old token is already worthless.
+   */
+  useImperativeHandle(
+    ref,
+    () => ({
+      reset: () => {
+        if (widgetIdRef.current === undefined || !window.turnstile) return;
+        window.turnstile.reset(widgetIdRef.current);
+        onTokenRef.current('');
+        onStatusRef.current('pending');
+      },
+    }),
+    []
+  );
 
   if (!siteKey) return null;
   return <div ref={boxRef} className="turnstile-widget" />;

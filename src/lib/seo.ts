@@ -1,5 +1,7 @@
 import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
+import { SHIPPABLE_STATE_CODES, cheapestShippingCents } from './order-terms';
+import { fromCents } from './format';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
@@ -141,13 +143,28 @@ export function productJsonLd(opts: {
        * InStock, InStoreOnly, LimitedAvailability, OnlineOnly, OutOfStock,
        * PreOrder, PreSale, SoldOut). InStock remains correct - the item IS
        * orderable - so the lead time is expressed where Google actually reads
-       * it, as handling time. Delivery is included in the price, hence a
-       * shippingRate of 0; see SHIPPING_CENTS in src/lib/pricing.ts.
+       * it, as handling time.
+       *
+       * shippingRate is the CHEAPER of the two delivery tiers, not 0. It said
+       * 0 while the site believed delivery was included; advertising free
+       * shipping in structured data and then charging $685 at checkout is the
+       * kind of mismatch Google issues merchant listing penalties for, and it
+       * is a promise to a customer we would not keep. See SHIPPING_METHODS in
+       * src/lib/order-terms.ts.
        */
       shippingDetails: {
         '@type': 'OfferShippingDetails',
-        shippingRate: { '@type': 'MonetaryAmount', value: 0, currency: 'USD' },
-        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'US' },
+        shippingRate: {
+          '@type': 'MonetaryAmount',
+          value: fromCents(cheapestShippingCents()),
+          currency: 'USD',
+        },
+        // The regional route, not the whole country - see SHIPPABLE_STATE_CODES.
+        shippingDestination: {
+          '@type': 'DefinedRegion',
+          addressCountry: 'US',
+          addressRegion: [...SHIPPABLE_STATE_CODES],
+        },
         deliveryTime: {
           '@type': 'ShippingDeliveryTime',
           handlingTime: {

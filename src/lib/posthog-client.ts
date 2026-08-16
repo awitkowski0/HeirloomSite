@@ -43,9 +43,9 @@ export function initPostHog(): void {
      *
      * Leaving it unset does not mean off: it is decided by the PostHog PROJECT
      * setting, so anyone with dashboard access could start recording the
-     * checkout form - card fields are inside Stripe's iframes and safe, the
-     * address fields are not - without any code change or review. Stating it
-     * here means turning it on requires a commit.
+     * checkout form - which is nothing but name, email and street address, all
+     * of it ordinary DOM - without any code change or review. Stating it here
+     * means turning it on requires a commit.
      */
     disable_session_recording: true,
 

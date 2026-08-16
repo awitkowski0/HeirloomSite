@@ -1,7 +1,7 @@
 import 'server-only';
 
 /**
- * Cloudflare Turnstile verification for the payment-intent endpoint.
+ * Cloudflare Turnstile verification for the quote endpoint.
  *
  * POST /api/quotes is anonymous, unauthenticated and unthrottled, and it
  * creates a Stripe Customer and a draft invoice on demand AND sends email from
@@ -47,6 +47,14 @@ export class TurnstileError extends Error {
  * Derived from configuration rather than hardcoded: the production domain is
  * not known to this repo, and a stale literal here would reject every real
  * customer. Mirrors the SITE_URL derivation in src/lib/seo.ts.
+ *
+ * Preview deployments need their own entries. NODE_ENV is 'production' on a
+ * Vercel preview, so the localhost branch below does not apply, and the host is
+ * a generated *.vercel.app name that matches neither NEXT_PUBLIC_SITE_URL nor
+ * VERCEL_PROJECT_PRODUCTION_URL. Without VERCEL_BRANCH_URL / VERCEL_URL every
+ * preview 403s on submit - which is precisely where checkout most needs testing
+ * before launch. The Turnstile widget must also list the preview domain, or
+ * Cloudflare refuses to render at all and the button never enables.
  */
 function allowedHostnames(): Set<string> {
   const hosts = new Set<string>();
@@ -60,8 +68,14 @@ function allowedHostnames(): Set<string> {
     }
   }
 
-  const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (vercelHost) hosts.add(vercelHost);
+  for (const key of [
+    'VERCEL_PROJECT_PRODUCTION_URL',
+    'VERCEL_BRANCH_URL',
+    'VERCEL_URL',
+  ] as const) {
+    const host = process.env[key];
+    if (host) hosts.add(host);
+  }
 
   if (process.env.NODE_ENV !== 'production') {
     hosts.add('localhost');

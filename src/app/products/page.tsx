@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getProductIndex, getCategories } from '@/lib/content';
+import { assertNoOrphanedCategories, getBrowsableProducts, getCategories } from '@/lib/content';
 import { itemListJsonLd,
   jsonLdScript,
 } from '@/lib/seo';
@@ -15,7 +15,14 @@ export const metadata: Metadata = {
 };
 
 export default function ProductsPage() {
-  const products = getProductIndex();
+  /*
+   * Browsable, not everything. The conversion kits and the crib mattress are
+   * sold through the bundle on a crib's own page; listing them here puts a
+   * $40 rail kit in the same grid as a $3,000 crib. They keep their pages,
+   * their prices and their place in every bundle - see src/lib/taxonomy.ts.
+   */
+  assertNoOrphanedCategories();
+  const products = getBrowsableProducts();
   const categories = getCategories();
 
   return (

@@ -32,6 +32,32 @@ const nextConfig: NextConfig = {
         destination: '/products/cribs',
         permanent: true,
       },
+      /*
+       * The flat category list became a two-level taxonomy, so eight category
+       * slugs no longer resolve. Permanent, because they were in the sitemap.
+       *
+       * Accessories and Guard Rails & Conversions have no destination: they are
+       * unlisted now (see src/lib/taxonomy.ts) and land on the full grid rather
+       * than a category that no longer exists. The products themselves keep
+       * their own URLs.
+       */
+      ...[
+        ['dressers', 'dressers-changing-tables'],
+        ['changing-tables', 'dressers-changing-tables'],
+        ['nightstands', 'nightstands-storage'],
+        ['chests', 'nightstands-storage'],
+        ['area-rugs', 'decor'],
+        ['lamps', 'decor'],
+      ].map(([from, to]) => ({
+        source: `/products/${from}`,
+        destination: `/products/${to}`,
+        permanent: true,
+      })),
+      ...['accessories', 'guard-rails-and-conversions'].map(from => ({
+        source: `/products/${from}`,
+        destination: '/products',
+        permanent: true,
+      })),
       // The old SPA used /products?search=q; search now has its own route.
       {
         source: '/products',
@@ -46,10 +72,11 @@ const nextConfig: NextConfig = {
     /*
      * The site had no security headers of any kind: no CSP, no HSTS, no
      * nosniff, no Referrer-Policy, no framing rule. That matters most on
-     * /checkout, which loads Stripe, PostHog, Google Fonts AND babylist.com's
-     * add.js together - and the shipping form (name, street address, email) is
-     * ordinary DOM that any of those scripts can read. Card fields are inside
-     * Stripe's iframes and were never exposed.
+     * /checkout, which loads PostHog, Google Fonts, babylist.com's add.js and
+     * Turnstile together - and the shipping form (name, street address, email)
+     * is ordinary DOM that any of those scripts can read. No card is collected
+     * anywhere on this site: payment happens later, on Stripe's hosted invoice
+     * page, on Stripe's own domain.
      *
      * The CSP ships REPORT-ONLY first. Enforcing a wrong policy breaks
      * checkout for everyone, and the only honest way to know it is right is to
@@ -66,9 +93,11 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://api.stripe.com https://us.i.posthog.com",
-      // Stripe Elements render in iframes we embed; m.stripe.network is used
-      // for its fraud signals.
+      // No api.stripe.com: the browser never talks to Stripe. The server does,
+      // from /api/quotes, which a page CSP has no say over.
+      // api.radar.io is the checkout address lookup - a plain fetch with a
+      // publishable key, so it needs connect-src and no script-src entry.
+      "connect-src 'self' https://us.i.posthog.com https://api.radar.io",
       // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
       // any more, and payment happens on Stripe's own hosted invoice page.
       "frame-src https://challenges.cloudflare.com",
@@ -94,8 +123,9 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            // Stripe needs payment; nothing here needs the rest.
-            value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")',
+            // Nothing on this site requests any of these. The payment feature
+            // went with Stripe.js - no page here opens a payment sheet.
+            value: 'camera=(), microphone=(), geolocation=(), payment=()',
           },
         ],
       },

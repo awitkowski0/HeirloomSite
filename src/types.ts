@@ -55,6 +55,8 @@ export interface InventoryItem {
   productName: string;
   wood: string;
   category: string | null;
+  /** The range this piece belongs to (Addison, West Lake...), or null. */
+  collection: string | null;
   variantType: VariantType;
   description: string | null;
   extendedDescription: string | null;
@@ -135,6 +137,21 @@ export interface CartAddon {
   stainName?: string;
 }
 
+/**
+ * Something that ships with a cart line and is already inside its price.
+ *
+ * DISPLAY ONLY, and that is a load-bearing restriction. src/lib/pricing.ts
+ * re-prices every line the browser sends from the catalogue, so a rail kit
+ * that reached the server as a cart line would be charged at its own $320 -
+ * which is exactly the $910-per-crib double-charge that splitting `includes`
+ * from `bundle` was written to fix. CheckoutClient never maps this into the
+ * request; it exists so the cart can SHOW the whole order.
+ */
+export interface CartInclude {
+  productName: string;
+  image: string | null;
+}
+
 export interface CartItem {
   id: string;
   productName: string;
@@ -145,4 +162,6 @@ export interface CartItem {
   image: string;
   quantity: number;
   addons?: CartAddon[];
+  /** What comes with this line, already paid for. Never sent to the server. */
+  includes?: CartInclude[];
 }

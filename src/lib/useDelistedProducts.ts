@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import posthog from 'posthog-js';
 import { initPostHog } from './posthog-client';
 
@@ -62,9 +62,17 @@ export function useDelistedProducts(): DelistedProducts {
     return posthog.onFeatureFlags(() => setReady(true));
   }, []);
 
-  return {
-    ready,
-    isDelisted: (slug: string) => {
+  /*
+   * Stable across renders, and that is load-bearing rather than tidiness.
+   *
+   * Callers list `isDelisted` in useMemo dependency arrays - src/lib/search.ts
+   * twice and GalleryBrowser once. A fresh arrow function every render made
+   * every one of those memos miss, so the MiniSearch result mapping re-ran on
+   * each keystroke and the whole gallery re-filtered on every render. Keyed on
+   * `ready` because that is the only thing that changes the answer.
+   */
+  const isDelisted = useCallback(
+    (slug: string) => {
       if (!ready || !posthog.__loaded) return false;
       /*
        * Explicitly false, not falsy. `isFeatureEnabled` returns undefined for
@@ -74,5 +82,8 @@ export function useDelistedProducts(): DelistedProducts {
        */
       return posthog.isFeatureEnabled(productFlagKey(slug)) === false;
     },
-  };
+    [ready]
+  );
+
+  return { ready, isDelisted };
 }

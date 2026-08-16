@@ -254,7 +254,6 @@ body {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-
 .text-primary {
   color: var(--primary);
 }
@@ -350,12 +349,12 @@ body {
 /*
  * Distributed, not clustered.
  *
- * The nine labels measure ~857px and sat at the left of a 1232px row with 26px
- * gaps, leaving ~167px of dead space against the right edge - so the bar ended
- * under the search field while the bar above it ran to the cart, and the two
- * rows visibly failed to line up. space-between spends that 167px on the gaps
- * instead, which puts the first category under the wordmark and the last under
- * the cart.
+ * The labels sat at the left of a 1232px row with 26px gaps, leaving dead
+ * space against the right edge - so the bar ended under the search field while
+ * the bar above it ran to the cart, and the two rows visibly failed to line up.
+ * space-between spends that space on the gaps instead, which puts the first
+ * category under the wordmark and the last under the cart. It matters more now
+ * that the taxonomy is three top-level categories rather than nine flat ones.
  *
  * `gap` stays as a floor so the labels cannot collide on a narrow desktop
  * window, where space-between has nothing spare to distribute.
@@ -369,6 +368,15 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 26px;
+  list-style: none;
+}
+
+/* The positioning context for the sub-menu below. */
+.category-bar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .category-bar-link {
@@ -403,6 +411,264 @@ body {
 .category-bar-link.active {
   color: var(--ink);
   border-bottom-color: var(--accent);
+}
+
+/*
+ * Sub-menus, in CSS alone.
+ *
+ * No client component and no state: CategoryBar is a server component rendered
+ * into every statically prerendered page on the site, and giving it JavaScript
+ * to open a menu would ship a bundle to all 305 of them for a hover.
+ *
+ * `:focus-within` is what makes it keyboard-reachable - tabbing to the parent
+ * link opens the panel, and tabbing on through its links keeps it open. The
+ * padding-top on the panel bridges the gap to the bar so the pointer can cross
+ * into it without the menu closing underneath.
+ */
+.category-submenu {
+  position: absolute;
+  top: 100%;
+  left: -14px;
+  z-index: 3100;
+  margin: 0;
+  padding: 8px 0;
+  min-width: 220px;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+}
+.category-bar-item:hover > .category-submenu,
+.category-bar-item:focus-within > .category-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.category-submenu-link {
+  display: block;
+  padding: 8px 16px;
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.category-submenu-link:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
+/*
+ * On-page sub-navigation, for a category that has children and for the
+ * collection index. Cards rather than pills: these carry a count as well as a
+ * name, and a two-line pill is not a pill.
+ */
+.subcategory-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 24px 0 32px;
+}
+.subcategory-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  transition: border-color 120ms ease;
+}
+.subcategory-card:hover {
+  border-color: var(--accent);
+}
+
+.shipping-limit-note {
+  margin: 10px 2px 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Homepage journey — the four steps that structure the page below the banner
+   --------------------------------------------------------------------------- */
+
+.home-journey {
+  counter-reset: journey;
+}
+
+/*
+ * A rule at the top of each step, so the four read as one sequence rather than
+ * four unrelated sections. The last one has none: a trailing rule above the
+ * footer looks like something failed to load.
+ */
+.journey-step {
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 56px 24px 0;
+}
+.journey-step + .journey-step {
+  border-top: 1px solid var(--rule);
+  margin-top: 56px;
+}
+.journey-step:last-child {
+  padding-bottom: 72px;
+}
+
+.journey-step-head {
+  max-width: 62ch;
+  margin-bottom: 32px;
+}
+.journey-step-num {
+  color: var(--accent);
+  margin: 0 0 8px;
+}
+.journey-step-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.4vw, 38px);
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+.journey-step-lead {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/*
+ * Step 01 holds whole sections that bring their own container and padding, so
+ * the step must not add a second one around them.
+ */
+.journey-step-body > .home-featured,
+.journey-step-body > .home-styles {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+.journey-step-body > .home-featured {
+  padding-top: 0;
+}
+
+.journey-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px 32px;
+}
+.journey-points li {
+  /* Grid items will not shrink below their content without this. */
+  min-width: 0;
+  padding-left: 16px;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .journey-step {
+    padding-top: 40px;
+  }
+  .journey-step + .journey-step {
+    margin-top: 40px;
+  }
+  .journey-step-head {
+    margin-bottom: 24px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Homepage featured range
+   --------------------------------------------------------------------------- */
+
+.home-featured {
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 64px 24px 0;
+}
+.home-featured-intro {
+  margin-bottom: 32px;
+}
+.home-featured-label {
+  margin: 0 0 8px;
+}
+.home-featured-label a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.home-featured-label a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+@media (max-width: 767px) {
+  .home-featured {
+    padding-top: 40px;
+  }
+}
+
+/* Included-with-this-line rows in the cart. Indented and quiet: they are part
+   of the line above, not siblings of it. */
+.order-summary-includes {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 1px solid var(--outline-variant);
+}
+.order-summary-includes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Checkout address lookup
+   --------------------------------------------------------------------------- */
+
+.address-combobox {
+  position: relative;
+}
+.address-combobox-status {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.address-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 2px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.address-suggestion {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--ink);
+}
+/* Hover and keyboard highlight are the same state, so they look the same. */
+.address-suggestion.is-highlighted {
+  background: var(--paper-2);
 }
 
 /* ---------------------------------------------------------------------------
@@ -663,7 +929,6 @@ main {
   object-fit: cover;
 }
 
-
 /*
  * 32px, not the 48px stack gap.
  *
@@ -702,7 +967,6 @@ main {
 .price-current {
   color: var(--primary);
 }
-
 
 .config-section {
   display: flex;
@@ -1012,7 +1276,6 @@ main {
   color: var(--on-surface-variant);
 }
 
-
 /* Bottom Nav */
 .bottom-nav {
   position: fixed;
@@ -1170,19 +1433,6 @@ main {
 }
 
 /* Filter pills scrollable on mobile */
-.filter-pills {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  background-color: var(--surface-container-lowest);
-  padding: 8px;
-  border-radius: 0;
-  border: 1px solid var(--surface-container-highest);
-  width: fit-content;
-  margin: 0 auto;
-}
 
 @media (max-width: 767px) {
   .gallery-grid {
@@ -1193,19 +1443,7 @@ main {
     height: 320px;
     padding: 16px;
   }
-  .filter-pills {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    border-radius: 0;
-    width: 100%;
-    justify-content: flex-start;
-    padding: 6px;
-  }
-  .filter-pills::-webkit-scrollbar {
-    display: none;
-  }
+
 }
 
 @media (max-width: 480px) {
@@ -1431,7 +1669,6 @@ main {
   }
 }
 
-
 @media (min-width: 768px) {
   .bottom-nav {
     display: none;
@@ -1539,33 +1776,7 @@ main {
   border: 1px solid var(--rule-strong);
 }
 
-/* Filter Pill & Stain Styles */
-.filter-pill-btn {
-  padding: 12px 24px;
-  border-radius: 0;
-  border: none;
-  background: transparent;
-  color: var(--on-surface-variant);
-  font-family: var(--font-label);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.filter-pill-btn--active {
-  background: var(--primary);
-  color: var(--on-primary);
-}
-
-.filter-pill-divider {
-  width: 1px;
-  height: 24px;
-  background-color: var(--outline-variant);
-}
-
+/* Stain Styles */
 .stain-filter-container {
   display: flex;
   justify-content: center;
@@ -2096,7 +2307,6 @@ main {
 .products-page,
 .checkout-page,
 .contact-page,
-.order-page,
 .product-page {
   padding-top: 24px;
   padding-bottom: 64px;
@@ -2244,9 +2454,6 @@ main {
   padding: 2px 8px;
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius-sm);
-}
-.wood-tag--more {
-  border-color: transparent;
 }
 
 .view-finishes-btn {
@@ -2624,9 +2831,6 @@ a.product-inline-link:focus-visible {
    Gallery page
    =========================================================================== */
 
-.gallery-page {
-  min-height: 100vh;
-}
 .gallery-header {
   padding-top: 8px;
   padding-bottom: 32px;
@@ -2765,6 +2969,13 @@ a.product-inline-link:focus-visible {
   border-radius: var(--radius-md);
   background-color: var(--surface-container-lowest);
   border: 1px solid var(--outline-variant);
+  /*
+   * A grid item defaults to min-width:auto, which refuses to shrink below its
+   * content - so a 43-character email address pushed the card wider than its
+   * track and out of the page on a phone. This lets the track win; the
+   * overflow-wrap below is what then breaks the address.
+   */
+  min-width: 0;
 }
 .contact-card .material-symbols-outlined {
   font-size: 24px;
@@ -2774,8 +2985,19 @@ a.product-inline-link:focus-visible {
 .contact-card dt {
   margin-bottom: 4px;
 }
+/* The same 43-character address appears in the sent-confirmation copy. */
+.contact-sent p {
+  overflow-wrap: anywhere;
+}
 .contact-card dd {
   margin: 0;
+  /*
+   * `anywhere`, not `break-word`. An email address has no break opportunity a
+   * browser will take on its own - not at the @ and not at a dot - so
+   * HeirloomCribs.Care@HeirloomCribsandMore.com is one unbreakable 43-character
+   * word that ran off the side of every phone.
+   */
+  overflow-wrap: anywhere;
 }
 .contact-card a {
   color: var(--on-surface);
@@ -2811,11 +3033,8 @@ a.product-inline-link:focus-visible {
   width: 100%;
   margin-top: 8px;
 }
-.checkout-edit {
-  margin-top: 12px;
-}
-.checkout-error,
-.checkout-notice {
+
+.checkout-error {
   padding: 16px;
   border-radius: var(--radius);
   margin: 16px 0;
@@ -2827,11 +3046,7 @@ a.product-inline-link:focus-visible {
   border: 1px solid var(--error);
   color: var(--on-error-container);
 }
-.checkout-notice {
-  background-color: var(--surface-container-high);
-  border: 1px solid var(--outline-variant);
-  color: var(--on-surface);
-}
+
 .checkout-hint {
   font-family: var(--font-label);
   font-size: 12px;
@@ -2876,28 +3091,7 @@ a.product-inline-link:focus-visible {
   flex-shrink: 0;
 }
 
-.payment-section {
-  margin-top: 32px;
-  padding: 32px;
-  background-color: var(--surface-container-lowest);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--surface-container-highest);
-}
-.payment-section h2 {
-  margin-bottom: 24px;
-}
-.payment-form {
-  width: 100%;
-}
-.payment-submit {
-  width: 100%;
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* Order summary + order confirmation */
+/* Order summary */
 .order-summary {
   position: sticky;
   top: 100px;
@@ -2965,85 +3159,6 @@ a.product-inline-link:focus-visible {
   align-items: center;
 }
 
-.order-page {
-  max-width: 760px;
-}
-.order-status {
-  text-align: center;
-  padding: 40px 24px;
-  border-radius: var(--radius-md);
-  margin-bottom: 32px;
-}
-.order-status .material-symbols-outlined {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 12px;
-}
-.order-status h1 {
-  margin-bottom: 8px;
-}
-.order-status--success {
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--secondary);
-}
-.order-status--success .material-symbols-outlined {
-  color: var(--secondary);
-}
-.order-status--pending {
-  background-color: var(--surface-container-high);
-  border: 1px solid var(--outline-variant);
-}
-.order-block {
-  background-color: var(--surface-container);
-  padding: 32px;
-  border-radius: var(--radius-md);
-  margin-bottom: 32px;
-}
-.order-block h2 {
-  margin-bottom: 24px;
-}
-.order-detail-list {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.order-detail-list > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-}
-.order-detail-list dt,
-.order-detail-list dd {
-  margin: 0;
-}
-.order-detail-list dd {
-  text-align: right;
-}
-.order-detail-status {
-  color: var(--primary);
-  text-transform: capitalize;
-}
-.order-items {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.order-items li {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  background-color: var(--surface-container-high);
-  border-radius: var(--radius);
-}
-.order-item-detail h3 {
-  font-weight: 700;
-  margin-bottom: 2px;
-}
 .search-result-wood {
   color: var(--on-surface-variant);
 }

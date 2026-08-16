@@ -249,6 +249,18 @@ export default function ProductConfigurator({
       price: totalPrice,
       image: galleryImages[0] || '',
       quantity: 1,
+      /*
+       * Carried so the cart can show the whole order - the conversion rails and
+       * the guard rail arrive with the crib and a buyer should see that before
+       * they wonder whether to order them.
+       *
+       * Display only. These are already inside the crib's price, they are not
+       * separate cart lines, and CheckoutClient does not send them: the server
+       * would re-price each one from the catalogue and bill $910 of parts a
+       * second time, which is the bug that separated `includes` from `bundle`
+       * in the first place.
+       */
+      includes: includedItems.map(i => ({ productName: i.productName, image: i.image })),
     });
 
     /*

@@ -18,12 +18,72 @@
  */
 
 /*
- * Delivery is included in the product price. Kept as a named constant rather
- * than deleted so reinstating a delivery charge is one line. See the longer
- * note in src/lib/pricing.ts about the $150 this used to add on top of a price
- * that already included it.
+ * Delivery is CHARGED, and the customer chooses how.
+ *
+ * The site previously said delivery was included in the product price and
+ * charged nothing for it - in the checkout summary, the product page
+ * assurances, the invoice footer and the Product JSON-LD. That was wrong: it
+ * is quoted separately, and shipping every order for nothing was giving away
+ * $685 at a minimum on each one.
+ *
+ * Prices are flat per ORDER, not per item: a crib and its dresser go on one
+ * truck. If that ever stops being true this is where it changes.
  */
-export const SHIPPING_CENTS = 0;
+export type ShippingMethodId = 'threshold' | 'white_glove';
+
+export interface ShippingMethod {
+  id: ShippingMethodId;
+  name: string;
+  /* Shown under the name at checkout. Confirm the exact service wording with
+     the carrier before launch - these describe the industry-standard tiers. */
+  description: string;
+  cents: number;
+}
+
+export const SHIPPING_METHODS: readonly ShippingMethod[] = [
+  {
+    id: 'threshold',
+    name: 'Threshold Delivery',
+    description: 'Delivery to the door.',
+    cents: 68_500,
+  },
+  {
+    id: 'white_glove',
+    name: 'White Glove Delivery',
+    description: 'White-glove delivery and assembly in your home.',
+    cents: 75_000,
+  },
+];
+
+/*
+ * True of BOTH tiers, so it is stated once under the pair rather than repeated
+ * in each description - a limit that appears twice reads as two different
+ * limits, and someone comparing the options should be weighing what differs.
+ */
+export const SHIPPING_LIMIT_NOTE = 'Both are limited to three flights of stairs.';
+
+/** The cheaper of the two, so an untouched checkout quotes the lower number. */
+export const DEFAULT_SHIPPING_METHOD: ShippingMethodId = 'threshold';
+
+export function isShippingMethodId(value: unknown): value is ShippingMethodId {
+  return SHIPPING_METHODS.some(m => m.id === value);
+}
+
+export function shippingMethodById(id: ShippingMethodId): ShippingMethod {
+  const method = SHIPPING_METHODS.find(m => m.id === id);
+  // Unreachable via isShippingMethodId, but this is money: never silently zero.
+  if (!method) throw new Error(`Unknown shipping method: ${id}`);
+  return method;
+}
+
+export function shippingCentsFor(id: ShippingMethodId): number {
+  return shippingMethodById(id).cents;
+}
+
+/** The lowest delivery price, for the "from" figure in Product JSON-LD. */
+export function cheapestShippingCents(): number {
+  return Math.min(...SHIPPING_METHODS.map(m => m.cents));
+}
 
 /** The only state the shop has nexus in, so the only one it collects tax for. */
 export const TAXED_STATE = 'PA';
@@ -109,6 +169,46 @@ const STATE_CODES = new Set(US_STATES.map(s => s.code));
 /** True for a canonical two-letter code. Callers must uppercase first. */
 export function isUsState(code: string): boolean {
   return STATE_CODES.has(code);
+}
+
+/*
+ * Where the shop actually delivers.
+ *
+ * The trucks run a regional route, so the checkout offers these states and no
+ * others rather than taking an order it cannot fulfil and unwinding it by
+ * phone. Enforced on the server too - the <select> is a convenience, not a
+ * control.
+ *
+ * Widening the route is this array plus nothing else.
+ */
+export const SHIPPABLE_STATE_CODES: readonly string[] = [
+  'PA',
+  'NJ',
+  'NY',
+  'CT',
+  'OH',
+  'MD',
+  'VA',
+];
+
+const SHIPPABLE = new Set(SHIPPABLE_STATE_CODES);
+
+/** The states offered at checkout, in the same order as US_STATES. */
+export const SHIPPABLE_STATES: readonly UsState[] = US_STATES.filter(s => SHIPPABLE.has(s.code));
+
+/** True for a state the shop delivers to. Callers must uppercase first. */
+export function isShippableState(code: string): boolean {
+  return SHIPPABLE.has(code);
+}
+
+/** The states we do NOT deliver to, still offered so we can say why. */
+export const UNSHIPPABLE_STATES: readonly UsState[] = US_STATES.filter(
+  s => !SHIPPABLE.has(s.code)
+);
+
+/** "Texas" for "TX". Falls back to the code so a message is never blank. */
+export function stateName(code: string): string {
+  return US_STATES.find(s => s.code === code.toUpperCase())?.name ?? code;
 }
 
 /**

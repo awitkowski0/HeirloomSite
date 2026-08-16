@@ -2,7 +2,12 @@ import 'server-only';
 import { createHash } from 'node:crypto';
 import type Stripe from 'stripe';
 import { getStripe } from './stripe-server';
-import { splitPayment, type PaymentOption, type PaymentSplit } from './order-terms';
+import {
+  shippingMethodById,
+  splitPayment,
+  type PaymentOption,
+  type PaymentSplit,
+} from './order-terms';
 import { variantLabel } from './labels';
 import type { PricedCart, ShippingDetails } from './pricing';
 
@@ -51,6 +56,20 @@ function orderRefFrom(hash: string): string {
  * Reuse matters more than it looks: every invoice this shop ever sends that
  * person, deposit and balance, then lands on one dashboard page, which is what
  * makes "what does this customer still owe" answerable at all.
+ *
+ * Known race, accepted: list-then-create is not atomic and Stripe has no
+ * create-if-absent for customers, so two submissions from a NEW address landing
+ * together can produce two Customers. It needs simultaneous first-ever orders
+ * from one address, it costs a duplicate dashboard row rather than a duplicate
+ * charge, and the next order from that address reuses whichever came first.
+ * Locking it properly would need a datastore, which this flow deliberately
+ * does not have.
+ *
+ * Note also that address and shipping are overwritten on every order, so a
+ * repeat buyer shipping to a different address updates their own record. That
+ * is the right default for a delivery business - the newest address is the one
+ * to deliver to - but it does mean the Customer holds the latest destination,
+ * not a billing address.
  */
 async function findOrCreateCustomer(
   stripe: Stripe,
@@ -70,8 +89,9 @@ async function findOrCreateCustomer(
   if (existing.data.length > 0) {
     return stripe.customers.update(existing.data[0].id, {
       name,
+      phone: shipping.phone,
       address,
-      shipping: { name, address },
+      shipping: { name, phone: shipping.phone, address },
       /*
        * Deliberately no timestamp. src/lib/pricing.ts documents why: a value
        * that differs per request makes the parameters differ under a stable
@@ -86,8 +106,9 @@ async function findOrCreateCustomer(
   return stripe.customers.create({
     email: shipping.email,
     name,
+    phone: shipping.phone,
     address,
-    shipping: { name, address },
+    shipping: { name, phone: shipping.phone, address },
     metadata: { first_order_ref: orderRef, last_order_ref: orderRef, source: 'website_checkout' },
   });
 }
@@ -125,6 +146,20 @@ function buildLines(
     };
   });
 
+  /*
+   * Delivery is its own line, before tax, because it is a charge the customer
+   * chose and can see the price of. Folding it into the item lines would make
+   * the invoice disagree with the checkout summary they approved.
+   */
+  if (priced.shippingCents > 0) {
+    const method = shippingMethodById(priced.shippingMethod);
+    lines.push({
+      description: method.name,
+      amount: priced.shippingCents,
+      metadata: { kind: 'shipping', method: method.id },
+    });
+  }
+
   if (priced.taxCents > 0) {
     lines.push({
       description: `${taxState} sales tax (6%)`,
@@ -142,6 +177,36 @@ function buildLines(
   }
 
   return lines;
+}
+
+/** The customer id off an invoice, which Stripe may return expanded or as a string. */
+function customerIdOf(invoice: Stripe.Invoice): string {
+  const customer = invoice.customer;
+  if (!customer) return '';
+  return typeof customer === 'string' ? customer : customer.id;
+}
+
+/**
+ * An existing draft for this exact order, if the idempotency key has expired.
+ *
+ * Fails OPEN. A search outage must not stop someone ordering: the cost of
+ * missing a duplicate is a second draft the shop can void, and the cost of
+ * failing here is a customer who cannot buy anything.
+ */
+async function findExistingDraft(
+  stripe: Stripe,
+  orderHash: string
+): Promise<Stripe.Invoice | null> {
+  try {
+    const { data } = await stripe.invoices.search({
+      query: `metadata["order_hash"]:"${orderHash}" AND status:"draft"`,
+      limit: 1,
+    });
+    return data[0] ?? null;
+  } catch (err) {
+    console.error('quote: duplicate-draft search failed; creating a new draft.', err);
+    return null;
+  }
 }
 
 export async function createQuote(
@@ -175,6 +240,22 @@ export async function createQuote(
   const split = splitPayment(priced.totalCents, paymentOption);
   const stripe = getStripe();
 
+  /*
+   * The idempotency key below only covers 24 hours - Stripe expires them.
+   * Someone who submits, thinks it over for a weekend and resubmits the
+   * identical cart would otherwise get a SECOND draft, and because orderRef is
+   * derived from the same hash both drafts would carry the same HC- reference,
+   * which is precisely the case the shop cannot untangle in the dashboard.
+   *
+   * Search rather than replacing the key: the index lags writes by up to a
+   * minute, so it does not cover the double-click the key already handles well.
+   * The two guards cover different windows and are both wanted.
+   */
+  const priorDraft = await findExistingDraft(stripe, orderHash);
+  if (priorDraft) {
+    return { orderRef, invoiceId: priorDraft.id as string, customerId: customerIdOf(priorDraft), split };
+  }
+
   const customer = await findOrCreateCustomer(stripe, shipping, orderRef);
 
   const invoice = await stripe.invoices.create(
@@ -199,14 +280,35 @@ export async function createQuote(
       // Explicit, so nobody switches it on later and desynchronises the invoice
       // from the quote the customer was shown.
       automatic_tax: { enabled: false },
+      /*
+       * Affirm is offered on a pay-in-full invoice and NOT on a deposit one.
+       *
+       * Affirm finances the whole invoice and pays us immediately, so a
+       * customer who took it on a 50% deposit would need a SECOND Affirm loan
+       * for the balance two months later - two applications, two credit checks
+       * and two schedules for one crib. It also makes no sense as a product:
+       * Affirm already does the "spread the cost" job the deposit exists for,
+       * so the two together are the same idea charged twice.
+       *
+       * Restricting to card here rather than listing the allowed set: Klarna
+       * carries the identical problem, and naming a method the account has
+       * switched off would fail invoice creation - which would take the whole
+       * checkout down. Pay-in-full omits payment_settings entirely and inherits
+       * the account default, so Affirm, Klarna and Link all appear there.
+       */
+      ...(paymentOption === 'deposit'
+        ? { payment_settings: { payment_method_types: ['card' as const] } }
+        : {}),
       description: `Website order ${orderRef}`,
       custom_fields: [{ name: 'Order', value: orderRef.slice(0, MAX_CUSTOM_FIELD_VALUE) }],
       footer:
         split.dueLaterCents > 0
-          ? 'Delivery and setup are included. The remaining balance is invoiced once staining is complete.'
-          : 'Delivery and setup are included. Paid in full.',
+          ? `${shippingMethodById(priced.shippingMethod).name} is included in this total. ` +
+            'The remaining balance is invoiced once staining is complete.'
+          : `${shippingMethodById(priced.shippingMethod).name} is included in this total. Paid in full.`,
       shipping_details: {
         name: `${shipping.firstName} ${shipping.lastName}`,
+        phone: shipping.phone,
         address: {
           line1: shipping.address,
           city: shipping.city,
@@ -219,7 +321,13 @@ export async function createQuote(
         order_ref: orderRef,
         order_hash: orderHash,
         source: 'website_checkout',
-        kind: 'deposit',
+        /*
+         * What this invoice IS, not what the flow usually produces. It was
+         * hardcoded 'deposit', so a pay-in-full order was labelled a deposit -
+         * and scripts/create-balance-invoice.mjs selects on exactly this field,
+         * so it would have offered to bill a balance that does not exist.
+         */
+        kind: paymentOption === 'full' ? 'full' : 'deposit',
         payment_option: paymentOption,
         subtotal_cents: String(priced.subtotalCents),
         shipping_cents: String(priced.shippingCents),
@@ -228,6 +336,7 @@ export async function createQuote(
         due_now_cents: String(split.dueNowCents),
         due_later_cents: String(split.dueLaterCents),
         tax_state: shipping.state,
+        shipping_method: priced.shippingMethod,
         item_count: String(priced.lines.length),
         terms_accepted: 'true',
       },

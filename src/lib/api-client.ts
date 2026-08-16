@@ -19,6 +19,8 @@ export interface CreateQuoteRequest {
   agreedToTerms: boolean;
   /** Cloudflare Turnstile token; required only when the server has a secret. */
   turnstileToken?: string;
+  /** Which delivery tier. Defaults to the cheaper one server-side. */
+  shippingMethod: 'threshold' | 'white_glove';
   /** 'deposit' (50% now) or 'full'. Defaults to 'deposit' server-side. */
   paymentOption: 'deposit' | 'full';
   email: string;
@@ -37,6 +39,14 @@ export interface CreateQuoteResponse {
   dueLaterCents: number;
   /** Always null: Stripe only mints it when a draft is finalised. */
   hostedInvoiceUrl: string | null;
+  /*
+   * Whether the customer confirmation email actually went out. The order is
+   * recorded either way - this only decides whether the success screen may
+   * promise an email. It can be false for two ordinary reasons: Resend is not
+   * configured, or Turnstile is unconfigured in production and the route
+   * refuses to mail an address nothing has verified.
+   */
+  confirmationSent: boolean;
 }
 
 export class ApiError extends Error {

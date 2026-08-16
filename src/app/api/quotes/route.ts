@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import { StripeNotConfiguredError } from '@/lib/stripe-server';
-import { priceCart, validateShipping, requireTermsAcceptance, PricingError } from '@/lib/pricing';
+import {
+  priceCart,
+  validateShipping,
+  requireShippingMethod,
+  requireTermsAcceptance,
+  PricingError,
+} from '@/lib/pricing';
 import { isPaymentOption } from '@/lib/order-terms';
 import { verifyTurnstile, TurnstileError, turnstileEnabled } from '@/lib/turnstile';
 import { createQuote } from '@/lib/quote';
@@ -39,9 +45,10 @@ export async function POST(req: Request) {
     requireTermsAcceptance(body);
 
     const paymentOption = isPaymentOption(body.paymentOption) ? body.paymentOption : 'deposit';
-    // Tax depends on the destination, so pricing runs after the address is
-    // validated, not alongside it.
-    const priced = priceCart(body.cart, shipping.state);
+    const shippingMethod = requireShippingMethod(body);
+    // Tax depends on the destination AND on the delivery charge, so pricing
+    // runs after the address is validated, not alongside it.
+    const priced = priceCart(body.cart, shipping.state, shippingMethod);
 
     const quote = await createQuote(priced, shipping, paymentOption);
 
@@ -54,9 +61,15 @@ export async function POST(req: Request) {
      * the request - only delay it.
      */
     const livemode = process.env.STRIPE_SECRET_KEY?.startsWith('sk_live') ?? false;
-    const sends: Array<Promise<boolean>> = [
-      sendQuoteAlert(priced, shipping, quote, livemode),
-    ];
+    const alert = sendQuoteAlert(priced, shipping, quote, livemode);
+    /*
+     * Tracked separately from the shop alert because the client is told about
+     * it. The success screen used to promise an email unconditionally, which
+     * was a lie on any deployment without Resend - and the customer would then
+     * wait for a confirmation instead of noting the reference on screen, which
+     * in that case is the only record they have.
+     */
+    let confirmation: Promise<boolean> = Promise.resolve(false);
     /*
      * Belt and braces while Turnstile is unconfigured in production: still
      * record the order and still tell the shop, but do not send mail to an
@@ -65,14 +78,16 @@ export async function POST(req: Request) {
      * burn the sending domain.
      */
     if (turnstileEnabled() || process.env.NODE_ENV !== 'production') {
-      sends.push(sendQuoteConfirmation(priced, shipping, quote));
+      confirmation = sendQuoteConfirmation(priced, shipping, quote);
     } else {
       console.error(
         'Turnstile is not configured; skipping the customer confirmation email for ' +
           `${quote.orderRef} rather than mailing an unverified address.`
       );
     }
-    await Promise.allSettled(sends);
+    const [, confirmationResult] = await Promise.allSettled([alert, confirmation]);
+    const confirmationSent =
+      confirmationResult.status === 'fulfilled' && confirmationResult.value;
 
     return NextResponse.json({
       orderRef: quote.orderRef,
@@ -87,6 +102,7 @@ export async function POST(req: Request) {
       // Null on a draft, always - Stripe only mints it at finalisation. Named
       // in the response so the client is not left wondering where it went.
       hostedInvoiceUrl: null as string | null,
+      confirmationSent,
     });
   } catch (err) {
     if (err instanceof StripeNotConfiguredError) {

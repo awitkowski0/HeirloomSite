@@ -1,6 +1,6 @@
 'use client';
 
-import type { CartItem, CartAddon } from '@/types';
+import type { CartItem, CartAddon, CartInclude } from '@/types';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 
 const STORAGE_KEY = 'heirloom_cart';
@@ -50,6 +50,18 @@ export function cartItemId(
   return `ci_${(hash >>> 0).toString(36)}`;
 }
 
+/*
+ * Deliberately NOT part of itemKey/cartItemId. What comes with a product is
+ * fixed by the catalogue, so two lines of the same crib always carry the same
+ * includes - folding them into the identity would change every existing id and
+ * orphan the carts already in people's browsers, for no gain.
+ */
+function isCartInclude(value: unknown): value is CartInclude {
+  if (typeof value !== 'object' || value === null) return false;
+  const i = value as Record<string, unknown>;
+  return typeof i.productName === 'string' && i.productName.length > 0;
+}
+
 function isCartAddon(value: unknown): value is CartAddon {
   if (typeof value !== 'object' || value === null) return false;
   const a = value as Record<string, unknown>;
@@ -90,6 +102,9 @@ export function parseStoredCart(raw: string | null): CartItem[] {
       continue;
     }
     const addons = Array.isArray(e.addons) ? e.addons.filter(isCartAddon) : undefined;
+    const includes = Array.isArray(e.includes)
+      ? (e.includes.filter(isCartInclude) as CartInclude[])
+      : undefined;
     const base = { productName: e.productName, wood: e.wood, stainName: e.stainName, addons };
     out.push({
       ...base,
@@ -97,6 +112,7 @@ export function parseStoredCart(raw: string | null): CartItem[] {
       cribName: typeof e.cribName === 'string' ? e.cribName : undefined,
       price: e.price,
       image: typeof e.image === 'string' ? e.image : '',
+      includes,
       // Clamped to the same ceiling the server enforces, so a cart restored
       // from localStorage can never carry a line checkout will reject.
       quantity: Math.min(e.quantity, MAX_QUANTITY_PER_LINE),

@@ -3,6 +3,7 @@
 import MiniSearch from 'minisearch';
 import { useEffect, useMemo, useState } from 'react';
 import { useDelistedProducts } from './useDelistedProducts';
+import { isUnlistedCategory } from './taxonomy';
 
 export interface SearchResult {
   id: string;
@@ -100,7 +101,17 @@ function toResults(
   query: string,
   limit = MAX_RESULTS
 ): SearchResult[] {
-  const raw = ms.search(query, { prefix: true, fuzzy: 0.2 });
+  /*
+   * Unlisted categories never reach a result row.
+   *
+   * The conversion kits and the crib mattress are sold through a crib's bundle
+   * builder, not browsed or searched for - see src/lib/taxonomy.ts. Filtered
+   * here rather than left out of search-docs.json so the decision lives in one
+   * place with the nav and the grids, and flipping it is one edit.
+   */
+  const raw = ms
+    .search(query, { prefix: true, fuzzy: 0.2 })
+    .filter(hit => !isUnlistedCategory((hit as unknown as SearchDoc).category));
 
   /*
    * One row per PRODUCT, not per variant.

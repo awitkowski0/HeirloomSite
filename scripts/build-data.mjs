@@ -258,6 +258,11 @@ for (const dirName of productDirs) {
       productName,
       wood: v.variant,
       category: meta.category || null,
+      // The range a piece belongs to (Addison, West Lake...). A second axis
+      // across the catalogue, independent of category: /collections/<slug>
+      // answers "show me everything that matches my crib". Null for the rugs,
+      // lamps and generic parts that belong to no range.
+      collection: meta.collection || null,
       variantType: meta.variantType,
       description: collapseRepeatedWords(meta.description, `${productName}.description`) || null,
       extendedDescription:
@@ -288,6 +293,7 @@ for (const dirName of productDirs) {
     productName,
     slug: meta.slug || null,
     category: meta.category || null,
+    collection: meta.collection || null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,
   });
@@ -592,8 +598,8 @@ writeFileSync(
   JSON.stringify(recommendations) + "\n"
 );
 
-// Pricing table: the only thing the payment-intent route needs. Imported
-// statically by the route so it is always in the function bundle -- public/ is
+// Pricing table: the only catalogue data /api/quotes needs. Imported
+// statically by src/lib/pricing.ts so it is always in the function bundle -- public/ is
 // uploaded to the CDN, not traced into the lambda, so a runtime readFileSync
 // of public/data/inventory.json is not reliable under Next on Vercel.
 const pricing = inventory.map(item => ({
