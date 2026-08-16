@@ -9,17 +9,19 @@ import Link from 'next/link';
  * button is the last thing on screen before the footer, so anything placed
  * after it is the last thing read before buying or leaving.
  *
- * Every line is checked against what the site can back. Delivery is included
- * because SHIPPING_CENTS is 0; the lead time is the one the catalogue quotes;
- * the standards claim is the one already made in 180 product descriptions and
- * consolidated on /safety.
+ * Every line is checked against what the site can back. Delivery is a PRICED
+ * choice at checkout, so this names the tiers instead of promising they are
+ * free - it said "no shipping charge at checkout" while the checkout was about
+ * to add $685. The lead time is the one the catalogue quotes; the standards
+ * claim is the one already made in 180 product descriptions and consolidated
+ * on /safety.
  */
 
 const ASSURANCES: { icon: string; title: string; body: string; href?: string }[] = [
   {
     icon: 'local_shipping',
-    title: 'Delivery and setup included',
-    body: 'White-glove delivery by our trusted partners. No shipping charge at checkout, no freight bill on arrival.',
+    title: 'Threshold or white-glove delivery',
+    body: 'Delivered by our trusted partners, priced at checkout. No surprise freight bill on arrival.',
   },
   {
     icon: 'verified_user',

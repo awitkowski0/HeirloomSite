@@ -9,5 +9,13 @@
   "defaultVariant": "Default Title",
   "slug": "mackenzie-nightstand",
   "title": "Mackenzie Nightstand",
-  "metaDescription": "Mackenzie Nightstand: solid hardwood nursery furniture for your family."
+  "metaDescription": "Mackenzie Nightstand: solid hardwood nursery furniture for your family.",
+  "related": [
+    "mackenzie-chest",
+    "mackenzie-crib-panel-back",
+    "mackenzie-crib-slat-back",
+    "mackenzie-7-drawer-dresser",
+    "mackenzie-6-drawer-dresser"
+  ],
+  "collection": "Mackenzie"
 }

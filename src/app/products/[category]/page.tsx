@@ -1,31 +1,41 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getCategories, getCategoryBySlug, getProductsInCategory } from '@/lib/content';
-import { itemListJsonLd, breadcrumbJsonLd,
-  jsonLdScript,
-} from '@/lib/seo';
+import Link from 'next/link';
+import {
+  assertNoOrphanedCategories,
+  getCategories,
+  getTaxonomyNodes,
+  getTaxonomyNodeBySlug,
+  getProductsForNode,
+  getInventory,
+} from '@/lib/content';
+import { buildGalleryProducts } from '@/lib/gallery';
+import GalleryBrowser from '@/components/gallery/GalleryBrowser';
+import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
+import { TAXONOMY, sourcesFor } from '@/lib/taxonomy';
 import CategoryPills from '@/components/products/CategoryPills';
-import ProductCard from '@/components/products/ProductCard';
+import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return getCategories().map(c => ({ category: c.slug }));
+  /*
+   * Every LIVE node, parent and child alike, at a flat URL.
+   *
+   * A declared category with nothing in it is pruned by getTaxonomy(), so an
+   * unstocked Clothing or Toys never becomes a route, a sitemap entry or an
+   * empty page for a crawler to find. It starts existing the day something
+   * declares that category.
+   */
+  assertNoOrphanedCategories();
+  return getTaxonomyNodes().map(n => ({ category: n.slug }));
 }
 
-/** Descriptive copy per category, for meta descriptions and the page intro. */
-const CATEGORY_BLURBS: Record<string, string> = {
-  cribs: 'Handcrafted heirloom cribs built from solid American hardwoods with traditional joinery.',
-  dressers: 'Solid hardwood dressers with dovetailed drawers, built to outlast the nursery.',
-  nightstands: 'Bedside tables handcrafted to match your crib and dresser.',
-  chests: 'Storage chests built with mortise-and-tenon joinery and hand-applied finishes.',
-  'changing-tables': 'Changing tables that convert to lasting furniture as your child grows.',
-  'guard-rails-and-conversions': 'Guard rails and conversion kits to take your crib from newborn to full bed.',
-  'area-rugs': 'Washable, natural-fibre area rugs sized for nurseries and bedrooms.',
-  accessories: 'Finishing touches for the nursery, made to the same standard as our furniture.',
-  lamps: 'Lighting chosen to complement handcrafted nursery furniture.',
-};
+/** The declared parent of a node, for breadcrumbs. Null for a top-level one. */
+function parentOf(slug: string) {
+  return TAXONOMY.find(top => (top.children ?? []).some(c => c.slug === slug)) ?? null;
+}
 
 export async function generateMetadata({
   params,
@@ -33,17 +43,14 @@ export async function generateMetadata({
   params: Promise<{ category: string }>;
 }): Promise<Metadata> {
   const { category: slug } = await params;
-  const category = getCategoryBySlug(slug);
-  if (!category) return { title: 'Category not found', robots: { index: false } };
-
-  const description =
-    CATEGORY_BLURBS[slug] ?? `Browse our handcrafted ${category.name.toLowerCase()}.`;
+  const node = getTaxonomyNodeBySlug(slug);
+  if (!node) return { title: 'Category not found', robots: { index: false } };
 
   return {
-    title: category.name,
-    description,
+    title: node.name,
+    description: node.description,
     alternates: { canonical: `/products/${slug}` },
-    openGraph: { title: category.name, description, url: `/products/${slug}` },
+    openGraph: { title: node.name, description: node.description, url: `/products/${slug}` },
   };
 }
 
@@ -53,12 +60,39 @@ export default async function CategoryPage({
   params: Promise<{ category: string }>;
 }) {
   const { category: slug } = await params;
-  const category = getCategoryBySlug(slug);
-  if (!category) notFound();
+  const node = getTaxonomyNodeBySlug(slug);
+  if (!node) notFound();
 
-  const products = getProductsInCategory(category.name);
+  const products = getProductsForNode(slug);
   const categories = getCategories();
-  const blurb = CATEGORY_BLURBS[slug];
+  const parent = parentOf(slug);
+
+  /*
+   * The finish browser, on any node whose products are cribs.
+   *
+   * It used to be keyed on the literal slug 'cribs'. That breaks the moment
+   * cribs live under a parent and a Mini Cribs child, so it now asks what the
+   * node actually contains. Only cribs, because only cribs have a finish worth
+   * filtering on - the products with `variantType: "none"` have a single
+   * "Default" finish, and a filter with one option that matches everything is
+   * furniture.
+   */
+  const nodeSources = new Set(sourcesFor(node));
+  const showFinishBrowser = nodeSources.has('Cribs');
+  // Built from the node's OWN sources, not the literal 'Cribs' category, so the
+  // Cribs parent browses all sixteen and does not advertise a count its grid
+  // then contradicts by one. Mini Cribs alone falls through to the plain grid:
+  // one product with a single finish is not something to filter.
+  const cribFinishes = showFinishBrowser
+    ? buildGalleryProducts(getInventory().filter(i => i.category && nodeSources.has(i.category)))
+    : [];
+
+  const crumbs = [
+    { name: 'Home', path: '/' },
+    { name: 'Products', path: '/products' },
+    ...(parent ? [{ name: parent.name, path: `/products/${parent.slug}` }] : []),
+    { name: node.name, path: `/products/${slug}` },
+  ];
 
   return (
     <div className="container products-page">
@@ -70,38 +104,46 @@ export default async function CategoryPage({
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: jsonLdScript(
-            breadcrumbJsonLd([
-              { name: 'Home', path: '/' },
-              { name: 'Products', path: '/products' },
-              { name: category.name, path: `/products/${slug}` },
-            ])
-          ),
-        }}
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd(crumbs)) }}
       />
 
       <header className="page-header">
-        <h1 className="headline-lg text-primary">{category.name}</h1>
-        {blurb && <p className="body-lg text-on-surface-variant">{blurb}</p>}
+        {parent && (
+          <p className="label-caps text-on-surface-variant">
+            <Link href={`/products/${parent.slug}`}>{parent.name}</Link>
+          </p>
+        )}
+        <h1 className="headline-lg text-primary">{node.name}</h1>
+        <p className="body-lg text-on-surface-variant">{node.description}</p>
       </header>
 
-      <CategoryPills categories={categories} activeSlug={slug} />
+      <CategoryPills categories={categories} activeSlug={parent?.slug ?? slug} />
 
-      <section aria-label={`${category.name} products`}>
-        <div className="featured-grid">
-          {products.map((p, i) => (
-            <ProductCard
-              key={p.slug}
-              slug={p.slug}
-              name={p.productName}
-              category={p.category}
-              minPrice={p.minPrice}
-              img={p.defaultImage}
-              priority={i < 4}
-            />
+      {/*
+        A parent offers its children before its products. Someone landing on
+        "Cribs" is choosing between the full range and the minis, and the grid
+        below still shows the whole branch for anyone who would rather just
+        look.
+      */}
+      {node.children && node.children.length > 0 && (
+        <nav className="subcategory-nav" aria-label={`${node.name} subcategories`}>
+          {node.children.map(child => (
+            <Link key={child.slug} href={`/products/${child.slug}`} className="subcategory-card">
+              <span className="body-lg">{child.name}</span>
+              <span className="label-caps text-on-surface-variant">
+                {child.count} {child.count === 1 ? 'piece' : 'pieces'}
+              </span>
+            </Link>
           ))}
-        </div>
+        </nav>
+      )}
+
+      <section aria-label={`${node.name} products`}>
+        {showFinishBrowser ? (
+          <GalleryBrowser products={cribFinishes} />
+        ) : (
+          <VisibleProductGrid products={products} />
+        )}
         <ListingAnalytics />
       </section>
     </div>

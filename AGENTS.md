@@ -5,7 +5,7 @@ Furniture e-commerce site. Next.js App Router + TypeScript, deployed on Vercel.
 ## Tech stack
 - Next.js 16 (App Router), React 19, TypeScript 6
 - Vanilla CSS with custom properties (`src/app/globals.css`)
-- Stripe (checkout), PostHog (analytics), MiniSearch (product search)
+- Stripe (invoicing), PostHog (analytics), MiniSearch (product search)
 - ESLint flat config
 
 ## Key directories
@@ -13,7 +13,7 @@ Furniture e-commerce site. Next.js App Router + TypeScript, deployed on Vercel.
   boundary files (anything they import is in the client bundle automatically
   and must NOT carry the directive).
 - `src/components/` — grouped by feature (layout, search, product, products,
-  gallery, checkout, order, contact, ui)
+  gallery, checkout, home, contact, ui)
 - `src/lib/` — content accessors, SEO helpers, pricing, search, formatting
 - `src/context/` — cart (localStorage via useSyncExternalStore)
 - `data/` — source data, plus generated `pricing.json`
@@ -26,7 +26,7 @@ Furniture e-commerce site. Next.js App Router + TypeScript, deployed on Vercel.
 - `public/data/{inventory,products,images}.json` — read at build time by
   `src/lib/content.ts` (server-only)
 - `src/data/search-docs.json` — lazily imported by the client search
-- `data/pricing.json` — statically imported by the payment-intent route
+- `data/pricing.json` — statically imported by `src/lib/pricing.ts`
 
 Every one of those is generated and gitignored. `data/` holds nothing else;
 the hand-maintained copies of the catalogue that used to sit there
@@ -72,22 +72,130 @@ intentionally remove a product, lower it.
 2. Implement, verify (`npm run lint`, `npm run typecheck`, `npm run build`)
 3. Commit, push, then `node scripts/create-pr.mjs "<title>"`
 
+## Hiding a product
+
+Two mechanisms, and they are not interchangeable.
+
+**`"hidden": true` in `product.json` is a withdrawal.** The build skips the
+product entirely, so there is no inventory row, no route, no sitemap entry, no
+search document and no row in `data/pricing.json`. That last one is the point:
+`src/lib/pricing.ts` prices every checkout line from that table and rejects
+anything missing from it, so a hidden product cannot be bought even by posting
+a hand-made cart straight at the API. The same key works on a variant in
+`variants.json` to withdraw a single wood. Hidden products are dropped from
+other products' `bundle`/`related` with a logged notice rather than failing the
+build - a shared accessory is in fifteen bundles - while a slug that is merely
+*wrong* still fails. Changing it needs a deploy.
+
+**A `product-<slug>` PostHog flag set to false is a de-listing.** It removes the
+product from grids, the cribs finish browser, search results, bundles and
+recommendations, without a deploy. It does NOT remove the product page, the
+sitemap entry, or the ability to buy it - every content route is statically
+prerendered and flags are read in the browser after that HTML is built, and
+evaluating them server-side would need `posthog-node` plus dynamic rendering,
+which is the trade this site refuses. It also fails OPEN: an unknown flag, a
+PostHog outage or a blocked script all leave the product visible, deliberately,
+because failing closed would empty the catalogue the moment analytics broke.
+A de-listed product is in the prerendered HTML and disappears when flags
+arrive, so it flashes.
+
+Use the flag for a soft launch or a quick de-list. Use `hidden` when it must
+not be sellable. See `src/lib/useDelistedProducts.ts`.
+
+## Browse taxonomy
+
+`src/lib/taxonomy.ts` DECLARES the category tree; products are mapped into it
+by the `category` value in their `product.json`. It is not derived from the
+catalogue any more, and cannot be: Clothing, Bath, Newborn Must-Haves, Gift
+Sets, Toys and Bedding are real categories with real copy and no stock yet, and
+a list counted from products can only show what already exists.
+
+- `sources` on a node names the `category` values that land there. A parent
+  owns its own sources plus everything under its children.
+- **Empty nodes are pruned, not removed.** `getTaxonomy()` in `src/lib/content.ts`
+  drops any node with no products before the nav, the routes or the sitemap see
+  it, so an unstocked category costs nothing and appears by itself the moment a
+  product declares that category. No deploy of taxonomy.ts required.
+- **URLs are flat.** A sub-menu is `/products/<its own slug>`, not
+  `/products/<parent>/<child>`. The hierarchy is a navigation affordance;
+  nesting it in the path would rename every category URL and buy nothing.
+- `assertNoOrphanedCategories()` fails the build if a product sits in a category
+  that no node claims and that is not deliberately unlisted. A product nobody
+  can browse to would otherwise just quietly vanish.
+
+**Unlisted is not hidden.** `UNLISTED_CATEGORIES` (the conversion kits and the
+crib mattress) drops products from the nav, the grids, `/products`, search and
+the sitemap while leaving their routes, their `pricing.json` rows and their
+place in every crib bundle intact. Do NOT use `hidden: true` for this - that
+removes the product from `pricing.json`, which makes it unbuyable and breaks
+the bundle on all fifteen cribs.
+
+**Collections are the second axis** and ARE derived, in `src/lib/collections.ts`.
+A category says what a piece is; a collection says what matches your crib. The
+reasoning is opposite to the taxonomy on purpose: a category must exist before
+it has stock, a collection means nothing until it does.
+
+## The order lifecycle
+
+Checkout takes no card. `POST /api/quotes` prices the cart server-side and
+creates a **draft** Stripe invoice, then stops. Every step after that is a
+person, on purpose - these are made-to-order pieces and the stain, the kit list
+or the price can all have moved since the conversation.
+
+```
+/api/quotes        → Customer + DRAFT invoice (kind: deposit | full) + 2 emails
+shop reviews it    → presses Send in the Stripe dashboard        [manual]
+customer pays      → on Stripe's hosted invoice page
+invoice.paid       → webhook logs it, mails the shop and the customer
+staining finishes  → node scripts/create-balance-invoice.mjs HC-XXXXXXXX  [manual]
+                     creates the DRAFT balance invoice
+shop reviews it    → presses Send                                [manual]
+```
+
+A deposit order is **two** invoices. One invoice cannot have two due dates, so
+the deposit is invoiced now and the balance when the staining is done. The
+deposit invoice itemises the whole order and carries a negative
+"Balance due on completion" line, so it shows what was bought while asking for
+half of it. All of the sales tax is charged on the deposit; the balance invoice
+has no tax line.
+
+`splitPayment()` in `src/lib/order-terms.ts` defines the balance as
+*total minus deposit*, and `create-balance-invoice.mjs` READS that figure from
+the deposit invoice's `due_later_cents` metadata rather than recomputing it.
+That is what guarantees the two invoices sum to the order total even if the
+price list has moved since. Do not make the script re-price anything.
+
+Nothing creates the balance invoice automatically. The `invoice.paid` alert to
+the shop carries the exact command to run, so the follow-up lives in an inbox
+rather than in someone's memory.
+
+There is no database. Stripe is the record, and `order_ref` / `order_hash` in
+invoice metadata are the join keys - `stripe.invoices.search` answers "what does
+this customer still owe".
+
 ## Env vars
 - `NEXT_PUBLIC_SITE_URL` — canonical origin for canonicals/sitemap/og:image
-- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`
 - `STRIPE_SECRET_KEY` — server only
 - `STRIPE_WEBHOOK_SECRET` — server only; verifies `/api/stripe/webhook`. The
   route returns 503 rather than trusting an unsigned body.
-- `ORDER_TOKEN_SECRET` — server only; HMAC key for order-lookup tokens. Required,
-  with no fallback (`openssl rand -hex 32`). The token is passed to
-  `/api/orders/*` in the `x-order-token` header only — never in the URL, because
-  PostHog captures `$current_url` with its query string.
+- `RESEND_API_KEY`, `ORDER_FROM_EMAIL`, `ORDER_NOTIFICATION_EMAIL` — server only;
+  `ORDER_NOTIFICATION_EMAIL` is comma-separated for multiple recipients;
+  the quote confirmation to the customer and the alert to the shop. All fail
+  **soft** with a loud warning: by the time email is attempted the quote is
+  already a draft invoice in Stripe, so failing the request would tell a
+  customer their order failed when it did not, and hand them a retry that
+  creates a second invoice. `ORDER_FROM_EMAIL` must be on a Resend-verified
+  domain.
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` — Cloudflare
   Turnstile on the checkout submit. Both are optional and the integration is
-  inert without them, but while they are unset the payment-intent endpoint has
-  no bot protection at all. Verified against Cloudflare's documented test
-  secrets: fails closed on `2x0000...`, passes on `1x0000...`.
+  inert without them. **Required in production**: `/api/quotes` is anonymous and
+  both creates Stripe Customers and sends email from a verified domain to an
+  address the caller supplies, so an unprotected endpoint is an email-bombing
+  amplifier that would burn the sending domain's reputation. The route already
+  refuses to send the customer-facing email when Turnstile is unconfigured in
+  production. Verified against Cloudflare's documented test secrets: fails
+  closed on `2x0000...`, passes on `1x0000...`.
 - `GITHUB_TOKEN`, `VERCEL_TOKEN` — local tooling only
 
 ## Security posture
@@ -99,9 +207,11 @@ intentionally remove a product, lower it.
   `Content-Security-Policy` once the console is clean — the value does not
   change. `/checkout` is the page that matters: Stripe, PostHog, Google Fonts,
   Babylist and (if configured) Turnstile all load there together.
-- Rate limiting is NOT implemented in code. Turnstile covers the bot case;
-  add a Vercel Firewall rate-limit rule on `/api/stripe/*` for the volumetric
-  one, which also covers token guessing on `/api/orders/*`.
+- Rate limiting is NOT implemented in code. Turnstile covers the bot case; add
+  a Vercel Firewall rate-limit rule on `/api/quotes` for the volumetric one.
+  That is the endpoint that matters: it is anonymous, it creates Stripe
+  customers and invoices, and it sends mail from a verified domain to an address
+  the caller supplies.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

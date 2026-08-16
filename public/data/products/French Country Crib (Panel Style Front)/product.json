@@ -9,5 +9,22 @@
   "defaultVariant": "Natural",
   "slug": "french-country-crib-panel-style-front",
   "title": "French Country Crib (Panel Style Front)",
-  "metaDescription": "Make a timeless statement with the French Country Crib featuring a panel-style front."
+  "metaDescription": "Make a timeless statement with the French Country Crib featuring a panel-style front.",
+  "bundle": [
+    "crib-mattress"
+  ],
+  "related": [
+    "french-country-chest",
+    "french-country-6-drawer-dresser-with-hutch-top",
+    "french-country-7-drawer-dresser-with-top-mirror",
+    "french-country-7-drawer-dresser-with-changing-table",
+    "french-country-3-drawer-dresser-with-door-and-changing-table",
+    "french-country-6-drawer-dresser-with-changing-table"
+  ],
+  "includes": [
+    "toddler-conversion-rail",
+    "full-bed-rail-kit",
+    "34-guard-rail"
+  ],
+  "collection": "French Country"
 }

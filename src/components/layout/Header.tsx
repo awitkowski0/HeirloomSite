@@ -1,15 +1,24 @@
 import Link from 'next/link';
 import SearchBar from '@/components/search/SearchBar';
 import CartBadge from './CartBadge';
-import NavLink from './NavLink';
+import CategoryBar from './CategoryBar';
+import HelpMenu from './HelpMenu';
 
 /**
- * Server component. Only the search field and the cart badge need client JS.
+ * Server component. Only the search field, help menu and cart badge need JS.
  *
- * Three-cell grid rather than flex space-between: the wordmark has to sit at
- * the optical centre of the bar, and space-between centres it only when the
- * two side clusters happen to be the same width. They are not, and the label
- * lengths change per viewport, so under flex the mark visibly drifts.
+ * Two bars on desktop. The first is the utility row - identity, search, help,
+ * cart - and the second is the catalogue. That split is the standard retail
+ * arrangement (Wayfair, Amazon) for a good reason: it lets search be the size
+ * it deserves to be.
+ *
+ * The previous single bar was a three-cell grid with the wordmark centred
+ * between two navs. Centring the mark meant the outer cells were 1fr each, and
+ * the clusters in them were nowhere near equal - two links on the left, three
+ * plus a 220px search field on the right, roughly 167px against 504px. The
+ * mark was dead centre by measurement and visibly shoved against the right,
+ * with 369px of air on one side and 32px on the other. Splitting the bars
+ * removes the constraint that caused it rather than tuning around it.
  *
  * The mark is text, not the logo PNG it replaced. That removes an image
  * request from every page in the site and lets the mark inherit colour;
@@ -18,24 +27,25 @@ import NavLink from './NavLink';
 export default function Header() {
   return (
     <header className="app-header">
-      <nav className="header-nav header-nav--start" aria-label="Shop">
-        <NavLink href="/products">Shop</NavLink>
-        <NavLink href="/gallery">Collections</NavLink>
-      </nav>
+      <div className="header-inner">
+        <Link href="/" className="wordmark" aria-label="Heirloom Cribs and More, home">
+          Heirloom
+        </Link>
 
-      <Link href="/" className="wordmark" aria-label="Heirloom Cribs and More, home">
-        Heirloom
-      </Link>
+        {/* The middle column, and the widest thing in the bar. On a catalogue
+            of 67 pieces across nine categories, search is how someone who
+            knows what they want gets there. */}
+        <div className="header-search">
+          <SearchBar />
+        </div>
 
-      <div className="header-end">
-        <nav className="header-nav header-nav--end" aria-label="Support">
-          <NavLink href="/safety">Safety</NavLink>
-          <NavLink href="/care">Care</NavLink>
-          <NavLink href="/contact">Help</NavLink>
-        </nav>
-        <SearchBar />
-        <CartBadge />
+        <div className="header-end">
+          <HelpMenu />
+          <CartBadge />
+        </div>
       </div>
+
+      <CategoryBar />
     </header>
   );
 }

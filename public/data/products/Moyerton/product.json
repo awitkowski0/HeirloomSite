@@ -9,5 +9,13 @@
   "defaultVariant": "BrownMaple",
   "slug": "moyerton",
   "title": "Moyerton",
-  "metaDescription": "Rustic warmth and heirloom quality come together in the Moyerton Convertible Crib, solid hardwood construction with charming panel details that feel."
+  "metaDescription": "Rustic warmth and heirloom quality come together in the Moyerton Convertible Crib, solid hardwood construction with charming panel details that feel.",
+  "bundle": [
+    "crib-mattress"
+  ],
+  "includes": [
+    "toddler-conversion-rail",
+    "full-bed-rail-kit",
+    "34-guard-rail"
+  ]
 }

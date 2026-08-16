@@ -14,10 +14,17 @@ import type { InventoryItem } from '@/types';
  * page that takes card payments is not a design detail.
  */
 
+/*
+ * The names here MUST match `productName` in the catalogue exactly - this is a
+ * Map lookup, not a search. They read "Mission Style", "Hudson Style" and
+ * "Darlington Style" while the products are "Mission", "Hudson" and
+ * "Darlington", so every card resolved to null and this whole section rendered
+ * nothing at all. resolveFeature now warns at build time when a name misses.
+ */
 const STYLES: { productName: string; descriptor: string }[] = [
-  { productName: 'Mission Style', descriptor: 'Straight slats, square posts, no ornament.' },
-  { productName: 'Hudson Style', descriptor: 'A low arched headboard with a flat top rail.' },
-  { productName: 'Darlington Style', descriptor: 'Panelled ends and a gently curved crest.' },
+  { productName: 'Mission', descriptor: 'Straight slats, square posts, no ornament.' },
+  { productName: 'Hudson', descriptor: 'A low arched headboard with a flat top rail.' },
+  { productName: 'Darlington', descriptor: 'Panelled ends and a gently curved crest.' },
 ];
 
 export default function StyleCards({ inventory }: { inventory: InventoryItem[] }) {

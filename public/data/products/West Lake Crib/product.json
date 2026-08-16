@@ -9,5 +9,21 @@
   "defaultVariant": "Almond",
   "slug": "west-lake-crib",
   "title": "West Lake Crib",
-  "metaDescription": "Traditional elegance meets modern functionality in the West Lake Crib."
+  "metaDescription": "Traditional elegance meets modern functionality in the West Lake Crib.",
+  "bundle": [
+    "crib-mattress"
+  ],
+  "related": [
+    "west-lake-chest",
+    "west-lake-7-drawer-dresser",
+    "west-lake-6-drawer-dresser",
+    "west-lake-4-drawer-dresser",
+    "west-lake-3-drawer-nightstand"
+  ],
+  "includes": [
+    "west-lake-toddler-bed",
+    "west-lake-full-bed-rail-kit",
+    "34-guard-rail"
+  ],
+  "collection": "West Lake"
 }

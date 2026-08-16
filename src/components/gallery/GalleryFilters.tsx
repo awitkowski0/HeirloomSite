@@ -1,75 +1,44 @@
 'use client';
 
-import { humanizeWood } from '@/lib/labels';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 
-export const ALL_WOODS = 'All Collections';
-export const ALL_STAINS = 'All Stains';
+/** Sentinel for "no finish filter applied", not a label - it is never rendered. */
+export const ALL_FINISHES = '__all_finishes__';
 
-interface WoodFilterProps {
-  woods: string[];
+interface FinishFilterProps {
+  finishes: string[];
   selected: string;
-  onSelect: (wood: string) => void;
-  onReset: () => void;
+  onSelect: (finish: string) => void;
 }
 
-export function WoodFilter({ woods, selected, onSelect, onReset }: WoodFilterProps) {
-  return (
-    <div className="filter-pills" role="radiogroup" aria-label="Filter by wood">
-      <button
-        type="button"
-        role="radio"
-        aria-checked={selected === ALL_WOODS}
-        className={`filter-pill-btn ${selected === ALL_WOODS ? 'filter-pill-btn--active' : ''}`}
-        onClick={onReset}
-      >
-        Our Cribs
-      </button>
-
-      <span className="filter-pill-divider" aria-hidden="true" />
-
-      {woods.map(w => (
-        <button
-          key={w}
-          type="button"
-          role="radio"
-          aria-checked={selected === w}
-          className={`filter-pill-btn ${selected === w ? 'filter-pill-btn--active' : ''}`}
-          onClick={() => onSelect(w)}
-        >
-          {humanizeWood(w)}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-interface StainFilterProps {
-  stains: string[];
-  selected: string;
-  onSelect: (stain: string) => void;
-}
-
-export function StainFilter({ stains, selected, onSelect }: StainFilterProps) {
-  if (stains.length === 0) return null;
+/**
+ * Finish filter pills.
+ *
+ * The wood filter that used to sit above this is gone. The shop sells one wood,
+ * and a control with one option is not a control - it was already hidden, and
+ * with it hidden the stain filter's "only show once a wood is chosen" gate
+ * could never open, which would have left the page with no filters at all.
+ */
+export function FinishFilter({ finishes, selected, onSelect }: FinishFilterProps) {
+  if (finishes.length === 0) return null;
 
   return (
-    <div className="stain-filter-container" role="group" aria-label="Filter by stain">
-      {stains.map(stain => {
-        const isSelected = selected === stain;
-        const color = getStainColor(stain);
+    <div className="stain-filter-container" role="group" aria-label="Filter by finish">
+      {finishes.map(finish => {
+        const isSelected = selected === finish;
+        const color = getStainColor(finish);
         return (
           <button
-            key={stain}
+            key={finish}
             type="button"
             // Toggle rather than single-select, so aria-pressed is the right
             // state, not aria-checked.
             aria-pressed={isSelected}
             className={`stain-pill-btn ${isSelected ? 'stain-pill-btn--active' : ''}`}
-            onClick={() => onSelect(stain)}
+            onClick={() => onSelect(finish)}
           >
             {color && <span className="stain-pill-dot" style={{ backgroundColor: color }} aria-hidden="true" />}
-            {stainLabel(stain)}
+            {stainLabel(finish)}
           </button>
         );
       })}

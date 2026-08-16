@@ -9,5 +9,13 @@
   "defaultVariant": "BrownMaple",
   "slug": "darlington",
   "title": "Darlington",
-  "metaDescription": "Elegant and inviting, the Darlington Convertible Crib features graceful detailing and sturdy hardwood construction you can trust."
+  "metaDescription": "Elegant and inviting, the Darlington Convertible Crib features graceful detailing and sturdy hardwood construction you can trust.",
+  "bundle": [
+    "crib-mattress"
+  ],
+  "includes": [
+    "toddler-conversion-rail",
+    "full-bed-rail-kit",
+    "34-guard-rail"
+  ]
 }

@@ -12,6 +12,24 @@ export interface Stain {
   gallery?: StainGalleryItem[];
 }
 
+/** A product referenced by another product's `bundle` or `related`. */
+export interface RelatedProduct {
+  slug: string;
+  productName: string;
+  /** Lowest price across the target's variants, in dollars, as elsewhere in the catalogue. */
+  price: number;
+  image: string | null;
+  category: string | null;
+  /*
+   * The single configuration this product has, or null when it has real
+   * choices. A cart line needs product + variant + stain, so only a target
+   * with exactly one of each can be added by a checkbox; build-data.mjs
+   * rejects any `bundle` entry where this would be null.
+   */
+  wood: string | null;
+  stainName: string | null;
+}
+
 export interface Addon {
   name: string;
   description: string | null;
@@ -37,6 +55,8 @@ export interface InventoryItem {
   productName: string;
   wood: string;
   category: string | null;
+  /** The range this piece belongs to (Addison, West Lake...), or null. */
+  collection: string | null;
   variantType: VariantType;
   description: string | null;
   extendedDescription: string | null;
@@ -49,6 +69,29 @@ export interface InventoryItem {
   dimensions: string | null;
   weight: number | null;
   addons: Addon[];
+  /*
+   * Other products this one relates to, resolved from slugs at build time by
+   * scripts/build-data.mjs.
+   *
+   * `includes` is what already ships with the crib and is already inside its
+   * price - the conversion rails and the guard rail. Shown so a buyer can see
+   * what the 4-in-1 claim consists of, and never added to the cart: those are
+   * not being sold a second time.
+   *
+   * `bundle` is the genuinely optional paid add-on - for a crib, the mattress.
+   * Each entry is a real product with its own page and price, so ticking one
+   * adds its own cart line rather than inflating the crib's; that keeps
+   * src/lib/pricing.ts authoritative with no new pricing concept, and makes an
+   * invoice itemise correctly.
+   *
+   * `related` is the rest of the matching family - the dressers, nightstands
+   * and chests that complete the nursery.
+   *
+   * Empty for any product that declares neither.
+   */
+  includes: RelatedProduct[];
+  bundle: RelatedProduct[];
+  related: RelatedProduct[];
   stains: Stain[];
 }
 
@@ -94,6 +137,21 @@ export interface CartAddon {
   stainName?: string;
 }
 
+/**
+ * Something that ships with a cart line and is already inside its price.
+ *
+ * DISPLAY ONLY, and that is a load-bearing restriction. src/lib/pricing.ts
+ * re-prices every line the browser sends from the catalogue, so a rail kit
+ * that reached the server as a cart line would be charged at its own $320 -
+ * which is exactly the $910-per-crib double-charge that splitting `includes`
+ * from `bundle` was written to fix. CheckoutClient never maps this into the
+ * request; it exists so the cart can SHOW the whole order.
+ */
+export interface CartInclude {
+  productName: string;
+  image: string | null;
+}
+
 export interface CartItem {
   id: string;
   productName: string;
@@ -104,4 +162,6 @@ export interface CartItem {
   image: string;
   quantity: number;
   addons?: CartAddon[];
+  /** What comes with this line, already paid for. Never sent to the server. */
+  includes?: CartInclude[];
 }

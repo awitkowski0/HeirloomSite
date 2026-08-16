@@ -49,7 +49,11 @@ export default function ProductGallery({ images, productName, priority = false }
             alt={productName}
             fill
             priority={priority}
-            sizes="(max-width: 768px) 100vw, 55vw"
+            /* The grid does not split until 1024px, but this claimed 55vw from
+              769px up - so every tablet was told to fetch roughly half the
+              pixels it actually renders. Pre-existing, unrelated to the
+              layout change. */
+            sizes="(max-width: 1023px) 100vw, 50vw"
             style={{ objectFit: 'contain' }}
           />
         </button>
@@ -92,6 +96,27 @@ export default function ProductGallery({ images, productName, priority = false }
         overlayClassName="lightbox-overlay"
         className="lightbox-content"
       >
+        {/*
+          A real dismiss surface behind the photograph.
+
+          Modal closes when the overlay is clicked directly, but
+          .lightbox-content is width:100%/height:100% and covers the whole
+          overlay, so the click never landed on the overlay itself and
+          click-outside-to-close silently did nothing. With that gone and the
+          close button drawn as a bare white glyph, Escape was the only exit
+          anyone could find.
+
+          A button rather than a div with a handler: it is a control, it should
+          be reachable and announced as one.
+        */}
+        <button
+          type="button"
+          onClick={() => setLightboxOpen(false)}
+          className="lightbox-dismiss"
+          aria-label="Close fullscreen view"
+          tabIndex={-1}
+        />
+
         <button
           type="button"
           onClick={() => setLightboxOpen(false)}

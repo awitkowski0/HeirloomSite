@@ -21,6 +21,8 @@ interface Props {
  * now-obscured button with nothing announced.
  */
 export default function CartPopup({ open, productName, wood, stain, onClose }: Props) {
+  const variant = variantLabel(wood, stain);
+
   return (
     <Modal
       open={open}
@@ -33,8 +35,10 @@ export default function CartPopup({ open, productName, wood, stain, onClose }: P
       <span className="material-symbols-outlined cart-popup-icon" aria-hidden="true">
         check_circle
       </span>
+      {/* The dash only when there is something after it: a product with no
+          variant to choose returns an empty label. */}
       <p className="body-md text-on-surface-variant cart-popup-detail">
-        {productName} — {variantLabel(wood, stain)}
+        {variant ? `${productName} — ${variant}` : productName}
       </p>
       <div className="cart-popup-actions">
         <Link href="/checkout" className="button-primary">

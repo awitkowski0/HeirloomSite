@@ -122,8 +122,10 @@ export default function SafetyPage() {
           your model — the geometry differs between styles.
         </p>
         <p>
-          <Link href="/products/guard-rails-and-conversions" className="doc-link">
-            See guard rails and conversion kits →
+          {/* The kits are listed on each crib's own page, not as a category:
+              they ship with the crib and are already in its price. */}
+          <Link href="/products/cribs" className="doc-link">
+            See which rails come with each crib →
           </Link>
         </p>
       </section>

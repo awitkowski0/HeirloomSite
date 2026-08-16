@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import type Stripe from 'stripe';
 import { getStripe, StripeNotConfiguredError } from '@/lib/stripe-server';
+import {
+  sendPaymentAlert,
+  sendPaymentFailedAlert,
+  sendPaymentReceipt,
+  type InvoiceEvent,
+} from '@/lib/email';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -14,47 +20,67 @@ export const dynamic = 'force-dynamic';
  * method and nothing server-side ever learned the order had happened. Payment
  * confirmation cannot depend on the payer's browser staying alive.
  *
- * Deliberately scoped: this verifies the signature and records the event.
- * There is no datastore and no email provider in this project, so `deliver()`
- * below is the single place a persistence or notification integration belongs.
- * Until it is filled in, a paid order is durably LOGGED but still does not
- * reach anyone automatically - that gap is real and is not closed by this file.
+ * Verifies the signature, logs the event, and notifies. There is still no
+ * datastore: Stripe is the record, and `order_ref` / `order_hash` in invoice
+ * metadata are the join keys that answer "what does this customer still owe"
+ * through invoices.search. `deliver()` remains the single seam where a database
+ * would attach if one ever exists.
+ *
+ * What it does NOT do is create the balance invoice. That is
+ * scripts/create-balance-invoice.mjs, run by hand when the staining is actually
+ * finished - a fact this process cannot know. The deposit-paid alert therefore
+ * carries the command to run, so the follow-up lives in the shop's inbox.
  */
 
-interface OrderRecord {
-  paymentIntentId: string;
-  status: string;
-  amountCents: number;
-  currency: string;
-  email: string | null;
-  name: string | null;
-  itemCount: string | null;
-  livemode: boolean;
-}
-
-function summarise(pi: Stripe.PaymentIntent): OrderRecord {
+function summarise(invoice: Stripe.Invoice): InvoiceEvent {
+  const meta = invoice.metadata ?? {};
+  /*
+   * Parsed here rather than in the templates. Stripe metadata values are always
+   * strings, and `Number(undefined)` is NaN - which is neither > 0 nor an
+   * integer, so an invoice written by anything other than quote.ts falls
+   * through to "nothing outstanding" instead of printing NaN at a customer.
+   */
+  const dueLaterCents = Number(meta.due_later_cents);
   return {
-    paymentIntentId: pi.id,
-    status: pi.status,
-    amountCents: pi.amount,
-    currency: pi.currency,
-    email: pi.receipt_email,
-    name: pi.shipping?.name ?? null,
-    itemCount: pi.metadata?.item_count ?? null,
-    livemode: pi.livemode,
+    invoiceId: invoice.id as string,
+    orderRef: meta.order_ref ?? null,
+    kind: meta.kind ?? null,
+    status: invoice.status ?? 'unknown',
+    amountDueCents: invoice.amount_due,
+    amountPaidCents: invoice.amount_paid,
+    dueLaterCents: Number.isInteger(dueLaterCents) && dueLaterCents > 0 ? dueLaterCents : 0,
+    email: invoice.customer_email,
+    name: invoice.customer_name,
+    hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+    livemode: invoice.livemode,
   };
 }
 
 /**
- * The extension point. Replace the log with a real sink (a row in a database, a
- * notification email, an order-management webhook) when one exists.
+ * Log, then notify.
  *
- * Never throws: a sink failure must not return a non-2xx to Stripe, or Stripe
- * retries and the same order is processed twice.
+ * Never throws, and never awaits its way into a non-2xx: a mail failure must not
+ * make Stripe retry, or the same payment is announced twice. src/lib/email.ts
+ * already fails soft for exactly this reason; the try/catch is the second belt.
+ *
+ * The log line stays regardless of whether mail is configured - it is the
+ * durable record in the Vercel logs, and the only one on a deployment without
+ * Resend.
  */
-async function deliver(event: string, order: OrderRecord): Promise<void> {
+async function deliver(event: string, order: InvoiceEvent): Promise<void> {
   try {
     console.log(`[order] ${event}`, JSON.stringify(order));
+
+    if (event === 'invoice.paid') {
+      await Promise.allSettled([sendPaymentAlert(order), sendPaymentReceipt(order)]);
+      return;
+    }
+    if (event === 'invoice.payment_failed') {
+      await sendPaymentFailedAlert(order);
+    }
+    // finalized / sent / voided / marked_uncollectible are logged only. Stripe's
+    // own invoice emails cover the customer side of those, and duplicating them
+    // from here would mean the customer hears about one send twice.
   } catch (err) {
     console.error('[order] delivery failed; Stripe still gets a 200', err);
   }
@@ -90,24 +116,23 @@ export async function POST(req: Request) {
   }
 
   switch (event.type) {
-    case 'payment_intent.succeeded':
-    case 'payment_intent.payment_failed':
+    /*
+     * Invoices, not PaymentIntents.
+     *
+     * Checkout no longer creates a PaymentIntent - it records a draft invoice
+     * that a person reviews and sends. Invoices do create their own
+     * PaymentIntents when paid, so keeping the old payment_intent.* cases
+     * subscribed would fire twice for every payment and send duplicate
+     * notifications. invoice.paid is the authoritative signal.
+     */
+    case 'invoice.paid':
+    case 'invoice.payment_failed':
+    case 'invoice.sent':
+    case 'invoice.finalized':
+    case 'invoice.voided':
+    case 'invoice.marked_uncollectible':
       await deliver(event.type, summarise(event.data.object));
       break;
-    case 'charge.refunded': {
-      const charge = event.data.object;
-      await deliver(event.type, {
-        paymentIntentId: typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.id,
-        status: 'refunded',
-        amountCents: charge.amount_refunded,
-        currency: charge.currency,
-        email: charge.receipt_email,
-        name: charge.shipping?.name ?? null,
-        itemCount: null,
-        livemode: charge.livemode,
-      });
-      break;
-    }
     default:
       // Acknowledged, not handled. Returning non-2xx would make Stripe retry an
       // event we were never going to act on.

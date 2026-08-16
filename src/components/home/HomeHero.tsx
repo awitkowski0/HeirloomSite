@@ -18,8 +18,14 @@ import ConversionDiagram from './ConversionDiagram';
  */
 
 interface Props {
-  /** Product page the hero's detail crops link through to. */
-  detail: { slug: string; image: string; name: string } | null;
+  /**
+   * The piece the hero photography shows, and where every frame here links.
+   *
+   * `href` is a VARIANT url - the exact wood and finish in the picture - not
+   * the bare product page, so clicking the nursery lands on the crib as shown
+   * rather than on whatever configuration happens to load first.
+   */
+  detail: { slug: string; image: string; name: string; href: string } | null;
   heroImage: string;
 }
 
@@ -49,15 +55,35 @@ export default function HomeHero({ detail, heroImage }: Props) {
         </Link>
       </div>
 
+      {/*
+        The nursery is a link when we know what is in it.
+        
+        It was a bare image: the largest, most inviting thing on the page, and
+        the only part of the hero that did not go anywhere when clicked. It now
+        opens the crib in the photograph, in its finish.
+      */}
       <div className="home-hero-photo">
-        <Image
-          src={heroImage}
-          alt="A nursery furnished with a solid hardwood crib beside a curtained window"
-          fill
-          priority
-          sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 34vw"
-          style={{ objectFit: 'cover', objectPosition: '42% 55%' }}
-        />
+        {detail ? (
+          <Link href={detail.href} aria-label={`Shop the ${detail.name} crib`}>
+            <Image
+              src={heroImage}
+              alt="A nursery furnished with a solid hardwood crib beside a curtained window"
+              fill
+              priority
+              sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 34vw"
+              style={{ objectFit: 'cover', objectPosition: '42% 55%' }}
+            />
+          </Link>
+        ) : (
+          <Image
+            src={heroImage}
+            alt="A nursery furnished with a solid hardwood crib beside a curtained window"
+            fill
+            priority
+            sizes="(max-width: 767px) 100vw, (max-width: 1199px) 50vw, 34vw"
+            style={{ objectFit: 'cover', objectPosition: '42% 55%' }}
+          />
+        )}
       </div>
 
       <div className="home-hero-details">
@@ -71,7 +97,7 @@ export default function HomeHero({ detail, heroImage }: Props) {
               construction the picture does not show.
             */}
             <Link
-              href={`/product/${detail.slug}`}
+              href={detail.href}
               className="home-detail"
               aria-label={`${detail.name}, top rail detail`}
             >
@@ -82,7 +108,7 @@ export default function HomeHero({ detail, heroImage }: Props) {
               <span className="label-caps home-detail-caption">Flat top rail</span>
             </Link>
             <Link
-              href={`/product/${detail.slug}`}
+              href={detail.href}
               className="home-detail"
               aria-label={`${detail.name}, corner post detail`}
             >

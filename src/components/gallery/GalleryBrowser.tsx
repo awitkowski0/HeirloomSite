@@ -3,67 +3,70 @@
 import { useMemo, useState } from 'react';
 import GalleryCard from './GalleryCard';
 import GalleryCarousel from './GalleryCarousel';
-import { WoodFilter, StainFilter, ALL_WOODS, ALL_STAINS } from './GalleryFilters';
+import { FinishFilter, ALL_FINISHES } from './GalleryFilters';
+import { useDelistedProducts } from '@/lib/useDelistedProducts';
 import type { GalleryProduct } from './types';
 
 interface Props {
   products: GalleryProduct[];
-  woods: string[];
 }
 
 /**
- * Client half of /gallery: filter state and the finishes modal.
+ * Filterable product grid with a finishes preview.
  *
- * The product data itself is built on the server and passed in as props, so the
- * grid is in the prerendered HTML rather than appearing after a spinner.
+ * The product data is built on the server and passed in, so the grid is in the
+ * prerendered HTML rather than appearing after a spinner. Filter state is
+ * useState and deliberately not a query parameter: reading searchParams would
+ * opt the route out of static prerendering, which AGENTS.md treats as the one
+ * thing this site cannot trade away.
  */
-export default function GalleryBrowser({ products, woods }: Props) {
-  const [selectedWood, setSelectedWood] = useState(ALL_WOODS);
-  const [selectedStain, setSelectedStain] = useState(ALL_STAINS);
+export default function GalleryBrowser({ products }: Props) {
+  const [selectedFinish, setSelectedFinish] = useState(ALL_FINISHES);
   const [carouselSlug, setCarouselSlug] = useState<string | null>(null);
+  const { isDelisted } = useDelistedProducts();
 
-  const availableStains = useMemo(() => {
+  const availableFinishes = useMemo(() => {
     const set = new Set<string>();
     for (const product of products) {
-      const woodsToScan =
-        selectedWood === ALL_WOODS ? product.woods : product.woods.filter(w => w === selectedWood);
-      for (const wood of woodsToScan) {
-        for (const stain of product.woodStains[wood] || []) set.add(stain.name);
-      }
+      for (const finish of product.finishes) set.add(finish.name);
     }
     return [...set].sort();
-  }, [products, selectedWood]);
+  }, [products]);
 
   const visible = useMemo(() => {
-    const hasActiveSelection = selectedWood !== ALL_WOODS || selectedStain !== ALL_STAINS;
+    const hasActiveSelection = selectedFinish !== ALL_FINISHES;
 
     return products
+      .filter(product => !isDelisted(product.slug))
       .map(product => {
-        const wood =
-          selectedWood !== ALL_WOODS && product.woods.includes(selectedWood)
-            ? selectedWood
-            : product.woods[0];
-        if (selectedWood !== ALL_WOODS && !product.woods.includes(selectedWood)) return null;
+        /*
+         * Searches every finish, not just the first variant's.
+         *
+         * The old version looked the selected stain up in woodStains[woods[0]]
+         * only. That was invisible while the grid held six wood products whose
+         * single variant carried all eleven stains, and would have been wrong
+         * the moment a finish-variant product joined it: each of those has one
+         * stain per variant, so ten of its eleven finishes lived under a
+         * variant this never looked at, and filtering by any of them would
+         * have hidden a crib that is available in exactly that finish.
+         */
+        const finish = hasActiveSelection
+          ? product.finishes.find(f => f.name === selectedFinish)
+          : product.finishes.find(f => f.inStock) || product.finishes[0];
 
-        const stains = product.woodStains[wood] || [];
-        let stain = stains.find(s => s.inStock) || stains[0];
-        if (selectedStain !== ALL_STAINS) {
-          const match = stains.find(s => s.name === selectedStain);
-          // Filtering by a stain this product does not offer hides it, rather
-          // than silently showing a different finish.
-          if (!match) return null;
-          stain = match;
-        }
+        // Filtering by a finish this product does not offer hides it, rather
+        // than silently showing a different one.
+        if (!finish) return null;
 
         return {
           product,
-          displayImage: stain?.image || stains[0]?.image || '',
-          displayPrice: (product.woodPrices[wood] ?? product.minPrice) + (stain?.priceAddition || 0),
+          displayImage: finish.image || product.finishes[0]?.image || '',
+          displayPrice: finish.price,
           hasActiveSelection,
         };
       })
       .filter((v): v is NonNullable<typeof v> => v !== null);
-  }, [products, selectedWood, selectedStain]);
+  }, [products, selectedFinish, isDelisted]);
 
   const carouselProduct = carouselSlug
     ? products.find(p => p.slug === carouselSlug) ?? null
@@ -73,25 +76,11 @@ export default function GalleryBrowser({ products, woods }: Props) {
     <>
       <div className="container gallery-header">
         <div className="gallery-filter-stack">
-          <WoodFilter
-            woods={woods}
-            selected={selectedWood}
-            onSelect={w => {
-              setSelectedWood(w);
-              setSelectedStain(ALL_STAINS);
-            }}
-            onReset={() => {
-              setSelectedWood(ALL_WOODS);
-              setSelectedStain(ALL_STAINS);
-            }}
+          <FinishFilter
+            finishes={availableFinishes}
+            selected={selectedFinish}
+            onSelect={f => setSelectedFinish(selectedFinish === f ? ALL_FINISHES : f)}
           />
-          {selectedWood !== ALL_WOODS && (
-            <StainFilter
-              stains={availableStains}
-              selected={selectedStain}
-              onSelect={s => setSelectedStain(selectedStain === s ? ALL_STAINS : s)}
-            />
-          )}
         </div>
       </div>
 
@@ -102,7 +91,7 @@ export default function GalleryBrowser({ products, woods }: Props) {
 
         {visible.length === 0 ? (
           <p className="body-lg text-on-surface-variant gallery-empty">
-            No pieces match that combination.
+            No pieces match that finish.
           </p>
         ) : (
           <div className="gallery-grid">

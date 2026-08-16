@@ -72,6 +72,11 @@ function inferVariantType(names) {
 
 const variantTypeProblems = [];
 const availabilityProblems = [];
+const hiddenProblems = [];
+const hiddenVariants = [];
+const hiddenProducts = [];
+const relationProblems = [];
+const relationNotices = [];
 function checkVariantType(dirName, declared, names) {
   if (!declared) {
     variantTypeProblems.push(`${dirName}: product.json has no variantType`);
@@ -135,6 +140,7 @@ if (productDirs.length === 0) {
 const inventory = [];
 const productIndex = [];
 const allImages = [];
+const declaredRelations = [];
 
 for (const dirName of productDirs) {
   const dir = join(PRODUCTS, dirName);
@@ -147,12 +153,63 @@ for (const dirName of productDirs) {
   // from the index and 404 its already-indexed URL.
   if (!meta) fail(`${dirName}/product.json exists but could not be parsed`);
 
+  /*
+   * `hidden` on the product withdraws the whole thing, the same way `hidden`
+   * on a variant withdraws one wood.
+   *
+   * Nothing downstream has to know: every artifact is generated from this
+   * loop, so skipping here means no inventory row, no route, no sitemap entry,
+   * no search document and - the one that matters - no row in pricing.json.
+   * That last is what makes this a real withdrawal rather than a visual one.
+   * src/lib/pricing.ts prices every checkout line from that table and rejects
+   * anything absent from it, so a hidden product cannot be bought even by
+   * posting a hand-made cart at the API.
+   */
+  if (meta.hidden === true) {
+    hiddenProducts.push({ dirName, slug: meta.slug || null });
+    continue;
+  }
+
   const productName = meta.productName;
-  checkVariantType(dirName, meta.variantType, variants.map(v => v.variant));
+
+  /*
+   * `hidden` withdraws a variant from the catalogue entirely, which is a
+   * different thing from `unavailable`.
+   *
+   * `unavailable` means "we make this, you cannot order it right now": the
+   * variant still emits an inventory row, still renders a selector chip, still
+   * generates a URL, and shows as sold out. `hidden` means "we do not make
+   * this": no row, no chip, no URL, no sitemap entry. Cherry Wood and Red Oak
+   * are the latter -- the shop sells Brown Maple only, and the placeholder
+   * $2499 those two carried was also dragging Moyerton's advertised price
+   * below the price of the only version anyone can actually buy.
+   *
+   * Filtered here, once, rather than at each render site: every downstream
+   * artifact is generated from this loop, so a variant dropped here is absent
+   * from inventory, search, pricing, the image index and generateStaticParams
+   * without any of them needing to know the concept exists.
+   */
+  const visibleVariants = variants.filter(v => v.hidden !== true);
+  const hidden = variants.filter(v => v.hidden === true);
+  if (hidden.length > 0) {
+    hiddenVariants.push(`${dirName}: ${hidden.map(v => v.variant).join(", ")}`);
+  }
+  if (visibleVariants.length === 0 && variants.length > 0) {
+    // Every route for this product is generated from its variants, so hiding
+    // all of them leaves a product in the index whose every URL 404s.
+    hiddenProblems.push(`${dirName}: every variant is hidden, so the product would have no page`);
+  }
+  const visibleNames = new Set(visibleVariants.map(v => v.variant));
+
+  // Checked against what is actually emitted, not what is on disk: hiding the
+  // two woods leaves ["BrownMaple"], which must still satisfy variantType.
+  if (visibleVariants.length > 0) {
+    checkVariantType(dirName, meta.variantType, visibleVariants.map(v => v.variant));
+  }
   const imageBase = `/data/products/${encodeURIComponent(dirName)}/`;
   let minPrice = Infinity;
 
-  for (const v of variants) {
+  for (const v of visibleVariants) {
     /*
      * Availability, sourced rather than invented.
      *
@@ -201,6 +258,11 @@ for (const dirName of productDirs) {
       productName,
       wood: v.variant,
       category: meta.category || null,
+      // The range a piece belongs to (Addison, West Lake...). A second axis
+      // across the catalogue, independent of category: /collections/<slug>
+      // answers "show me everything that matches my crib". Null for the rugs,
+      // lamps and generic parts that belong to no range.
+      collection: meta.collection || null,
       variantType: meta.variantType,
       description: collapseRepeatedWords(meta.description, `${productName}.description`) || null,
       extendedDescription:
@@ -216,20 +278,38 @@ for (const dirName of productDirs) {
       dimensions: v.dimensions || null,
       weight: v.weight ?? null,
       addons: meta.addons || [],
+      includes: [],
+      bundle: [],
+      related: [],
       stains,
     });
   }
 
-  const firstStain = variants[0]?.stains?.[0];
-  const defaultKey = firstStain ? `${variants[0].variant}||${firstStain}` : null;
+  const firstStain = visibleVariants[0]?.stains?.[0];
+  const defaultKey = firstStain ? `${visibleVariants[0].variant}||${firstStain}` : null;
   const defaultImage = defaultKey && media[defaultKey]?.[0] ? imageBase + media[defaultKey][0] : null;
 
   productIndex.push({
     productName,
     slug: meta.slug || null,
     category: meta.category || null,
+    collection: meta.collection || null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,
+  });
+
+  /*
+   * Relations are declared as slugs and resolved in a second pass below,
+   * because `bundle` routinely points forward at a product this loop has not
+   * built yet -- Addison Crib names crib-mattress, and directories are read in
+   * whatever order the filesystem returns.
+   */
+  declaredRelations.push({
+    dirName,
+    slug: meta.slug || null,
+    includes: meta.includes || [],
+    bundle: meta.bundle || [],
+    related: meta.related || [],
   });
 
   // Build the image index in this same pass. Previously this was a second loop
@@ -237,6 +317,8 @@ for (const dirName of productDirs) {
   // just to recover productName, which is already in hand here.
   for (const [key, paths] of Object.entries(media)) {
     const [wood, stainName] = key.split("||");
+    // A hidden variant's photographs are of a product that is not for sale.
+    if (!visibleNames.has(wood)) continue;
     paths.forEach((path, idx) => {
       allImages.push({
         productName,
@@ -250,14 +332,174 @@ for (const dirName of productDirs) {
 }
 
 // ---------------------------------------------------------------------------
+// Relations, resolved.
+// ---------------------------------------------------------------------------
+
+/*
+ * `includes`, `bundle` and `related` are the relational structure of the
+ * catalogue. All three are arrays of slugs of OTHER products.
+ *
+ * `includes` is what already ships with the crib and is already inside its
+ * price -- the conversion rails and the guard rail. It is listed so a buyer can
+ * see what the 4-in-1 claim actually consists of, and it is NEVER added to the
+ * cart: those are not things being sold a second time, and charging for them
+ * billed $4,088 for what is a $3,178 order.
+ *
+ * `bundle` is the genuinely optional, genuinely extra paid add-on. For a crib
+ * that is the mattress and nothing else.
+ *
+ * `related` is the rest of the matching family, the dressers and nightstands.
+ *
+ * Deliberately curated per product rather than inferred from the name prefix.
+ * Inference looks obvious (Addison, Mackenzie, Newport, West Lake) right up
+ * until the seven cribs with no family kits at all, which have to fall back to
+ * the generic rails -- and a heuristic that silently guesses wrong here puts
+ * the wrong $481 kit in someone's cart.
+ *
+ * Resolved to whole objects here rather than at render time so that no
+ * component has to look a slug up, and so an unknown slug is a build failure
+ * rather than a blank row in a bundle.
+ */
+const bySlug = new Map(productIndex.filter(p => p.slug).map(p => [p.slug, p]));
+
+/*
+ * Hidden slugs are tracked separately so a relation pointing at one can be
+ * told apart from a relation pointing at a typo. The first is a consequence of
+ * a deliberate act and is dropped; the second is a mistake and fails the build.
+ */
+const hiddenSlugs = new Set(hiddenProducts.map(p => p.slug).filter(Boolean));
+
+const rowsBySlug = new Map();
+for (const item of inventory) {
+  if (!item.slug) continue;
+  if (!rowsBySlug.has(item.slug)) rowsBySlug.set(item.slug, []);
+  rowsBySlug.get(item.slug).push(item);
+}
+
+/*
+ * The exact configuration a relation refers to, or null when it is ambiguous.
+ *
+ * A cart line is identified by product + variant + stain, so a bundle checkbox
+ * has to know all three to add anything. It can only know them when the target
+ * has exactly one of each - which every conversion kit and the mattress do,
+ * being `variantType: "none"`. A target with real choices cannot be expressed
+ * as a checkbox at all, so `bundle` rejects it rather than silently adding an
+ * arbitrary finish to someone's cart.
+ */
+function soleConfig(slug) {
+  const rows = rowsBySlug.get(slug) || [];
+  if (rows.length !== 1) return null;
+  const stains = rows[0].stains || [];
+  if (stains.length !== 1) return null;
+  return { wood: rows[0].wood, stainName: stains[0].name };
+}
+
+function resolveRelation(dirName, field, slugs, ownSlug) {
+  if (!Array.isArray(slugs)) {
+    relationProblems.push(`${dirName}: ${field} must be an array of product slugs`);
+    return [];
+  }
+  const out = [];
+  const seen = new Set();
+  for (const slug of slugs) {
+    if (slug === ownSlug) {
+      relationProblems.push(`${dirName}: ${field} lists its own slug "${slug}"`);
+      continue;
+    }
+    if (seen.has(slug)) {
+      relationProblems.push(`${dirName}: ${field} lists "${slug}" twice`);
+      continue;
+    }
+    if (hiddenSlugs.has(slug)) {
+      /*
+       * Dropped, not fatal. Hiding a shared accessory - the mattress is in
+       * fifteen bundles - would otherwise refuse the build for fifteen
+       * products that are each individually fine. Logged so the consequence
+       * of the hide is visible in the build output rather than discovered as
+       * a bundle that quietly lost a row.
+       */
+      relationNotices.push(`${dirName}: ${field} drops "${slug}", which is hidden`);
+      continue;
+    }
+
+    const target = bySlug.get(slug);
+    if (!target) {
+      // The failure this guard exists for: a typo'd or renamed slug would
+      // otherwise just disappear from the bundle, and a crib would quietly
+      // stop offering its conversion kit.
+      relationProblems.push(`${dirName}: ${field} names "${slug}", which is not a product slug`);
+      continue;
+    }
+    const config = soleConfig(slug);
+    if (field === 'bundle' && !config) {
+      const rows = rowsBySlug.get(slug) || [];
+      relationProblems.push(
+        `${dirName}: bundle names "${slug}", which has ${rows.length} variant(s) and ` +
+          `${rows[0]?.stains?.length ?? 0} finish(es) on the first - a bundle checkbox ` +
+          `cannot choose one, so it must be a single-configuration product`
+      );
+      continue;
+    }
+    seen.add(slug);
+    out.push({
+      slug: target.slug,
+      productName: target.productName,
+      price: target.minPrice,
+      image: target.defaultImage,
+      category: target.category,
+      // Null for a `related` target with real choices; those are links, not
+      // add-to-cart controls, so the visitor picks on the product's own page.
+      wood: config ? config.wood : null,
+      stainName: config ? config.stainName : null,
+    });
+  }
+  return out;
+}
+
+let bundleCount = 0;
+for (const declared of declaredRelations) {
+  const includes = resolveRelation(declared.dirName, 'includes', declared.includes, declared.slug);
+  const bundle = resolveRelation(declared.dirName, 'bundle', declared.bundle, declared.slug);
+  const related = resolveRelation(declared.dirName, 'related', declared.related, declared.slug);
+  if (bundle.length > 0) bundleCount++;
+  // Every inventory row for this product carries the same relations: they are
+  // a property of the product, not of the wood or finish chosen.
+  for (const item of inventory) {
+    if (item.slug === declared.slug) {
+      item.includes = includes;
+      item.bundle = bundle;
+      item.related = related;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Guards. These run before anything is written.
 // ---------------------------------------------------------------------------
 
-if (productIndex.length < MIN_EXPECTED_PRODUCTS) {
+if (relationProblems.length > 0) {
+  fail(`bundle/related do not match the catalogue:\n` + relationProblems.map(p => `    - ${p}`).join("\n"));
+}
+
+/*
+ * The tripwire counts what PARSED, not what shipped.
+ *
+ * It exists to catch the pipeline silently emptying the catalogue, and hiding
+ * a product on purpose is not that. Counting only the visible ones would mean
+ * every deliberate hide also demanded an edit to this constant, which trains
+ * whoever hits it to lower the number without thinking - and that is exactly
+ * the reflex the guard depends on not existing.
+ */
+const parsedProducts = productIndex.length + hiddenProducts.length;
+if (parsedProducts < MIN_EXPECTED_PRODUCTS) {
   fail(
-    `only ${productIndex.length} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
+    `only ${parsedProducts} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
       `    If a product was removed on purpose, lower MIN_EXPECTED_PRODUCTS in this file.`
   );
+}
+
+if (hiddenProblems.length > 0) {
+  fail(`hidden leaves a product with no variants:\n` + hiddenProblems.map(p => `    - ${p}`).join("\n"));
 }
 
 if (availabilityProblems.length > 0) {
@@ -324,8 +566,40 @@ for (const item of inventory) {
 mkdirSync(join(root, "src", "data"), { recursive: true });
 writeFileSync(join(root, "src", "data", "search-docs.json"), JSON.stringify(searchDocs) + "\n");
 
-// Pricing table: the only thing the payment-intent route needs. Imported
-// statically by the route so it is always in the function bundle -- public/ is
+/*
+ * Checkout recommendations: "you may also like".
+ *
+ * Deliberately the BUNDLE entries only, not `related`. Two reasons. A bundle
+ * entry is a single-configuration product, so it can be added from the
+ * checkout in one click; a related dresser has a finish to choose and would
+ * have to bounce the buyer out of the checkout to pick it. And the useful
+ * recommendation at this point is the $310 mattress someone forgot, not a
+ * $3,000 dresser - a cart-abandoning distraction at the exact moment they
+ * were about to pay.
+ *
+ * Keyed on productName because that is what a CartItem carries. 0.6 KB
+ * gzipped, so it is handed to the page rather than fetched.
+ */
+const recommendations = {};
+for (const item of inventory) {
+  if (recommendations[item.productName]) continue;
+  const recs = (item.bundle || []).map(r => ({
+    slug: r.slug,
+    productName: r.productName,
+    price: r.price,
+    image: r.image,
+    wood: r.wood,
+    stainName: r.stainName,
+  }));
+  if (recs.length > 0) recommendations[item.productName] = recs;
+}
+writeFileSync(
+  join(root, "src", "data", "recommendations.json"),
+  JSON.stringify(recommendations) + "\n"
+);
+
+// Pricing table: the only catalogue data /api/quotes needs. Imported
+// statically by src/lib/pricing.ts so it is always in the function bundle -- public/ is
 // uploaded to the CDN, not traced into the lambda, so a runtime readFileSync
 // of public/data/inventory.json is not reliable under Next on Vercel.
 const pricing = inventory.map(item => ({
@@ -345,9 +619,26 @@ mkdirSync(join(root, "data"), { recursive: true });
 writeFileSync(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
 
 console.log(`Generated from ${productDirs.length} product directories`);
+if (hiddenProducts.length > 0) {
+  console.log(`  hid ${hiddenProducts.length} product(s) entirely:`);
+  for (const h of hiddenProducts) console.log(`    ${h.dirName}`);
+}
+if (relationNotices.length > 0) {
+  for (const n of relationNotices) console.log(`    ${n}`);
+}
+if (hiddenVariants.length > 0) {
+  // Logged rather than silent: a variant vanishing from the catalogue should be
+  // visible in the build output, not something you discover from a 404.
+  console.log(`  hid ${hiddenVariants.length} product(s)' variants:`);
+  for (const h of hiddenVariants) console.log(`    ${h}`);
+}
 if (dedupedWords.length > 0) {
   console.log(`  collapsed ${dedupedWords.length} repeated word(s):`);
   for (const d of dedupedWords) console.log(`    ${d}`);
+}
+if (bundleCount > 0) {
+  const items = inventory.reduce((n, i) => n + (i.bundle?.length || 0), 0);
+  console.log(`  relations: ${bundleCount} product(s) with a bundle, ${items} bundle rows`);
 }
 const stainRows = inventory.reduce((n, i) => n + i.stains.length, 0);
 const oosRows = inventory.reduce((n, i) => n + i.stains.filter(s => !s.inStock).length, 0);
@@ -355,4 +646,5 @@ console.log(`  public/data/inventory.json:  ${inventory.length} items, ${stainRo
 console.log(`  public/data/products.json:   ${productIndex.length} products`);
 console.log(`  public/data/images.json:     ${allImages.length} images`);
 console.log(`  src/data/search-docs.json:   ${searchDocs.length} docs`);
+console.log(`  src/data/recommendations.json: ${Object.keys(recommendations).length} products`);
 console.log(`  data/pricing.json:           ${pricing.length} rows`);

@@ -9,5 +9,13 @@
   "defaultVariant": "BrownMaple",
   "slug": "hudson",
   "title": "Hudson",
-  "metaDescription": "Clean, contemporary lines meet old-world strength in the Hudson Convertible Crib."
+  "metaDescription": "Clean, contemporary lines meet old-world strength in the Hudson Convertible Crib.",
+  "bundle": [
+    "crib-mattress"
+  ],
+  "includes": [
+    "toddler-conversion-rail",
+    "full-bed-rail-kit",
+    "34-guard-rail"
+  ]
 }

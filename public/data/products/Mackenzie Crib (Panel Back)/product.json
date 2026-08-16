@@ -9,5 +9,20 @@
   "defaultVariant": "Natural",
   "slug": "mackenzie-crib-panel-back",
   "title": "Mackenzie Crib (Panel Back)",
-  "metaDescription": "The Mackenzie Panel Back Crib offers a beautiful alternative to the slat design, featuring a solid raised panel headboard that adds warmth and a cozy."
+  "metaDescription": "The Mackenzie Panel Back Crib offers a beautiful alternative to the slat design, featuring a solid raised panel headboard that adds warmth and a cozy.",
+  "bundle": [
+    "crib-mattress"
+  ],
+  "related": [
+    "mackenzie-chest",
+    "mackenzie-7-drawer-dresser",
+    "mackenzie-6-drawer-dresser",
+    "mackenzie-nightstand"
+  ],
+  "includes": [
+    "mackenzie-toddler-bed",
+    "mackenzie-full-bed-rail-kit",
+    "34-guard-rail"
+  ],
+  "collection": "Mackenzie"
 }

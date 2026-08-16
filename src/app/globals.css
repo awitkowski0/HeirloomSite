@@ -123,7 +123,10 @@
 
   /* Header height, referenced by .app-header and main's top padding so the
      fixed header and the space reserved for it cannot drift apart. */
-  --header-h: 60px;
+  /* Derived, not restated: the header is two rows now, and `main` reserves
+     exactly what they occupy. The row heights are declared next to the header
+     rules that use them. */
+  --header-h: calc(var(--header-row-h) + var(--category-bar-h));
 
   --spacing-base: 8px;
   --spacing-xs: 4px;
@@ -251,7 +254,6 @@ body {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
 
-
 .text-primary {
   color: var(--primary);
 }
@@ -283,43 +285,450 @@ body {
   z-index: 3000;
   background-color: var(--paper);
   border-bottom: 1px solid var(--rule);
-  height: var(--header-h);
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  padding: 0 24px;
   max-width: 100vw;
   overflow: visible;
 }
 
 /*
- * Cells are assigned explicitly rather than by source order, so that hiding
- * the left nav on phones does not slide the wordmark into column 1 and take
- * the whole bar off centre.
+ * Two rows, so --header-h is their sum rather than a single bar's height.
+ * `main` reserves this much space; get it wrong and the first heading on every
+ * page hides under the header.
  */
-.header-nav--start {
-  grid-column: 1;
-}
-.wordmark {
-  grid-column: 2;
-}
-.header-end {
-  grid-column: 3;
+:root {
+  --header-row-h: 68px;
+  --category-bar-h: 44px;
 }
 
-.header-nav {
-  display: flex;
+/*
+ * Row one: identity, search, help, cart.
+ *
+ * `auto 1fr auto` and not `1fr auto 1fr`. The old bar centred the wordmark
+ * between two 1fr cells, which forced the two navs to be treated as equal
+ * weights when they were 167px and 504px of content - the mark measured dead
+ * centre and looked shoved against the right-hand group. Here the middle
+ * column is the search field, so 1fr goes to the thing that should absorb
+ * every spare pixel, and the two fixed clusters take exactly what they need.
+ */
+.header-inner {
+  height: var(--header-row-h);
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 22px;
+  /* One rhythm across the bar. Help and the cart used to sit 8px apart while
+     everything else was 32px, so the right-hand pair read as one clumped
+     object rather than two controls. */
+  gap: 24px;
 }
-.header-nav--end {
-  justify-content: flex-end;
+
+.header-search {
+  min-width: 0;
 }
+
 .header-end {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 18px;
+  gap: 24px;
+}
+
+/*
+ * Row two: the catalogue.
+ *
+ * Nine categories at 11px tracked caps fit a 1232px row comfortably, so this
+ * does not scroll on desktop. It is hidden on phones rather than made
+ * scrollable - see the note in CategoryBar.tsx.
+ */
+.category-bar {
+  border-top: 1px solid var(--rule);
+  background: var(--paper-2);
+}
+
+/*
+ * Distributed, not clustered.
+ *
+ * The labels sat at the left of a 1232px row with 26px gaps, leaving dead
+ * space against the right edge - so the bar ended under the search field while
+ * the bar above it ran to the cart, and the two rows visibly failed to line up.
+ * space-between spends that space on the gaps instead, which puts the first
+ * category under the wordmark and the last under the cart. It matters more now
+ * that the taxonomy is three top-level categories rather than nine flat ones.
+ *
+ * `gap` stays as a floor so the labels cannot collide on a narrow desktop
+ * window, where space-between has nothing spare to distribute.
+ */
+.category-bar-inner {
+  height: var(--category-bar-h);
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 26px;
+  list-style: none;
+}
+
+/* The positioning context for the sub-menu below. */
+.category-bar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.category-bar-link {
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
+}
+.category-bar-link:hover {
+  color: var(--ink);
+}
+/*
+ * Set apart by weight, not by a divider.
+ *
+ * A border-right sat oddly here: the row is space-between, so the gap either
+ * side of the rule changes with the viewport and the divider drifted away from
+ * the item it was meant to separate. Weight and colour say "this one is
+ * different" without depending on the geometry.
+ */
+.category-bar-link--all {
+  color: var(--ink);
+  font-weight: 600;
+}
+/* The current category is marked, which the old header never did for any
+   route despite the stylesheet having carried an .active rule for years. */
+.category-bar-link.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/*
+ * Sub-menus, in CSS alone.
+ *
+ * No client component and no state: CategoryBar is a server component rendered
+ * into every statically prerendered page on the site, and giving it JavaScript
+ * to open a menu would ship a bundle to all 305 of them for a hover.
+ *
+ * `:focus-within` is what makes it keyboard-reachable - tabbing to the parent
+ * link opens the panel, and tabbing on through its links keeps it open. The
+ * padding-top on the panel bridges the gap to the bar so the pointer can cross
+ * into it without the menu closing underneath.
+ */
+.category-submenu {
+  position: absolute;
+  top: 100%;
+  left: -14px;
+  z-index: 3100;
+  margin: 0;
+  padding: 8px 0;
+  min-width: 220px;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
+}
+.category-bar-item:hover > .category-submenu,
+.category-bar-item:focus-within > .category-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+.category-submenu-link {
+  display: block;
+  padding: 8px 16px;
+  text-decoration: none;
+  color: var(--ink-muted);
+  font-family: var(--font-caps);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.category-submenu-link:hover {
+  color: var(--ink);
+  background: var(--paper-2);
+}
+
+/*
+ * On-page sub-navigation, for a category that has children and for the
+ * collection index. Cards rather than pills: these carry a count as well as a
+ * name, and a two-line pill is not a pill.
+ */
+.subcategory-nav {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin: 24px 0 32px;
+}
+.subcategory-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 20px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  transition: border-color 120ms ease;
+}
+.subcategory-card:hover {
+  border-color: var(--accent);
+}
+
+.shipping-limit-note {
+  margin: 10px 2px 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Homepage journey — the four steps that structure the page below the banner
+   --------------------------------------------------------------------------- */
+
+.home-journey {
+  counter-reset: journey;
+}
+
+/*
+ * A rule at the top of each step, so the four read as one sequence rather than
+ * four unrelated sections. The last one has none: a trailing rule above the
+ * footer looks like something failed to load.
+ */
+.journey-step {
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 56px 24px 0;
+}
+.journey-step + .journey-step {
+  border-top: 1px solid var(--rule);
+  margin-top: 56px;
+}
+.journey-step:last-child {
+  padding-bottom: 72px;
+}
+
+.journey-step-head {
+  max-width: 62ch;
+  margin-bottom: 32px;
+}
+.journey-step-num {
+  color: var(--accent);
+  margin: 0 0 8px;
+}
+.journey-step-title {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.4vw, 38px);
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+.journey-step-lead {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+/*
+ * Step 01 holds whole sections that bring their own container and padding, so
+ * the step must not add a second one around them.
+ */
+.journey-step-body > .home-featured,
+.journey-step-body > .home-styles {
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+.journey-step-body > .home-featured {
+  padding-top: 0;
+}
+
+.journey-points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px 32px;
+}
+.journey-points li {
+  /* Grid items will not shrink below their content without this. */
+  min-width: 0;
+  padding-left: 16px;
+  border-left: 2px solid var(--accent);
+  color: var(--ink-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .journey-step {
+    padding-top: 40px;
+  }
+  .journey-step + .journey-step {
+    margin-top: 40px;
+  }
+  .journey-step-head {
+    margin-bottom: 24px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Homepage featured range
+   --------------------------------------------------------------------------- */
+
+.home-featured {
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 64px 24px 0;
+}
+.home-featured-intro {
+  margin-bottom: 32px;
+}
+.home-featured-label {
+  margin: 0 0 8px;
+}
+.home-featured-label a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.home-featured-label a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+@media (max-width: 767px) {
+  .home-featured {
+    padding-top: 40px;
+  }
+}
+
+/* Included-with-this-line rows in the cart. Indented and quiet: they are part
+   of the line above, not siblings of it. */
+.order-summary-includes {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0 0 0 12px;
+  border-left: 1px solid var(--outline-variant);
+}
+.order-summary-includes li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+/* ---------------------------------------------------------------------------
+   Checkout address lookup
+   --------------------------------------------------------------------------- */
+
+.address-combobox {
+  position: relative;
+}
+.address-combobox-status {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.address-suggestions {
+  position: absolute;
+  z-index: 20;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 2px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.address-suggestion {
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--ink);
+}
+/* Hover and keyboard highlight are the same state, so they look the same. */
+.address-suggestion.is-highlighted {
+  background: var(--paper-2);
+}
+
+/* ---------------------------------------------------------------------------
+   Help menu
+   --------------------------------------------------------------------------- */
+
+.help-menu {
+  position: relative;
+}
+
+/*
+ * A button, not another 11px tracked-caps link. Help is the one control here
+ * someone reaches for when something has gone wrong, and it should not take
+ * the same visual effort to find as a category.
+ */
+.help-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.help-button:hover {
+  background: var(--plate);
+}
+.help-button .material-symbols-outlined {
+  font-size: 18px;
+}
+
+.help-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 3100;
+  min-width: 232px;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+}
+
+.help-panel-link {
+  padding: 12px 16px;
+  text-decoration: none;
+  color: var(--ink);
+  font-family: var(--font-label);
+  font-size: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.help-panel-link:last-child {
+  border-bottom: 0;
+}
+.help-panel-link:hover {
+  background: var(--plate);
 }
 
 /*
@@ -369,6 +778,12 @@ main {
   padding-bottom: 128px;
 }
 
+/*
+ * The generic two-column page grid. Used by /checkout: form left, order
+ * summary right. The product page has its own grid below - it was sharing this
+ * one, which is why the child spans are scoped with `>` now rather than
+ * matching .product-showcase anywhere on the site.
+ */
 .grid-layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -397,11 +812,94 @@ main {
     grid-template-columns: repeat(12, 1fr);
     gap: var(--spacing-xl);
   }
-  .product-showcase {
+  .grid-layout > .product-showcase {
     grid-column: span 7;
   }
-  .configuration-panel {
+  .grid-layout > .configuration-panel {
     grid-column: span 5;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Product page grid
+
+   Photograph left, decision column right, name in whichever place reads first.
+
+   Named areas rather than column spans, because the name has to sit ABOVE the
+   photograph on a phone and BESIDE it from 1024px, and mounting the heading
+   twice to achieve that is the arrangement AGENTS.md rules out. One <h1>, two
+   placements.
+
+   Its own class rather than /checkout's .grid-layout, which it used to share.
+   Two rows against a spanning left column is not the shape a checkout wants:
+   with no title element to fill the first row, the order summary would have
+   been pushed down by an empty one.
+   --------------------------------------------------------------------------- */
+
+.product-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    'title'
+    'image'
+    'panel';
+  /* The 48px stack gap is right between the photograph and the panel, and far
+     too much between a heading and the thing it names. */
+  column-gap: var(--spacing-lg);
+  row-gap: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+}
+
+/* Same reasoning as .grid-layout > *: the stain rail's eleven non-shrinking
+   swatches would otherwise set an ~650px floor for the whole page. */
+.product-layout > * {
+  min-width: 0;
+}
+
+.product-layout > .product-title {
+  grid-area: title;
+}
+.product-layout > .product-showcase {
+  grid-area: image;
+}
+.product-layout > .configuration-panel {
+  grid-area: panel;
+}
+
+@media (min-width: 1024px) {
+  .product-layout {
+    /* 7/5 of twelve, stated directly now that the areas do the placing. */
+    grid-template-columns: 7fr 5fr;
+    grid-template-areas:
+      'image title'
+      'image panel';
+    /*
+     * `auto 1fr`, not implicit `auto auto`.
+     *
+     * With two auto rows and the photograph spanning both, a photograph taller
+     * than name + panel has its surplus distributed across BOTH tracks - so
+     * the name's row grows too and the heading floats in a void above the
+     * price. An `fr` track is sized after the spanning item is accounted for,
+     * so row one pins to the name and row two absorbs the rest.
+     */
+    grid-template-rows: auto 1fr;
+    column-gap: var(--spacing-xl);
+    /* Not the 48px stack gap: this is the space between the name and the
+       price directly under it, which is one heading and its own value. */
+    row-gap: var(--spacing-md);
+  }
+
+  /*
+   * The photograph spans both rows, so whichever side is taller sets the
+   * height. When it is the photograph, the surplus is handed to the two
+   * spanned rows - and a grid item stretches by default, so the panel would
+   * grow and its 48px internal gaps would open up to fill space it does not
+   * want. Sized to content instead; the surplus becomes room below.
+   */
+  .product-layout > .product-title,
+  .product-layout > .configuration-panel {
+    align-self: start;
   }
 }
 
@@ -431,11 +929,18 @@ main {
   object-fit: cover;
 }
 
-
+/*
+ * 32px, not the 48px stack gap.
+ *
+ * The panel used to hold two or three blocks; it now holds five - price,
+ * variant picker, finish picker, buy controls, description - and 48px between
+ * each put ~200px of pure gap in a column whose whole job is to be read in one
+ * go. The sections are already separated by their own headings and rules.
+ */
 .configuration-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: 32px;
 }
 
 .pricing-section {
@@ -462,7 +967,6 @@ main {
 .price-current {
   color: var(--primary);
 }
-
 
 .config-section {
   display: flex;
@@ -733,8 +1237,9 @@ main {
   color: var(--accent);
 }
 
+/* No extra padding on top of the panel's own 32px gap - together they were
+   72px above the most important control on the page. */
 .action-section {
-  padding-top: var(--spacing-md);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -743,6 +1248,11 @@ main {
 .add-to-cart {
   width: 100%;
   padding: 20px 0;
+  /* A <button> does not inherit the page font, and there is no global button
+     reset here - so the site's most important control was the only thing on
+     the page set in the browser's default UI font. */
+  font-family: var(--font-caps);
+  font-size: 11px;
   background-color: var(--secondary);
   color: var(--on-secondary);
   border-radius: 0;
@@ -765,7 +1275,6 @@ main {
   text-align: center;
   color: var(--on-surface-variant);
 }
-
 
 /* Bottom Nav */
 .bottom-nav {
@@ -924,19 +1433,6 @@ main {
 }
 
 /* Filter pills scrollable on mobile */
-.filter-pills {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  background-color: var(--surface-container-lowest);
-  padding: 8px;
-  border-radius: 0;
-  border: 1px solid var(--surface-container-highest);
-  width: fit-content;
-  margin: 0 auto;
-}
 
 @media (max-width: 767px) {
   .gallery-grid {
@@ -947,19 +1443,7 @@ main {
     height: 320px;
     padding: 16px;
   }
-  .filter-pills {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    border-radius: 0;
-    width: 100%;
-    justify-content: flex-start;
-    padding: 6px;
-  }
-  .filter-pills::-webkit-scrollbar {
-    display: none;
-  }
+
 }
 
 @media (max-width: 480px) {
@@ -1061,20 +1545,17 @@ main {
 /* Admin editing overlay */
 
 
-.product-title {
-  text-align: center;
-  padding: 10px 16px;
-}
-
-@media (max-width: 767px) {
-  .product-title {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: var(--surface);
-    border-bottom: 1px solid var(--outline-variant);
-  }
-}
+/*
+ * The title's centring, padding and mobile sticky treatment lived here, two
+ * screens away from the rule that sizes it, so an edit to one silently left
+ * the other behind. All of it is now in the single .product-title rule under
+ * "Product detail".
+ *
+ * The sticky was the real casualty: it pinned the name to the top of the
+ * viewport, which made sense when the name was the first thing on the page.
+ * It is now a grid item directly above the photograph, so sticking it would
+ * park the heading over the picture for the whole scroll.
+ */
 
 /* Product details - mobile */
 @media (max-width: 767px) {
@@ -1120,31 +1601,37 @@ main {
 /* Mobile typography & spacing */
 @media (max-width: 767px) {
   .app-header {
-    padding: 0 14px;
-    /* --header-h, not a second literal: one number, one place. */
-    --header-h: 52px;
-    height: var(--header-h);
+    /* One row on phones, so the sum collapses to that row. */
+    --header-row-h: 52px;
+    --category-bar-h: 0px;
     position: static;
   }
 
   /*
-   * Both text navs go away on phones: five tracked-caps labels plus a
-   * wordmark cannot share a 390px bar, and the bottom nav already carries
-   * this IA. Safety and Care remain reachable from the footer.
+   * Search, help and the whole category bar go away on phones, and the bottom
+   * nav carries all three: it already has a search trigger, a Help link, and
+   * the shop and category entry points. Nine tracked-caps category labels
+   * cannot share a 390px bar, and a second scrolling strip under the header
+   * would eat a third of the screen before any product appeared.
    */
-  .app-header .header-nav,
-  .app-header .nav-links {
+  .app-header .category-bar,
+  .app-header .header-search,
+  .app-header .help-menu {
     display: none;
   }
 
-  .app-header .header-end form {
-    display: none;
-  }
-
-  /* With the side navs gone the grid has nothing to balance, so let the
-     wordmark take the middle and the cart sit hard right. */
-  .app-header {
+  /* Explicit cells, so the wordmark stays optically centred with only the
+     cart beside it rather than sliding into column 1. */
+  .header-inner {
     grid-template-columns: 1fr auto 1fr;
+    padding: 0 16px;
+    gap: 0;
+  }
+  .header-inner .wordmark {
+    grid-column: 2;
+  }
+  .header-inner .header-end {
+    grid-column: 3;
   }
 
   .container {
@@ -1182,7 +1669,6 @@ main {
   }
 }
 
-
 @media (min-width: 768px) {
   .bottom-nav {
     display: none;
@@ -1206,14 +1692,36 @@ main {
   cursor: pointer;
 }
 
+/*
+ * A real target, not a bare glyph.
+ *
+ * This was `background: none; border: none; color: white` in a corner - a thin
+ * white outline on a near-black backdrop, with no boundary to aim at. The
+ * overlay does close on a backdrop click, but .lightbox-img-wrap covers
+ * 90vw x 80vh, so there was barely any backdrop left to hit and the practical
+ * way out was Escape, which is not an affordance anyone can see.
+ */
 .lightbox-close-btn {
   position: absolute;
-  top: 24px;
-  right: 24px;
-  background: none;
-  border: none;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   color: white;
   cursor: pointer;
+}
+.lightbox-close-btn:hover {
+  background: rgba(0, 0, 0, 0.85);
+  border-color: white;
+}
+.lightbox-close-btn .material-symbols-outlined {
+  font-size: 26px;
 }
 
 .lightbox-img {
@@ -1224,6 +1732,8 @@ main {
 
 .lightbox-nav-btn {
   position: absolute;
+  /* Above the dismiss surface, or the arrows would close instead of paginate. */
+  z-index: 1;
   top: 50%;
   transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.2);
@@ -1266,33 +1776,7 @@ main {
   border: 1px solid var(--rule-strong);
 }
 
-/* Filter Pill & Stain Styles */
-.filter-pill-btn {
-  padding: 12px 24px;
-  border-radius: 0;
-  border: none;
-  background: transparent;
-  color: var(--on-surface-variant);
-  font-family: var(--font-label);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.filter-pill-btn--active {
-  background: var(--primary);
-  color: var(--on-primary);
-}
-
-.filter-pill-divider {
-  width: 1px;
-  height: 24px;
-  background-color: var(--outline-variant);
-}
-
+/* Stain Styles */
 .stain-filter-container {
   display: flex;
   justify-content: center;
@@ -1553,59 +2037,127 @@ main {
    Search
    =========================================================================== */
 
+/*
+ * The search field is the widest thing in the header, on purpose.
+ *
+ * It was a 220px box wedged between three nav links and the cart. On a
+ * catalogue of 67 pieces across nine categories, search is how someone who
+ * already knows what they want gets there, and it was being treated as an
+ * afterthought. It now takes the whole middle column.
+ */
 .search-bar {
   position: relative;
+  width: 100%;
 }
+/*
+ * A filled plate with the icon inside it, and no submit block.
+ *
+ * The dark block on the right was the heaviest element in the header, which
+ * put the most visual weight on the least consequential control - Enter
+ * already submits, and nobody hunts for a search button. A flat --plate fill
+ * reads as a field without a border box, which suits a system whose stated
+ * rule is hairline rules and no elevation.
+ */
 .search-bar-form {
   display: flex;
   align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  background: var(--plate);
+  border: 1px solid transparent;
+}
+/* The whole control takes the focus treatment, because the boundary the user
+   perceives is the fill, not the input inside it. */
+.search-bar-form:focus-within {
+  border-color: var(--ink);
 }
 .search-bar-input {
-  padding: 6px 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 0;
+  border: 0;
   border-radius: var(--radius);
-  border: 1px solid var(--control-border);
-  font-size: 13px;
-  width: 220px;
-  background: var(--surface-container-lowest);
+  /* >=16px stops iOS Safari zooming on focus. */
+  font-size: 16px;
+  background: transparent;
   color: var(--on-surface);
 }
+.search-bar-input:focus {
+  outline: none;
+}
+.search-bar-input::placeholder {
+  color: var(--ink-muted);
+}
+/*
+ * Rendered first, but still the last thing in the DOM.
+ *
+ * `order` and not a markup reorder: a submit button placed before the input in
+ * source order is the first thing Tab lands on when entering the header, so a
+ * keyboard user meets "submit search" before the field they would type into.
+ * Input then submit is the meaningful sequence; left-of-the-field is only
+ * where it should be drawn.
+ */
+.search-bar-form .icon-btn {
+  order: -1;
+  flex: none;
+  padding: 0;
+  color: var(--ink-muted);
+}
+.search-bar-form .icon-btn:hover {
+  color: var(--ink);
+}
 
+/*
+ * The dropdown is the width of the field, not a 380px card floated under its
+ * right edge.
+ *
+ * It also carried `border` twice - --rule-strong then --outline-variant - so
+ * the second silently won and the panel was outlined in the hairline token the
+ * stylesheet elsewhere documents as too weak for a control boundary (1.32:1 on
+ * the cream ground, against WCAG 1.4.11's 3:1). One border, the strong one.
+ *
+ * Flush to the field: no margin-top gap, no radius, no inner padding, so rows
+ * run edge to edge and the panel reads as the field continuing downward rather
+ * than a separate floating object.
+ */
 .search-dropdown {
   position: absolute;
   top: 100%;
+  left: 0;
   right: 0;
-  width: 380px;
-  max-width: 90vw;
-  background-color: var(--surface-container-lowest);
-  border-radius: var(--radius-md);
+  background-color: var(--paper);
   border: 1px solid var(--rule-strong);
-  border: 1px solid var(--outline-variant);
+  border-top: 0;
   z-index: 1000;
-  padding: 8px;
-  margin-top: 4px;
 }
 
+/*
+ * Rows separated by a hairline rather than by a 4px gap between rounded
+ * cards. Same vocabulary as the bundle, related and also-like lists, which is
+ * what "matching the site" means here - the site has one way of drawing a list.
+ */
 .search-result {
   display: flex;
   gap: 12px;
-  padding: 12px;
-  border-radius: var(--radius);
+  padding: 12px 14px;
   border: none;
+  border-bottom: 1px solid var(--rule);
   background: none;
   cursor: pointer;
   width: 100%;
   text-align: left;
   align-items: center;
-  margin-bottom: 4px;
   transition: background 0.15s;
   font-family: inherit;
 }
 .search-result--compact {
-  padding: 10px;
-  margin-bottom: 0;
+  padding: 10px 14px;
 }
+/* Hover only. The arrow-key highlight has its own treatment further down -
+   both can be true at once, and the keyboard position is the one Enter acts
+   on, so they must not look identical. */
 .search-result:hover {
-  background: var(--surface-container-high);
+  background: var(--plate);
 }
 .search-result-thumb {
   width: 48px;
@@ -1613,10 +2165,10 @@ main {
   border-radius: 0;
   object-fit: cover;
   flex-shrink: 0;
-  background-color: var(--surface-container-lowest);
+  background-color: var(--plate);
 }
 .search-result-thumb--empty {
-  background-color: var(--surface-container-high);
+  background-color: var(--plate);
 }
 .search-result-body {
   flex: 1;
@@ -1626,8 +2178,8 @@ main {
 .search-result-name {
   display: block;
   font-size: 14px;
-  font-weight: 600;
-  color: var(--on-surface);
+  font-weight: 500;
+  color: var(--ink);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1638,38 +2190,39 @@ main {
 .search-result-meta {
   display: block;
   font-size: 12px;
-  color: var(--on-surface-variant);
+  color: var(--ink-muted);
   margin-top: 2px;
 }
 .search-result-price {
   display: block;
   font-size: 14px;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
   margin-top: 2px;
 }
 
+/* The last row of the list, not a footer stuck under it. */
 .search-see-all {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 10px;
-  border-radius: var(--radius);
+  gap: 6px;
+  padding: 12px 14px;
   border: none;
   background: none;
   cursor: pointer;
   width: 100%;
-  font-family: var(--font-label);
-  font-size: 12px;
-  color: var(--on-surface-variant);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  border-top: 1px solid var(--outline-variant);
-  margin-top: 4px;
+  font-family: var(--font-caps);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-muted);
+  font-weight: 500;
 }
 .search-see-all:hover {
-  background: var(--surface-container-high);
+  background: var(--plate);
+  color: var(--ink);
 }
 
 .mobile-search-panel {
@@ -1746,12 +2299,16 @@ main {
   margin-top: 8px;
 }
 
+/*
+ * 24px, not 40px. The header is two bars now, so `main`'s padding-top already
+ * reserves 112px before any of this; another 40 put the breadcrumb a sixth of
+ * a laptop screen down the page.
+ */
 .products-page,
 .checkout-page,
 .contact-page,
-.order-page,
 .product-page {
-  padding-top: 40px;
+  padding-top: 24px;
   padding-bottom: 64px;
 }
 
@@ -1898,9 +2455,6 @@ main {
   border: 1px solid var(--outline-variant);
   border-radius: var(--radius-sm);
 }
-.wood-tag--more {
-  border-color: transparent;
-}
 
 .view-finishes-btn {
   display: inline-flex;
@@ -1936,6 +2490,26 @@ main {
   flex-wrap: wrap;
   margin-bottom: 40px;
 }
+
+/*
+ * The in-page pills are the phone's copy of the header category bar.
+ *
+ * Both list the same nine categories and both mark the active one, so on
+ * desktop the page carried the row twice - once fixed at the top and again
+ * under the heading. The header bar is itself hidden on phones, where the
+ * bottom nav offers only Shop and Cribs, so removing the pills outright would
+ * leave a phone with no route to Dressers.
+ *
+ * Immediately after the base rule, and not up with the other breakpoints,
+ * because `display: flex` above would otherwise be declared later at equal
+ * specificity and win - which is exactly what happened: the pills were never
+ * hidden and the categories really were rendered twice.
+ */
+@media (min-width: 768px) {
+  .category-pills {
+    display: none;
+  }
+}
 .category-pill {
   padding: 8px 20px;
   border-radius: var(--radius-full);
@@ -1962,20 +2536,32 @@ main {
    Product detail
    =========================================================================== */
 
-/* PDP title + body — single standard (see Site Audit Data/PRODUCT-DESCRIPTION-STANDARDS.md) */
+/*
+ * PDP title + body — single standard (see Site Audit Data/PRODUCT-DESCRIPTION-STANDARDS.md)
+ *
+ * headline-lg rather than headline-xl: at 28-48px, centred and full-bleed
+ * above the grid, the name read as a page banner rather than as the label of
+ * the thing beside it. In the decision column it is a heading over a price, so
+ * it takes the size of one.
+ */
 .product-title {
-  margin: 0 0 12px;
-  text-align: center;
+  margin: 0;
+  /* `.product-layout > * { min-width: 0 }` lets this shrink below its content,
+     so an unbroken name would overflow the column rather than widen it. */
+  overflow-wrap: anywhere;
   font-family: var(--font-serif);
-  font-size: var(--text-headline-xl);
+  font-size: var(--text-headline-lg);
   font-weight: 600;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--ink);
 }
 .product-description {
+  /* No longer centred with `margin: 0 auto`: it is the last block in a ~440px
+     column now, so 65ch never binds and auto margins have nothing to centre
+     within. */
   max-width: 65ch;
-  margin: 0 auto 28px;
+  margin: 0;
   color: var(--ink-muted);
   font-family: var(--font-label);
   font-size: var(--text-body-lg);
@@ -2158,10 +2744,25 @@ a.product-inline-link:focus-visible {
   align-items: center;
   justify-content: center;
 }
+/* Sits behind everything and fills the dialog, so a click anywhere that is not
+   the photograph or a control dismisses. `zoom-out` because the image was
+   opened with `zoom-in`. */
+.lightbox-dismiss {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: zoom-out;
+}
+
 .lightbox-img-wrap {
   position: relative;
-  width: 90vw;
-  height: 80vh;
+  z-index: 1;
+  width: 86vw;
+  height: 78vh;
 }
 
 .gallery-carousel-content {
@@ -2230,9 +2831,6 @@ a.product-inline-link:focus-visible {
    Gallery page
    =========================================================================== */
 
-.gallery-page {
-  min-height: 100vh;
-}
 .gallery-header {
   padding-top: 8px;
   padding-bottom: 32px;
@@ -2279,6 +2877,7 @@ a.product-inline-link:focus-visible {
 }
 .field input,
 .field textarea,
+.field select,
 .contact-form input,
 .contact-form textarea {
   width: 100%;
@@ -2293,11 +2892,30 @@ a.product-inline-link:focus-visible {
   font-family: var(--font-label);
   font-size: 16px; /* >=16px stops iOS Safari zooming on focus */
 }
+
+/*
+ * The state field is a <select>, and a select does not inherit an input's box.
+ *
+ * Without this it renders as the platform default control next to six styled
+ * inputs. `appearance: none` drops the native arrow so the chevron below can
+ * be positioned in the same place regardless of platform, and the extra right
+ * padding keeps a long state name from running under it.
+ */
+.field select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%),
+    linear-gradient(135deg, var(--ink-muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
 .field textarea,
 .contact-form textarea {
   resize: vertical;
 }
-.field input[aria-invalid='true'] {
+.field input[aria-invalid='true'],
+.field select[aria-invalid='true'] {
   border-color: var(--error);
 }
 .field-error {
@@ -2351,6 +2969,13 @@ a.product-inline-link:focus-visible {
   border-radius: var(--radius-md);
   background-color: var(--surface-container-lowest);
   border: 1px solid var(--outline-variant);
+  /*
+   * A grid item defaults to min-width:auto, which refuses to shrink below its
+   * content - so a 43-character email address pushed the card wider than its
+   * track and out of the page on a phone. This lets the track win; the
+   * overflow-wrap below is what then breaks the address.
+   */
+  min-width: 0;
 }
 .contact-card .material-symbols-outlined {
   font-size: 24px;
@@ -2360,8 +2985,19 @@ a.product-inline-link:focus-visible {
 .contact-card dt {
   margin-bottom: 4px;
 }
+/* The same 43-character address appears in the sent-confirmation copy. */
+.contact-sent p {
+  overflow-wrap: anywhere;
+}
 .contact-card dd {
   margin: 0;
+  /*
+   * `anywhere`, not `break-word`. An email address has no break opportunity a
+   * browser will take on its own - not at the @ and not at a dot - so
+   * HeirloomCribs.Care@HeirloomCribsandMore.com is one unbreakable 43-character
+   * word that ran off the side of every phone.
+   */
+  overflow-wrap: anywhere;
 }
 .contact-card a {
   color: var(--on-surface);
@@ -2397,11 +3033,8 @@ a.product-inline-link:focus-visible {
   width: 100%;
   margin-top: 8px;
 }
-.checkout-edit {
-  margin-top: 12px;
-}
-.checkout-error,
-.checkout-notice {
+
+.checkout-error {
   padding: 16px;
   border-radius: var(--radius);
   margin: 16px 0;
@@ -2413,11 +3046,7 @@ a.product-inline-link:focus-visible {
   border: 1px solid var(--error);
   color: var(--on-error-container);
 }
-.checkout-notice {
-  background-color: var(--surface-container-high);
-  border: 1px solid var(--outline-variant);
-  color: var(--on-surface);
-}
+
 .checkout-hint {
   font-family: var(--font-label);
   font-size: 12px;
@@ -2462,28 +3091,7 @@ a.product-inline-link:focus-visible {
   flex-shrink: 0;
 }
 
-.payment-section {
-  margin-top: 32px;
-  padding: 32px;
-  background-color: var(--surface-container-lowest);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--surface-container-highest);
-}
-.payment-section h2 {
-  margin-bottom: 24px;
-}
-.payment-form {
-  width: 100%;
-}
-.payment-submit {
-  width: 100%;
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-/* Order summary + order confirmation */
+/* Order summary */
 .order-summary {
   position: sticky;
   top: 100px;
@@ -2551,85 +3159,6 @@ a.product-inline-link:focus-visible {
   align-items: center;
 }
 
-.order-page {
-  max-width: 760px;
-}
-.order-status {
-  text-align: center;
-  padding: 40px 24px;
-  border-radius: var(--radius-md);
-  margin-bottom: 32px;
-}
-.order-status .material-symbols-outlined {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 12px;
-}
-.order-status h1 {
-  margin-bottom: 8px;
-}
-.order-status--success {
-  background-color: var(--surface-container-low);
-  border: 1px solid var(--secondary);
-}
-.order-status--success .material-symbols-outlined {
-  color: var(--secondary);
-}
-.order-status--pending {
-  background-color: var(--surface-container-high);
-  border: 1px solid var(--outline-variant);
-}
-.order-block {
-  background-color: var(--surface-container);
-  padding: 32px;
-  border-radius: var(--radius-md);
-  margin-bottom: 32px;
-}
-.order-block h2 {
-  margin-bottom: 24px;
-}
-.order-detail-list {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.order-detail-list > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-}
-.order-detail-list dt,
-.order-detail-list dd {
-  margin: 0;
-}
-.order-detail-list dd {
-  text-align: right;
-}
-.order-detail-status {
-  color: var(--primary);
-  text-transform: capitalize;
-}
-.order-items {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.order-items li {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px;
-  background-color: var(--surface-container-high);
-  border-radius: var(--radius);
-}
-.order-item-detail h3 {
-  font-weight: 700;
-  margin-bottom: 2px;
-}
 .search-result-wood {
   color: var(--on-surface-variant);
 }
@@ -2832,4 +3361,387 @@ a.product-inline-link:focus-visible {
 /* Cloudflare Turnstile. Absent entirely when no site key is configured. */
 .turnstile-widget {
   margin-block: var(--spacing-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Build Your Bundle (product page)
+
+   Lives in the configuration panel, which on products with few choices was
+   ~200px of content against a ~910px photo. This is what that column is for.
+   --------------------------------------------------------------------------- */
+
+.bundle {
+  border: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+}
+
+.bundle-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.bundle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Grid, not flex: the thumbnails, checkboxes and prices have to line up in
+ * columns down the list, and with flex each row sizes itself independently so
+ * a long product name shunts that row's price out of line with the others.
+ */
+.bundle-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.bundle-list .bundle-row:last-child {
+  border-bottom: 0;
+}
+
+/* The crib itself. Tinted to read as context rather than another option. */
+.bundle-row--base {
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--rule);
+}
+.bundle-row--base .bundle-name {
+  font-weight: 500;
+}
+/* Keeps the base row's price in the same column as the ticked rows' prices,
+   which carry a checkbox this row does not have. */
+/* Pinned to the last column rather than a hard-coded 4, so it survives the
+   mobile rule dropping the thumbnail column. */
+.bundle-row--base .bundle-price {
+  grid-column: -2 / -1;
+}
+
+/* Sits directly under the bundle box, aligned to it. The .product-showcase
+   column already puts 24px between them. */
+.bundle-cta {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Group labels. The two halves of this box are different in kind - one is what
+   you have already bought, the other is what you can still add - and without a
+   label the "Included" rows read as unticked options someone forgot. */
+.bundle-group {
+  margin: 0;
+  padding: 12px 16px 6px;
+  color: var(--ink-muted);
+}
+
+.bundle-row--included .bundle-name {
+  color: var(--ink-muted);
+}
+
+/* Sits in the price column so the two groups line up down the right edge. */
+.bundle-included {
+  grid-column: -2 / -1;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.bundle-thumb {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--plate);
+}
+.bundle-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.bundle-name {
+  min-width: 0;
+  cursor: pointer;
+}
+
+.bundle-check {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.bundle-price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bundle-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: 14px 16px;
+  border-top: 1px solid var(--rule-strong);
+}
+
+@media (max-width: 767px) {
+  /* The thumbnail is the first thing to go: on a 390px screen the name and
+     the price are what the decision actually needs. */
+  .bundle-row {
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+  }
+  .bundle-thumb {
+    display: none;
+  }
+
+}
+
+/* ---------------------------------------------------------------------------
+   Related products ("Completes the collection")
+   --------------------------------------------------------------------------- */
+
+.related {
+  border-top: 1px solid var(--rule);
+  padding-top: 16px;
+}
+
+.related-head {
+  margin-bottom: 8px;
+  color: var(--ink-muted);
+}
+
+.related-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/*
+ * Same 48px / 1fr / auto rhythm as .bundle-row, so a page showing one and a
+ * page showing the other read as the same component in the same slot.
+ */
+.related-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  color: inherit;
+}
+.related-list li:last-child .related-row {
+  border-bottom: 0;
+}
+.related-row:hover .related-name {
+  color: var(--accent);
+}
+
+.related-thumb {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--plate);
+}
+.related-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.related-name {
+  min-width: 0;
+}
+
+.related-price {
+  white-space: nowrap;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+   "You may also like" (checkout)
+
+   Same row rhythm as .bundle-row and .related-row, with an Add button in place
+   of the checkbox: by this point the buyer has already decided, so the control
+   commits rather than configures.
+   --------------------------------------------------------------------------- */
+
+.also-like {
+  margin-top: var(--spacing-md);
+  border: 1px solid var(--rule);
+}
+
+.also-like-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-muted);
+}
+
+.also-like-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.also-like-row {
+  display: grid;
+  grid-template-columns: 48px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.also-like-list li:last-child {
+  border-bottom: 0;
+}
+
+.also-like-thumb {
+  width: 48px;
+  height: 48px;
+  overflow: hidden;
+  background: var(--plate);
+}
+.also-like-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.also-like-name {
+  min-width: 0;
+}
+
+.also-like-price {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Smaller than a primary action: adding a $310 mattress must never compete
+   with continuing to payment. */
+.also-like-add {
+  padding: 6px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .also-like-row {
+    grid-template-columns: 40px 1fr auto;
+    gap: 10px;
+  }
+  .also-like-thumb {
+    width: 40px;
+    height: 40px;
+  }
+  /* The button drops to its own line rather than squeezing the name to a few
+     characters. */
+  .also-like-add {
+    grid-column: 2 / -1;
+    justify-self: start;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Product page: the band below the fold-grid
+
+   Build Your Bundle and "Complete the set". Both were in the right-hand
+   column: the bundle sat between the finish picker and the price, so a
+   five-row box with its own total pushed the price of the thing being
+   configured most of a screen down the page, and the related list was a
+   48px-thumb column squeezed into ~440px.
+
+   Here they are a second, optional decision taken after the first one.
+   --------------------------------------------------------------------------- */
+
+.product-bottom {
+  margin-top: var(--spacing-lg);
+}
+.product-related {
+  margin-top: var(--spacing-lg);
+}
+
+.product-bottom-head {
+  margin-bottom: var(--spacing-md);
+  color: var(--ink-muted);
+}
+
+/* Recommendations run the full width; .featured-grid is four columns here and
+   the list is capped at four, so it is exactly one row. */
+
+@media (max-width: 767px) {
+  .product-bottom {
+    margin-top: var(--spacing-md);
+  }
+  .product-related {
+    margin-top: var(--spacing-md);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Checkout: how you'd like to pay
+   --------------------------------------------------------------------------- */
+
+.deposit-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/*
+ * The whole row is the label, so the target is the option rather than a 16px
+ * radio. Same reasoning as the bundle rows.
+ */
+.deposit-option {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: start;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+.deposit-option:hover {
+  border-color: var(--rule-strong);
+}
+.deposit-option[data-selected='true'] {
+  border-color: var(--accent);
+}
+
+.deposit-option input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.deposit-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* "Due at completion" is real but secondary - it must not compete with the
+   number the customer is about to be invoiced for. */
+.order-total-row--muted dt,
+.order-total-row--muted dd {
+  color: var(--ink-muted);
+}
+
+.checkout-done {
+  max-width: 60ch;
+}
+.checkout-done p {
+  margin-bottom: 16px;
 }

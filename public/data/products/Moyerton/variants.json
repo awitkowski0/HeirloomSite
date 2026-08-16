@@ -39,7 +39,8 @@
     "basePrice": 2499,
     "sku": "FQP-701",
     "dimensions": null,
-    "weight": null
+    "weight": null,
+    "hidden": true
   },
   {
     "variant": "RedOak",
@@ -60,6 +61,7 @@
     "basePrice": 2499,
     "sku": "FQP-701",
     "dimensions": null,
-    "weight": null
+    "weight": null,
+    "hidden": true
   }
 ]

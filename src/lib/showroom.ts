@@ -6,6 +6,8 @@ export interface ResolvedFeature {
   image: string | null;
   price: number;
   stainName: string;
+  /** The configuration this resolved to, so callers can build a variant URL. */
+  wood: string;
 }
 
 /**
@@ -22,8 +24,21 @@ export function resolveFeature(
 ): ResolvedFeature | null {
   const config = byName.get(item.productName);
   // A featured entry naming a product that no longer exists used to render a
-  // red dashed "not found" tile to every visitor. Skip it instead.
-  if (!config || !config.slug) return null;
+  // red dashed "not found" tile to every visitor. Skip it instead - but SAY SO.
+  //
+  // Silence here cost the homepage its entire product section: the three style
+  // cards named "Mission Style", "Hudson Style" and "Darlington Style" while
+  // the catalogue calls them "Mission", "Hudson" and "Darlington", so all three
+  // resolved to null, StyleCards saw an empty array and returned null, and the
+  // page simply had no cribs on it. Nothing errored and nothing looked broken.
+  // This runs at build time, so the warning lands in the build log.
+  if (!config || !config.slug) {
+    console.warn(
+      `Featured product "${item.productName}" is not in the catalogue - the tile ` +
+        'will be omitted. Check the name against public/data/inventory.json.'
+    );
+    return null;
+  }
 
   const stain =
     config.stains.find(s => s.name === (item.stainName || 'Natural') && s.inStock) ||
@@ -36,6 +51,7 @@ export function resolveFeature(
     image: stain?.gallery?.[0]?.url || stain?.image || null,
     price: config.basePrice + (stain?.priceAddition || 0),
     stainName: stain?.name ?? '',
+    wood: config.wood,
   };
 }
 

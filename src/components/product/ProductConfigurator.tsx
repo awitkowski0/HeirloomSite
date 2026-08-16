@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, type ReactNode } from 'react';
 import { productAddedToCart, productViewed, variantConfigured } from '@/lib/analytics';
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
@@ -9,9 +9,11 @@ import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
+import BundleBuilder from './BundleBuilder';
 import { formatPrice } from '@/lib/format';
 import { variantLabel as formatVariant } from '@/lib/labels';
 import { variantHref } from '@/lib/variants';
+import { useDelistedProducts } from '@/lib/useDelistedProducts';
 import type { InventoryItem, Stain, VariantType } from '@/types';
 
 /**
@@ -40,6 +42,19 @@ interface Props {
   productName: string;
   configurations: InventoryItem[];
   slug: string;
+  /*
+   * The <h1> and the description, rendered by the server page and slotted in.
+   *
+   * They belong to this component's LAYOUT - the name sits above the photo on
+   * a phone and beside it on a desktop, and the description is the last thing
+   * in the decision column - but not to its behaviour. Passing them as nodes
+   * keeps them server-rendered, which matters for the description: the page
+   * splits its paragraphs and substitutes real <Link>s for "Safety page" and
+   * "Get Personal Assistance", and none of that should cross into the client
+   * bundle just to be positioned.
+   */
+  title: ReactNode;
+  description: ReactNode;
   /** Resolved on the server from the URL path, so the correct configuration is
       in the initial HTML rather than applied after hydration. */
   initialWood: string;
@@ -50,6 +65,8 @@ export default function ProductConfigurator({
   productName,
   configurations,
   slug,
+  title,
+  description,
   initialWood,
   initialStain,
 }: Props) {
@@ -57,6 +74,35 @@ export default function ProductConfigurator({
   const [userWood, setUserWood] = useState<string | null>(initialWood);
   const [userStain, setUserStain] = useState<string | null>(initialStain);
   const [showCartPopup, setShowCartPopup] = useState(false);
+
+  /*
+   * Bundle items start ticked, so this is seeded from the catalogue rather
+   * than empty. Keyed on slug because that is what the toggle and the cart
+   * line both need, and it is stable across a wood or finish change - the
+   * conversion kits do not depend on the crib's finish.
+   */
+  const { isDelisted } = useDelistedProducts();
+  // A de-listed kit must not be offered as a tickbox, and a de-listed dresser
+  // must not be recommended; both would add it straight to a cart.
+  const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
+  // Display only - already inside the crib's price, never added to the cart.
+  const includedItems = (configurations[0]?.includes ?? []).filter(i => !isDelisted(i.slug));
+  const [bundleSelected, setBundleSelected] = useState<Set<string>>(
+    () => new Set(bundleItems.map(i => i.slug))
+  );
+  /*
+   * What pressing Add to Cart will actually put in the cart. Derived rather
+   * than tracked, so it cannot drift from the loop in handleAddToCart.
+   */
+  const selectedBundleItems = bundleItems.filter(i => bundleSelected.has(i.slug));
+
+  const toggleBundleItem = (slug: string) =>
+    setBundleSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
 
   const woods = useMemo(() => configurations.map(c => c.wood), [configurations]);
   const variantType = configurations[0]?.variantType ?? 'none';
@@ -138,6 +184,12 @@ export default function ProductConfigurator({
   const addition = Number(currentStain?.priceAddition) || 0;
   const totalPrice = basePrice + addition;
 
+  // What the Add to Cart button will add, and what it will come to.
+  const addedCount = 1 + selectedBundleItems.length;
+  const cartTotal = totalPrice + selectedBundleItems.reduce((sum, i) => sum + i.price, 0);
+  const hasBundle = includedItems.length > 0 || bundleItems.length > 0;
+
+
   /*
    * Keep the address bar on the configuration being shown, so the URL is
    * always the one worth copying.
@@ -197,18 +249,150 @@ export default function ProductConfigurator({
       price: totalPrice,
       image: galleryImages[0] || '',
       quantity: 1,
+      /*
+       * Carried so the cart can show the whole order - the conversion rails and
+       * the guard rail arrive with the crib and a buyer should see that before
+       * they wonder whether to order them.
+       *
+       * Display only. These are already inside the crib's price, they are not
+       * separate cart lines, and CheckoutClient does not send them: the server
+       * would re-price each one from the catalogue and bill $910 of parts a
+       * second time, which is the bug that separated `includes` from `bundle`
+       * in the first place.
+       */
+      includes: includedItems.map(i => ({ productName: i.productName, image: i.image })),
     });
+
+    /*
+     * Each ticked kit is added as its OWN line, at its own price, not folded
+     * into the crib's. They are separate products with separate SKUs, and an
+     * invoice that says "Addison Crib $4,088" instead of naming the rail kits
+     * is not a document anyone can check against what arrives.
+     *
+     * `wood` and `stainName` are non-null for every bundle entry - build-data
+     * rejects a bundle target that has real choices, precisely so this cannot
+     * put an arbitrary finish in the cart - but they are typed nullable
+     * because `related` shares the type, so this narrows rather than asserts.
+     */
+    for (const bundleItem of bundleItems) {
+      if (!bundleSelected.has(bundleItem.slug)) continue;
+      if (!bundleItem.wood || !bundleItem.stainName) continue;
+      const line = {
+        productName: bundleItem.productName,
+        wood: bundleItem.wood,
+        stainName: bundleItem.stainName,
+      };
+      productAddedToCart({
+        product_name: line.productName,
+        wood: line.wood,
+        stain: line.stainName,
+        price: bundleItem.price,
+        quantity: 1,
+      });
+      addToCart({
+        ...line,
+        id: cartItemId(line),
+        price: bundleItem.price,
+        image: bundleItem.image || '',
+        quantity: 1,
+      });
+    }
+
     setShowCartPopup(true);
   };
 
+  /*
+   * One button, rendered twice.
+   *
+   * The primary sits in the decision column; the second sits under the bundle,
+   * because that is where the last decision is actually taken - you tick the
+   * mattress and then you are done, and the first button is a column away and
+   * usually off-screen by then.
+   *
+   * Deliberately the SAME action, not a separate "add the bundle": two buttons
+   * that add different subsets of one order is how someone ends up with two
+   * cribs. Both add the crib and whatever is ticked, and CartPopup confirms
+   * what went in either way.
+   *
+   * Described once so the label - which counts what the click will add - can
+   * never say one thing in one place and something else in the other.
+   */
+  const addToCartButton = (
+    <button
+      type="button"
+      className="add-to-cart"
+      disabled={!selection.stain}
+      onClick={handleAddToCart}
+    >
+      {!selection.stain
+        ? 'OUT OF STOCK'
+        : addedCount > 1
+          ? `ADD ${addedCount} ITEMS — ${formatPrice(cartTotal)}`
+          : 'ADD TO CART'}
+    </button>
+  );
+
   return (
     <>
-      <div className="grid-layout">
+      <div className="product-layout">
+        {/*
+          The name is a direct child of the grid, not part of either column.
+          On a phone it is the first thing on the page, above the photograph;
+          from 1024px it is the top of the decision column beside it. Named
+          grid areas put one element in both places, rather than mounting the
+          heading twice and hiding one, which is the arrangement AGENTS.md
+          rules out.
+        */}
+        {title}
+
         <div className="product-showcase">
           <ProductGallery images={galleryImages} productName={productName} priority />
+
+          {/*
+            Under the photograph, not in the decision column and not at the
+            foot of the page.
+            
+            In the column it sat between the finish picker and the price, so a
+            five-row box with its own total pushed the price of the thing being
+            configured most of a screen down. At the foot of the page it was
+            below the buy button - and every row is ticked by default, so a
+            customer who never scrolled that far would have had four extra
+            products added by a button they pressed before seeing them.
+          */}
+          <BundleBuilder
+            productName={currentConfig.productName}
+            basePrice={totalPrice}
+            baseImage={galleryImages[0] || ''}
+            included={includedItems}
+            items={bundleItems}
+            selected={bundleSelected}
+            onToggle={toggleBundleItem}
+          />
+
+          {/* The bundle is where the last decision gets made, so the commit
+              belongs here too rather than only a column away. */}
+          {hasBundle && <div className="bundle-cta">{addToCartButton}</div>}
         </div>
 
+        {/*
+          One column, in the order the decision is actually made: what it
+          costs, what it comes in, buy it, then the copy that justifies it.
+          The price used to sit BELOW the variant pickers and the bundle,
+          which put the two things being weighed against each other - the
+          photograph and the price - at opposite ends of a scroll.
+        */}
         <div className="configuration-panel">
+          <section className="pricing-section">
+            <div className="price-row">
+              <span className="headline-lg price-current">{formatPrice(totalPrice)}</span>
+            </div>
+            <p role="status" aria-live="polite" className="visually-hidden">
+              {selection.stain
+                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. ${formatPrice(totalPrice)}.`
+                : ''}
+            </p>
+          </section>
+
           {variantLabel && (
             <WoodSelector
               woods={woods}
@@ -229,26 +413,17 @@ export default function ProductConfigurator({
             />
           )}
 
-          <section className="pricing-section">
-            <div className="price-row">
-              <span className="headline-lg price-current">{formatPrice(totalPrice)}</span>
-            </div>
-            <p role="status" aria-live="polite" className="visually-hidden">
-              {selection.stain
-                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. ${formatPrice(totalPrice)}.`
-                : ''}
-            </p>
-          </section>
-
           <section className="action-section">
-            <button
-              type="button"
-              className="add-to-cart"
-              disabled={!selection.stain}
-              onClick={handleAddToCart}
-            >
-              {selection.stain ? 'ADD TO CART' : 'OUT OF STOCK'}
-            </button>
+            {/*
+              The label counts what the click will actually add.
+
+              A ticked add-on adds its own cart line, so the button can be
+              putting two products and $3,178 in the cart rather than one and
+              $2,868 - and the bundle it was ticked in is a column away, below
+              the fold on a laptop. The button has to be the thing that tells
+              the truth about its own consequences.
+            */}
+            {addToCartButton}
 
             <button
               type="button"
@@ -276,6 +451,8 @@ export default function ProductConfigurator({
                 who to ask - unanswered at the point of decision. */}
             {showDeliveryMessage && <PurchaseAssurances />}
           </section>
+
+          {description}
         </div>
       </div>
 

@@ -52,7 +52,7 @@ export default function SearchBar() {
           onKeyDown={e => {
             if (handleKeyDown(e) === 'close') setOpen(false);
           }}
-          placeholder="Search products, stains, woods..."
+          placeholder="Search cribs, finishes, dressers"
           aria-label="Search products"
           role="combobox"
           aria-expanded={showDropdown}

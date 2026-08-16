@@ -1,52 +1,120 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/useCart';
-import { createPaymentIntent, type OrderTotals } from '@/lib/api-client';
+import { createQuote, type CreateQuoteResponse, type OrderTotals } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
+import {
+  DEFAULT_SHIPPING_METHOD,
+  SHIPPING_METHODS,
+  SHIPPING_LIMIT_NOTE,
+  TAXED_STATE,
+  shippingCentsFor,
+  splitPayment,
+  taxCentsFor,
+  type PaymentOption,
+  type ShippingMethodId,
+} from '@/lib/order-terms';
 import { variantLabel } from '@/lib/labels';
 import {
   cartItemRemoved,
   checkoutFailed,
   checkoutStarted,
-  orderCompleted,
-  shippingSubmitted,
+  quoteSubmitted,
 } from '@/lib/analytics';
-import ShippingForm, {
-  EMPTY_SHIPPING,
-  validateShipping,
-  type ShippingValues,
-} from './ShippingForm';
+import ShippingForm, { validateShipping, type ShippingValues } from './ShippingForm';
 import TermsBlock from './TermsBlock';
-import TurnstileWidget from './TurnstileWidget';
-import PaymentSection from './PaymentSection';
+import TurnstileWidget, { type TurnstileHandle, type TurnstileStatus } from './TurnstileWidget';
+import {
+  clearShippingValues,
+  getShippingSnapshot,
+  getShippingServerSnapshot,
+  setShippingValues,
+  subscribeShipping,
+} from './shippingStorage';
+import AlsoLike, { type Recommendation } from './AlsoLike';
 
-// Must match src/lib/pricing.ts, which is the authority: this is only the
-// estimate shown before the server returns real totals. Delivery is included
-// in the product price.
-const SHIPPING_CENTS = 0;
-const TAX_RATE = 0.08;
+interface Props {
+  /** productName -> its bundle items, from the build-time catalogue. */
+  recommendations: Record<string, Recommendation[]>;
+}
 
-export default function CheckoutClient() {
+export default function CheckoutClient({ recommendations }: Props) {
   const { cart, hydrated, subtotal, clearCart, removeFromCart, updateQuantity } = useCart();
-  const router = useRouter();
 
-  const [shipping, setShipping] = useState<ShippingValues>(EMPTY_SHIPPING);
+  /*
+   * The form survives a reload, via the same external-store pattern as the cart.
+   *
+   * Retyping a name, an email and a street address is the most tedious thing
+   * this site asks anyone to do, and it was thrown away by every reload -
+   * including the reload the checkout itself tells you to perform when the
+   * browser check fails.
+   */
+  const shipping = useSyncExternalStore(
+    subscribeShipping,
+    getShippingSnapshot,
+    getShippingServerSnapshot
+  );
   const [errors, setErrors] = useState<Partial<Record<keyof ShippingValues, string>>>({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
+  /*
+   * Starts 'pending', not 'disabled': until the widget has reported, we do not
+   * know whether this deployment gates checkout, and guessing "no" would be
+   * the guess that lets an unverified submit through. The widget reports on
+   * mount, so the closed state lasts a tick when Turnstile is not configured.
+   */
+  const [turnstileStatus, setTurnstileStatus] = useState<TurnstileStatus>('pending');
 
-  const [clientSecret, setClientSecret] = useState('');
-  const [paymentIntentId, setPaymentIntentId] = useState('');
+  const [shippingMethod, setShippingMethod] =
+    useState<ShippingMethodId>(DEFAULT_SHIPPING_METHOD);
+  const [paymentOption, setPaymentOption] = useState<PaymentOption>('deposit');
+  /* Set once the quote is accepted. Its presence IS the success state - there
+     is no payment step to advance to and no order page to navigate away to. */
+  const [quote, setQuote] = useState<CreateQuoteResponse | null>(null);
+  /*
+   * The address the confirmation went to, captured at submit.
+   *
+   * NOT read off `shipping` on the success screen. The form is a store now, and
+   * a successful submit clears it - so by the time this screen renders, the
+   * live value is empty and the sentence read "We've emailed a copy to ."
+   * This is a snapshot of what was actually sent to, which is what the
+   * sentence claims anyway.
+   */
+  const [confirmationEmail, setConfirmationEmail] = useState('');
   const [serverTotals, setServerTotals] = useState<OrderTotals | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const abortRef = useRef<AbortController | null>(null);
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  /* Turnstile tokens are single-use and /api/quotes spends one before it prices
+     the cart, so every rejection leaves us holding a dead token. See the catch
+     below and the note on TurnstileHandle. */
+  const turnstileRef = useRef<TurnstileHandle>(null);
+
+  /*
+   * The form survives a reload.
+   *
+   * Restored in an effect rather than a lazy useState initialiser: the server
+   * renders these fields empty, so seeding state from localStorage during
+   * render is a hydration mismatch. `restored` gates the writer below so the
+   * first pass cannot save an empty form over a stored one.
+   *
+   * Terms acceptance is deliberately NOT restored. It is the evidence that
+   * matters in a chargeback, so it has to be an act the customer performs on
+   * the order they are actually placing - not a checkbox a previous session
+   * left ticked.
+   */
+  /*
+   * Terms acceptance is deliberately NOT persisted. It is the evidence that
+   * matters in a chargeback, so it has to be an act the customer performs on
+   * the order they are actually placing - not a checkbox a previous session
+   * left ticked.
+   */
 
   /*
    * Funnel step 4, fired once.
@@ -66,27 +134,41 @@ export default function CheckoutClient() {
     });
   }, [hydrated, cart, subtotal]);
 
-  // Estimates only, replaced by the server's numbers once the intent exists.
+  /*
+   * Estimates only, replaced by the server's numbers once the intent exists.
+   *
+   * The rate itself is no longer duplicated here: this calls the same
+   * taxCentsFor() that src/lib/pricing.ts calls, so the summary and the amount
+   * charged cannot disagree about the rate. They can still disagree about
+   * PRICES, because a cart line carries the price snapshotted into
+   * localStorage at add-to-cart time - which is exactly what serverTotals
+   * overriding this is for.
+   */
   const estSubtotalCents = toCents(subtotal);
-  const estTaxCents = Math.round(estSubtotalCents * TAX_RATE);
-  const estTotalCents = estSubtotalCents + (cart.length > 0 ? SHIPPING_CENTS : 0) + estTaxCents;
+  const estShippingCents = cart.length > 0 ? shippingCentsFor(shippingMethod) : 0;
+  const estTaxCents = taxCentsFor(shipping.state, estSubtotalCents + estShippingCents);
+  const estTotalCents = estSubtotalCents + estShippingCents + estTaxCents;
+
+  const split = splitPayment(
+    (serverTotals ?? { totalCents: estTotalCents }).totalCents,
+    paymentOption
+  );
 
   const totals: OrderTotals = serverTotals ?? {
     subtotalCents: estSubtotalCents,
-    shippingCents: cart.length > 0 ? SHIPPING_CENTS : 0,
+    shippingCents: estShippingCents,
     taxCents: estTaxCents,
     totalCents: estTotalCents,
   };
 
   /**
-   * Create the PaymentIntent on submit.
+   * Submit the order.
    *
-   * Previously this ran in a mount effect keyed on every form field. On mount
-   * all seven shipping fields were empty, the server rejected the request, the
-   * .catch set `error`, and the effect's own guard
-   * `if (clientSecret || error || ...) return` then short-circuited forever
-   * because nothing ever reset `error`. clientSecret was never set, so the
-   * payment form never rendered and no customer could pay.
+   * Runs on submit, never in an effect. Previously the equivalent ran in a
+   * mount effect keyed on every form field: on mount all seven shipping fields
+   * were empty, the server rejected the request, the .catch set `error`, and
+   * the effect's own guard then short-circuited forever because nothing ever
+   * reset `error` - so the checkout could never be completed at all.
    */
   const handleSubmitDetails = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,8 +189,14 @@ export default function CheckoutClient() {
     setError(''); // Errors are recoverable: retrying clears the previous one.
 
     try {
-      const data = await createPaymentIntent(
+      const data = await createQuote(
         {
+          /*
+           * Explicit fields, not a spread. `includes` must never reach the
+           * server: priceCart() re-prices every line from the catalogue, so a
+           * rail kit sent as a line would be charged at its own price - the
+           * $910-per-crib double-charge all over again. It is display-only.
+           */
           cart: cart.map(item => ({
             productName: item.productName,
             wood: item.wood,
@@ -118,60 +206,114 @@ export default function CheckoutClient() {
           })),
           ...shipping,
           agreedToTerms,
+          shippingMethod,
+          paymentOption,
           turnstileToken,
         },
         controller.signal
       );
-      setClientSecret(data.clientSecret);
-      setPaymentIntentId(data.paymentIntentId);
       setServerTotals(data.totals);
-      /*
-       * Stored here, not on success.
-       *
-       * A redirect payment method - Klarna, Affirm, Cash App, all enabled by
-       * automatic_payment_methods - leaves the site entirely and comes back
-       * through return_url, so handleSuccess never runs and anything written
-       * there is never written at all. The token has to be on disk BEFORE the
-       * customer leaves, or the confirmation page has no way to read the order
-       * they just paid for.
-       */
-      try {
-        sessionStorage.setItem(`order_token_${data.paymentIntentId}`, data.token);
-      } catch {
-        // Safari private mode. The inline path still works; a redirect payment
-        // will land on the confirmation page unable to load the order.
-      }
-      // Funnel step 5: the address validated and Stripe accepted the intent.
-      shippingSubmitted({
+      setQuote(data);
+      quoteSubmitted({
         item_count: cart.reduce((n, i) => n + i.quantity, 0),
         order_total: fromCents(data.totals.totalCents),
+        due_now: fromCents(data.dueNowCents),
+        payment_option: paymentOption,
       });
+      /*
+       * Cleared on submission, not on payment.
+       *
+       * The cart's job is finished the moment the order is recorded - and it
+       * is recorded: the quote is a draft invoice in Stripe before this
+       * resolves. Nothing is charged yet, and waiting for that would leave a
+       * full cart sitting behind an order the shop is already working on.
+       */
+      setConfirmationEmail(shipping.email);
+      clearCart();
+      /*
+       * Cleared with the cart, and for the same reason: the order is recorded,
+       * so the details have done their job. Leaving a name, an email and a
+       * street address in localStorage after checkout would outlive any reason
+       * to keep them - and this is a browser a household shares.
+       */
+      clearShippingValues();
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
-      const message = (err as Error).message || 'Could not start checkout. Please try again.';
-      checkoutFailed({ step: 'shipping', reason: message });
+      const message = (err as Error).message || 'Could not submit your order. Please try again.';
+      checkoutFailed({ step: 'quote', reason: message });
       setError(message);
+      /*
+       * The token is spent whatever went wrong, because verifyTurnstile runs
+       * first. Without this the retry resends it, siteverify answers
+       * `timeout-or-duplicate`, and a recoverable 400 ("that stain is no longer
+       * available") turns into a permanent 403 that only a page reload clears.
+       */
+      turnstileRef.current?.reset();
     } finally {
       if (!controller.signal.aborted) setSubmitting(false);
     }
   };
 
-  // Named to avoid shadowing the state of the same name; this is the id from
-  // the PaymentIntent Stripe actually confirmed, so it is the authoritative one.
-  const handleSuccess = (confirmedId: string) => {
-    // Captured before clearCart(), which empties the array these read from, and
-    // from the server-authoritative total rather than the client estimate.
-    orderCompleted({
-      item_count: cart.reduce((count, item) => count + item.quantity, 0),
-      order_total: fromCents(totals.totalCents),
-    });
-    clearCart();
-    // The token was written to sessionStorage when the intent was created, so
-    // there is nothing to hand over here. It never travels in the URL: it is a
-    // bearer credential for an endpoint returning name, street address and
-    // email, and PostHog captures $current_url on every pageview.
-    router.push(`/order-confirmation/${confirmedId}`);
-  };
+  /*
+   * Submitted. This is terminal - there is no payment step to advance to.
+   *
+   * Checked before the empty-cart branch below, because submitting clears the
+   * cart and would otherwise drop the customer onto "your cart is empty"
+   * immediately after they ordered.
+   */
+  if (quote) {
+    return (
+      <div className="container narrow-page checkout-done">
+        <h1 className="headline-lg">Order received</h1>
+        <p className="body-lg">
+          Thank you. Your reference is <strong>{quote.orderRef}</strong>.
+        </p>
+        {/*
+          Says plainly that no money moved. The invoice is a draft until a
+          person reviews it, so there is nothing payable to link to yet - and a
+          customer who has just filled in a checkout form reasonably assumes
+          they have been charged unless told otherwise.
+        */}
+        <p className="body-md">
+          <strong>Nothing has been charged.</strong> We&rsquo;re reviewing your order now and
+          will email an invoice from Stripe, usually within one business day.
+          {quote.dueLaterCents > 0 ? (
+            <>
+              {' '}
+              Your deposit of {formatPrice(fromCents(quote.dueNowCents))} is due when it
+              arrives; the remaining {formatPrice(fromCents(quote.dueLaterCents))} is
+              invoiced once staining is complete.
+            </>
+          ) : (
+            <> The full {formatPrice(fromCents(quote.dueNowCents))} is due when it arrives.</>
+          )}
+        </p>
+        {/*
+          Conditional, because the send genuinely may not have happened: the
+          server skips the customer email while Turnstile is unconfigured in
+          production, and src/lib/email.ts returns false when Resend is not
+          configured at all. Claiming an email that never left is worse than
+          admitting it - the customer would wait for it instead of writing down
+          the reference, which in that case is the only record they have.
+        */}
+        {quote.confirmationSent ? (
+          <p className="body-md">
+            We&rsquo;ve emailed a copy to <strong>{confirmationEmail}</strong>.
+          </p>
+        ) : (
+          <p className="body-md">
+            Please keep your reference <strong>{quote.orderRef}</strong> — we could not
+            send a confirmation email, so this page is your copy. We have your order and
+            will be in touch.
+          </p>
+        )}
+        <div className="not-found-actions">
+          <Link href="/products/cribs" className="button-primary">Keep browsing</Link>
+          <Link href="/contact" className="button-secondary">Contact us</Link>
+        </div>
+      </div>
+    );
+  }
 
   // Gate on `hydrated`, not on cart.length: the server renders an empty cart,
   // so without this every visitor sees "your cart is empty" before their real
@@ -192,14 +334,12 @@ export default function CheckoutClient() {
           Start exploring our handcrafted collection to build your legacy.
         </p>
         <div className="not-found-actions">
-          <Link href="/gallery" className="button-primary">Browse Gallery</Link>
+          <Link href="/products/cribs" className="button-primary">Browse Cribs</Link>
           <Link href="/products" className="button-secondary">All Products</Link>
         </div>
       </div>
     );
   }
-
-  const detailsLocked = Boolean(clientSecret);
 
   return (
     <div className="container checkout-page">
@@ -207,7 +347,7 @@ export default function CheckoutClient() {
       <div className="grid-layout">
         <div className="product-showcase">
           <div className="checkout-secure">
-            <span className="label-caps text-on-surface-variant">Secure checkout</span>
+            <span className="label-caps text-on-surface-variant">No payment taken today</span>
             <span className="material-symbols-outlined text-secondary" aria-hidden="true">lock</span>
           </div>
 
@@ -215,10 +355,22 @@ export default function CheckoutClient() {
             <ShippingForm
               values={shipping}
               errors={errors}
-              disabled={detailsLocked || submitting}
+              disabled={submitting}
               onChange={(field, value) => {
-                setShipping(prev => ({ ...prev, [field]: value }));
+                setShippingValues({ ...shipping, [field]: value });
                 setErrors(prev => ({ ...prev, [field]: undefined }));
+              }}
+              /* One write for all four fields, so the summary and the stored
+                 copy never see a half-applied address. */
+              onSelectAddress={parts => {
+                setShippingValues({ ...shipping, ...parts });
+                setErrors(prev => ({
+                  ...prev,
+                  address: undefined,
+                  city: undefined,
+                  state: undefined,
+                  zip: undefined,
+                }));
               }}
             />
 
@@ -228,64 +380,139 @@ export default function CheckoutClient() {
               </div>
             )}
 
-            {/* Above the submit, not below it: acceptance is now a
-                precondition of creating the PaymentIntent, so asking for it
-                after the button would strand the customer on a server error
-                pointing at a checkbox further down the page. */}
+            {/* Above the submit, not below it: acceptance is a precondition of
+                recording the order, so asking for it after the button would
+                strand the customer on a server error pointing at a checkbox
+                further down the page. */}
+            {/*
+              The deposit is the default because the terms require it: "a
+              minimum 50% non-refundable deposit". Paying in full is offered
+              because some people would rather not have a second invoice
+              arriving in two months.
+            */}
+            {/*
+              Delivery is a paid choice, not a free inclusion.
+              
+              Above the payment options deliberately: it CHANGES the total, so
+              asking "how would you like to pay" before the amount is settled
+              would quote a deposit against a number that is about to move.
+            */}
+            <fieldset className="checkout-fieldset deposit-choice" disabled={submitting}>
+              <legend className="headline-md">Shipping method</legend>
+              {SHIPPING_METHODS.map(method => (
+                <label
+                  key={method.id}
+                  className="deposit-option"
+                  data-selected={shippingMethod === method.id}
+                >
+                  <input
+                    type="radio"
+                    name="shippingMethod"
+                    value={method.id}
+                    checked={shippingMethod === method.id}
+                    onChange={() => setShippingMethod(method.id)}
+                  />
+                  <span className="deposit-option-body">
+                    <span className="body-lg">
+                      {method.name} — {formatPrice(fromCents(method.cents))}
+                    </span>
+                    <span className="body-md text-on-surface-variant">{method.description}</span>
+                  </span>
+                </label>
+              ))}
+              {/* Applies to both tiers, so it sits under the pair. */}
+              <p className="body-md text-on-surface-variant shipping-limit-note">
+                {SHIPPING_LIMIT_NOTE}
+              </p>
+            </fieldset>
+
+            <fieldset className="checkout-fieldset deposit-choice" disabled={submitting}>
+              <legend className="headline-md">How you&rsquo;d like to pay</legend>
+              {(
+                [
+                  {
+                    value: 'deposit' as const,
+                    label: '50% deposit now',
+                    note: `${formatPrice(fromCents(splitPayment(totals.totalCents, 'deposit').dueNowCents))} now · ${formatPrice(fromCents(splitPayment(totals.totalCents, 'deposit').dueLaterCents))} invoiced when staining is complete`,
+                  },
+                  {
+                    value: 'full' as const,
+                    label: 'Pay in full',
+                    note: `${formatPrice(fromCents(totals.totalCents))} on one invoice`,
+                  },
+                ]
+              ).map(option => (
+                <label
+                  key={option.value}
+                  className="deposit-option"
+                  data-selected={paymentOption === option.value}
+                >
+                  <input
+                    type="radio"
+                    name="paymentOption"
+                    value={option.value}
+                    checked={paymentOption === option.value}
+                    onChange={() => setPaymentOption(option.value)}
+                  />
+                  <span className="deposit-option-body">
+                    <span className="body-lg">{option.label}</span>
+                    <span className="body-md text-on-surface-variant">{option.note}</span>
+                  </span>
+                </label>
+              ))}
+            </fieldset>
+
             <TermsBlock agreed={agreedToTerms} onChange={setAgreedToTerms} />
 
             {/* Renders nothing unless NEXT_PUBLIC_TURNSTILE_SITE_KEY is set. */}
-            <TurnstileWidget onToken={setTurnstileToken} />
+            <TurnstileWidget ref={turnstileRef} onToken={setTurnstileToken} onStatus={setTurnstileStatus} />
 
-            {!detailsLocked && (
-              <button
-                type="submit"
-                className="add-to-cart checkout-continue"
-                disabled={submitting || !agreedToTerms}
-              >
-                {submitting ? 'Preparing payment…' : 'Continue to payment'}
-              </button>
+            {/*
+              Says which of the two problems it is.
+              
+              The server rejects an empty token with 403 "Verification failed.
+              Please try again." - true, unhelpful, and unactionable when the
+              cause is a content blocker, because trying again does the same
+              nothing. The submit is blocked here instead, before the request,
+              and names the fix.
+            */}
+            {turnstileStatus === 'error' && (
+              <div className="checkout-error" role="alert">
+                <p>
+                  We could not load the browser check that protects this form. It is
+                  usually a privacy extension or ad blocker. Allow
+                  challenges.cloudflare.com for this page and reload, or{' '}
+                  <Link href="/contact">contact us</Link> and we will take your order
+                  directly.
+                </p>
+              </div>
             )}
+
+            <button
+              type="submit"
+              className="add-to-cart checkout-continue"
+              /*
+               * Gated on the check having passed, so a submit that the server
+               * is certain to reject with a 403 is never made. 'disabled'
+               * means Turnstile is not configured on this deployment, which is
+               * not the customer's problem and must not block them.
+               */
+              disabled={
+                submitting ||
+                !agreedToTerms ||
+                turnstileStatus === 'pending' ||
+                turnstileStatus === 'error'
+              }
+            >
+              {submitting
+                ? 'Sending your order…'
+                : turnstileStatus === 'pending'
+                  ? 'Checking your browser…'
+                  : 'Place order'}
+            </button>
           </form>
 
-          {detailsLocked && (
-            <button
-              type="button"
-              className="button-secondary checkout-edit"
-              onClick={() => {
-                // Editing details invalidates the intent; a new one is created
-                // on the next submit.
-                setClientSecret('');
-                setPaymentIntentId('');
-                setServerTotals(null);
-              }}
-            >
-              Edit shipping details
-            </button>
-          )}
 
-          {clientSecret && (
-            <PaymentSection
-              clientSecret={clientSecret}
-              agreedToTerms={agreedToTerms}
-              /*
-               * The real confirmation URL for THIS order.
-               *
-               * This was `/order-confirmation/pending`, a literal string that
-               * is not a payment intent id: it failed the ^pi_ check with a
-               * 400, no token had been stored under "pending", and the cart
-               * was never cleared. Every customer who paid with a redirect
-               * method - having actually been charged - landed on "We couldn't
-               * load that order" with their cart still full.
-               */
-              returnUrl={
-                typeof window !== 'undefined'
-                  ? `${window.location.origin}/order-confirmation/${paymentIntentId}`
-                  : ''
-              }
-              onSuccess={handleSuccess}
-            />
-          )}
         </div>
 
         <div className="configuration-panel">
@@ -301,10 +528,31 @@ export default function CheckoutClient() {
                   </div>
                   <div className="order-summary-detail">
                     <h3 className="body-lg">{item.productName}</h3>
-                    <p className="label-caps text-on-surface-variant">
-                      {variantLabel(item.wood, item.stainName)}
-                    </p>
+                    {variantLabel(item.wood, item.stainName) && (
+                      <p className="label-caps text-on-surface-variant">
+                        {variantLabel(item.wood, item.stainName)}
+                      </p>
+                    )}
                     <p className="body-md">{formatPrice(item.price)}</p>
+                    {/*
+                      What arrives with this line, already inside its price.
+                      
+                      Listed so the cart shows the whole order rather than
+                      leaving a buyer to wonder whether the rails they read
+                      about on the product page are actually coming. No remove
+                      control and no price, because neither is true of them:
+                      they are not separate lines and they are not extra.
+                    */}
+                    {item.includes && item.includes.length > 0 && (
+                      <ul className="order-summary-includes">
+                        {item.includes.map(inc => (
+                          <li key={inc.productName}>
+                            <span className="body-md">{inc.productName}</span>
+                            <span className="label-caps text-on-surface-variant">Included</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     {/* The cart had no quantity control anywhere on the site -
                         updateQuantity was written, typed and exported with no
                         call site - so a line could only reach 2 by adding the
@@ -314,7 +562,7 @@ export default function CheckoutClient() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        disabled={detailsLocked || item.quantity <= 1}
+                        disabled={submitting || item.quantity <= 1}
                         aria-label={`Decrease quantity of ${item.productName}`}
                       >
                         &minus;
@@ -325,7 +573,7 @@ export default function CheckoutClient() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        disabled={detailsLocked || item.quantity >= MAX_QUANTITY_PER_LINE}
+                        disabled={submitting || item.quantity >= MAX_QUANTITY_PER_LINE}
                         aria-label={`Increase quantity of ${item.productName}`}
                       >
                         +
@@ -344,7 +592,7 @@ export default function CheckoutClient() {
                     }}
                     className="icon-btn"
                     aria-label={`Remove ${item.productName} from cart`}
-                    disabled={detailsLocked}
+                    disabled={submitting}
                   >
                     <span className="material-symbols-outlined" aria-hidden="true">close</span>
                   </button>
@@ -358,32 +606,65 @@ export default function CheckoutClient() {
                 <dd>{formatPrice(fromCents(totals.subtotalCents))}</dd>
               </div>
               <div>
-                <dt>Delivery</dt>
-                {/* "$0.00" invites the question; "Included" answers it. */}
-                <dd>
-                  {totals.shippingCents === 0
-                    ? 'Included'
-                    : formatPrice(fromCents(totals.shippingCents))}
-                </dd>
+                <dt>
+                  {SHIPPING_METHODS.find(m => m.id === shippingMethod)?.name ?? 'Delivery'}
+                </dt>
+                <dd>{formatPrice(fromCents(totals.shippingCents))}</dd>
               </div>
+              {/*
+                The label carries the reason. Sales tax is charged only where
+                the shop has nexus, so for most customers this row is $0.00 -
+                and an unexplained zero reads as something that has not
+                calculated yet rather than a number.
+              */}
               <div>
-                <dt>{serverTotals ? 'Tax' : 'Estimated tax'}</dt>
+                <dt>
+                  {shipping.state === ''
+                    ? 'Estimated tax'
+                    : shipping.state === TAXED_STATE
+                      ? `Sales tax (${TAXED_STATE} 6%)`
+                      : `Sales tax (none outside ${TAXED_STATE})`}
+                </dt>
                 <dd>{formatPrice(fromCents(totals.taxCents))}</dd>
               </div>
               <div className="order-total-row">
-                <dt className="headline-md">Total</dt>
+                <dt className="headline-md">Order total</dt>
                 <dd className="headline-md text-primary">
                   {formatPrice(fromCents(totals.totalCents))}
                 </dd>
               </div>
+              {/* What the first invoice will actually ask for. The order total
+                  above is what they are buying; this is what they owe now, and
+                  conflating the two is how a deposit becomes a surprise. */}
+              <div className="order-total-row">
+                <dt className="headline-md">Due now</dt>
+                <dd className="headline-md text-primary">
+                  {formatPrice(fromCents(split.dueNowCents))}
+                </dd>
+              </div>
+              {split.dueLaterCents > 0 && (
+                <div className="order-total-row order-total-row--muted">
+                  <dt className="body-lg">Due at completion</dt>
+                  <dd className="body-lg">{formatPrice(fromCents(split.dueLaterCents))}</dd>
+                </div>
+              )}
             </dl>
 
             {!serverTotals && (
               <p className="checkout-hint">
-                Totals are confirmed when you continue to payment.
+                Totals are confirmed on the invoice we send you.
               </p>
             )}
           </div>
+
+          {/*
+            Below the summary, never above the total: this is a reminder about
+            parts, not a merchandising unit, and it must not push the number
+            the buyer came here to check below the fold. Locked while the
+            order is submitting, like every other control that would change
+            the amount.
+          */}
+          <AlsoLike recommendations={recommendations} disabled={submitting} />
         </div>
       </div>
     </div>

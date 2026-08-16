@@ -31,11 +31,10 @@ export function getStripe(): Stripe {
     const key = process.env.STRIPE_SECRET_KEY;
     if (!key) {
       console.error(
-        '\n  Payments are disabled: STRIPE_SECRET_KEY is not set.\n' +
-          '  If this project was migrated from the Vite setup, the variable names changed:\n' +
-          '    VITE_STRIPE_PUBLIC_KEY -> NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY\n' +
-          '    VITE_POSTHOG_TOKEN     -> NEXT_PUBLIC_POSTHOG_KEY\n' +
-          '  and STRIPE_SECRET_KEY + ORDER_TOKEN_SECRET must both be set server-side.\n'
+        '\n  Ordering is disabled: STRIPE_SECRET_KEY is not set.\n' +
+          '  It is the only Stripe variable the server needs. Checkout takes no card,\n' +
+          '  so there is no publishable key and no Stripe.js in the browser bundle.\n' +
+          '  Set STRIPE_WEBHOOK_SECRET too, or payment confirmations are dropped.\n'
       );
       throw new StripeNotConfiguredError('STRIPE_SECRET_KEY');
     }
