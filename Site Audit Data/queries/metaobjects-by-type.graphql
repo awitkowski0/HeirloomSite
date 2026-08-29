@@ -1,0 +1,25 @@
+# Every entry of one metaobject type, with raw field values.
+#
+# `value` is always a string; Shopify encodes numbers, money and JSON into it
+# according to the field's type, which is why the definition query above has to
+# run first.
+query MetaobjectsByType($type: String!, $cursor: String) {
+  metaobjects(type: $type, first: 100, after: $cursor) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    nodes {
+      id
+      handle
+      type
+      displayName
+      updatedAt
+      fields {
+        key
+        type
+        value
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+# Every metaobject definition in the store, with its field schema.
+#
+# Run this first: the delivery tiers live in a metaobject whose type and field
+# keys we do not know, and guessing them would mean writing rate code against
+# an imagined shape.
+query MetaobjectDefinitions {
+  metaobjectDefinitions(first: 50) {
+    nodes {
+      id
+      type
+      name
+      displayNameKey
+      metaobjectsCount
+      fieldDefinitions {
+        key
+        name
+        required
+        type {
+          name
+          category
+        }
+      }
+    }
+  }
+}
