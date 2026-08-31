@@ -46,8 +46,6 @@ const nextConfig: NextConfig = {
         ['changing-tables', 'dressers-changing-tables'],
         ['nightstands', 'nightstands-storage'],
         ['chests', 'nightstands-storage'],
-        ['area-rugs', 'decor'],
-        ['lamps', 'decor'],
       ].map(([from, to]) => ({
         source: `/products/${from}`,
         destination: `/products/${to}`,
@@ -57,6 +55,23 @@ const nextConfig: NextConfig = {
         source: `/products/${from}`,
         destination: '/products',
         permanent: true,
+      })),
+      /*
+       * The rugs and the lamp are withdrawn (`hidden` in their product.json),
+       * which empties Decor, and Bedding was never stocked - so getTaxonomy()
+       * prunes those nodes and Nursery with them, and four slugs that resolved
+       * yesterday now 404. /products/area-rugs and /products/lamps redirected
+       * here too, so without this they redirect into a dead page.
+       *
+       * TEMPORARY, unlike every redirect above: these categories return by
+       * themselves the moment a product declares one of them, with no change to
+       * taxonomy.ts. A 308 would be cached by every browser that saw it and
+       * would keep sending people to /products long after the stock is back.
+       */
+      ...['nursery', 'decor', 'bedding', 'area-rugs', 'lamps'].map(from => ({
+        source: `/products/${from}`,
+        destination: '/products',
+        permanent: false,
       })),
       // The old SPA used /products?search=q; search now has its own route.
       {

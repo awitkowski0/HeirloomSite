@@ -33,8 +33,8 @@ export default function Header() {
         </Link>
 
         {/* The middle column, and the widest thing in the bar. On a catalogue
-            of 67 pieces across nine categories, search is how someone who
-            knows what they want gets there. */}
+            this size, search is how someone who knows what they want gets
+            there. */}
         <div className="header-search">
           <SearchBar />
         </div>

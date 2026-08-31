@@ -77,7 +77,7 @@ export function useDelistedProducts(): DelistedProducts {
       /*
        * Explicitly false, not falsy. `isFeatureEnabled` returns undefined for
        * a flag that does not exist, and treating that as "hidden" would hide
-       * all 67 products on any deployment where nobody has created flags -
+       * all 59 products on any deployment where nobody has created flags -
        * which is every deployment today.
        */
       return posthog.isFeatureEnabled(productFlagKey(slug)) === false;
