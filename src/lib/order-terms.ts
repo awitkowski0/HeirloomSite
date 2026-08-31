@@ -242,10 +242,48 @@ export function taxCentsFor(state: string, taxableCents: number): number {
  * non-refundable deposit of the total order price", and the balance is
  * invoiced once staining is done.
  */
-export type PaymentOption = 'deposit' | 'full';
+export type PaymentOption = 'affirm' | 'deposit' | 'full';
+
+const PAYMENT_OPTIONS: readonly PaymentOption[] = ['affirm', 'deposit', 'full'];
 
 export function isPaymentOption(value: unknown): value is PaymentOption {
-  return value === 'deposit' || value === 'full';
+  return PAYMENT_OPTIONS.includes(value as PaymentOption);
+}
+
+/*
+ * Affirm's own limits, in cents, from Stripe's Affirm page: USD 35 to
+ * USD 30,000, US buyers only. The site already ships US-only, so the amount is
+ * the only part we can get wrong.
+ *
+ * Checked rather than assumed because the range brackets this catalogue on both
+ * sides: a single conversion kit is under $35, and a nursery set with white
+ * glove delivery can pass $30,000. Outside it Stripe simply does not present
+ * Affirm on the invoice, so an unchecked option would be a promise the hosted
+ * invoice page then silently breaks.
+ */
+export const AFFIRM_MIN_CENTS = 3_500;
+export const AFFIRM_MAX_CENTS = 3_000_000;
+
+export function affirmEligible(totalCents: number): boolean {
+  return totalCents >= AFFIRM_MIN_CENTS && totalCents <= AFFIRM_MAX_CENTS;
+}
+
+/**
+ * The option to actually bill, once the total is known.
+ *
+ * Affirm on an ineligible total degrades to a plain pay-in-full invoice rather
+ * than erroring: the customer asked to pay the whole amount and that is exactly
+ * what the invoice asks for, so refusing the order would cost a sale over a
+ * financing method Stripe was never going to offer. The checkout hides the
+ * option in that range anyway - this is the guard for a request that did not
+ * come from our form.
+ */
+export function resolvePaymentOption(
+  requested: PaymentOption,
+  totalCents: number
+): PaymentOption {
+  if (requested === 'affirm' && !affirmEligible(totalCents)) return 'full';
+  return requested;
 }
 
 export interface PaymentSplit {
@@ -261,9 +299,14 @@ export interface PaymentSplit {
  * subtraction rather than computed independently, which is what guarantees the
  * two invoices sum to the total exactly - there is no rounding to disagree
  * about, because the second number is defined as "the rest".
+ *
+ * Affirm splits like 'full' because that is what it is: Affirm pays us the
+ * whole amount up front and collects instalments from the customer itself. The
+ * instalments are Affirm's schedule, never ours, so nothing about them appears
+ * on the invoice or in these figures.
  */
 export function splitPayment(totalCents: number, option: PaymentOption): PaymentSplit {
-  if (option === 'full') return { dueNowCents: totalCents, dueLaterCents: 0 };
+  if (option !== 'deposit') return { dueNowCents: totalCents, dueLaterCents: 0 };
   const dueNowCents = Math.ceil(totalCents / 2);
   return { dueNowCents, dueLaterCents: totalCents - dueNowCents };
 }

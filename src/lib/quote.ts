@@ -36,6 +36,13 @@ export interface QuoteResult {
   invoiceId: string;
   customerId: string;
   split: PaymentSplit;
+  /*
+   * The option this invoice was BILLED under, which is not always the one that
+   * was asked for - Affirm degrades to a plain pay-in-full invoice outside its
+   * amount range. The emails are written from this, so they cannot promise an
+   * Affirm button the invoice will not show.
+   */
+  paymentOption: PaymentOption;
 }
 
 /**
@@ -253,7 +260,13 @@ export async function createQuote(
    */
   const priorDraft = await findExistingDraft(stripe, orderHash);
   if (priorDraft) {
-    return { orderRef, invoiceId: priorDraft.id as string, customerId: customerIdOf(priorDraft), split };
+    return {
+      orderRef,
+      invoiceId: priorDraft.id as string,
+      customerId: customerIdOf(priorDraft),
+      split,
+      paymentOption,
+    };
   }
 
   const customer = await findOrCreateCustomer(stripe, shipping, orderRef);
@@ -295,6 +308,14 @@ export async function createQuote(
        * switched off would fail invoice creation - which would take the whole
        * checkout down. Pay-in-full omits payment_settings entirely and inherits
        * the account default, so Affirm, Klarna and Link all appear there.
+       *
+       * That is also why choosing Affirm at checkout does not name it here. The
+       * 'affirm' and 'full' options mint the same invoice; what differs is the
+       * metadata, the confirmation email and the fact that the customer has
+       * been told to expect Affirm on it. Hardcoding ['affirm'] would swap a
+       * customer seeing one fewer payment button for the entire checkout
+       * failing on any account where Affirm is off or under review, which is
+       * not a trade worth taking for a button order.
        */
       ...(paymentOption === 'deposit'
         ? { payment_settings: { payment_method_types: ['card' as const] } }
@@ -326,8 +347,12 @@ export async function createQuote(
          * hardcoded 'deposit', so a pay-in-full order was labelled a deposit -
          * and scripts/create-balance-invoice.mjs selects on exactly this field,
          * so it would have offered to bill a balance that does not exist.
+         *
+         * Written as "deposit or else full", not "full or else deposit": an
+         * Affirm order is paid in full, and the inverted test would have
+         * relabelled it a deposit and put the same phantom balance back.
          */
-        kind: paymentOption === 'full' ? 'full' : 'deposit',
+        kind: paymentOption === 'deposit' ? 'deposit' : 'full',
         payment_option: paymentOption,
         subtotal_cents: String(priced.subtotalCents),
         shipping_cents: String(priced.shippingCents),
@@ -358,5 +383,5 @@ export async function createQuote(
     { idempotencyKey: `${orderHash}:lines` }
   );
 
-  return { orderRef, invoiceId: invoice.id as string, customerId: customer.id, split };
+  return { orderRef, invoiceId: invoice.id as string, customerId: customer.id, split, paymentOption };
 }

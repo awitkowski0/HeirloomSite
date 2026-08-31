@@ -491,7 +491,9 @@ body {
   border-color: var(--accent);
 }
 
-.shipping-limit-note {
+/* A note under a fieldset's options, applying to the set rather than to any
+   one of them: the stair limit on delivery, the Affirm instruction on payment. */
+.fieldset-note {
   margin: 10px 2px 0;
 }
 
