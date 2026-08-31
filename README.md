@@ -39,7 +39,8 @@ Public (exposed to the browser):
 | Variable | Purpose |
 | --- | --- |
 | `NEXT_PUBLIC_SITE_URL` | Canonical origin for canonical tags, `sitemap.xml` and absolute `og:image` URLs. Falls back to `VERCEL_PROJECT_PRODUCTION_URL`, then `http://localhost:3000`. |
-| `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST` | PostHog analytics |
+| `NEXT_PUBLIC_POSTHOG_KEY` / `NEXT_PUBLIC_POSTHOG_HOST` | PostHog analytics. In production the HOST is a reverse proxy on our own domain, set in Vercel, because tracker blocklists drop `*.posthog.com`. `next.config.ts` builds the PostHog entries of the CSP from it at build time. |
+| `NEXT_PUBLIC_POSTHOG_DEBUG` | Local only. `next dev` opts out of capturing by default; set to `1` to send events and log them while working on analytics. No effect in a production build. |
 
 Server only:
 
