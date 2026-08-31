@@ -197,6 +197,15 @@ this customer still owe".
   work at all. `ui_host` in `src/lib/posthog-client.ts` stays pointed at
   `https://us.posthog.com`: the proxy serves ingestion, not the app, and the
   toolbar and every "view in PostHog" link are built from it.
+  The KEY is set in Vercel too, and `.env.production` is only a fallback for a
+  production build made elsewhere — keep the two in step. They were not once,
+  and a build outside Vercel quietly sent every event to a second, real PostHog
+  project, which looks exactly like analytics being broken.
+- `NEXT_PUBLIC_POSTHOG_DEBUG` — local only, never set in Vercel. `next dev`
+  opts out of capturing entirely (dev traffic does not belong in the production
+  project), which also means a broken capture cannot be found before it ships.
+  Set it to `1` in `.env.local` to opt back in and turn on posthog-js logging.
+  It compiles away in a production build, so setting it in Vercel does nothing.
 - `STRIPE_SECRET_KEY` — server only
 - `STRIPE_WEBHOOK_SECRET` — server only; verifies `/api/stripe/webhook`. The
   route returns 503 rather than trusting an unsigned body.

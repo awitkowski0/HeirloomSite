@@ -85,9 +85,33 @@ export function initPostHog(): void {
       capture_unhandled_rejections: true,
       capture_console_errors: false,
     },
+    /*
+     * Local development sends nothing - unless you ask it to.
+     *
+     * The opt-out is still the default: dev traffic has no business in the
+     * production project. But an unconditional opt-out meant analytics could
+     * not be exercised anywhere except production, so the only way to find out
+     * a capture was broken was to ship it and wait - which is exactly how a
+     * silent gap gets diagnosed days late, against a live site.
+     *
+     * NEXT_PUBLIC_POSTHOG_DEBUG=1 in .env.local opts back IN and turns on
+     * posthog-js's own logging. opt_in is not redundant: opt_out_capturing()
+     * persists in localStorage under __ph_opt_in_out_<token>, so a browser that
+     * ever loaded dev without the flag stays opted out until something clears
+     * it - including, confusingly, after you set the flag.
+     *
+     * Production returns first and is never affected: NODE_ENV is inlined at
+     * build time, so this whole body compiles away to `loaded: () => {}` in a
+     * production bundle and setting the variable in Vercel does nothing.
+     */
     loaded: ph => {
-      // Do not pollute production analytics with local development traffic.
-      if (process.env.NODE_ENV !== 'production') ph.opt_out_capturing();
+      if (process.env.NODE_ENV === 'production') return;
+      if (process.env.NEXT_PUBLIC_POSTHOG_DEBUG === '1') {
+        ph.opt_in_capturing();
+        ph.debug();
+      } else {
+        ph.opt_out_capturing();
+      }
     },
   });
 }
