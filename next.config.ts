@@ -1,5 +1,28 @@
 import type { NextConfig } from 'next';
 
+/*
+ * The origins PostHog is reached on, for the CSP below.
+ *
+ * Analytics ingestion goes through a reverse proxy on our own domain
+ * (info.heirloomcribsandmore.com), which is the whole point: a request to
+ * *.posthog.com is dropped outright by most tracker blockers. The CSP has to
+ * name whatever NEXT_PUBLIC_POSTHOG_HOST is set to, or the browser blocks the
+ * thing the proxy exists to get through - posthog-js sends every event there
+ * and lazy-loads exception-autocapture.js from there at runtime.
+ *
+ * PostHog's own origins stay in the list. A build with the variable unset -
+ * `next dev`, a preview deploy without it - falls back to them in
+ * posthog-client.ts, and a CSP that silently stopped covering that case would
+ * fail as a console error nobody is watching for.
+ */
+const POSTHOG_DEFAULT_ORIGINS = [
+  'https://us.i.posthog.com',
+  'https://us-assets.i.posthog.com',
+];
+const posthogOrigins = [
+  ...new Set([process.env.NEXT_PUBLIC_POSTHOG_HOST, ...POSTHOG_DEFAULT_ORIGINS].filter(Boolean)),
+].join(' ');
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
@@ -104,7 +127,7 @@ const nextConfig: NextConfig = {
       // 'unsafe-inline' is required by the JSON-LD blocks and Next's inline
       // bootstrap. A nonce would need middleware, which would opt every route
       // out of static prerendering - the one thing this site cannot trade away.
-      "script-src 'self' 'unsafe-inline' https://babylist.com https://us.i.posthog.com https://challenges.cloudflare.com",
+      `script-src 'self' 'unsafe-inline' https://babylist.com ${posthogOrigins} https://challenges.cloudflare.com`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
@@ -112,7 +135,7 @@ const nextConfig: NextConfig = {
       // from /api/quotes, which a page CSP has no say over.
       // api.radar.io is the checkout address lookup - a plain fetch with a
       // publishable key, so it needs connect-src and no script-src entry.
-      "connect-src 'self' https://us.i.posthog.com https://api.radar.io",
+      `connect-src 'self' ${posthogOrigins} https://api.radar.io`,
       // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
       // any more, and payment happens on Stripe's own hosted invoice page.
       "frame-src https://challenges.cloudflare.com",

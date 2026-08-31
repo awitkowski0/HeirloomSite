@@ -21,7 +21,19 @@ export function initPostHog(): void {
   if (!key || posthog.__loaded) return;
 
   posthog.init(key, {
+    /*
+     * In production NEXT_PUBLIC_POSTHOG_HOST is info.heirloomcribsandmore.com,
+     * a reverse proxy on our own domain, so events survive the blocklists that
+     * drop a request to *.posthog.com outright. next.config.ts reads the same
+     * variable to build the CSP - it has to name this origin or the browser
+     * blocks the thing the proxy exists to get through.
+     *
+     * ui_host is not optional once api_host moves. posthog-js builds the
+     * toolbar and every "view in PostHog" link from api_host unless told
+     * otherwise, and the proxy serves ingestion, not the app.
+     */
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
+    ui_host: 'https://us.posthog.com',
     person_profiles: 'identified_only',
     // App Router navigates client-side; pageviews are captured explicitly.
     capture_pageview: false,

@@ -3,7 +3,7 @@
 import { Suspense, useEffect, type ReactNode } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
+import { PostHogProvider } from '@posthog/react';
 import { CartProvider } from '@/context/CartContext';
 import { initPostHog, capture } from '@/lib/posthog-client';
 
