@@ -135,6 +135,17 @@ const nextConfig: NextConfig = {
       // from /api/quotes, which a page CSP has no say over.
       // api.radar.io is the checkout address lookup - a plain fetch with a
       // publishable key, so it needs connect-src and no script-src entry.
+      //
+      // Session recording needs nothing beyond the PostHog origins already
+      // here: the recorder is a script fetched from the assets host and the
+      // snapshots POST to /s/ on the same host, so script-src and connect-src
+      // above cover it. ONE exception, which matters when this policy is
+      // finally enforced: canvas recording spins up a Web Worker from a
+      // blob: URL, and `worker-src` falls back to `default-src 'self'`, so it
+      // would be blocked. It is off in the PostHog project settings and the
+      // SDK never reaches that path - but turning it on there is a dashboard
+      // click with no diff, and the replays would break silently. Add
+      // `worker-src blob:` at the same time, not afterwards.
       `connect-src 'self' ${posthogOrigins} https://api.radar.io`,
       // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
       // any more, and payment happens on Stripe's own hosted invoice page.

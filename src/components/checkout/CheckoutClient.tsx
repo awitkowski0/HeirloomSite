@@ -322,7 +322,10 @@ export default function CheckoutClient({ recommendations }: Props) {
         */}
         {quote.confirmationSent ? (
           <p className="body-md">
-            We&rsquo;ve emailed a copy to <strong>{confirmationEmail}</strong>.
+            We&rsquo;ve emailed a copy to{' '}
+            {/* ph-mask: session recording is on, and input masking covers
+                what is typed IN, not an email printed back out as text. */}
+            <strong className="ph-mask">{confirmationEmail}</strong>.
           </p>
         ) : (
           <p className="body-md">
