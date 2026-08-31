@@ -51,15 +51,40 @@ export function initPostHog(): void {
     autocapture: false,
 
     /*
-     * Session recording off, explicitly.
+     * Session recording ON, with the checkout masked.
      *
-     * Leaving it unset does not mean off: it is decided by the PostHog PROJECT
-     * setting, so anyone with dashboard access could start recording the
-     * checkout form - which is nothing but name, email and street address, all
-     * of it ordinary DOM - without any code change or review. Stating it here
-     * means turning it on requires a commit.
+     * This was off, and the reason it was off still stands: /checkout is
+     * nothing but a name, an email and a street address, all of it ordinary
+     * DOM that a recorder reads as easily as a person does. Turning recording
+     * on without answering that would ship those three fields to a replay
+     * anyone with dashboard access can scrub through. So the masking below is
+     * not decoration - it is the condition on which this is enabled at all.
+     *
+     * posthog-js masks input VALUES by default. Both options are stated anyway
+     * rather than inherited, because a default that changes upstream would
+     * unmask a checkout form silently, in a patch release, with nothing in a
+     * diff to notice.
      */
-    disable_session_recording: true,
+    disable_session_recording: false,
+    session_recording: {
+      // Every <input> and <textarea> value, not just passwords.
+      maskAllInputs: true,
+      /*
+       * Input masking is NOT enough here, and this is the part that is easy to
+       * get wrong: it covers what is typed INTO a field, and nothing else. Two
+       * places render the same PII back out as ordinary text, where it would
+       * have been recorded in the clear:
+       *
+       *   AddressAutocomplete.tsx  the Radar suggestion list - full street
+       *                            addresses, as <li> text
+       *   CheckoutClient.tsx       the success screen's "we've emailed a copy
+       *                            to <email>"
+       *
+       * Both carry `ph-mask`. This is posthog-js's own default class name,
+       * repeated here for the same reason as above.
+       */
+      maskTextClass: 'ph-mask',
+    },
 
     /*
      * Defence in depth for the order token.
