@@ -175,7 +175,18 @@ this customer still owe".
 
 ## Env vars
 - `NEXT_PUBLIC_SITE_URL` — canonical origin for canonicals/sitemap/og:image
-- `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST`
+- `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` — production points the
+  HOST at a reverse proxy on our own domain
+  (`https://info.heirloomcribsandmore.com`), set in the Vercel project settings,
+  because tracker blocklists drop a request to `*.posthog.com` outright and the
+  `product-<slug>` flags go down with the analytics. `next.config.ts` builds the
+  PostHog entries of the CSP from this variable, so setting it moves both — but
+  it is read at BUILD time, so a deployment that gains the variable without a
+  rebuild ships a policy that blocks the proxy. Next calls `loadEnvConfig`
+  before it evaluates `next.config.ts`, which is what makes reading it there
+  work at all. `ui_host` in `src/lib/posthog-client.ts` stays pointed at
+  `https://us.posthog.com`: the proxy serves ingestion, not the app, and the
+  toolbar and every "view in PostHog" link are built from it.
 - `STRIPE_SECRET_KEY` — server only
 - `STRIPE_WEBHOOK_SECRET` — server only; verifies `/api/stripe/webhook`. The
   route returns 503 rather than trusting an unsigned body.
