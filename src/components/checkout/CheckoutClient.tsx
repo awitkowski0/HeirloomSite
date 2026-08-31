@@ -11,6 +11,7 @@ import {
   SHIPPING_METHODS,
   SHIPPING_LIMIT_NOTE,
   TAXED_STATE,
+  affirmEligible,
   shippingCentsFor,
   splitPayment,
   taxCentsFor,
@@ -70,7 +71,9 @@ export default function CheckoutClient({ recommendations }: Props) {
 
   const [shippingMethod, setShippingMethod] =
     useState<ShippingMethodId>(DEFAULT_SHIPPING_METHOD);
-  const [paymentOption, setPaymentOption] = useState<PaymentOption>('deposit');
+  /* What the customer picked. The option actually billed is derived below,
+     because Affirm's eligibility depends on a total that can still move. */
+  const [paymentChoice, setPaymentChoice] = useState<PaymentOption>('deposit');
   /* Set once the quote is accepted. Its presence IS the success state - there
      is no payment step to advance to and no order page to navigate away to. */
   const [quote, setQuote] = useState<CreateQuoteResponse | null>(null);
@@ -149,10 +152,22 @@ export default function CheckoutClient({ recommendations }: Props) {
   const estTaxCents = taxCentsFor(shipping.state, estSubtotalCents + estShippingCents);
   const estTotalCents = estSubtotalCents + estShippingCents + estTaxCents;
 
-  const split = splitPayment(
-    (serverTotals ?? { totalCents: estTotalCents }).totalCents,
-    paymentOption
-  );
+  const orderTotalCents = serverTotals?.totalCents ?? estTotalCents;
+
+  /*
+   * Affirm is offered only where Affirm actually works: $35 to $30,000.
+   *
+   * Derived rather than corrected in an effect, and this is why: changing the
+   * delivery tier moves the total, so a cart can leave the range after the
+   * radio has been chosen. An effect would repair that a render late, which is
+   * a render in which the summary says "Affirm" and `split` has already been
+   * computed from something else.
+   */
+  const affirmOffered = affirmEligible(orderTotalCents);
+  const paymentOption: PaymentOption =
+    paymentChoice === 'affirm' && !affirmOffered ? 'deposit' : paymentChoice;
+
+  const split = splitPayment(orderTotalCents, paymentOption);
 
   const totals: OrderTotals = serverTotals ?? {
     subtotalCents: estSubtotalCents,
@@ -284,6 +299,15 @@ export default function CheckoutClient({ recommendations }: Props) {
               arrives; the remaining {formatPrice(fromCents(quote.dueLaterCents))} is
               invoiced once staining is complete.
             </>
+          ) : paymentOption === 'affirm' ? (
+            /* Named here because this screen is the last thing a customer sees
+               before an invoice that may be hours away, and "select Affirm on
+               the invoice" is the one instruction they have to remember. */
+            <>
+              {' '}
+              The full {formatPrice(fromCents(quote.dueNowCents))} is due when it arrives —
+              select <strong>Affirm</strong> on the invoice to spread it over time.
+            </>
           ) : (
             <> The full {formatPrice(fromCents(quote.dueNowCents))} is due when it arrives.</>
           )}
@@ -389,6 +413,13 @@ export default function CheckoutClient({ recommendations }: Props) {
               minimum 50% non-refundable deposit". Paying in full is offered
               because some people would rather not have a second invoice
               arriving in two months.
+
+              Affirm is listed FIRST and still not the default. It belongs at
+              the top because it is the option that answers "I cannot put three
+              thousand dollars down at once", and someone in that position
+              should not have to read to the bottom to find out they do not
+              have to - but defaulting to a credit application for a customer
+              who never asked for one is a different thing entirely.
             */}
             {/*
               Delivery is a paid choice, not a free inclusion.
@@ -421,7 +452,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                 </label>
               ))}
               {/* Applies to both tiers, so it sits under the pair. */}
-              <p className="body-md text-on-surface-variant shipping-limit-note">
+              <p className="body-md text-on-surface-variant fieldset-note">
                 {SHIPPING_LIMIT_NOTE}
               </p>
             </fieldset>
@@ -430,6 +461,15 @@ export default function CheckoutClient({ recommendations }: Props) {
               <legend className="headline-md">How you&rsquo;d like to pay</legend>
               {(
                 [
+                  ...(affirmOffered
+                    ? [
+                        {
+                          value: 'affirm' as const,
+                          label: 'Pay over time with Affirm',
+                          note: `${formatPrice(fromCents(totals.totalCents))} financed · Affirm shows you their plans, rates and eligibility when you open the invoice`,
+                        },
+                      ]
+                    : []),
                   {
                     value: 'deposit' as const,
                     label: '50% deposit now',
@@ -452,7 +492,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                     name="paymentOption"
                     value={option.value}
                     checked={paymentOption === option.value}
-                    onChange={() => setPaymentOption(option.value)}
+                    onChange={() => setPaymentChoice(option.value)}
                   />
                   <span className="deposit-option-body">
                     <span className="body-lg">{option.label}</span>
@@ -460,6 +500,23 @@ export default function CheckoutClient({ recommendations }: Props) {
                   </span>
                 </label>
               ))}
+              {/*
+                Says nothing when Affirm is simply not on offer. A cart under
+                $35 or over $30,000 is a rare edge, and explaining an absent
+                option to everyone who hits it would draw more attention to
+                financing than the option itself does.
+
+                What this DOES say, always, is that nothing is decided here.
+                The customer picks Affirm on Stripe's invoice page, not on this
+                form - so a line promising an instant decision would be a
+                promise this checkout cannot keep.
+              */}
+              {paymentOption === 'affirm' && (
+                <p className="body-md text-on-surface-variant fieldset-note">
+                  Choose Affirm when your invoice arrives. Approval, rates and the length
+                  of the plan are Affirm&rsquo;s decision, not ours.
+                </p>
+              )}
             </fieldset>
 
             <TermsBlock agreed={agreedToTerms} onChange={setAgreedToTerms} />

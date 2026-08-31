@@ -7,7 +7,7 @@ import {
   requireTermsAcceptance,
   PricingError,
 } from '@/lib/pricing';
-import { isPaymentOption } from '@/lib/order-terms';
+import { isPaymentOption, resolvePaymentOption } from '@/lib/order-terms';
 import { verifyTurnstile, TurnstileError, turnstileEnabled } from '@/lib/turnstile';
 import { createQuote } from '@/lib/quote';
 import { sendQuoteAlert, sendQuoteConfirmation } from '@/lib/email';
@@ -44,11 +44,16 @@ export async function POST(req: Request) {
     const shipping = validateShipping(body);
     requireTermsAcceptance(body);
 
-    const paymentOption = isPaymentOption(body.paymentOption) ? body.paymentOption : 'deposit';
+    const requestedPayment = isPaymentOption(body.paymentOption) ? body.paymentOption : 'deposit';
     const shippingMethod = requireShippingMethod(body);
     // Tax depends on the destination AND on the delivery charge, so pricing
     // runs after the address is validated, not alongside it.
     const priced = priceCart(body.cart, shipping.state, shippingMethod);
+
+    // Affirm has an amount range and the total is only known now. Resolving
+    // before createQuote keeps the resolved option inside the order hash, so
+    // the invoice a customer gets back is keyed to what we actually billed.
+    const paymentOption = resolvePaymentOption(requestedPayment, priced.totalCents);
 
     const quote = await createQuote(priced, shipping, paymentOption);
 

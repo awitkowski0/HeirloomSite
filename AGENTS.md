@@ -152,6 +152,16 @@ staining finishes  → node scripts/create-balance-invoice.mjs HC-XXXXXXXX  [man
 shop reviews it    → presses Send                                [manual]
 ```
 
+Checkout offers **three** ways to pay, and only one of them changes the money:
+`deposit` (50% now, balance later), `full`, and `affirm` — which bills exactly
+like `full` and differs in the metadata, the confirmation email and the fact
+that the customer was told to expect Affirm on the invoice. Nothing names
+`affirm` in `payment_settings`: a payment method the account has switched off
+fails invoice creation, so the option inherits the account default the same way
+`full` does. Affirm is offered only between $35 and $30,000 (Affirm's own USD
+range) and `resolvePaymentOption()` degrades it to `full` outside that, because
+Stripe would not present Affirm there anyway.
+
 A deposit order is **two** invoices. One invoice cannot have two due dates, so
 the deposit is invoiced now and the balance when the staining is done. The
 deposit invoice itemises the whole order and carries a negative

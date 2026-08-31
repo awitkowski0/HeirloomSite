@@ -214,27 +214,47 @@ function totalsRows(priced: PricedCart, quote: QuoteResult, taxState: string): s
  * would go looking for an option their invoice will not offer - see the note in
  * src/lib/quote.ts about why Affirm is pay-in-full only. They are told how to
  * switch instead, which is a reply rather than a dead end.
+ *
+ * Three paths now, because Affirm is its own choice at checkout rather than
+ * something a pay-in-full buyer discovers on the invoice. Branching on
+ * quote.paymentOption and not on the amounts: an Affirm order and a plain
+ * pay-in-full order have identical splits, so the split cannot tell them apart
+ * - and it is the customer who asked for Affirm who most needs to be told
+ * where the button is.
  */
 export function sendQuoteConfirmation(
   priced: PricedCart,
   shipping: ShippingDetails,
   quote: QuoteResult
 ): Promise<boolean> {
-  const takingDeposit = quote.split.dueLaterCents > 0;
+  const takingDeposit = quote.paymentOption === 'deposit';
 
-  const paymentPath = takingDeposit
-    ? `<p>To get production started, we&rsquo;ll email you a secure Stripe invoice, usually
-       within one business day. A minimum 50% deposit is all that&rsquo;s needed to begin;
-       the remaining balance is invoiced once staining is complete.</p>
-       <p>Would you rather spread the cost? Reply to this email and we&rsquo;ll send a single
-       pay-in-full invoice instead, which lets you check out with Affirm. Affirm will show
-       you their available plans, rates and eligibility directly; those terms are
-       determined by Affirm and shared with you at that time.</p>`
-    : `<p>To get production started, we&rsquo;ll email you a secure Stripe invoice, usually
-       within one business day.</p>
-       <p>When you open it you can pay by card, or select Affirm and follow their prompts.
-       Affirm will show you their available plans, rates and eligibility directly; those
-       terms are determined by Affirm and shared with you at that time.</p>`;
+  /* Sentences rather than paragraphs, so the deposit path can continue the
+     first one instead of opening a second block to add one clause to it. */
+  const invoiceIsComing = `To get production started, we&rsquo;ll email you a secure Stripe
+    invoice, usually within one business day.`;
+
+  /* Identical in all three paths: Affirm decides the terms, we never do, and
+     neither this email nor the checkout may imply otherwise. */
+  const affirmTerms = `Affirm will show you their available plans, rates and eligibility
+    directly; those terms are determined by Affirm and shared with you at that time.`;
+
+  const paymentPath =
+    quote.paymentOption === 'affirm'
+      ? `<p>${invoiceIsComing}</p>
+         <p>You asked to pay over time. When the invoice opens, choose
+         <strong>Affirm</strong> and follow their prompts. ${affirmTerms}</p>
+         <p>Prefer not to? The same invoice takes a card, and nothing about the order
+         changes if you pay it that way instead.</p>`
+      : takingDeposit
+        ? `<p>${invoiceIsComing} A minimum 50% deposit is all that&rsquo;s needed to begin;
+           the remaining balance is invoiced once staining is complete.</p>
+           <p>Would you rather spread the cost? Reply to this email and we&rsquo;ll send a
+           single pay-in-full invoice instead, which lets you check out with Affirm.
+           ${affirmTerms}</p>`
+        : `<p>${invoiceIsComing}</p>
+           <p>When you open it you can pay by card, or select Affirm and follow their
+           prompts. ${affirmTerms}</p>`;
 
   const html = `
     <p>Thank you from the bottom of our hearts for entrusting us with this special piece
@@ -286,10 +306,23 @@ export async function sendQuoteAlert(
       ? '<p><em>Pennsylvania order — check the tax line if the buyer is in Philadelphia or Allegheny County, where the rate is higher than the 6% charged here.</em></p>'
       : '';
 
+  /*
+   * Said on the alert because the invoice itself cannot say it. An Affirm order
+   * and a plain pay-in-full order are the same document - the difference is
+   * that this customer has been told, twice, to expect an Affirm button on it.
+   * If Affirm is ever switched off on the account, this line is what turns a
+   * confused reply into an explicable one.
+   */
+  const chosePayment =
+    quote.paymentOption === 'affirm'
+      ? '<p><strong>Customer chose Affirm.</strong> The invoice is pay-in-full; Affirm appears on it as long as it is enabled in payment method settings.</p>'
+      : '';
+
   const html = `
     <p><strong>New quote ${esc(quote.orderRef)}</strong>${livemode ? '' : ' [TEST MODE]'}</p>
     <p>A draft invoice is waiting. Review the stain and the price, then send it:<br>
     <a href="${dashboard}">${dashboard}</a></p>
+    ${chosePayment}
     <table cellpadding="6">${itemRows(priced)}${totalsRows(priced, quote, shipping.state)}</table>
     <p>${esc(shipping.firstName)} ${esc(shipping.lastName)}<br>
     ${esc(shipping.email)}<br>

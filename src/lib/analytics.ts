@@ -1,6 +1,7 @@
 "use client";
 
 import { capture } from "./posthog-client";
+import type { PaymentOption } from "./order-terms";
 
 /**
  * The PostHog event vocabulary, in one place.
@@ -116,7 +117,9 @@ export function quoteSubmitted(props: {
   order_total: number;
   /** What the deposit invoice will ask for, which is the number that converts. */
   due_now: number;
-  payment_option: "deposit" | "full";
+  /* Imported rather than restated: this is the property the funnel splits on,
+     so a union that drifts from the real one silently drops a whole cohort. */
+  payment_option: PaymentOption;
 }) {
   capture("quote_submitted", props);
 }

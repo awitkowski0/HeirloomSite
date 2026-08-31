@@ -1,3 +1,5 @@
+import type { PaymentOption } from './order-terms';
+
 export interface CartItemPayload {
   productName: string;
   wood: string;
@@ -21,8 +23,12 @@ export interface CreateQuoteRequest {
   turnstileToken?: string;
   /** Which delivery tier. Defaults to the cheaper one server-side. */
   shippingMethod: 'threshold' | 'white_glove';
-  /** 'deposit' (50% now) or 'full'. Defaults to 'deposit' server-side. */
-  paymentOption: 'deposit' | 'full';
+  /**
+   * 'deposit' (50% now), 'full', or 'affirm' (full, financed by Affirm).
+   * Defaults to 'deposit' server-side; 'affirm' falls back to 'full' when the
+   * total is outside Affirm's range.
+   */
+  paymentOption: PaymentOption;
   email: string;
   firstName: string;
   lastName: string;
