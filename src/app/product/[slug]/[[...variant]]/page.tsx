@@ -89,9 +89,11 @@ type Params = { slug: string; variant: string[] };
  */
 export function generateStaticParams(): Params[] {
   const slugs = getAllProductSlugs();
-  // Mirrors the guard in build-data.mjs. If the data artifact is short, refuse
-  // to build rather than ship a deploy that 404s already-indexed product URLs.
-  if (slugs.length < 67) {
+  // Mirrors the guard in build-data.mjs, but counts VISIBLE products: this one
+  // reads the generated artifact, which excludes anything `hidden`. Lower it
+  // deliberately when a product is withdrawn - it exists to catch a data
+  // artifact that came out short, not to veto a withdrawal.
+  if (slugs.length < 59) {
     throw new Error(
       `Refusing to build: only ${slugs.length} product slugs found. Run \`npm run data:build\`.`
     );

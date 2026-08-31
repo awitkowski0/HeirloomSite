@@ -12,7 +12,6 @@ import FeaturedProducts from '@/components/home/FeaturedProducts';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
 import { SHIPPING_METHODS, SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
-import { formatPrice } from '@/lib/format';
 import '@/styles/home.css';
 
 export const metadata: Metadata = {
@@ -125,13 +124,14 @@ export default function HomePage() {
           lead="You choose how it arrives when you order. Both tiers are handled by our trusted partners, not a freight terminal."
         >
           {/*
-            Priced from SHIPPING_METHODS, the same constant the checkout charges
-            from, so the homepage cannot quote a delivery price the cart then
-            contradicts.
+            Named from SHIPPING_METHODS but deliberately UNPRICED: delivery is
+            quoted at checkout, where the destination is known. The tiers still
+            come from the constant the checkout charges from so the two cannot
+            drift apart on what is on offer.
           */}
           <JourneyPoints
             points={[
-              ...SHIPPING_METHODS.map(m => `${m.name} — ${formatPrice(m.cents / 100)}. ${m.description}`),
+              ...SHIPPING_METHODS.map(m => `${m.name} — ${m.description}`),
               SHIPPING_LIMIT_NOTE,
             ]}
           />
