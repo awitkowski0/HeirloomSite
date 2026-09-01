@@ -31,6 +31,7 @@ export default function PrivacyPage() {
     <div className="container doc-page">
       <p className="label-caps text-on-surface-variant">Legal</p>
       <h1 className="headline-xl">Privacy</h1>
+      <p className="body-md text-on-surface-variant">Last updated: September 1, 2026</p>
       <p className="body-lg doc-lede">
         What we collect, who processes it on our behalf, and how to change your mind. We sell
         furniture; we do not sell data.
@@ -140,13 +141,78 @@ export default function PrivacyPage() {
           obligations. Analytics data is kept for as long as it is useful and no longer. You can
           unsubscribe from the mailing list using the link in any email we send.
         </p>
+      </section>
+
+      <hr className="doc-rule" />
+
+      <section>
+        <h2 className="headline-md">Your rights</h2>
+        <p>Depending on where you live, you may have the right to:</p>
+        <ul className="doc-list">
+          <li>
+            <strong>Know or access</strong> what personal information we hold about you.
+          </li>
+          <li>
+            <strong>Correct</strong> inaccurate personal information.
+          </li>
+          <li>
+            <strong>Delete</strong> personal information we hold about you.
+          </li>
+          <li>
+            <strong>Get a copy</strong> of your personal information in a portable form.
+          </li>
+          <li>
+            <strong>Opt out</strong> of the sharing described above under Meta Pixel, which some
+            laws classify as a &ldquo;sale&rdquo; or &ldquo;sharing&rdquo; of information for
+            targeted advertising. Use <strong>Cookie settings</strong> at the bottom of any page —
+            it stops immediately, and we do not sell information in any other sense.
+          </li>
+        </ul>
         <p>
-          You can ask us what we hold about you, ask for a copy, or ask us to delete it.{' '}
+          To exercise any of these,{' '}
           <Link href="/contact" className="doc-link">
-            Get in touch
+            get in touch
           </Link>{' '}
           and tell us which — we will need the email address you used so we can find the right
-          records.
+          records, and may need to verify it&rsquo;s you before acting on the request. We will not
+          treat you differently for asking. If you are not satisfied with our response, you may
+          have the right to appeal our decision or to complain to your local data protection
+          authority.
+        </p>
+      </section>
+
+      <hr className="doc-rule" />
+
+      <section>
+        <h2 className="headline-md">A few more things</h2>
+        <ul className="doc-list">
+          <li>
+            <strong>Children.</strong> This site is not directed at children, and we do not
+            knowingly collect personal information from them. If you are a parent or guardian and
+            believe your child has given us information, contact us and we will delete it.
+          </li>
+          <li>
+            <strong>International transfers.</strong> The processors listed above operate
+            globally, so your information may be processed in a country other than the one you
+            live in.
+          </li>
+        </ul>
+      </section>
+
+      <hr className="doc-rule" />
+
+      <section>
+        <h2 className="headline-md">Contact</h2>
+        <p>
+          Questions about this policy, or want to exercise one of the rights above? Call{' '}
+          <a href="tel:+14842931840" className="doc-link">
+            (484) 293-1840
+          </a>
+          , email{' '}
+          <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
+            heirloomcribs.care@heirloomcribsandmore.com
+          </a>
+          , or write to us at 421 Manor Dr, Nazareth, PA 18064, United States.
         </p>
       </section>
     </div>

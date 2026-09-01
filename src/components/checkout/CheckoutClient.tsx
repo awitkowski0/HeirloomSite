@@ -21,11 +21,12 @@ import {
 import { variantLabel } from '@/lib/labels';
 import {
   cartItemRemoved,
+  checkoutEmailEntered,
   checkoutFailed,
   checkoutStarted,
   quoteSubmitted,
 } from '@/lib/analytics';
-import ShippingForm, { validateShipping, type ShippingValues } from './ShippingForm';
+import ShippingForm, { EMAIL_RE, validateShipping, type ShippingValues } from './ShippingForm';
 import TermsBlock from './TermsBlock';
 import TurnstileWidget, { type TurnstileHandle, type TurnstileStatus } from './TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
@@ -138,6 +139,27 @@ export default function CheckoutClient({ recommendations }: Props) {
       cart_value: subtotal,
     });
   }, [hydrated, cart, subtotal]);
+
+  /*
+   * Identify the moment the email field becomes a valid address - not on
+   * submit, which is too late for anyone who abandons here. Gated on
+   * `hydrated` for the same reason as above: the server renders this field
+   * empty, so an unguarded check would fire for a form restored from
+   * localStorage before the browser has painted anything.
+   *
+   * The ref dedupes against every other keystroke, not just this field's -
+   * shipping is one object, so typing a middle initial re-runs this effect
+   * too. Comparing against the last identified value, not a boolean, also
+   * means correcting a typo'd email re-identifies the corrected one.
+   */
+  const identifiedEmailRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!hydrated) return;
+    const email = shipping.email.trim().toLowerCase();
+    if (!EMAIL_RE.test(email) || identifiedEmailRef.current === email) return;
+    identifiedEmailRef.current = email;
+    checkoutEmailEntered(email);
+  }, [hydrated, shipping.email]);
 
   /*
    * Estimates only, replaced by the server's numbers once the intent exists.

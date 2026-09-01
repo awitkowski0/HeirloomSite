@@ -61,7 +61,9 @@ const FIELDS: Array<{
   { key: 'zip', label: 'ZIP code', type: 'text', autoComplete: 'postal-code' },
 ];
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// Exported for CheckoutClient, which identifies the visitor in PostHog the
+// moment this passes - see checkoutEmailEntered in lib/analytics.ts.
+export const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /*
  * Deliberately loose: count the digits, do not police the formatting.

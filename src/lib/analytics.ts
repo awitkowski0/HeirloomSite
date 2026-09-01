@@ -148,6 +148,25 @@ export function variantConfigured(props: {
   metaTrack("CustomizeProduct", { content_name: props.product_name });
 }
 
+/**
+ * Identify the visitor the moment a valid email lands in the checkout form -
+ * before shipping is filled in, before submit, possibly before they ever
+ * finish. Without this, `person_profiles: 'identified_only'` means someone
+ * who reaches checkout_started and then abandons stays fully anonymous
+ * forever, even though they typed an address we could have emailed.
+ *
+ * No capture() call here and deliberately no Meta event: identify() alone is
+ * enough to retroactively stitch this browser's whole session - including a
+ * checkout_started that already fired before the email was typed - onto the
+ * person profile. Firing a new named event would be double-counting the
+ * funnel step checkout_started already represents. See quoteSubmitted for the
+ * production of the same email address as a person property, and
+ * identifyPerson's docstring for what calling this actually costs.
+ */
+export function checkoutEmailEntered(email: string) {
+  identifyPerson(email, { email });
+}
+
 export function checkoutStarted(props: { item_count: number; cart_value: number }) {
   capture("checkout_started", props);
   metaTrack("InitiateCheckout", {
