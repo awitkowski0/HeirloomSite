@@ -3747,3 +3747,170 @@ a.product-inline-link:focus-visible {
 .checkout-done p {
   margin-bottom: 16px;
 }
+
+/* ===========================================================================
+   Consent banner
+
+   A bar pinned to the bottom, deliberately not a modal: the site stays usable
+   while it is up (see ConsentBanner.tsx). z-index sits below .cart-popup-overlay
+   (1000) so a dialog opened from the page still covers it rather than fighting
+   it for the same plane.
+   =========================================================================== */
+
+.consent-banner {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 900;
+  background-color: var(--surface-container-lowest);
+  border-top: 1px solid var(--rule-strong);
+  padding: 20px;
+}
+
+.consent-banner-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.consent-banner-text {
+  flex: 1 1 320px;
+  margin: 0;
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.consent-banner-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.consent-banner-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* Equal weight on both, on purpose: a decline that is harder to click is not a
+   free choice, and consent that is not freely given is not consent. */
+.consent-banner-button {
+  padding: 12px 28px;
+  min-width: 130px;
+}
+
+@media (max-width: 560px) {
+  .consent-banner-inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .consent-banner-actions {
+    justify-content: stretch;
+  }
+  .consent-banner-button {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+/* The footer's "Cookie settings" control. A <button>, because it acts on this
+   page rather than navigating - styled to sit in the link list beside real
+   links without looking like a form control. */
+.footer-link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.footer-link-button:hover {
+  text-decoration: underline;
+}
+
+/* ===========================================================================
+   Email capture popup
+
+   Reuses .cart-popup-overlay / .cart-popup-content for the shell so there is
+   one dialog look on the site, and adds only what this form needs.
+   =========================================================================== */
+
+.email-popup {
+  max-width: 460px;
+  padding: 44px 40px 32px;
+}
+
+.email-popup-title {
+  margin: 0 0 12px;
+}
+
+.email-popup-text {
+  margin: 0 0 24px;
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.email-popup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.email-popup-input {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1px solid var(--control-border);
+  border-radius: 0;
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface);
+  font-family: var(--font-manrope), sans-serif;
+  font-size: 15px;
+}
+
+.email-popup-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.email-popup-submit {
+  width: 100%;
+}
+
+.email-popup-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.email-popup-error {
+  margin: 0;
+  color: var(--on-error-container);
+  background-color: var(--error-container);
+  padding: 10px 12px;
+  font-size: 13px;
+  text-align: left;
+}
+
+/* Visibly a lesser action than the primary button, but a real one: a dismissal
+   that has to be hunted for is the pattern this component is trying not to be. */
+.email-popup-dismiss {
+  margin-top: 18px;
+  padding: 4px;
+  border: 0;
+  background: none;
+  color: var(--on-surface-variant);
+  font-family: var(--font-caps);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}

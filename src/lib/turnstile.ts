@@ -10,6 +10,11 @@ import 'server-only';
  * fills the shop's own inbox, and it litters the Stripe account with junk
  * customers that poison the find-by-email reuse the invoicing flow depends on.
  *
+ * POST /api/subscribe is guarded for the same reason in a different currency:
+ * it writes a caller-supplied address into a marketing audience, so unprotected
+ * it pollutes the list with addresses nobody owns - and the complaints land on
+ * the reputation of the same sending domain the order mail goes out on.
+ *
  * siteverify is called from here and only from here. It takes the secret key,
  * so a browser can never be trusted to make this call.
  *
@@ -18,16 +23,16 @@ import 'server-only';
  * mismatched token is rejected rather than waved through.
  */
 
-import { TURNSTILE_ACTION } from './turnstile-action';
+import type { TurnstileAction } from './turnstile-action';
 
 const VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 /**
- * The widget's `action`, asserted on both ends. Defined in its own non-
- * server-only module so the client half can import it without dragging this
+ * The widget `action`s, asserted on both ends. Defined in their own non-
+ * server-only module so the client half can import them without dragging this
  * file - and the secret handling in it - into the browser bundle.
  */
-export { TURNSTILE_ACTION } from './turnstile-action';
+export { TURNSTILE_ACTIONS, type TurnstileAction } from './turnstile-action';
 
 export function turnstileEnabled(): boolean {
   return Boolean(process.env.TURNSTILE_SECRET_KEY);
@@ -120,7 +125,16 @@ let warnedTestingKey = false;
  */
 let warnedHalfConfigured = false;
 
-export async function verifyTurnstile(token: unknown, ip: string | null): Promise<void> {
+/**
+ * @param expectedAction which surface this token must have been minted for.
+ *   Required rather than defaulted: a default would silently accept a
+ *   newsletter token at checkout the first time somebody forgot to pass it.
+ */
+export async function verifyTurnstile(
+  token: unknown,
+  ip: string | null,
+  expectedAction: TurnstileAction
+): Promise<void> {
   const secret = process.env.TURNSTILE_SECRET_KEY;
   if (!secret) {
     if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !warnedHalfConfigured) {
@@ -175,8 +189,8 @@ export async function verifyTurnstile(token: unknown, ip: string | null): Promis
     return;
   }
 
-  if (outcome.action !== TURNSTILE_ACTION) {
-    console.warn(`Turnstile action mismatch: expected ${TURNSTILE_ACTION}, got ${outcome.action}`);
+  if (outcome.action !== expectedAction) {
+    console.warn(`Turnstile action mismatch: expected ${expectedAction}, got ${outcome.action}`);
     throw new TurnstileError();
   }
 

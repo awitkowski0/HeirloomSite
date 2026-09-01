@@ -28,6 +28,8 @@ import {
 import ShippingForm, { validateShipping, type ShippingValues } from './ShippingForm';
 import TermsBlock from './TermsBlock';
 import TurnstileWidget, { type TurnstileHandle, type TurnstileStatus } from './TurnstileWidget';
+import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
+import { markSubscribePrompt } from '@/components/marketing/subscribeStorage';
 import {
   clearShippingValues,
   getShippingSnapshot,
@@ -229,7 +231,16 @@ export default function CheckoutClient({ recommendations }: Props) {
       );
       setServerTotals(data.totals);
       setQuote(data);
+      /*
+       * Somebody who just typed their email into the checkout must never be
+       * chased around the site by a popup asking for it. Recorded permanently,
+       * like an actual subscription - they have given us the address, and
+       * whether it went on the marketing list is a separate question from
+       * whether it is polite to keep asking.
+       */
+      markSubscribePrompt('subscribed');
       quoteSubmitted({
+        email: shipping.email,
         item_count: cart.reduce((n, i) => n + i.quantity, 0),
         order_total: fromCents(data.totals.totalCents),
         due_now: fromCents(data.dueNowCents),
@@ -525,7 +536,12 @@ export default function CheckoutClient({ recommendations }: Props) {
             <TermsBlock agreed={agreedToTerms} onChange={setAgreedToTerms} />
 
             {/* Renders nothing unless NEXT_PUBLIC_TURNSTILE_SITE_KEY is set. */}
-            <TurnstileWidget ref={turnstileRef} onToken={setTurnstileToken} onStatus={setTurnstileStatus} />
+            <TurnstileWidget
+              ref={turnstileRef}
+              onToken={setTurnstileToken}
+              onStatus={setTurnstileStatus}
+              action={TURNSTILE_ACTIONS.checkout}
+            />
 
             {/*
               Says which of the two problems it is.

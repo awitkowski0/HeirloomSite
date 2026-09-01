@@ -23,6 +23,24 @@ const posthogOrigins = [
   ...new Set([process.env.NEXT_PUBLIC_POSTHOG_HOST, ...POSTHOG_DEFAULT_ORIGINS].filter(Boolean)),
 ].join(' ');
 
+/*
+ * The origins the Meta Pixel is reached on.
+ *
+ * connect.facebook.net serves fbevents.js and the runtime config it fetches
+ * once loaded, so it needs BOTH script-src and connect-src - a script-src entry
+ * alone loads the pixel and then blocks its own configuration request.
+ * www.facebook.com is the ingestion endpoint: the /tr/ beacon is covered by
+ * img-src's blanket `https:`, but current fbevents.js prefers fetch and
+ * sendBeacon, which are connect-src.
+ *
+ * Named unconditionally rather than gated on NEXT_PUBLIC_META_PIXEL_ID. The
+ * variable is deliberately unset outside production (see .env.example), and a
+ * CSP that only permits the pixel in the one environment where it runs is a
+ * policy nobody can test before it ships.
+ */
+const META_SCRIPT_ORIGIN = 'https://connect.facebook.net';
+const META_CONNECT_ORIGINS = 'https://www.facebook.com https://connect.facebook.net';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
@@ -127,7 +145,7 @@ const nextConfig: NextConfig = {
       // 'unsafe-inline' is required by the JSON-LD blocks and Next's inline
       // bootstrap. A nonce would need middleware, which would opt every route
       // out of static prerendering - the one thing this site cannot trade away.
-      `script-src 'self' 'unsafe-inline' https://babylist.com ${posthogOrigins} https://challenges.cloudflare.com`,
+      `script-src 'self' 'unsafe-inline' https://babylist.com ${posthogOrigins} https://challenges.cloudflare.com ${META_SCRIPT_ORIGIN}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
@@ -146,7 +164,7 @@ const nextConfig: NextConfig = {
       // SDK never reaches that path - but turning it on there is a dashboard
       // click with no diff, and the replays would break silently. Add
       // `worker-src blob:` at the same time, not afterwards.
-      `connect-src 'self' ${posthogOrigins} https://api.radar.io`,
+      `connect-src 'self' ${posthogOrigins} https://api.radar.io ${META_CONNECT_ORIGINS}`,
       // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
       // any more, and payment happens on Stripe's own hosted invoice page.
       "frame-src https://challenges.cloudflare.com",

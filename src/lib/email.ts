@@ -60,6 +60,18 @@ const MAX_RECIPIENTS = 50;
 const LOOKS_LIKE_EMAIL = /^[^\s@,]+@[^\s@,]+\.[^\s@,]{2,}$/;
 
 /**
+ * Shared with /api/subscribe rather than copied into it.
+ *
+ * A second regex would drift from this one, and the two would then disagree
+ * about which addresses exist - so a signup could be accepted at one endpoint
+ * and rejected at the other for the same address, which is the kind of bug
+ * nobody reproduces.
+ */
+export function looksLikeEmail(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 254 && LOOKS_LIKE_EMAIL.test(value.trim());
+}
+
+/**
  * Who hears about an order: ORDER_NOTIFICATION_EMAIL, comma-separated.
  *
  *   ORDER_NOTIFICATION_EMAIL=orders@example.com, shop@example.com
