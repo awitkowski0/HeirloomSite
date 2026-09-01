@@ -84,8 +84,9 @@ export function organizationJsonLd(): JsonLd {
     url: SITE_URL,
     logo: absoluteUrl('/logo-wide.png'),
     description:
-      'Handcrafted nursery furniture built to hold your most precious cargo for generations. ' +
-      'Traditional joinery, botanical finishes, solid American hardwoods.',
+      'Heirloom builds solid hardwood nursery furniture that meets or exceeds CPSC and ASTM ' +
+      'safety standards, forest to family, with white-glove delivery and finishes built to ' +
+      'grow with your child.',
   };
 }
 

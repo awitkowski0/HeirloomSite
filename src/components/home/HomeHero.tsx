@@ -34,9 +34,9 @@ export default function HomeHero({ detail, heroImage }: Props) {
     <section className="home-hero">
       <div className="home-hero-copy">
         <h1 className="home-hero-headline">
-          Built from solid wood.
+          Built from Solid Wood.
           <br />
-          Built to grow up.
+          Built to Grow Up.
         </h1>
 
         <div className="home-ornament" aria-hidden="true">
