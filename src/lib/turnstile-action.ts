@@ -20,6 +20,8 @@ export const TURNSTILE_ACTIONS = {
   checkout: 'checkout',
   /** POST /api/subscribe - writes an address into a marketing audience. */
   subscribe: 'subscribe',
+  /** POST /api/coupon/validate - an anonymous oracle that calls Stripe. */
+  coupon: 'coupon',
 } as const;
 
 export type TurnstileAction = (typeof TURNSTILE_ACTIONS)[keyof typeof TURNSTILE_ACTIONS];

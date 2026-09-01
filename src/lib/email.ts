@@ -204,11 +204,18 @@ function itemRows(priced: PricedCart): string {
 function totalsRows(priced: PricedCart, quote: QuoteResult, taxState: string): string {
   const rows = [
     `<tr><td>Subtotal</td><td align="right">${money(priced.subtotalCents)}</td></tr>`,
+  ];
+  if (priced.discountCents > 0 && priced.coupon) {
+    rows.push(
+      `<tr><td>Discount (${esc(priced.coupon.code)})</td><td align="right">-${money(priced.discountCents)}</td></tr>`
+    );
+  }
+  rows.push(
     `<tr><td>${esc(shippingMethodById(priced.shippingMethod).name)}</td><td align="right">${money(priced.shippingCents)}</td></tr>`,
     `<tr><td>Sales tax${priced.taxCents > 0 ? ` (${esc(taxState)} 6%)` : ''}</td><td align="right">${money(priced.taxCents)}</td></tr>`,
     `<tr><td><strong>Order total</strong></td><td align="right"><strong>${money(priced.totalCents)}</strong></td></tr>`,
-    `<tr><td><strong>Due now</strong></td><td align="right"><strong>${money(quote.split.dueNowCents)}</strong></td></tr>`,
-  ];
+    `<tr><td><strong>Due now</strong></td><td align="right"><strong>${money(quote.split.dueNowCents)}</strong></td></tr>`
+  );
   if (quote.split.dueLaterCents > 0) {
     rows.push(
       `<tr><td>Due at completion</td><td align="right">${money(quote.split.dueLaterCents)}</td></tr>`

@@ -10,6 +10,7 @@ export interface CartItemPayload {
 
 export interface OrderTotals {
   subtotalCents: number;
+  discountCents: number;
   shippingCents: number;
   taxCents: number;
   totalCents: number;
@@ -29,6 +30,8 @@ export interface CreateQuoteRequest {
    * total is outside Affirm's range.
    */
   paymentOption: PaymentOption;
+  /** A Stripe Promotion Code, re-validated server-side. Omit for no coupon. */
+  couponCode?: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -115,3 +118,30 @@ export async function createQuote(
   return parse<CreateQuoteResponse>(res);
 }
 
+export interface ValidateCouponRequest {
+  code: string;
+  cart: CartItemPayload[];
+  turnstileToken?: string;
+}
+
+export interface ValidateCouponResponse {
+  valid: true;
+  /** Canonical code as Stripe stored it, for display. */
+  code: string;
+  amountOffCents: number;
+  /** Preview only - /api/quotes recomputes this independently at submit time. */
+  discountCents: number;
+}
+
+export async function validateCoupon(
+  req: ValidateCouponRequest,
+  signal?: AbortSignal
+): Promise<ValidateCouponResponse> {
+  const res = await fetch('/api/coupon/validate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+    signal,
+  });
+  return parse<ValidateCouponResponse>(res);
+}

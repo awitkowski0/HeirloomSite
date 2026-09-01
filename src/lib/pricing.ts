@@ -96,10 +96,20 @@ export interface PricedLine {
   addons: Array<{ name: string; priceCents: number }>;
 }
 
+/** A validated, fixed-amount-off coupon, resolved against Stripe by src/lib/coupon.ts. */
+export interface CartCoupon {
+  code: string;
+  promotionCodeId: string;
+  amountOffCents: number;
+}
+
 export interface PricedCart {
   lines: PricedLine[];
   shippingMethod: ShippingMethodId;
   subtotalCents: number;
+  /** 0 when no coupon is applied. Never more than subtotalCents. */
+  discountCents: number;
+  coupon: CartCoupon | null;
   shippingCents: number;
   taxCents: number;
   totalCents: number;
@@ -113,18 +123,13 @@ function asString(value: unknown, field: string): string {
 }
 
 /**
- * Price a cart for delivery to `state` by `shippingMethod`.
- *
- * `state` is required rather than optional: tax is no longer a single rate, so
- * a caller that forgets it would silently produce an untaxed order. Callers
- * pass the value from validateShipping(), which has already checked it is a
- * state the shop delivers to.
+ * The catalogue-priced lines and their subtotal, with none of the
+ * destination-specific work (shipping tier, tax jurisdiction) `priceCart`
+ * also does. Split out so a trustworthy subtotal is available to code that
+ * only needs it - the coupon validation endpoint, which runs before the
+ * customer has necessarily chosen a shipping method or entered a state.
  */
-export function priceCart(
-  cart: unknown,
-  state: string,
-  shippingMethod: ShippingMethodId = DEFAULT_SHIPPING_METHOD
-): PricedCart {
+function priceLines(cart: unknown): { lines: PricedLine[]; subtotalCents: number } {
   if (!Array.isArray(cart) || cart.length === 0) {
     throw new PricingError('Cart is required');
   }
@@ -210,23 +215,60 @@ export function priceCart(
     });
   }
 
-  const subtotalCents = lines.reduce((sum, l) => sum + l.lineCents, 0);
+  return { lines, subtotalCents: lines.reduce((sum, l) => sum + l.lineCents, 0) };
+}
+
+/**
+ * A cart's product subtotal alone, with no shipping/tax/coupon work done.
+ *
+ * Exists for POST /api/coupon/validate: a coupon code can be checked before
+ * a shipping method or destination state is known, and its minimum-order
+ * restriction is compared against this same subtotal - never a client-sent
+ * number, since the client cannot be trusted with prices.
+ */
+export function cartSubtotalCents(cart: unknown): number {
+  return priceLines(cart).subtotalCents;
+}
+
+/**
+ * Price a cart for delivery to `state` by `shippingMethod`, optionally with a
+ * coupon already resolved against Stripe (see src/lib/coupon.ts).
+ *
+ * `state` is required rather than optional: tax is no longer a single rate, so
+ * a caller that forgets it would silently produce an untaxed order. Callers
+ * pass the value from validateShipping(), which has already checked it is a
+ * state the shop delivers to.
+ */
+export function priceCart(
+  cart: unknown,
+  state: string,
+  shippingMethod: ShippingMethodId = DEFAULT_SHIPPING_METHOD,
+  coupon: CartCoupon | null = null
+): PricedCart {
+  const { lines, subtotalCents } = priceLines(cart);
+
+  // Never below zero, never more than the subtotal - a coupon cannot make the
+  // pre-tax, pre-shipping portion of the order negative.
+  const discountCents = coupon ? Math.min(coupon.amountOffCents, subtotalCents) : 0;
+
   const shippingCents = shippingCentsFor(shippingMethod);
   /*
-   * Tax is on subtotal PLUS delivery, which now actually matters: Pennsylvania
-   * taxes the delivery charge on a taxable item, so a $685 delivery adds $41.10
-   * of tax on a PA order. The shape was already written this way against the
-   * day delivery stopped being free.
+   * Tax is on (subtotal - discount) PLUS delivery. A coupon is a seller-funded
+   * discount, so the customer is taxed on what they actually pay, same as PA
+   * taxes the delivery charge on a taxable item (a $685 delivery adds $41.10 of
+   * tax on a PA order).
    */
-  const taxCents = taxCentsFor(state, subtotalCents + shippingCents);
+  const taxCents = taxCentsFor(state, subtotalCents - discountCents + shippingCents);
 
   return {
     lines,
     shippingMethod,
     subtotalCents,
+    discountCents,
+    coupon,
     shippingCents,
     taxCents,
-    totalCents: subtotalCents + shippingCents + taxCents,
+    totalCents: subtotalCents - discountCents + shippingCents + taxCents,
   };
 }
 

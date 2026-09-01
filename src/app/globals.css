@@ -3196,6 +3196,46 @@ a.product-inline-link:focus-visible {
   align-items: center;
 }
 
+.coupon-section {
+  margin-bottom: 24px;
+}
+.coupon-form {
+  display: flex;
+  gap: 8px;
+}
+.coupon-form input {
+  flex-grow: 1;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--control-border);
+  background: var(--surface-container-lowest);
+  color: var(--on-surface);
+  font-family: var(--font-label);
+  font-size: 16px; /* >=16px stops iOS Safari zooming on focus */
+}
+.coupon-form .button-secondary {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.coupon-applied {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  border-radius: var(--radius);
+  background-color: var(--surface-container-high);
+  font-family: var(--font-label);
+  font-size: 14px;
+}
+.coupon-applied span:nth-child(2) {
+  flex-grow: 1;
+}
+.coupon-applied .button-secondary {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
 .search-result-wood {
   color: var(--on-surface-variant);
 }

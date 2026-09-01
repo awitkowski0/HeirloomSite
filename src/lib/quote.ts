@@ -154,6 +154,24 @@ function buildLines(
   });
 
   /*
+   * The discount, right after the items it applies to and before shipping -
+   * an invoice that read items, delivery, tax, THEN a discount would leave
+   * shipping and tax looking like they were computed on the wrong base, even
+   * though (per src/lib/pricing.ts) the discount is already folded into tax.
+   */
+  if (priced.discountCents > 0 && priced.coupon) {
+    lines.push({
+      description: `Discount (${priced.coupon.code})`,
+      amount: -priced.discountCents,
+      metadata: {
+        kind: 'discount',
+        coupon_code: priced.coupon.code,
+        promotion_code_id: priced.coupon.promotionCodeId,
+      },
+    });
+  }
+
+  /*
    * Delivery is its own line, before tax, because it is a charge the customer
    * chose and can see the price of. Folding it into the item lines would make
    * the invoice disagree with the checkout summary they approved.
@@ -235,6 +253,8 @@ export async function createQuote(
         v: 1,
         lines: priced.lines,
         subtotal: priced.subtotalCents,
+        discount: priced.discountCents,
+        coupon: priced.coupon?.promotionCodeId ?? null,
         tax: priced.taxCents,
         total: priced.totalCents,
         shipping,
@@ -355,6 +375,9 @@ export async function createQuote(
         kind: paymentOption === 'deposit' ? 'deposit' : 'full',
         payment_option: paymentOption,
         subtotal_cents: String(priced.subtotalCents),
+        discount_cents: String(priced.discountCents),
+        coupon_code: priced.coupon?.code ?? '',
+        promotion_code_id: priced.coupon?.promotionCodeId ?? '',
         shipping_cents: String(priced.shippingCents),
         tax_cents: String(priced.taxCents),
         total_cents: String(priced.totalCents),

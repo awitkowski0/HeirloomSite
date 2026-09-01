@@ -56,7 +56,28 @@ export function initPostHog(): void {
      */
     api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://us.i.posthog.com',
     ui_host: 'https://us.posthog.com',
-    person_profiles: 'identified_only',
+    /*
+     * 'always', not 'identified_only'.
+     *
+     * Under 'identified_only', every event is stamped $process_person_profile
+     * at CAPTURE time - so anything that fires before identify() (every
+     * pageview, checkout_started, all of it) is ingested with no person
+     * attached, permanently. identify() later creates the person and merges
+     * in the email, but it does not reach back and attach a person to events
+     * that were already ingested personless - there is nothing there to
+     * merge. That is what left checkout_started, the product pageview and
+     * web vitals stranded under the raw anonymous ID after email entry
+     * started being captured: they had already been written off the person
+     * graph before identify() ran.
+     *
+     * 'always' assigns a person to every event from the first pageview, so
+     * the later identify() performs a true merge of the anonymous person into
+     * the identified one, and the whole pre-email browse joins the profile.
+     * The cost is that every anonymous visitor - not just the ones who give
+     * an email - becomes a tracked Person profile. Check the PostHog plan's
+     * person-profile billing before assuming this is free at scale.
+     */
+    person_profiles: 'always',
     // App Router navigates client-side; pageviews are captured explicitly.
     capture_pageview: false,
 
@@ -281,10 +302,14 @@ if (typeof window !== 'undefined') subscribeConsent(onConsentResolved);
 /**
  * Attach the anonymous visitor to a person, keyed on their email address.
  *
- * `person_profiles: 'identified_only'` means no profile exists until this is
- * called, and PostHog stitches the visitor's earlier anonymous events onto the
- * profile retroactively - so a signup at the end of a session brings the whole
- * browse with it.
+ * Because `person_profiles: 'always'` gives every visitor a person from their
+ * first pageview, this is a MERGE, not a first creation: PostHog folds the
+ * anonymous person built up over the browse into the identified one, and the
+ * whole session - pageviews, checkout_started, all of it - joins the profile.
+ * (This is exactly the behaviour 'identified_only' does not give you: under
+ * that setting, anything captured before this call was already ingested with
+ * no person attached, and there is nothing left for a later identify() to
+ * reach back and merge.)
  *
  * TWO THINGS TO KNOW BEFORE ADDING A CALLER.
  *

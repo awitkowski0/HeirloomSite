@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/useCart';
-import { createQuote, type CreateQuoteResponse, type OrderTotals } from '@/lib/api-client';
+import {
+  createQuote,
+  type CartItemPayload,
+  type CreateQuoteResponse,
+  type OrderTotals,
+} from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 import {
@@ -28,6 +33,7 @@ import {
 } from '@/lib/analytics';
 import ShippingForm, { EMAIL_RE, validateShipping, type ShippingValues } from './ShippingForm';
 import TermsBlock from './TermsBlock';
+import CouponInput, { type AppliedCoupon } from './CouponInput';
 import TurnstileWidget, { type TurnstileHandle, type TurnstileStatus } from './TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
 import { markSubscribePrompt } from '@/components/marketing/subscribeStorage';
@@ -90,6 +96,7 @@ export default function CheckoutClient({ recommendations }: Props) {
    * sentence claims anyway.
    */
   const [confirmationEmail, setConfirmationEmail] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [serverTotals, setServerTotals] = useState<OrderTotals | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -172,9 +179,15 @@ export default function CheckoutClient({ recommendations }: Props) {
    * overriding this is for.
    */
   const estSubtotalCents = toCents(subtotal);
+  const estDiscountCents = appliedCoupon
+    ? Math.min(estSubtotalCents, appliedCoupon.amountOffCents)
+    : 0;
   const estShippingCents = cart.length > 0 ? shippingCentsFor(shippingMethod) : 0;
-  const estTaxCents = taxCentsFor(shipping.state, estSubtotalCents + estShippingCents);
-  const estTotalCents = estSubtotalCents + estShippingCents + estTaxCents;
+  const estTaxCents = taxCentsFor(
+    shipping.state,
+    estSubtotalCents - estDiscountCents + estShippingCents
+  );
+  const estTotalCents = estSubtotalCents - estDiscountCents + estShippingCents + estTaxCents;
 
   const orderTotalCents = serverTotals?.totalCents ?? estTotalCents;
 
@@ -195,10 +208,25 @@ export default function CheckoutClient({ recommendations }: Props) {
 
   const totals: OrderTotals = serverTotals ?? {
     subtotalCents: estSubtotalCents,
+    discountCents: estDiscountCents,
     shippingCents: estShippingCents,
     taxCents: estTaxCents,
     totalCents: estTotalCents,
   };
+
+  /*
+   * Explicit fields, not a spread, shared by the coupon check and the actual
+   * submit below. `includes` must never reach the server: priceCart()
+   * re-prices every line from the catalogue, so a rail kit sent as a line
+   * would be charged at its own price. It is display-only.
+   */
+  const cartPayload: CartItemPayload[] = cart.map(item => ({
+    productName: item.productName,
+    wood: item.wood,
+    stainName: item.stainName,
+    quantity: item.quantity,
+    addons: item.addons?.map(a => ({ name: a.name })),
+  }));
 
   /**
    * Submit the order.
@@ -230,23 +258,12 @@ export default function CheckoutClient({ recommendations }: Props) {
     try {
       const data = await createQuote(
         {
-          /*
-           * Explicit fields, not a spread. `includes` must never reach the
-           * server: priceCart() re-prices every line from the catalogue, so a
-           * rail kit sent as a line would be charged at its own price - the
-           * $910-per-crib double-charge all over again. It is display-only.
-           */
-          cart: cart.map(item => ({
-            productName: item.productName,
-            wood: item.wood,
-            stainName: item.stainName,
-            quantity: item.quantity,
-            addons: item.addons?.map(a => ({ name: a.name })),
-          })),
+          cart: cartPayload,
           ...shipping,
           agreedToTerms,
           shippingMethod,
           paymentOption,
+          couponCode: appliedCoupon?.code,
           turnstileToken,
         },
         controller.signal
@@ -698,11 +715,25 @@ export default function CheckoutClient({ recommendations }: Props) {
               ))}
             </ul>
 
+            <CouponInput
+              cart={cartPayload}
+              applied={appliedCoupon}
+              onApply={setAppliedCoupon}
+              onRemove={() => setAppliedCoupon(null)}
+              disabled={submitting}
+            />
+
             <dl className="order-totals">
               <div>
                 <dt>Subtotal</dt>
                 <dd>{formatPrice(fromCents(totals.subtotalCents))}</dd>
               </div>
+              {totals.discountCents > 0 && appliedCoupon && (
+                <div>
+                  <dt>Discount ({appliedCoupon.code})</dt>
+                  <dd>-{formatPrice(fromCents(totals.discountCents))}</dd>
+                </div>
+              )}
               <div>
                 <dt>
                   {SHIPPING_METHODS.find(m => m.id === shippingMethod)?.name ?? 'Delivery'}

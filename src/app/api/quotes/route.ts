@@ -2,11 +2,14 @@ import { NextResponse } from 'next/server';
 import { StripeNotConfiguredError } from '@/lib/stripe-server';
 import {
   priceCart,
+  cartSubtotalCents,
   validateShipping,
   requireShippingMethod,
   requireTermsAcceptance,
   PricingError,
+  type CartCoupon,
 } from '@/lib/pricing';
+import { resolveCoupon, CouponError } from '@/lib/coupon';
 import { isPaymentOption, resolvePaymentOption } from '@/lib/order-terms';
 import {
   verifyTurnstile,
@@ -52,9 +55,24 @@ export async function POST(req: Request) {
 
     const requestedPayment = isPaymentOption(body.paymentOption) ? body.paymentOption : 'deposit';
     const shippingMethod = requireShippingMethod(body);
+
+    // Re-resolved here rather than trusted from an earlier /api/coupon/validate
+    // call: the cart can have changed since then, and the coupon itself may
+    // have been deactivated or expired in the meantime.
+    let coupon: CartCoupon | null = null;
+    if (typeof body.couponCode === 'string' && body.couponCode.trim() !== '') {
+      const subtotalCents = cartSubtotalCents(body.cart);
+      const resolved = await resolveCoupon(body.couponCode, subtotalCents);
+      coupon = {
+        code: resolved.code,
+        promotionCodeId: resolved.promotionCodeId,
+        amountOffCents: resolved.amountOffCents,
+      };
+    }
+
     // Tax depends on the destination AND on the delivery charge, so pricing
     // runs after the address is validated, not alongside it.
-    const priced = priceCart(body.cart, shipping.state, shippingMethod);
+    const priced = priceCart(body.cart, shipping.state, shippingMethod, coupon);
 
     // Affirm has an amount range and the total is only known now. Resolving
     // before createQuote keeps the resolved option inside the order hash, so
@@ -104,6 +122,7 @@ export async function POST(req: Request) {
       orderRef: quote.orderRef,
       totals: {
         subtotalCents: priced.subtotalCents,
+        discountCents: priced.discountCents,
         shippingCents: priced.shippingCents,
         taxCents: priced.taxCents,
         totalCents: priced.totalCents,
@@ -131,6 +150,9 @@ export async function POST(req: Request) {
     if (err instanceof PricingError) {
       // Safe to surface: names a product, a stain or a field, never anything
       // internal.
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    if (err instanceof CouponError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     console.error('createQuote error:', err);
