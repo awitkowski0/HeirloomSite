@@ -56,11 +56,13 @@ intentionally remove a product, lower it.
   outside a `<Suspense>` boundary. Either one opts the route out of static
   prerendering, which silently undoes the site's SEO. Check the `next build`
   route table: any `ƒ` on a content route is a regression.
-- Product URLs `/product/<slug>` are stable by preference, not by constraint.
-  An earlier note claimed they were live and referenced by Babylist registry
-  entries; the site is not public and nothing has been registered, so there is
-  no external link to break. Change a slug when a better one exists — but keep
-  them stable once the site does go live.
+- Product URLs `/product/<slug>` are now live and Google-indexed (confirmed via
+  Google Shopping traffic, not a Babylist registry — an earlier note's claim
+  about Babylist was false). Changing a slug now breaks a real, already-indexed
+  external link, so add a permanent redirect in `next.config.ts` rather than
+  renaming or deleting one outright. See the legacy-collection handling in
+  `src/lib/collections.ts` / `src/app/collections/[collection]/page.tsx` for an
+  example of recovering an indexed URL that has no direct replacement.
 - The client never sends prices. `src/lib/pricing.ts` is the only source of
   truth for what a cart costs, and all money is in integer cents.
 - Responsive work is CSS-first: one component, one DOM tree, layout switched in

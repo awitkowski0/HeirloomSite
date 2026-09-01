@@ -1,5 +1,5 @@
 import 'server-only';
-import { getBrowsableProducts, type ProductIndexItem } from './content';
+import { getBrowsableProducts, getAllProductSlugs, type ProductIndexItem } from './content';
 
 /**
  * Collections: the second axis across the catalogue.
@@ -45,6 +45,25 @@ export function getCollections(): CollectionSummary[] {
 
 export function getCollectionBySlug(slug: string): CollectionSummary | null {
   return getCollections().find(c => c.slug === slug) ?? null;
+}
+
+/**
+ * The old Shopify store gave almost every crib its own single-product
+ * "collection" (e.g. /collections/princeton-style-collection for the
+ * standalone Princeton crib), and Google indexed those pages. A collection
+ * here is a multi-piece range, so most of them have no equivalent - the
+ * closest thing that still exists is the product itself.
+ */
+const LEGACY_COLLECTION_SUFFIXES = ['-style-collection', '-collection', '-style'];
+
+export function resolveLegacyCollectionSlug(slug: string): string | null {
+  const productSlugs = new Set(getAllProductSlugs());
+  for (const suffix of LEGACY_COLLECTION_SUFFIXES) {
+    if (!slug.endsWith(suffix)) continue;
+    const candidate = slug.slice(0, -suffix.length);
+    if (productSlugs.has(candidate)) return candidate;
+  }
+  return null;
 }
 
 /**

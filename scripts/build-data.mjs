@@ -11,13 +11,13 @@ const PRODUCTS = join(PUBLIC, "data", "products");
 // silently produces a short or slug-less product list, the build succeeds and
 // ships a deploy where every /product/<slug> URL 404s.
 //
-// The original note here said those URLs were already indexed by Google and
-// linked from Babylist registries. That is not true -- the site is not public
-// and nothing has been added to a registry -- and it was being read as a
-// standing ban on changing any product URL. The guard is still worth keeping,
-// but for the plainer reason: a data-pipeline failure that empties the
-// catalogue should fail the build, not ship a working-looking site with no
-// products in it.
+// An earlier version of this note also claimed the URLs were linked from
+// Babylist registries, which was never true. The site is public now, though,
+// and its product and collection URLs are Google-indexed (confirmed via
+// Google Shopping traffic) -- so this guard is not just a data-pipeline
+// tripwire, it also protects real, already-indexed external links: a
+// silently emptied catalogue would 404 URLs Google already sends traffic to,
+// not just ship a working-looking site with no products in it.
 //
 // This is a tripwire, not a guess: it is the exact current product count.
 // Adding products raises the count and passes. Intentionally REMOVING a

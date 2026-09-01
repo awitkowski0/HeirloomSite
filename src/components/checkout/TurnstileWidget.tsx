@@ -57,6 +57,26 @@ declare global {
 const SCRIPT_ID = 'cf-turnstile-script';
 const SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit';
 
+/*
+ * Callbacks waiting on the script to finish loading, module-scoped rather
+ * than per-instance.
+ *
+ * Checkout can have TWO widgets mounted at once now (the main one, and the
+ * coupon field's own) - both racing to be the thing challenges.cloudflare.com
+ * calls back into. A single `window.onTurnstileLoad = render` let the second
+ * widget to mount silently overwrite the first's callback, so whichever
+ * mounted first never rendered, never minted a token, and submitting sent an
+ * empty one - which is exactly the generic "Verification failed" the customer
+ * saw, on a surface where trying again could not fix it. Every waiting
+ * instance gets queued here and flushed together once, instead.
+ */
+let pendingRenders: Array<() => void> = [];
+function flushPendingRenders() {
+  const callbacks = pendingRenders;
+  pendingRenders = [];
+  callbacks.forEach(cb => cb());
+}
+
 /**
  * What the checkout can ask of the widget.
  *
@@ -167,7 +187,11 @@ export default function TurnstileWidget({
     if (window.turnstile) {
       render();
     } else {
-      window.onTurnstileLoad = render;
+      pendingRenders.push(render);
+      // Idempotent: every instance waiting on the script points this at the
+      // same flush function, so it does not matter which one's effect runs
+      // last - all of them still get called once the script is ready.
+      window.onTurnstileLoad = flushPendingRenders;
       timer = setTimeout(fail, LOAD_TIMEOUT_MS);
       if (!document.getElementById(SCRIPT_ID)) {
         const script = document.createElement('script');
@@ -181,6 +205,10 @@ export default function TurnstileWidget({
 
     return () => {
       if (timer) clearTimeout(timer);
+      // Drop this instance's callback if the script still hasn't loaded by
+      // the time it unmounts - otherwise a later load would call render()
+      // against a box that is no longer in the document.
+      pendingRenders = pendingRenders.filter(cb => cb !== render);
       if (widgetIdRef.current !== undefined) {
         window.turnstile?.remove(widgetIdRef.current);
         widgetIdRef.current = undefined;

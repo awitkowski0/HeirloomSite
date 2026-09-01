@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
 import Modal, { anyModalOpen } from '@/components/ui/Modal';
-import TurnstileWidget, { type TurnstileStatus } from '@/components/checkout/TurnstileWidget';
+import TurnstileWidget, {
+  type TurnstileHandle,
+  type TurnstileStatus,
+} from '@/components/checkout/TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
 import {
   getConsentServerSnapshot,
@@ -67,6 +70,11 @@ export default function EmailCapturePopup() {
    */
   const [engaged, setEngaged] = useState(false);
   const shownAt = useRef(0);
+  /* Turnstile tokens are single-use; see the note on TurnstileHandle. Without
+     resetting on failure, a retry resends the same dead token and every
+     subsequent attempt fails with the same unrecoverable "Verification
+     failed" message - see CheckoutClient.tsx for the same pattern. */
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   /*
    * SUPPRESSION, in one place so the rules can be read together.
@@ -156,6 +164,9 @@ export default function EmailCapturePopup() {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
         setError(data.error ?? 'Something went wrong. Please try again.');
         setStatus('idle');
+        // The token is spent whatever went wrong, since verifyTurnstile runs
+        // first server-side - a retry without this resends the dead token.
+        turnstileRef.current?.reset();
         emailSubscribeFailed({ reason: data.error ?? 'unknown', status: res.status });
         return;
       }
@@ -170,6 +181,7 @@ export default function EmailCapturePopup() {
     } catch {
       setError('Something went wrong. Please try again.');
       setStatus('idle');
+      turnstileRef.current?.reset();
       emailSubscribeFailed({ reason: 'network' });
     }
   }
@@ -236,6 +248,7 @@ export default function EmailCapturePopup() {
             */}
             {engaged && (
               <TurnstileWidget
+                ref={turnstileRef}
                 onToken={setTurnstileToken}
                 onStatus={setTurnstileStatus}
                 action={TURNSTILE_ACTIONS.subscribe}

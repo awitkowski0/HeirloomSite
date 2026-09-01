@@ -1,15 +1,19 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import {
   getCollections,
   getCollectionBySlug,
   getProductsInCollection,
+  resolveLegacyCollectionSlug,
 } from '@/lib/collections';
 import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
-export const dynamicParams = false;
+// Not false: a slug outside generateStaticParams still needs to run through
+// the page component below, which tries resolveLegacyCollectionSlug() before
+// giving up and calling notFound(). See src/lib/collections.ts.
+export const dynamicParams = true;
 
 export function generateStaticParams() {
   return getCollections().map(c => ({ collection: c.slug }));
@@ -47,7 +51,11 @@ export default async function CollectionPage({
 }) {
   const { collection: slug } = await params;
   const collection = getCollectionBySlug(slug);
-  if (!collection) notFound();
+  if (!collection) {
+    const productSlug = resolveLegacyCollectionSlug(slug);
+    if (productSlug) permanentRedirect(`/product/${productSlug}`);
+    notFound();
+  }
 
   const products = getProductsInCollection(collection.name);
 
