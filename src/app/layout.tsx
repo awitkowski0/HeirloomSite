@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Playfair_Display, Manrope } from 'next/font/google';
+import { GFS_Didot, Open_Sans } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
@@ -9,29 +9,34 @@ import Footer from '@/components/layout/Footer';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
 /*
- * Playfair Display is the high-contrast old-style serif the editorial look is
- * built on: headlines, prices, and the tracked small-caps used for nav, labels
- * and buttons.
+ * GFS Didot is the classical Didone serif the editorial look is built on now:
+ * headlines, prices and the wordmark, wherever --font-display is used.
  *
- * No `weight` array on purpose - Playfair Display is a variable font, so
- * omitting it ships the whole 400-900 axis in a single file. Enumerating
- * weights would download four separate static instances instead.
+ * `weight` is required, not optional: GFS Didot ships exactly one static
+ * weight (400, normal), no variable axis and no italic. Any selector that
+ * asks it for a different weight/style gets a browser-fabricated fake
+ * instead of erroring, so hierarchy on these surfaces comes from size and
+ * letter-spacing rather than weight - see the font-role comment in
+ * globals.css. Tracked small-caps UI (nav, buttons, labels) moved off this
+ * family onto --font-caps = Open Sans for exactly that reason.
  */
-const playfair = Playfair_Display({
+const gfsDidot = GFS_Didot({
   subsets: ['latin'],
-  variable: '--font-playfair',
+  weight: '400',
+  variable: '--font-gfs-didot',
   display: 'swap',
 });
 
 /*
- * Kept for body copy, forms, checkout and search. Setting a high-contrast
- * display serif at 13-16px on a checkout field reads as a downgrade, not as
- * editorial, so the dense UI surfaces stay on a humanist sans.
+ * Body copy, forms, checkout, search, and now also the tracked small-caps
+ * role (--font-caps) that used to sit on the display serif. Open Sans is a
+ * variable font (300-800) with real italics, so no `weight` array is needed
+ * and it can carry every weight/emphasis the UI asks for.
  */
-const manrope = Manrope({
+const openSans = Open_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-manrope',
+  style: ['normal', 'italic'],
+  variable: '--font-open-sans',
   display: 'swap',
 });
 
@@ -39,26 +44,26 @@ export const metadata: Metadata = {
   // Makes every relative canonical and og:image absolute in one place.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Heirloom Cribs — Handcrafted for Generations',
+    default: 'Heirloom Cribs — Built to Grow Up.',
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    'Handcrafted nursery furniture built to hold your most precious cargo for generations. ' +
-    'Traditional joinery, botanical finishes, solid American hardwoods.',
+    'Solid hardwood nursery furniture, forest to family, delivered white-glove and built to ' +
+    'grow with your child. Meets or exceeds CPSC and ASTM safety standards.',
   applicationName: SITE_NAME,
   openGraph: {
     type: 'website',
     siteName: SITE_NAME,
     locale: 'en_US',
     url: '/',
-    title: 'Heirloom Cribs — Handcrafted for Generations',
-    description: 'Handcrafted nursery furniture built for generations.',
+    title: 'Heirloom Cribs — Built to Grow Up.',
+    description: 'Forest-to-family hardwood nursery furniture, built to grow with your child.',
     images: [{ url: '/logo-wide.png', width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Heirloom Cribs — Handcrafted for Generations',
-    description: 'Handcrafted nursery furniture built for generations.',
+    title: 'Heirloom Cribs — Built to Grow Up.',
+    description: 'Forest-to-family hardwood nursery furniture, built to grow with your child.',
     images: ['/logo-wide.png'],
   },
   icons: {
@@ -74,14 +79,14 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#3A2A20',
+  themeColor: '#3E3A39',
   width: 'device-width',
   initialScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${playfair.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${gfsDidot.variable} ${openSans.variable}`}>
       <head>
         {/*
           Material Symbols stays a plain <link> rather than next/font: it is a

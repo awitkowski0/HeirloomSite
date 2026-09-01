@@ -2,23 +2,25 @@
   /* ===========================================================================
    * LAYER 1 - primitives. The whole palette is these nine values.
    *
-   * Editorial catalog: warm cream ground, espresso text, oxblood for anything
-   * that asks to be acted on. Hairline rules instead of borders and shadows.
+   * 2026 brand refresh: linen cream ground, charcoal text, a charcoal-shaded
+   * terracotta (derived from the kit's Peach Wood, since the kit has no
+   * saturated accent of its own) for anything that asks to be acted on.
+   * Hairline rules instead of borders and shadows, unchanged.
    *
-   * Measured contrast against --paper: ink 12.18, accent 8.98, ink-muted 5.45.
-   * On --ink: paper 12.18, muted-on-dark 6.92. All clear WCAG AA.
+   * Measured contrast against --paper: ink 10.06, accent 5.75, ink-muted 5.66.
+   * On --ink: muted-on-dark 6.77. All clear WCAG AA.
    * =========================================================================== */
-  --paper: #f6f1e7;
-  --paper-2: #efe9db;
-  --plate: #fcfaf5;
-  --ink: #3a2a20;
-  --ink-muted: #6e5f53;
-  --accent: #7e1c22;
-  --accent-on: #f6f1e7;
-  --rule: #dcd3c3;
-  --rule-strong: #8a7c6d;
-  /* Muted cream for copy on the dark band. 6.92:1 on --ink. */
-  --on-ink-muted: #c4b6a7;
+  --paper: #f7f2e7;
+  --paper-2: #efebe2;
+  --plate: #faf7f1;
+  --ink: #3e3a39;
+  --ink-muted: #675e5a;
+  --accent: #6e584f;
+  --accent-on: #f7f2e7;
+  --rule: #e9dfd4;
+  --rule-strong: #837770;
+  /* Muted cream for copy on the dark band. 6.77:1 on --ink. */
+  --on-ink-muted: #d6c6ba;
 
   /*
    * Interactive boundaries are NOT --rule.
@@ -31,8 +33,9 @@
   --control-border: var(--rule-strong);
 
   /*
-   * Error red has to stay distinguishable from the oxblood accent, or a failed
-   * card payment reads as a promotional flourish. Kept brighter and oranger.
+   * Error red has to stay distinguishable from the terracotta accent, or a
+   * failed card payment reads as a promotional flourish. Kept brighter and
+   * oranger.
    */
   --error: #b3261e;
   --error-container: #ffdad6;
@@ -49,7 +52,7 @@
    * Two of these names lie about their role and are worth knowing:
    *   --surface-container-highest is only ever used as a border colour
    *   --secondary was an olive green; it is the price/CTA accent, so it is
-   *     now oxblood - that single line re-colours every price on the site.
+   *     now terracotta - that single line re-colours every price on the site.
    * =========================================================================== */
   --background: var(--paper);
   --surface: var(--paper);
@@ -143,25 +146,26 @@
   /*
    * Three type roles.
    *
-   * These previously read:
-   *   --font-label: var(--font-manrope), var(--font-label);
-   *   --font-serif: var(--font-noto-serif), var(--font-serif);
-   * which is a self-reference. Per CSS Variables 3, a custom property that
-   * depends on itself - including through a var() fallback - is invalid at
-   * computed-value time (the spec's own example is that `--foo: var(--foo,
-   * 10px)` is invalid, not 10px). Both therefore resolved to nothing,
-   * `body { font-family: var(--font-label) }` was invalid, and the whole site
-   * rendered in the browser default: measured as Times on body AND headlines,
-   * while still downloading two webfonts that were never used.
+   * GFS Didot (the display serif) ships a single static weight - 400,
+   * normal - with no bold and no italic. Everything that used to lean on
+   * Playfair's variable weight axis for hierarchy falls into two groups:
+   *
+   *   - True display-serif surfaces (headlines, wordmark, prices) stay on
+   *     --font-display and are forced to font-weight: 400 at each call site,
+   *     with hierarchy coming from size/letter-spacing instead of weight.
+   *   - Tracked small-caps UI (nav, buttons, labels, category bar) moved off
+   *     the display serif onto --font-caps = Open Sans, which still supports
+   *     every weight those selectors already request. This is why --font-caps
+   *     no longer matches --font-display the way it did with Playfair.
    *
    * The generics live here rather than in next/font's `fallback` option,
    * because passing that option REPLACES the metric-adjusted local fallback
-   * next/font generates ("Playfair Display Fallback"), which is what keeps
-   * layout shift down while the webfont loads.
+   * next/font generates, which is what keeps layout shift down while the
+   * webfont loads.
    */
-  --font-display: var(--font-playfair), Georgia, 'Times New Roman', serif;
-  --font-caps: var(--font-playfair), Georgia, serif;
-  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-gfs-didot), Georgia, 'Times New Roman', serif;
+  --font-caps: var(--font-open-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-open-sans), ui-sans-serif, system-ui, sans-serif;
 
   /* Legacy names, kept because ~2900 lines below still reference them. */
   --font-serif: var(--font-display);
@@ -198,7 +202,7 @@ body {
 .headline-xl {
   font-family: var(--font-serif);
   font-size: var(--text-headline-xl);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
@@ -206,15 +210,16 @@ body {
 .headline-lg {
   font-family: var(--font-serif);
   font-size: var(--text-headline-lg);
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.3;
 }
 
 .headline-md {
   font-family: var(--font-serif);
   font-size: var(--text-headline-md);
-  font-weight: 500;
-  line-height: 1.4;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
 }
 
 .body-lg {
@@ -232,10 +237,13 @@ body {
 }
 
 /*
- * Tracked small caps, set in the display serif rather than the body sans.
- * Playfair Display's variable font ships no `smcp` feature, so real small
- * caps would be browser-synthesised - scaled-down capitals at the wrong
- * stroke weight, varying by engine. Uppercase plus tracking instead.
+ * Tracked small caps, set on --font-caps (Open Sans), not the display serif.
+ * Open Sans ships no `smcp` feature either, so real small caps would still be
+ * browser-synthesised - scaled-down capitals at the wrong stroke weight,
+ * varying by engine. Uppercase plus tracking instead. --font-caps used to
+ * equal --font-display (both Playfair); it now points at Open Sans instead,
+ * because GFS Didot has only one static weight and this class's callers
+ * (nav, buttons, category bar) rely on 500/600/700 weight variants.
  *
  * Changing this one rule re-skins every eyebrow, category, card title and
  * button label on all nine routes.
@@ -247,6 +255,30 @@ body {
   line-height: 1.1;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+
+/*
+ * GFS Didot has one static weight (400) and no italic. Requesting a
+ * different weight/style on it doesn't error - the browser fabricates
+ * ("synthesises") a fake bold/italic that looks poor on a high-contrast
+ * Didone serif. This guards every true-Didot surface against that, so a
+ * future edit that adds `font-weight: 700` here fails visibly-ugly rather
+ * than silently.
+ */
+:where(
+  .headline-xl,
+  .headline-lg,
+  .headline-md,
+  .journey-step-title,
+  .wordmark,
+  .footer-brand,
+  .product-title,
+  .product-extended h2,
+  .cart-popup-content h2,
+  .featured-card-body h3,
+  .featured-card-body .price
+) {
+  font-synthesis: none;
 }
 
 /* Utilities */
@@ -534,6 +566,7 @@ body {
 .journey-step-title {
   font-family: var(--font-display);
   font-size: clamp(26px, 3.4vw, 38px);
+  font-weight: 400;
   line-height: 1.15;
   margin: 0 0 12px;
 }
@@ -741,7 +774,7 @@ body {
 .wordmark {
   font-family: var(--font-display);
   font-size: 21px;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.28em;
   text-indent: 0.28em;
   text-transform: uppercase;
@@ -1180,7 +1213,7 @@ main {
   transform: scale(0.98);
 }
 
-/* Selection is an oxblood marker rule plus a weight change, not a background
+/* Selection is a terracotta marker rule plus a weight change, not a background
    tint - on a cream ground a tint is nearly invisible. */
 .stain-button.selected {
   background-color: transparent;
@@ -1512,18 +1545,18 @@ main {
 .featured-card-body h3 {
   font-family: var(--font-display);
   font-size: 19px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--ink);
   margin: 0 0 6px;
 }
 
 /* Prices are set in the display serif, the way a printed catalogue sets
-   figures, and in oxblood so they read as the actionable number. */
+   figures, and in terracotta so they read as the actionable number. */
 .featured-card-body .price {
   font-family: var(--font-display);
   font-size: 16px;
   color: var(--accent);
-  font-weight: 500;
+  font-weight: 400;
   margin: 0;
 }
 
@@ -1950,7 +1983,7 @@ main {
   margin-bottom: 16px;
   font-family: var(--font-display);
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.26em;
   text-transform: uppercase;
   color: var(--ink);
@@ -2553,7 +2586,7 @@ main {
   overflow-wrap: anywhere;
   font-family: var(--font-serif);
   font-size: var(--text-headline-lg);
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--ink);
@@ -2604,6 +2637,7 @@ a.product-inline-link:focus-visible {
   margin-bottom: 12px;
   font-family: var(--font-serif);
   font-size: var(--text-headline-md);
+  font-weight: 400;
 }
 .product-extended p {
   font-family: var(--font-label);
@@ -2722,6 +2756,7 @@ a.product-inline-link:focus-visible {
 .cart-popup-content h2 {
   font-family: var(--font-serif);
   font-size: var(--text-headline-md);
+  font-weight: 400;
   margin-bottom: 8px;
 }
 .cart-popup-icon {
@@ -3260,7 +3295,7 @@ a.product-inline-link:focus-visible {
 
 /*
  * WebKit paints its own clear button inside type="search", in the UA's blue.
- * On a cream and oxblood page it reads as a rendering error, and the form
+ * On a cream and terracotta page it reads as a rendering error, and the form
  * already has an explicit submit control.
  */
 .search-bar-input::-webkit-search-cancel-button,
@@ -3871,7 +3906,7 @@ a.product-inline-link:focus-visible {
   border-radius: 0;
   background-color: var(--surface-container-lowest);
   color: var(--on-surface);
-  font-family: var(--font-manrope), sans-serif;
+  font-family: var(--font-open-sans), sans-serif;
   font-size: 15px;
 }
 

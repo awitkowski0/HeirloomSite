@@ -107,7 +107,7 @@ export const TAXONOMY: readonly TaxonomyNode[] = [
     name: 'Nightstands & Storage',
     slug: 'nightstands-storage',
     description:
-      'Complementary storage furniture that creates a complete, cohesive nursery look.',
+      'Solid hardwood nightstands and chests designed to match your crib collection.',
     sources: ['Nightstands', 'Chests'],
   },
   {
@@ -163,7 +163,7 @@ export const TAXONOMY: readonly TaxonomyNode[] = [
     name: 'Toys',
     slug: 'toys',
     description:
-      'High-quality wooden toys and play items selected to pair beautifully with classic nursery furniture.',
+      'Wooden toys and play items chosen to match our crib and dresser finishes.',
     sources: ['Toys'],
   },
 ];

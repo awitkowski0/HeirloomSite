@@ -369,7 +369,7 @@ export default function CheckoutClient({ recommendations }: Props) {
       <div className="container narrow-page">
         <h1 className="headline-lg">Your cart is empty</h1>
         <p className="body-lg">
-          Start exploring our handcrafted collection to build your legacy.
+          Add a crib or accessory to get started.
         </p>
         <div className="not-found-actions">
           <Link href="/products/cribs" className="button-primary">Browse Cribs</Link>

@@ -4,7 +4,7 @@ import ContactPageForm from '@/components/contact/ContactPageForm';
 export const metadata: Metadata = {
   title: 'Contact Us',
   description:
-    "Get in touch with Heirloom Cribs and More about our handcrafted nursery furniture. We'd love to hear from you.",
+    'Reach Heirloom Cribs and More by email or phone about an order, a repair, or a question about our furniture.',
   alternates: { canonical: '/contact' },
 };
 
@@ -17,7 +17,7 @@ export default function ContactPage() {
       <header className="page-header">
         <h1 className="headline-lg text-primary">Contact Us</h1>
         <p className="body-md text-on-surface-variant">
-          We&rsquo;d love to hear from you. Send us a message and we&rsquo;ll respond promptly.
+          Send us a message about an order, a repair, or a question about our furniture.
         </p>
       </header>
 

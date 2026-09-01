@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <span className="footer-brand">Heirloom</span>
             <p className="body-md text-on-surface-variant footer-tagline">
-              Solid hardwood nursery furniture, built to convert and to last.
+              Solid hardwood nursery furniture, crafted forest-to-family with white-glove care.
             </p>
           </div>
           <div>

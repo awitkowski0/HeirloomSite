@@ -31,14 +31,15 @@
 .home-hero-headline {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;
+  font-synthesis: none;
   font-size: clamp(2rem, 1.3rem + 2.9vw, 3.1rem);
   line-height: 1.12;
   letter-spacing: -0.015em;
   color: var(--ink);
 }
 
-/* Small oxblood rule with a diamond at its centre. */
+/* Small terracotta rule with a diamond at its centre. */
 .home-ornament {
   display: flex;
   align-items: center;
@@ -314,7 +315,8 @@
 .home-styles-heading {
   margin: 0 0 18px;
   font-family: var(--font-display);
-  font-weight: 500;
+  font-weight: 400;
+  font-synthesis: none;
   font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.2rem);
   line-height: 1.2;
   color: var(--ink);
@@ -405,6 +407,8 @@
 
 .home-style-figure {
   font-family: var(--font-display);
+  font-weight: 400;
+  font-synthesis: none;
   font-size: 1.25rem;
   color: var(--accent);
 }
@@ -439,12 +443,12 @@
   }
 
   .home-band-cols {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 0;
   }
 
   .home-band-col + .home-band-col {
-    border-left: 1px solid rgba(196, 182, 167, 0.28);
+    border-left: 1px solid rgba(214, 198, 186, 0.28);
   }
 
   .home-styles-grid {
