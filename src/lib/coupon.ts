@@ -1,5 +1,6 @@
 import 'server-only';
 import { getStripe } from './stripe-server';
+import type Stripe from 'stripe';
 
 /**
  * Fixed-amount-off coupon codes, backed by Stripe Promotion Codes.
@@ -29,32 +30,20 @@ export class CouponError extends Error {
   }
 }
 
-export interface ResolvedCoupon {
-  /** Canonical code as Stripe stored it, for display and for the invoice line. */
-  code: string;
-  promotionCodeId: string;
-  couponId: string;
-  amountOffCents: number;
+interface FixedAmountCoupon {
+  promo: Stripe.PromotionCode;
+  coupon: Stripe.Coupon;
 }
 
 /**
- * Look up, validate, and price a coupon code against a cart's product
- * subtotal.
- *
- * Called from BOTH POST /api/coupon/validate and POST /api/quotes - there is
- * exactly one implementation of "is this code currently good," and quote
- * creation calls it again with a freshly computed subtotal rather than
- * trusting an earlier validate response, since the cart or the coupon's own
- * state (expired, deactivated) can change in between.
- *
- * `subtotalCents` must come from src/lib/pricing.ts's cartSubtotalCents() or
- * priceCart(), never from the client - it is what the minimum-order
- * restriction is checked against.
+ * The part shared by checkout's resolveCoupon() and the welcome email's
+ * lookupCouponTerms(): find a promotion code by its customer-facing string,
+ * and confirm it is a currently-usable, fixed-amount-off USD coupon. Neither
+ * caller's subtotal is involved here - that check belongs to resolveCoupon()
+ * alone, since a display-only lookup (an email that hasn't been sent yet)
+ * has no cart to check it against.
  */
-export async function resolveCoupon(
-  rawCode: unknown,
-  subtotalCents: number
-): Promise<ResolvedCoupon> {
+async function findFixedAmountCoupon(rawCode: unknown): Promise<FixedAmountCoupon> {
   if (typeof rawCode !== 'string' || rawCode.trim() === '') {
     throw new CouponError('Enter a coupon code.');
   }
@@ -99,6 +88,37 @@ export async function resolveCoupon(
     throw new CouponError('That coupon code is not valid for this store.');
   }
 
+  return { promo, coupon };
+}
+
+export interface ResolvedCoupon {
+  /** Canonical code as Stripe stored it, for display and for the invoice line. */
+  code: string;
+  promotionCodeId: string;
+  couponId: string;
+  amountOffCents: number;
+}
+
+/**
+ * Look up, validate, and price a coupon code against a cart's product
+ * subtotal.
+ *
+ * Called from BOTH POST /api/coupon/validate and POST /api/quotes - there is
+ * exactly one implementation of "is this code currently good," and quote
+ * creation calls it again with a freshly computed subtotal rather than
+ * trusting an earlier validate response, since the cart or the coupon's own
+ * state (expired, deactivated) can change in between.
+ *
+ * `subtotalCents` must come from src/lib/pricing.ts's cartSubtotalCents() or
+ * priceCart(), never from the client - it is what the minimum-order
+ * restriction is checked against.
+ */
+export async function resolveCoupon(
+  rawCode: unknown,
+  subtotalCents: number
+): Promise<ResolvedCoupon> {
+  const { promo, coupon } = await findFixedAmountCoupon(rawCode);
+
   const restrictions = promo.restrictions;
   if (restrictions.minimum_amount !== null) {
     const minCurrency = (restrictions.minimum_amount_currency ?? 'usd').toLowerCase();
@@ -118,6 +138,44 @@ export async function resolveCoupon(
     code: promo.code,
     promotionCodeId: promo.id,
     couponId: coupon.id,
-    amountOffCents: coupon.amount_off,
+    amountOffCents: coupon.amount_off as number,
   };
+}
+
+export interface CouponTerms {
+  code: string;
+  amountOffCents: number;
+  /** null when the code carries no minimum-order restriction. */
+  minimumAmountCents: number | null;
+  /** Unix seconds, null when the code does not expire. */
+  expiresAt: number | null;
+}
+
+/**
+ * A coupon's terms, for DISPLAY rather than checkout - the welcome email
+ * quoting a signup incentive, which has no cart to check a minimum order
+ * against yet.
+ *
+ * Returns null on anything wrong (unknown code, expired, misconfigured)
+ * rather than throwing: a broken promo code must not turn into a broken
+ * subscribe request, it just means the email that goes out does not mention
+ * one. Errors are logged, not swallowed silently.
+ */
+export async function lookupCouponTerms(rawCode: string): Promise<CouponTerms | null> {
+  try {
+    const { promo, coupon } = await findFixedAmountCoupon(rawCode);
+    return {
+      code: promo.code,
+      amountOffCents: coupon.amount_off as number,
+      minimumAmountCents: promo.restrictions.minimum_amount,
+      expiresAt: promo.expires_at,
+    };
+  } catch (err) {
+    if (err instanceof CouponError) {
+      console.error(`lookupCouponTerms: ${rawCode} is not usable: ${err.message}`);
+      return null;
+    }
+    console.error('lookupCouponTerms: Stripe lookup failed', err);
+    return null;
+  }
 }

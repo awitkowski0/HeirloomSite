@@ -502,3 +502,34 @@ export async function sendPaymentFailedAlert(order: InvoiceEvent): Promise<boole
     order.email ?? undefined
   );
 }
+
+/**
+ * The newsletter signup's welcome offer. Called from /api/subscribe after
+ * addToAudience() succeeds, with terms already looked up fresh from Stripe
+ * (src/lib/coupon.ts's lookupCouponTerms) - never hardcoded here, so this
+ * template always states whatever the coupon actually allows.
+ *
+ * Fails soft like every other send() call: the subscription itself is
+ * already durable in the Resend audience by the time this runs, so a failed
+ * welcome email is a missed nice-to-have, not a lost signup.
+ */
+export function sendWelcomeCoupon(
+  email: string,
+  terms: { code: string; amountOffCents: number; minimumAmountCents: number | null }
+): Promise<boolean> {
+  const minimumLine =
+    terms.minimumAmountCents !== null
+      ? ` on orders over ${money(terms.minimumAmountCents)}`
+      : '';
+
+  const html = `
+    <p>Thank you for joining our list. As a welcome gift, here is
+    ${money(terms.amountOffCents)} off your next order${minimumLine}:</p>
+
+    <p style="font-size: 20px; font-weight: 700; letter-spacing: 2px;">${esc(terms.code)}</p>
+
+    <p>Enter it at checkout on the coupon field. We will let you know if we ever run
+    another one, but this is the only one we can promise right now.</p>
+  `;
+  return send(email, 'A welcome gift for your nursery', html);
+}

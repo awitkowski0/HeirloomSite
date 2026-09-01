@@ -21,15 +21,24 @@ import {
   type SubscribeTrigger,
 } from '@/lib/analytics';
 import { markSubscribePrompt, subscribePromptSettled } from './subscribeStorage';
+import { newsletterCouponActive } from '@/lib/newsletter-promo';
 
 /**
  * The email capture popup.
  *
- * WHAT IT PROMISES IS WHAT WE CAN DELIVER. There is no discount code generated
- * here, no code shown on success and no redemption field at checkout - offers
- * are sent by hand from the Resend audience. So the copy invites people onto a
- * list that gets exclusive offers; it does not say a code is on its way in the
- * next sixty seconds, because nothing would send one.
+ * WHAT IT PROMISES IS WHAT WE CAN DELIVER. Outside the current welcome-coupon
+ * window (src/lib/newsletter-promo.ts), there is no discount code generated,
+ * no code shown on success and no redemption field at checkout - offers are
+ * sent by hand from the Resend audience. So the copy invites people onto a
+ * list that gets exclusive offers; it does not say a code is on its way,
+ * because nothing would send one.
+ *
+ * Inside the window, POST /api/subscribe actually emails a code (see
+ * sendWelcomeCoupon in src/lib/email.ts) - the copy below says so ONLY while
+ * newsletterCouponActive() is true, checked at render so it flips off on its
+ * own once the coupon's cutoff passes, with no deploy required. The signup
+ * itself keeps working either side of that date; only the incentive copy
+ * changes.
  *
  * It works for a visitor who DECLINED tracking, deliberately. Subscribing is a
  * first-party transaction they initiated rather than something done to them, so
@@ -195,6 +204,10 @@ export default function EmailCapturePopup() {
    * make the form permanently unsubmittable on a deployment without Turnstile.
    */
   const awaitingToken = engaged && turnstileStatus === 'pending';
+  // Checked at render, not stored in state: it must flip off on its own the
+  // instant the cutoff passes, with no deploy and no stale value from when
+  // the popup happened to mount.
+  const couponActive = newsletterCouponActive();
 
   return (
     <Modal
@@ -208,8 +221,9 @@ export default function EmailCapturePopup() {
         <>
           <h3 className="headline-md email-popup-title">You&rsquo;re on the list</h3>
           <p className="email-popup-text">
-            Thank you. Exclusive offers and first look at new pieces will come straight to your
-            inbox.
+            {couponActive
+              ? "Thank you. We've emailed you a welcome discount code, plus first look at new pieces going forward."
+              : 'Thank you. Exclusive offers and first look at new pieces will come straight to your inbox.'}
           </p>
           <button type="button" className="button-primary email-popup-submit" onClick={close}>
             Continue browsing
@@ -217,10 +231,13 @@ export default function EmailCapturePopup() {
         </>
       ) : (
         <>
-          <h3 className="headline-md email-popup-title">Exclusive offers</h3>
+          <h3 className="headline-md email-popup-title">
+            {couponActive ? 'A welcome gift' : 'Exclusive offers'}
+          </h3>
           <p className="email-popup-text">
-            Join our list for subscriber-only discounts and first look at new pieces. No more than
-            a few emails a year, and you can leave whenever you like.
+            {couponActive
+              ? "Sign up and we'll email you a welcome discount code today, good through October 31, plus first look at new pieces. No more than a few emails a year, and you can leave whenever you like."
+              : 'Join our list for subscriber-only discounts and first look at new pieces. No more than a few emails a year, and you can leave whenever you like.'}
           </p>
           <form onSubmit={onSubmit} className="email-popup-form">
             <label htmlFor="email-popup-input" className="visually-hidden">

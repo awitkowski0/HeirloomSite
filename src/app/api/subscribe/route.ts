@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { verifyTurnstile, TurnstileError, TURNSTILE_ACTIONS } from '@/lib/turnstile';
-import { looksLikeEmail } from '@/lib/email';
+import { looksLikeEmail, sendWelcomeCoupon } from '@/lib/email';
 import { addToAudience, AudienceError, AudienceNotConfiguredError } from '@/lib/audience';
+import { lookupCouponTerms } from '@/lib/coupon';
+import { NEWSLETTER_COUPON_CODE, newsletterCouponActive } from '@/lib/newsletter-promo';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -66,6 +68,21 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
     throw err;
+  }
+
+  /*
+   * The welcome coupon, fire-and-awaited but never load-bearing: the address
+   * is already durable in the audience by this point, so a coupon that has
+   * since expired, or Resend being down, must not turn a real subscription
+   * into an error response. Terms are looked up fresh from Stripe every time
+   * rather than assumed - the email must never promise a code that would
+   * actually fail at checkout.
+   */
+  if (newsletterCouponActive()) {
+    const terms = await lookupCouponTerms(NEWSLETTER_COUPON_CODE);
+    if (terms) {
+      await sendWelcomeCoupon(body.email, terms);
+    }
   }
 
   return NextResponse.json({ subscribed: true });
