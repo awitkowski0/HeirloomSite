@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
 
 export default function Footer() {
   return (
@@ -33,6 +34,12 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/contact">Contact Us</Link>
+              </li>
+              <li>
+                <Link href="/privacy">Privacy</Link>
+              </li>
+              <li>
+                <CookieSettingsLink />
               </li>
             </ul>
             <p className="body-md text-on-surface-variant footer-copyright">

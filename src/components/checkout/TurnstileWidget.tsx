@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useImperativeHandle, useRef } from 'react';
-import { TURNSTILE_ACTION } from '@/lib/turnstile-action';
+import type { TurnstileAction } from '@/lib/turnstile-action';
 
 /**
  * Cloudflare Turnstile widget.
@@ -76,10 +76,31 @@ export interface TurnstileHandle {
 interface Props {
   onToken: (token: string) => void;
   onStatus: (status: TurnstileStatus) => void;
+  /** Which surface this token is for. Asserted server-side; see turnstile-action.ts. */
+  action: TurnstileAction;
+  /**
+   * Cloudflare's widget appearance.
+   *
+   * 'interaction-only' renders NOTHING unless a challenge is actually required,
+   * which is what the newsletter popup wants: a visible box inside a popup
+   * asking for an email is friction on the one surface that can least afford
+   * it, and a widget that errors would disable its only button.
+   *
+   * Checkout deliberately stays on 'always'. There the visible badge is
+   * reassurance rather than friction, and it is the surface where a blocked
+   * widget genuinely does need to be surfaced to the customer.
+   */
+  appearance?: 'always' | 'interaction-only';
   ref?: React.Ref<TurnstileHandle>;
 }
 
-export default function TurnstileWidget({ onToken, onStatus, ref }: Props) {
+export default function TurnstileWidget({
+  onToken,
+  onStatus,
+  action,
+  appearance = 'always',
+  ref,
+}: Props) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const boxRef = useRef<HTMLDivElement>(null);
   /*
@@ -125,7 +146,8 @@ export default function TurnstileWidget({ onToken, onStatus, ref }: Props) {
         sitekey: siteKey,
         // Asserted server-side, so a token minted by this site key on some
         // other surface cannot be replayed against checkout.
-        action: TURNSTILE_ACTION,
+        action,
+        appearance,
         callback: (token: string) => {
           onTokenRef.current(token);
           onStatusRef.current('solved');
@@ -164,7 +186,14 @@ export default function TurnstileWidget({ onToken, onStatus, ref }: Props) {
         widgetIdRef.current = undefined;
       }
     };
-  }, [siteKey]);
+    /*
+     * `action` and `appearance` belong here even though re-running this effect
+     * tears the widget down and rebuilds it. Both are constant literals at
+     * every call site, so in practice this never re-runs - and if one ever did
+     * become dynamic, rebuilding is exactly right: a widget rendered with the
+     * old action would mint tokens the server then rejects.
+     */
+  }, [siteKey, action, appearance]);
 
   /*
    * Back to 'pending', not 'error': reset() makes Cloudflare issue a new

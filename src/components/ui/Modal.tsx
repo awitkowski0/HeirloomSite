@@ -2,6 +2,36 @@
 
 import { useEffect, useId, useRef, type ReactNode } from 'react';
 
+/*
+ * How many dialogs are open right now.
+ *
+ * WHY A MODULE-LEVEL COUNTER AND NOT PER-INSTANCE STATE. Each Modal used to
+ * capture body.style.overflow on open and restore that captured value on close.
+ * With two dialogs open at once - which the email capture popup made possible,
+ * since CartPopup uses this same component - the inner one captures the OUTER
+ * one's already-locked 'hidden', and closing the inner one restores 'hidden'
+ * correctly... but closing the OUTER one first restores the pre-lock value while
+ * the inner dialog is still on screen, unlocking the page behind a live modal.
+ *
+ * So the lock is refcounted: the first open captures and locks, the last close
+ * restores. Latent until now only because nothing nested.
+ */
+let openCount = 0;
+let savedOverflow = '';
+let savedPaddingRight = '';
+
+/**
+ * Is any dialog currently open?
+ *
+ * Read by EmailCapturePopup, which must not stack itself on top of the cart
+ * popup. Deliberately a plain function rather than a subscribable store: the
+ * popup only ever asks at the instant a trigger fires, and nothing needs to
+ * re-render when the answer changes.
+ */
+export function anyModalOpen(): boolean {
+  return openCount > 0;
+}
+
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -57,12 +87,16 @@ export default function Modal({
     (first ?? node)?.focus();
 
     // Scroll lock, compensating for the scrollbar so the page does not jump.
+    // Refcounted - only the outermost dialog touches the body; see openCount.
     const { body, documentElement } = document;
-    const scrollBarWidth = window.innerWidth - documentElement.clientWidth;
-    const prevOverflow = body.style.overflow;
-    const prevPaddingRight = body.style.paddingRight;
-    body.style.overflow = 'hidden';
-    if (scrollBarWidth > 0) body.style.paddingRight = `${scrollBarWidth}px`;
+    openCount += 1;
+    if (openCount === 1) {
+      const scrollBarWidth = window.innerWidth - documentElement.clientWidth;
+      savedOverflow = body.style.overflow;
+      savedPaddingRight = body.style.paddingRight;
+      body.style.overflow = 'hidden';
+      if (scrollBarWidth > 0) body.style.paddingRight = `${scrollBarWidth}px`;
+    }
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -93,8 +127,11 @@ export default function Modal({
     document.addEventListener('keydown', onKeyDown, true);
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
-      body.style.overflow = prevOverflow;
-      body.style.paddingRight = prevPaddingRight;
+      openCount = Math.max(0, openCount - 1);
+      if (openCount === 0) {
+        body.style.overflow = savedOverflow;
+        body.style.paddingRight = savedPaddingRight;
+      }
       // Return focus to whatever opened the dialog.
       previouslyFocused.current?.focus?.();
     };

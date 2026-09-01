@@ -226,6 +226,21 @@ this customer still owe".
   refuses to send the customer-facing email when Turnstile is unconfigured in
   production. Verified against Cloudflare's documented test secrets: fails
   closed on `2x0000...`, passes on `1x0000...`.
+- `NEXT_PUBLIC_META_PIXEL_ID` — the Meta (Facebook) Pixel. **Production Vercel
+  only**; leave it unset locally and in preview. Test traffic does not merely
+  add noise to a pixel — Meta's optimiser learns from it, so fake conversions
+  teach ad delivery to chase people who behave like you do while testing, which
+  is slow and expensive to undo. Unset, `src/lib/meta-pixel.ts` loads nothing
+  and every `metaTrack()` is a no-op. Unlike the PostHog origins, the Meta ones
+  are named in the CSP unconditionally: a policy that only permits the pixel in
+  the single environment where it runs cannot be tested before it ships.
+- `RESEND_AUDIENCE_ID` — server only; the audience the email-capture popup
+  writes to. Without it `/api/subscribe` answers 503 rather than accepting an
+  address it has nowhere to put. Note the deliberate contrast with the order
+  mail above: this one **cannot fail soft**. A quote is already a durable draft
+  invoice before email is attempted, so a failed send loses nothing; here
+  nothing is durable until Resend accepts the contact, so a soft failure would
+  drop the address while telling the visitor they had subscribed.
 - `GITHUB_TOKEN`, `VERCEL_TOKEN` — local tooling only
 
 ## Security posture
@@ -238,10 +253,53 @@ this customer still owe".
   change. `/checkout` is the page that matters: Stripe, PostHog, Google Fonts,
   Babylist and (if configured) Turnstile all load there together.
 - Rate limiting is NOT implemented in code. Turnstile covers the bot case; add
-  a Vercel Firewall rate-limit rule on `/api/quotes` for the volumetric one.
-  That is the endpoint that matters: it is anonymous, it creates Stripe
-  customers and invoices, and it sends mail from a verified domain to an address
-  the caller supplies.
+  a Vercel Firewall rate-limit rule on `/api/quotes` **and `/api/subscribe`** for
+  the volumetric one. Those are the endpoints that matter: both are anonymous,
+  `/api/quotes` creates Stripe customers and invoices and sends mail from a
+  verified domain to an address the caller supplies, and `/api/subscribe` writes
+  a caller-supplied address into a marketing audience.
+- Turnstile tokens are scoped by ACTION (`src/lib/turnstile-action.ts`), and
+  `verifyTurnstile` takes the action it expects. This is not decoration: without
+  it a token minted by the low-friction signup widget would be replayable
+  against checkout. Adding a third protected endpoint means adding a third
+  action, not reusing one.
+
+## Consent
+
+Analytics and advertising are **opt-in in EU/EEA, UK, Switzerland, Canada and
+California**, and on by default elsewhere. `src/lib/consent.ts` owns the state;
+`/api/geo` classifies the visitor from Vercel's `x-vercel-ip-country` and
+`-country-region` headers.
+
+Four things here are load-bearing and easy to break:
+
+- **Geo is a Route Handler, never middleware.** Middleware would opt every route
+  out of static prerendering — the one thing this site cannot trade away. A
+  Route Handler has no such effect. `/api/geo` must also send
+  `Cache-Control: private, no-store`, or the CDN can serve one visitor's country
+  to another.
+- **A missing country header means consent IS required.** On Vercel the header
+  is always present, so its absence means something is broken; a banner shown to
+  everyone is a visible, safe failure rather than an invisible compliance one.
+- **Captures made before consent resolves are QUEUED, not dropped.**
+  `posthog.capture()` silently discards anything sent before init, and the geo
+  fetch is always slower than component mount — in every region, not just the
+  gated ones. Gating naively would re-break the top of the funnel worldwide,
+  which is the bug `src/lib/posthog-client.ts` was written to fix in the first
+  place. The queue flushes on grant with the ORIGINAL timestamps.
+- **`initPostHog()` has callers outside `capture()`** — `src/app/providers.tsx`
+  and `src/lib/useDelistedProducts.ts`. Every one of them must go through the
+  gate, or the flag hook loads posthog-js for a visitor who has not consented
+  and the banner is decorative. A visitor who declines gets no flags, so nothing
+  is de-listed; that is the same fail-open behaviour documented under *Hiding a
+  product*, with a second cause. Use `hidden: true` when a product must not be
+  sellable.
+
+Do NOT init PostHog with `persistence: 'memory'` for pending visitors as a
+shortcut: `posthog.init` starts the session recorder before any opt-out
+deterministically takes effect, and `opt_out_capturing()` itself writes to
+localStorage. `opt_out_capturing()` is the right tool for *withdrawal* only,
+where posthog is already loaded.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

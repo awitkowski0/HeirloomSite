@@ -1,6 +1,7 @@
 'use client';
 
 import posthog from 'posthog-js';
+import { consentStatus, subscribeConsent } from './consent';
 
 /**
  * PostHog initialisation, owned by one module and safe to call from anywhere.
@@ -14,11 +15,32 @@ import posthog from 'posthog-js';
  *
  * Making init idempotent and calling it from the capture path instead means no
  * event can be dropped by mount order, whatever mounts first.
+ *
+ * IT IS ALSO CONSENT-GATED, and the two things interact in a way that is easy
+ * to get wrong - see the queue below the init.
  */
 export function initPostHog(): void {
   if (typeof window === 'undefined') return;
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   if (!key || posthog.__loaded) return;
+
+  /*
+   * Nothing loads until consent is granted, and this check has to be HERE
+   * rather than only in capture() because capture() is not the only caller:
+   * src/app/providers.tsx and src/lib/useDelistedProducts.ts both call
+   * initPostHog directly. Gating only the capture path would leave the feature
+   * flag hook loading posthog-js for a visitor staring at the banner - setting
+   * cookies and starting the session recorder - which makes the banner
+   * decorative.
+   *
+   * Note what is NOT done here: init with persistence:'memory' and
+   * opt_out_capturing(). posthog.init starts the session recorder before any
+   * opt-out deterministically takes effect, and opt_out_capturing() itself
+   * writes __ph_opt_in_out_<token> to localStorage - a storage write for
+   * somebody who has not consented to storage. For a visitor who has not
+   * answered, the only defensible thing is to not initialise at all.
+   */
+  if (consentStatus() !== 'granted') return;
 
   posthog.init(key, {
     /*
@@ -150,6 +172,164 @@ export function initPostHog(): void {
  * with a real Chrome UA or every event will look like it vanished.
  */
 export function capture(event: string, properties?: Record<string, unknown>): void {
+  const status = consentStatus();
+
+  if (status === 'denied') return;
+
+  /*
+   * Not yet answered - HOLD IT, do not drop it.
+   *
+   * This is the whole reason this queue exists, and skipping it would
+   * reintroduce the exact bug described at the top of this file, except
+   * worldwide. posthog.capture() silently discards anything sent before init,
+   * and consent resolution costs a round trip to /api/geo, which is always
+   * slower than a component mounting. So a plain `if (!granted) return` would
+   * drop the first pageview and every product_viewed for EVERY visitor in EVERY
+   * region - including the ungated ones who are granted a few hundred
+   * milliseconds later and never see a banner at all.
+   */
+  if (status !== 'granted') {
+    if (pendingCaptures.length < MAX_PENDING_CAPTURES) {
+      pendingCaptures.push({ event, properties, timestamp: new Date() });
+    }
+    return;
+  }
+
   initPostHog();
   posthog.capture(event, properties);
+}
+
+/*
+ * Bounded because 'pending' can last as long as a visitor ignores the banner,
+ * which is indefinitely. Fifty events is far more than the handful the funnel
+ * produces before anyone can click, and it stops a long browse against an
+ * unanswered banner from growing an array without limit.
+ */
+const MAX_PENDING_CAPTURES = 50;
+
+interface PendingCapture {
+  event: string;
+  properties?: Record<string, unknown>;
+  timestamp: Date;
+}
+
+const pendingCaptures: PendingCapture[] = [];
+
+/**
+ * Consent resolved. Send what happened while we were waiting, or bin it.
+ *
+ * The original timestamps are replayed rather than letting PostHog stamp them
+ * on arrival. A product_viewed that happened 900ms before the visitor clicked
+ * Accept belongs at the moment it happened; bunching a whole browse onto the
+ * instant of the consent click would make every funnel duration read as zero.
+ *
+ * This works because providers.tsx passes $current_url explicitly instead of
+ * letting posthog-js read location at send time - a decision made for an
+ * unrelated reason, without which a deferred pageview would be attributed to
+ * whatever page the visitor happened to be on when they accepted.
+ */
+function onConsentResolved(): void {
+  const status = consentStatus();
+  if (status === 'denied') {
+    pendingCaptures.length = 0;
+    return;
+  }
+  if (status !== 'granted') return;
+
+  initPostHog();
+
+  /*
+   * Undo a previous WITHDRAWAL, or this whole path is dead.
+   *
+   * withdrawPostHog() calls opt_out_capturing(), which persists in
+   * localStorage as __ph_opt_in_out_<token> and outlives the page. So without
+   * this, anyone who ever declined and later changed their mind through the
+   * footer would be shown a banner, click Accept, see the banner disappear -
+   * and still have every event silently dropped, forever. The UI would say
+   * tracking was on while posthog quietly ignored it.
+   *
+   * Guarded on production because in development the opt-out is DELIBERATE and
+   * belongs to a different mechanism entirely: the `loaded` callback in
+   * initPostHog opts out unless NEXT_PUBLIC_POSTHOG_DEBUG=1, precisely so dev
+   * traffic stays out of the production project. Opting back in here
+   * unconditionally would defeat that and start sending local events.
+   *
+   * NODE_ENV is inlined at build time, so this compiles away in dev.
+   */
+  if (process.env.NODE_ENV === 'production' && posthog.has_opted_out_capturing()) {
+    posthog.opt_in_capturing();
+  }
+
+  // Splice rather than iterate-then-clear: a capture during the flush must not
+  // be replayed twice or lost.
+  const queued = pendingCaptures.splice(0, pendingCaptures.length);
+  for (const item of queued) {
+    posthog.capture(item.event, item.properties, { timestamp: item.timestamp });
+  }
+}
+
+/*
+ * Subscribed at module scope, deliberately.
+ *
+ * The alternative is wiring it up in an effect in Providers, which would put
+ * the flush behind exactly the mount-ordering problem this file exists to be
+ * immune to. This module is the one owner of the posthog instance; it watches
+ * consent itself.
+ */
+if (typeof window !== 'undefined') subscribeConsent(onConsentResolved);
+
+/**
+ * Attach the anonymous visitor to a person, keyed on their email address.
+ *
+ * `person_profiles: 'identified_only'` means no profile exists until this is
+ * called, and PostHog stitches the visitor's earlier anonymous events onto the
+ * profile retroactively - so a signup at the end of a session brings the whole
+ * browse with it.
+ *
+ * TWO THINGS TO KNOW BEFORE ADDING A CALLER.
+ *
+ * 1. `sanitize_properties` above scrubs `token=`, NOT email addresses. After
+ *    this, PostHog holds real customer email addresses in the clear. That is
+ *    the intent - it is what makes the funnel joinable to an order - but it
+ *    raises the stakes on the consent gate rather than being free.
+ *
+ * 2. identify() binds every SUBSEQUENT event on this browser to this person
+ *    until reset(). CheckoutClient deliberately clears the stored shipping
+ *    details on submit because a browser is something a household shares; this
+ *    cuts the other way. It is an accepted trade, not an oversight - and it is
+ *    why withdrawal calls reset().
+ */
+export function identifyPerson(email: string, properties?: Record<string, unknown>): void {
+  if (typeof window === 'undefined') return;
+  if (consentStatus() !== 'granted') return;
+  initPostHog();
+  if (!posthog.__loaded) return;
+  // Lowercased so the same person from two forms is one profile, not two.
+  posthog.identify(email.trim().toLowerCase(), properties);
+}
+
+/**
+ * Withdrawal, for a visitor who accepted and has now changed their mind.
+ *
+ * This is the one case where opt_out_capturing() is the right tool rather than
+ * the shortcut warned about in initPostHog: posthog is already loaded here, so
+ * there is no "don't start it" option left - the recorder is running and has to
+ * be told to stop.
+ *
+ * Order matters. Stop the recorder first, or a fragment of the session between
+ * the opt-out and the reset can still be flushed. reset() last, so the person
+ * profile is detached and the next visitor on a shared browser does not
+ * continue this one's identity.
+ */
+export function withdrawPostHog(): void {
+  pendingCaptures.length = 0;
+  if (!posthog.__loaded) return;
+  try {
+    posthog.stopSessionRecording();
+    posthog.opt_out_capturing();
+    posthog.reset();
+  } catch {
+    // Nothing useful to do, and throwing here would break the banner's own
+    // click handler - leaving the UI claiming tracking is still on.
+  }
 }

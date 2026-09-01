@@ -8,7 +8,12 @@ import {
   PricingError,
 } from '@/lib/pricing';
 import { isPaymentOption, resolvePaymentOption } from '@/lib/order-terms';
-import { verifyTurnstile, TurnstileError, turnstileEnabled } from '@/lib/turnstile';
+import {
+  verifyTurnstile,
+  TurnstileError,
+  turnstileEnabled,
+  TURNSTILE_ACTIONS,
+} from '@/lib/turnstile';
 import { createQuote } from '@/lib/quote';
 import { sendQuoteAlert, sendQuoteConfirmation } from '@/lib/email';
 
@@ -38,7 +43,8 @@ export async function POST(req: Request) {
   try {
     await verifyTurnstile(
       body.turnstileToken,
-      req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for')
+      req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for'),
+      TURNSTILE_ACTIONS.checkout
     );
 
     const shipping = validateShipping(body);
