@@ -186,7 +186,7 @@ invoice metadata are the join keys - `stripe.invoices.search` answers "what does
 this customer still owe".
 
 ## Env vars
-- `NEXT_PUBLIC_SITE_URL` — canonical origin for canonicals/sitemap/og:image; defaults to `https://heirloomcribsandmore.com` in production and `http://localhost:3000` in local development (Vercel host variables do not control SEO URLs)
+- `NEXT_PUBLIC_SITE_URL` — canonical origin for canonicals/sitemap/og:image; `*.vercel.app` values are ignored. Local unset → `http://localhost:3000`; otherwise → `https://heirloomcribsandmore.com`
 - `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_POSTHOG_HOST` — production points the
   HOST at a reverse proxy on our own domain
   (`https://info.heirloomcribsandmore.com`), set in the Vercel project settings,

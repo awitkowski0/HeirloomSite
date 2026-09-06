@@ -7,21 +7,40 @@ import { fromCents } from './format';
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
  * every generateMetadata call run on the server.
  *
- * The brand domain is the production default. Local development stays on
- * localhost, while Vercel preview and production builds use the brand domain
- * unless NEXT_PUBLIC_SITE_URL explicitly overrides it.
+ * Public SEO must always use the brand host. NEXT_PUBLIC_SITE_URL may override
+ * only when it is a real custom domain — never a *.vercel.app deployment host
+ * (Vercel project env has historically pointed at heirloom-site-zeta.vercel.app,
+ * which leaked into canonical / og:url / robots / sitemap). Local development
+ * still uses localhost when no usable override is set.
  */
-const isLocalDevelopment =
-  process.env.NODE_ENV === 'development' ||
-  (process.env.NODE_ENV !== 'production' &&
-    !process.env.VERCEL &&
-    !process.env.VERCEL_ENV &&
-    !process.env.VERCEL_PROJECT_PRODUCTION_URL);
+export const BRAND_SITE_URL = 'https://heirloomcribsandmore.com';
+
+function isLocalDevelopment(): boolean {
+  return (
+    process.env.NODE_ENV === 'development' ||
+    (process.env.NODE_ENV !== 'production' &&
+      !process.env.VERCEL &&
+      !process.env.VERCEL_ENV &&
+      !process.env.VERCEL_PROJECT_PRODUCTION_URL)
+  );
+}
+
+function usablePublicOrigin(raw: string | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    if (url.hostname.endsWith('.vercel.app')) return null;
+    return `${url.protocol}//${url.host}`.replace(/\/+$/, '');
+  } catch {
+    return null;
+  }
+}
 
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (isLocalDevelopment ? 'http://localhost:3000' : 'https://heirloomcribsandmore.com')
-).replace(/\/+$/, '');
+  usablePublicOrigin(process.env.NEXT_PUBLIC_SITE_URL) ||
+  (isLocalDevelopment() ? 'http://localhost:3000' : BRAND_SITE_URL)
+);
 
 export const SITE_NAME = 'Heirloom Cribs and More';
 
