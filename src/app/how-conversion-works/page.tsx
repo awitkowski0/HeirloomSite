@@ -6,7 +6,7 @@ import '@/styles/home.css';
 export const metadata: Metadata = {
   title: 'How Our 4-in-1 Conversion Works',
   description:
-    'How a Heirloom 4-in-1 convertible crib moves from crib to toddler bed, daybed, and full-size bed with model-matched kits—and what to confirm before you buy.',
+    'Learn how a 4-in-1 convertible crib moves from crib to toddler bed, daybed, and full-size bed, with model-matched kits and product-specific guidance.',
   alternates: { canonical: '/how-conversion-works' },
 };
 
@@ -69,10 +69,10 @@ export default function ConversionPage() {
           />
         </div>
         <p>
-          Our convertible cribs are built from solid hardwood rather than particle board or MDF. The
-          same posts and rails that form the crib become the headboard and footboard of the larger
-          bed, so the underlying structure is intended to stay rigid through disassembly,
-          reassembly, and years of use.
+          The convertible cribs we offer are solid hardwood rather than particle board or MDF — made by
+          Amish and independent US craftspeople; Heirloom is the reseller. The same posts and rails
+          that form the crib become the headboard and footboard of the larger bed, so the underlying
+          structure is intended to stay rigid through disassembly, reassembly, and years of use.
         </p>
       </section>
       <hr className="doc-rule" />
@@ -174,7 +174,7 @@ export default function ConversionPage() {
             height={1152}
           />
         </div>
-        <p>Our cribs follow the same made-to-order path as the homepage journey:</p>
+        <p>Our cribs follow the same made-to-order path as the homepage journey — not deposit-first:</p>
         <ol className="doc-list">
           <li>
             <strong>01 Choose and Customize</strong> — Pick the silhouette first; hardwood and finish
@@ -192,9 +192,10 @@ export default function ConversionPage() {
             staining is complete — not before.
           </li>
           <li>
-            <strong>04 Delivered to Your Nursery</strong> — Choose Threshold Delivery or White Glove
-            Delivery when you order; both are handled by our trusted partners. Exact timing and cost
-            are confirmed for your zip code on the Confirm Order call.
+            <strong>04 Delivered to Your Nursery</strong> — Choose Threshold (to the door) or White
+            Glove (delivery + assembly in your home); both are handled by our trusted partners and
+            limited to three flights of stairs. We deliver in PA, NJ, NY, CT, OH, MD, and VA; confirm
+            your zip with us. We do not ship nationwide.
           </li>
         </ol>
         <p>
@@ -210,7 +211,7 @@ export default function ConversionPage() {
           <li>Are the conversion kits included or sold separately?</li>
           <li>What mattress sizes does each stage require?</li>
           <li>What is the current lead time for my style, wood, and stain?</li>
-          <li>Threshold or White Glove — which fits your home?</li>
+          <li>Threshold or White Glove — which fits your home in PA, NJ, NY, CT, OH, MD, or VA?</li>
         </ul>
         <p>
           You can get answers through Get Personal Assistance before Confirm Order / before any
