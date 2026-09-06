@@ -7,13 +7,20 @@ import { fromCents } from './format';
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
  * every generateMetadata call run on the server.
  *
- * VERCEL_PROJECT_PRODUCTION_URL is a bare host with no scheme.
+ * The brand domain is the production default. Local development stays on
+ * localhost, while Vercel preview and production builds use the brand domain
+ * unless NEXT_PUBLIC_SITE_URL explicitly overrides it.
  */
+const isLocalDevelopment =
+  process.env.NODE_ENV === 'development' ||
+  (process.env.NODE_ENV !== 'production' &&
+    !process.env.VERCEL &&
+    !process.env.VERCEL_ENV &&
+    !process.env.VERCEL_PROJECT_PRODUCTION_URL);
+
 export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000')
+  (isLocalDevelopment ? 'http://localhost:3000' : 'https://heirloomcribsandmore.com')
 ).replace(/\/+$/, '');
 
 export const SITE_NAME = 'Heirloom Cribs and More';

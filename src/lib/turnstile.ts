@@ -51,7 +51,7 @@ export class TurnstileError extends Error {
  *
  * Derived from configuration rather than hardcoded: the production domain is
  * not known to this repo, and a stale literal here would reject every real
- * customer. Mirrors the SITE_URL derivation in src/lib/seo.ts.
+ * customer. Includes the configured site host when available, plus deployment hosts.
  *
  * Preview deployments need their own entries. NODE_ENV is 'production' on a
  * Vercel preview, so the localhost branch below does not apply, and the host is
