@@ -150,8 +150,7 @@ export default function ConversionPage() {
         <p>
           It depends on the style. Some configurations, including certain Princeton-style options,
           include the conversion kits with the crib; others list the kits separately as purchasable
-          options. The product page shows what applies to each model. If you are unsure, use Get
-          Personal Assistance and we will confirm what is included for the exact SKU.
+          options. The product page shows what applies to each model. If you are unsure, use <Link href="/contact" className="doc-link">Get Personal Assistance</Link> and we will confirm what is included for the exact SKU.
         </p>
       </section>
       <section>
@@ -214,7 +213,7 @@ export default function ConversionPage() {
           <li>Threshold or White Glove — which fits your home in PA, NJ, NY, CT, OH, MD, or VA?</li>
         </ul>
         <p>
-          You can get answers through Get Personal Assistance before Confirm Order / before any
+          You can get answers through <Link href="/contact" className="doc-link">Get Personal Assistance</Link> before Confirm Order / before any
           deposit.
         </p>
       </section>
