@@ -174,16 +174,33 @@ export default function ConversionPage() {
             height={1152}
           />
         </div>
-        <p>Our cribs are custom, made-to-order pieces:</p>
+        <p>Our cribs follow the same made-to-order path as the homepage journey:</p>
         <ol className="doc-list">
-          <li>Choose your crib style and preferred wood and stain.</li>
-          <li>Place a 50% deposit—production begins immediately.</li>
-          <li>We confirm your estimated lead time and delivery cost for your zip code.</li>
-          <li>The balance is due before shipping; inspect on delivery.</li>
+          <li>
+            <strong>01 Choose and Customize</strong> — Pick the silhouette first; hardwood and finish
+            follow. Every crib converts through four stages and arrives with the rails to do it.
+          </li>
+          <li>
+            <strong>02 Confirm Order</strong> — Nothing is charged when you place an order. We read it,
+            call to confirm the stain, the kit list, and delivery <strong>before anything is built</strong>,
+            then send a secure Stripe invoice. A minimum 50% deposit begins production. No card is taken
+            at checkout.
+          </li>
+          <li>
+            <strong>03 Built and Finishing by Hand</strong> — Your piece is made to order in solid
+            American hardwood over roughly six to eight weeks. The remaining balance is invoiced once
+            staining is complete — not before.
+          </li>
+          <li>
+            <strong>04 Delivered to Your Nursery</strong> — Choose Threshold Delivery or White Glove
+            Delivery when you order; both are handled by our trusted partners. Exact timing and cost
+            are confirmed for your zip code on the Confirm Order call.
+          </li>
         </ol>
         <p>
-          Exact lead times are confirmed individually for each order and are estimates, not
-          guarantees. The 48-hour cancellation window applies from order placement.
+          Exact lead times are confirmed individually for each order and are estimates, not guarantees.
+          Cancellation and deposit terms are on the product page you order from — ask on the Confirm
+          Order call before you put a deposit down if anything is unclear.
         </p>
       </section>
       <section>
@@ -193,9 +210,12 @@ export default function ConversionPage() {
           <li>Are the conversion kits included or sold separately?</li>
           <li>What mattress sizes does each stage require?</li>
           <li>What is the current lead time for my style, wood, and stain?</li>
-          <li>What is included in delivery, standard or white-glove?</li>
+          <li>Threshold or White Glove — which fits your home?</li>
         </ul>
-        <p>You can get answers through Get Personal Assistance before you place a deposit.</p>
+        <p>
+          You can get answers through Get Personal Assistance before Confirm Order / before any
+          deposit.
+        </p>
       </section>
     </div>
   );
