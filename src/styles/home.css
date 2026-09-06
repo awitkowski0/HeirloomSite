@@ -538,3 +538,59 @@
     align-items: start;
   }
 }
+
+/* Brand sketches (Phil) — journey visuals on home + help pages */
+.brand-sketch {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--color-surface-container-low, #f3efe6);
+}
+
+.brand-sketch img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.journey-sketches {
+  display: grid;
+  gap: 1rem;
+  margin: 1.25rem 0 0;
+}
+
+.journey-sketches--pair {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .journey-sketches--pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.doc-sketches {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.doc-sketches--hero {
+  grid-template-columns: 1fr;
+}
+
+.doc-sketches--pair {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .doc-sketches--pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.doc-sketch-caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant, #5c574e);
+}
