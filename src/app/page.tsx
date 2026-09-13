@@ -11,6 +11,7 @@ import StyleCards from '@/components/home/StyleCards';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
+import BrandSketch from '@/components/marketing/BrandSketch';
 import { SHIPPING_METHODS, SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
 import '@/styles/home.css';
 
@@ -88,6 +89,15 @@ export default function HomePage() {
         >
           <FeaturedProducts />
           <StyleCards inventory={inventory} />
+          <div className="journey-sketches">
+            <BrandSketch
+              src="/images/brand/crib-room-placement.jpg"
+              alt="Sketch of a solid hardwood crib placed in a nursery"
+              width={1728}
+              height={1152}
+              sizes="(max-width: 1199px) 100vw, 1140px"
+            />
+          </div>
         </JourneyStep>
 
         <JourneyStep
@@ -116,6 +126,15 @@ export default function HomePage() {
               'The remaining balance is invoiced once the staining is complete — not before.',
             ]}
           />
+          <div className="journey-sketches">
+            <BrandSketch
+              src="/images/brand/wood-crafting.jpg"
+              alt="Sketch of hands shaping solid hardwood for nursery furniture"
+              width={1728}
+              height={1152}
+              sizes="(max-width: 1199px) 100vw, 1140px"
+            />
+          </div>
         </JourneyStep>
 
         <JourneyStep
@@ -135,6 +154,15 @@ export default function HomePage() {
               SHIPPING_LIMIT_NOTE,
             ]}
           />
+          <div className="journey-sketches">
+            <BrandSketch
+              src="/images/brand/delivery.jpg"
+              alt="Sketch of furniture delivery arriving at a family home"
+              width={1728}
+              height={1152}
+              sizes="(max-width: 1199px) 100vw, 1140px"
+            />
+          </div>
         </JourneyStep>
       </div>
     </>
