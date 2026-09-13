@@ -4018,9 +4018,8 @@ a.product-inline-link:focus-visible {
  * The sources are a mix of 3:2 and 1:1, so a two-up row would otherwise be
  * ragged. Cropping to a common ratio keeps the pair aligned; next/image still
  * gets the true intrinsic size from the width/height props, so nothing shifts
- * while it loads.
+ * while it loads. Only pairs: a full-width sketch shows its own ratio uncropped.
  */
-.journey-sketches--pair .brand-sketch img,
 .doc-sketches--pair .brand-sketch img {
   aspect-ratio: 3 / 2;
   object-fit: cover;
@@ -4034,7 +4033,7 @@ a.product-inline-link:focus-visible {
 }
 
 .journey-sketches {
-  margin: 1.25rem 0 0;
+  margin: 2rem 0 0;
 }
 
 .doc-sketches {
@@ -4042,7 +4041,6 @@ a.product-inline-link:focus-visible {
 }
 
 @media (min-width: 768px) {
-  .journey-sketches--pair,
   .doc-sketches--pair {
     grid-template-columns: 1fr 1fr;
   }

@@ -87,6 +87,8 @@ export default function HomePage() {
           title="Choose and Customize"
           lead="Pick the silhouette first; the hardwood and the finish follow. Every crib converts through four stages and arrives with the rails to do it."
         >
+          <FeaturedProducts />
+          <StyleCards inventory={inventory} />
           <div className="journey-sketches">
             <BrandSketch
               src="/images/brand/crib-room-placement.jpg"
@@ -96,8 +98,6 @@ export default function HomePage() {
               sizes="(max-width: 1199px) 100vw, 1140px"
             />
           </div>
-          <FeaturedProducts />
-          <StyleCards inventory={inventory} />
         </JourneyStep>
 
         <JourneyStep
@@ -119,20 +119,6 @@ export default function HomePage() {
           title="Built and Finishing by Hand"
           lead="Your piece is cut, joined and finished to order in solid American hardwood — six to eight weeks, because nothing is waiting in a warehouse."
         >
-          <div className="journey-sketches journey-sketches--pair">
-            <BrandSketch
-              src="/images/brand/amish-workshop.jpg"
-              alt="Sketch of craftspeople building furniture in a woodworking workshop"
-              width={1728}
-              height={1152}
-            />
-            <BrandSketch
-              src="/images/brand/wood-crafting.jpg"
-              alt="Sketch of hands shaping solid hardwood for nursery furniture"
-              width={1728}
-              height={1152}
-            />
-          </div>
           <JourneyPoints
             points={[
               'Sustainably sourced maple, cherry and red oak. Never veneer over particle board.',
@@ -140,6 +126,15 @@ export default function HomePage() {
               'The remaining balance is invoiced once the staining is complete — not before.',
             ]}
           />
+          <div className="journey-sketches">
+            <BrandSketch
+              src="/images/brand/wood-crafting.jpg"
+              alt="Sketch of hands shaping solid hardwood for nursery furniture"
+              width={1728}
+              height={1152}
+              sizes="(max-width: 1199px) 100vw, 1140px"
+            />
+          </div>
         </JourneyStep>
 
         <JourneyStep
@@ -153,26 +148,21 @@ export default function HomePage() {
             come from the constant the checkout charges from so the two cannot
             drift apart on what is on offer.
           */}
-          <div className="journey-sketches journey-sketches--pair">
-            <BrandSketch
-              src="/images/brand/delivery.jpg"
-              alt="Sketch of furniture delivery arriving at a family home"
-              width={1728}
-              height={1152}
-            />
-            <BrandSketch
-              src="/images/brand/assembly.jpg"
-              alt="Sketch of assembling a hardwood crib in the nursery"
-              width={1408}
-              height={1408}
-            />
-          </div>
           <JourneyPoints
             points={[
               ...SHIPPING_METHODS.map(m => `${m.name} — ${m.description}`),
               SHIPPING_LIMIT_NOTE,
             ]}
           />
+          <div className="journey-sketches">
+            <BrandSketch
+              src="/images/brand/delivery.jpg"
+              alt="Sketch of furniture delivery arriving at a family home"
+              width={1728}
+              height={1152}
+              sizes="(max-width: 1199px) 100vw, 1140px"
+            />
+          </div>
         </JourneyStep>
       </div>
     </>

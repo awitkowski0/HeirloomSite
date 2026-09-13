@@ -25,7 +25,7 @@ export default function ConversionPage() {
         unclear, ask us before ordering so we can confirm exactly what is in the box for that style.
       </p>
 
-      <div className="doc-sketches doc-sketches--hero">
+      <div className="doc-sketches">
         <BrandSketch
           src="/images/brand/crib-room-placement.jpg"
           alt="Sketch of a hardwood crib in the nursery — the first of four conversion stages"
