@@ -82,7 +82,7 @@ export default function SafeSleepPage() {
           <li>A firm mattress that fits tightly with no gaps. (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>; <a href={AAP} className="doc-link">AAP / HealthyChildren.org</a>)</li>
         </ul>
         <p>
-          Product standards and setup for cribs we sell are on our <Link href="/safety" className="doc-link">Safety</Link>
+          Product standards and setup for cribs we sell are on our <Link href="/safety" className="doc-link">Safety</Link>{' '}
           page (meet or exceed CPSC and ASTM; non-toxic, baby-safe finishes; mattress fit, hardware,
           and placement notes). That page is product information — <strong>not medical advice</strong>.
         </p>
@@ -102,7 +102,7 @@ export default function SafeSleepPage() {
         <p>
           Convertible cribs we offer move through crib → toddler bed → daybed → full-size bed. Use
           only the parts made for your model and follow the manufacturer&rsquo;s instructions. Rails
-          and separately sold conversion parts are listed on product pages and our <Link href="/safety" className="doc-link">Safety</Link>
+          and separately sold conversion parts are listed on product pages and our <Link href="/safety" className="doc-link">Safety</Link>{' '}
           page. Heirloom Cribs and More is the reseller; Amish and independent US craftspeople make
           the hardwood case goods.
         </p>

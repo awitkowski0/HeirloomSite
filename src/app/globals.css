@@ -3989,3 +3989,67 @@ a.product-inline-link:focus-visible {
   text-underline-offset: 3px;
   cursor: pointer;
 }
+
+/* ========== BRAND SKETCHES ========== */
+
+/*
+ * Phil's sketch illustrations, on the home journey and the owner's guides.
+ *
+ * Global rather than in home.css: how-conversion-works is not the home page
+ * and was importing the whole of home.css - six hundred lines of home layout
+ * that then applied to that route - to reach these five rules. They sit here
+ * beside the other .doc-* guide classes, which is where the guides already
+ * look for their styling.
+ */
+.brand-sketch {
+  margin: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--color-surface-container-low, #f3efe6);
+}
+
+.brand-sketch img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/*
+ * The sources are a mix of 3:2 and 1:1, so a two-up row would otherwise be
+ * ragged. Cropping to a common ratio keeps the pair aligned; next/image still
+ * gets the true intrinsic size from the width/height props, so nothing shifts
+ * while it loads.
+ */
+.journey-sketches--pair .brand-sketch img,
+.doc-sketches--pair .brand-sketch img {
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.journey-sketches,
+.doc-sketches {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+.journey-sketches {
+  margin: 1.25rem 0 0;
+}
+
+.doc-sketches {
+  margin: 1.5rem 0;
+}
+
+@media (min-width: 768px) {
+  .journey-sketches--pair,
+  .doc-sketches--pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.brand-sketch figcaption {
+  margin: 0.5rem 0 0;
+  font-size: 0.875rem;
+  color: var(--color-on-surface-variant, #5c574e);
+}

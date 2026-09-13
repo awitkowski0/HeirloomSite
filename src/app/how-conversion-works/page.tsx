@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import BrandSketch from '@/components/home/BrandSketch';
-import '@/styles/home.css';
+import BrandSketch from '@/components/marketing/BrandSketch';
 
 export const metadata: Metadata = {
   title: 'How Our 4-in-1 Conversion Works',
@@ -32,9 +31,10 @@ export default function ConversionPage() {
           alt="Sketch of a hardwood crib in the nursery — the first of four conversion stages"
           width={1728}
           height={1152}
+          sizes="(max-width: 1199px) 100vw, 1140px"
+          caption="Crib stage — the starting configuration in the nursery."
           priority
         />
-        <p className="doc-sketch-caption">Crib stage — the starting configuration in the nursery.</p>
       </div>
 
       <section>
@@ -98,6 +98,7 @@ export default function ConversionPage() {
             alt="Sketch of converting and assembling crib rails for the next stage"
             width={1408}
             height={1408}
+            sizes="(max-width: 1199px) 100vw, 1140px"
           />
         </div>
         <p>
@@ -176,6 +177,7 @@ export default function ConversionPage() {
             alt="Sketch of delivery arriving once your made-to-order crib is ready"
             width={1728}
             height={1152}
+            sizes="(max-width: 1199px) 100vw, 1140px"
           />
         </div>
         <p>Same path as our homepage — not deposit-first:</p>

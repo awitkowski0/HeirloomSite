@@ -11,7 +11,7 @@ import StyleCards from '@/components/home/StyleCards';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
-import BrandSketch from '@/components/home/BrandSketch';
+import BrandSketch from '@/components/marketing/BrandSketch';
 import { SHIPPING_METHODS, SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
 import '@/styles/home.css';
 
@@ -93,6 +93,7 @@ export default function HomePage() {
               alt="Sketch of a solid hardwood crib placed in a nursery"
               width={1728}
               height={1152}
+              sizes="(max-width: 1199px) 100vw, 1140px"
             />
           </div>
           <FeaturedProducts />
