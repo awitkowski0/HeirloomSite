@@ -4,10 +4,10 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
 
 /**
- * Help, as a button that opens Contact, Safety and Care.
+ * Help, as a button that opens Contact, FAQ, Safety and Care.
  *
  * A disclosure rather than a `role="menu"` widget. A real menu owes the user
- * arrow-key roaming, typeahead and focus wrapping; this is three links, and
+ * arrow-key roaming, typeahead and focus wrapping; this is four links, and
  * announcing it as a menu without implementing the keyboard contract is worse
  * for a screen-reader user than not claiming it at all. As a disclosure, Tab
  * moves through the links exactly as it looks like it should.
@@ -21,6 +21,7 @@ import Link from 'next/link';
 
 const LINKS = [
   { href: '/contact', label: 'Contact us' },
+  { href: '/faq', label: 'FAQ' },
   { href: '/safety', label: 'Safety & certifications' },
   { href: '/care', label: 'Care & finishes' },
 ];

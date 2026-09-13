@@ -1,5 +1,7 @@
 import 'server-only';
 
+import { SITE_URL } from './seo';
+
 /**
  * Cloudflare Turnstile verification for the quote endpoint.
  *
@@ -49,9 +51,11 @@ export class TurnstileError extends Error {
 /**
  * Hostnames a token may legitimately come from.
  *
- * Derived from configuration rather than hardcoded: the production domain is
- * not known to this repo, and a stale literal here would reject every real
- * customer. Mirrors the SITE_URL derivation in src/lib/seo.ts.
+ * Derived from configuration rather than hardcoded: a stale literal here would
+ * reject every real customer. SITE_URL is the SAME resolved origin the canonical
+ * tags and the sitemap use - reading NEXT_PUBLIC_SITE_URL directly would drift
+ * from it, because seo.ts discards a *.vercel.app value and falls back to the
+ * brand host. That host would then be missing here and every real submit 403s.
  *
  * Preview deployments need their own entries. NODE_ENV is 'production' on a
  * Vercel preview, so the localhost branch below does not apply, and the host is
@@ -64,14 +68,8 @@ export class TurnstileError extends Error {
 function allowedHostnames(): Set<string> {
   const hosts = new Set<string>();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (siteUrl) {
-    try {
-      hosts.add(new URL(siteUrl).hostname);
-    } catch {
-      // A malformed SITE_URL is a config error elsewhere; do not fail here.
-    }
-  }
+  // Already validated and normalised by seo.ts, so there is nothing to catch.
+  hosts.add(new URL(SITE_URL).hostname);
 
   for (const key of [
     'VERCEL_PROJECT_PRODUCTION_URL',

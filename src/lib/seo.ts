@@ -7,14 +7,41 @@ import { fromCents } from './format';
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
  * every generateMetadata call run on the server.
  *
- * VERCEL_PROJECT_PRODUCTION_URL is a bare host with no scheme.
+ * Public SEO must always use the brand host. NEXT_PUBLIC_SITE_URL may override
+ * only when it is a real custom domain — never a *.vercel.app deployment host
+ * (Vercel project env has historically pointed at heirloom-site-zeta.vercel.app,
+ * which leaked into canonical / og:url / robots / sitemap). Local development
+ * still uses localhost when no usable override is set.
  */
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000')
-).replace(/\/+$/, '');
+export const BRAND_SITE_URL = 'https://heirloomcribsandmore.com';
+
+function isLocalDevelopment(): boolean {
+  return (
+    process.env.NODE_ENV === 'development' ||
+    (process.env.NODE_ENV !== 'production' &&
+      !process.env.VERCEL &&
+      !process.env.VERCEL_ENV &&
+      !process.env.VERCEL_PROJECT_PRODUCTION_URL)
+  );
+}
+
+function usablePublicOrigin(raw: string | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    if (url.hostname.endsWith('.vercel.app')) return null;
+    // Origin only: any path, query or hash in the variable is dropped, because
+    // every caller appends its own absolute path to this value.
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return null;
+  }
+}
+
+export const SITE_URL =
+  usablePublicOrigin(process.env.NEXT_PUBLIC_SITE_URL) ||
+  (isLocalDevelopment() ? 'http://localhost:3000' : BRAND_SITE_URL);
 
 export const SITE_NAME = 'Heirloom Cribs and More';
 
@@ -207,5 +234,27 @@ export function itemListJsonLd(products: ProductIndexItem[], basePath: string): 
       url: absoluteUrl(`/product/${p.slug}`),
     })),
     url: absoluteUrl(basePath),
+  };
+}
+
+/**
+ * FAQPage structured data.
+ *
+ * Answers arrive as already-rendered React nodes rather than as a second copy
+ * of the prose: schema.org wants plain text and the page wants markup, and a
+ * hand-maintained plain-text twin of twenty answers drifts from the visible
+ * copy the first time someone edits one and not the other. Google penalises
+ * FAQ markup that disagrees with the page, so the two must come from one
+ * source - see nodeTextCompact in src/lib/node-text.ts.
+ */
+export function faqPageJsonLd(entries: { question: string; answerText: string }[]): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: entries.map(e => ({
+      '@type': 'Question',
+      name: e.question,
+      acceptedAnswer: { '@type': 'Answer', text: e.answerText },
+    })),
   };
 }

@@ -61,6 +61,42 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      /*
+       * On the PRODUCTION deployment only, everything served on a *.vercel.app
+       * host goes to the brand domain.
+       *
+       * src/lib/seo.ts already refuses to put a deployment host in a canonical
+       * tag, og:url, robots.txt or the sitemap - but that only stops us from
+       * ADVERTISING the wrong origin. heirloom-site-zeta.vercel.app still
+       * answers 200 on every URL, so a crawler that reached it from anywhere
+       * else keeps fetching it and Search Console can still treat it as a
+       * separate site. This is the half that makes the host stop serving
+       * indexable content.
+       *
+       * Gated on VERCEL_ENV, and that gate is the whole point: the rule matches
+       * by host pattern, so on a preview it would match the preview's OWN host
+       * and bounce every preview URL to production - making the deployments
+       * that most need testing unreachable. redirects() runs at build time, so
+       * the preview build simply never emits the rule.
+       *
+       * A `has` host rule rather than middleware: middleware would opt every
+       * route out of static prerendering, which is the one thing this site
+       * cannot trade away.
+       *
+       * TEMPORARY (307), unlike the permanent redirects below. A 308 is cached
+       * by every browser that sees it, and if the brand domain were ever
+       * detached from this project that cache would be unrecoverable.
+       */
+      ...(process.env.VERCEL_ENV === 'production'
+        ? [
+            {
+              source: '/:path*',
+              has: [{ type: 'host' as const, value: '.*\\.vercel\\.app' }],
+              destination: 'https://heirloomcribsandmore.com/:path*',
+              permanent: false,
+            },
+          ]
+        : []),
       {
         /*
          * /gallery is retired: it showed six of the sixteen cribs - the ones
