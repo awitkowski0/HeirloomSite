@@ -31,16 +31,17 @@ function usablePublicOrigin(raw: string | undefined): string | null {
     const url = new URL(raw);
     if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
     if (url.hostname.endsWith('.vercel.app')) return null;
-    return `${url.protocol}//${url.host}`.replace(/\/+$/, '');
+    // Origin only: any path, query or hash in the variable is dropped, because
+    // every caller appends its own absolute path to this value.
+    return `${url.protocol}//${url.host}`;
   } catch {
     return null;
   }
 }
 
-export const SITE_URL = (
+export const SITE_URL =
   usablePublicOrigin(process.env.NEXT_PUBLIC_SITE_URL) ||
-  (isLocalDevelopment() ? 'http://localhost:3000' : BRAND_SITE_URL)
-);
+  (isLocalDevelopment() ? 'http://localhost:3000' : BRAND_SITE_URL);
 
 export const SITE_NAME = 'Heirloom Cribs and More';
 
@@ -233,5 +234,27 @@ export function itemListJsonLd(products: ProductIndexItem[], basePath: string): 
       url: absoluteUrl(`/product/${p.slug}`),
     })),
     url: absoluteUrl(basePath),
+  };
+}
+
+/**
+ * FAQPage structured data.
+ *
+ * Answers arrive as already-rendered React nodes rather than as a second copy
+ * of the prose: schema.org wants plain text and the page wants markup, and a
+ * hand-maintained plain-text twin of twenty answers drifts from the visible
+ * copy the first time someone edits one and not the other. Google penalises
+ * FAQ markup that disagrees with the page, so the two must come from one
+ * source - see nodeTextCompact in src/lib/node-text.ts.
+ */
+export function faqPageJsonLd(entries: { question: string; answerText: string }[]): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: entries.map(e => ({
+      '@type': 'Question',
+      name: e.question,
+      acceptedAnswer: { '@type': 'Answer', text: e.answerText },
+    })),
   };
 }
