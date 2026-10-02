@@ -26,6 +26,7 @@ export const metadata: Metadata = {
   description:
     'How our cribs are built, the standards they are tested to, the finishes we use, and safe-sleep guidance for setting up the nursery.',
   alternates: { canonical: '/safety' },
+  openGraph: { url: '/safety' },
 };
 
 export default function SafetyPage() {
