@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     'What GREENGUARD Gold measures, how Heirloom describes finishes and emissions on live Care/Safety pages, and how to read claims without overstating certification.',
   alternates: { canonical: '/finishes' },
+  openGraph: { url: '/finishes' },
 };
 
 export default function FinishesPage() {

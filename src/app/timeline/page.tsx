@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     'How a made-to-order hardwood crib moves from Choose to Confirm Order, deposit, hand finishing, and regional delivery—with a planning estimate for your order.',
   alternates: { canonical: '/timeline' },
+  openGraph: { url: '/timeline' },
 };
 
 export default function TimelinePage() {

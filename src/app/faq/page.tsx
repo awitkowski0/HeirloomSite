@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description:
     'Answers on solid hardwood cribs, finishes, 4-in-1 conversion, ordering, shipping, and safety standards from Heirloom Cribs and More (Nazareth / Lehigh Valley, PA).',
   alternates: { canonical: '/faq' },
+  openGraph: { url: '/faq' },
 };
 
 /*
