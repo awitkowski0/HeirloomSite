@@ -342,21 +342,32 @@ const SECTIONS: Section[] = [
     heading: 'Price and deposits',
     entries: [
       {
-        question: 'Why is the price higher than big-box cribs?',
+        question: 'What am I paying for with an Heirloom crib?',
         answer: (
-          <p>
-            You are paying for solid hardwood from US craftspeople, convertible longevity,
-            and finish and safety choices aimed at real nursery use—not a disposable particle-board
-            cycle. If you would like a side-by-side of two Heirloom styles for your budget, ask via{' '}
-            <Link href="/contact" className="doc-link">
-              Get Personal Assistance
-            </Link>
-            . See also{' '}
-            <Link href="/why-hardwood" className="doc-link">
-              Why Solid Hardwood Matters
-            </Link>
-            .
-          </p>
+          <>
+            <p>
+              You’re paying for a solid American hardwood crib made to order for your nursery—and
+              for the years it stays with your family as it grows with your child.
+            </p>
+            <p>
+              We source nursery case goods crafted by Amish and independent US craftspeople from
+              maple, cherry, or red oak—never veneer over particle board. Finishes are non-toxic
+              and baby-safe, and every crib meets or exceeds CPSC and ASTM standards—details live
+              on our {SafetyLink} and each product page. One crib converts to a toddler bed, a
+              daybed, and a full bed when the kits for your style are in place; that’s what we mean
+              by Built to Grow Up. When you’re ready to order, you choose Threshold delivery to the
+              door or White Glove with in-home assembly, and we confirm what fits your address
+              before production starts.
+            </p>
+            <p>
+              If you’re weighing two styles for your nursery and budget, ask us on Confirm Order
+              before any deposit—we’ll walk you through what’s in each one. See also{' '}
+              <Link href="/why-hardwood" className="doc-link">
+                Why Solid Hardwood Matters
+              </Link>
+              .
+            </p>
+          </>
         ),
       },
       {
