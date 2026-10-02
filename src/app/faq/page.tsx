@@ -48,9 +48,9 @@ const SECTIONS: Section[] = [
         question: 'Are your cribs solid hardwood?',
         answer: (
           <p>
-            Yes. Our cribs are crafted from solid American hardwoods. Where a product page states
-            “no particle board / no MDF / no veneer,” that language is intentional and specific to
-            that piece.
+            Yes. The cribs we offer are solid American hardwood, crafted by Amish and independent
+            US craftspeople. Where a product page states “no particle board / no MDF / no veneer,”
+            that language is intentional and specific to that piece.
           </p>
         ),
       },
@@ -69,8 +69,9 @@ const SECTIONS: Section[] = [
         question: 'Where are the cribs made?',
         answer: (
           <p>
-            Our cribs are made in the USA. Heirloom Cribs and More is a women-owned business based
-            in the Nazareth / Lehigh Valley, Pennsylvania area.
+            The cribs we sell are made in the USA by Amish and independent US craftspeople. You buy
+            through us. Heirloom Cribs and More is a women-owned shop in the Nazareth / Lehigh Valley,
+            Pennsylvania area — we are the reseller, not the factory.
           </p>
         ),
       },
@@ -101,7 +102,8 @@ const SECTIONS: Section[] = [
           <p>
             Yes. Most cribs offer wood and stain options on the product page. If you are unsure
             which finish will match your nursery, use <strong>Get Personal Assistance</strong> and
-            share photos or inspiration before you place a deposit.
+            share photos or inspiration before Confirm Order. Nothing is charged until after that
+            call.
           </p>
         ),
       },
@@ -174,9 +176,9 @@ const SECTIONS: Section[] = [
                 deposit begins production.
               </li>
               <li>
-                <strong>Built and Finishing by Hand.</strong> Your piece is cut, joined, and
-                finished to order in solid American hardwood — six to eight weeks, because nothing
-                is waiting in a warehouse. The remaining balance is invoiced once the staining is
+                <strong>Built and Finishing by Hand.</strong> Amish and independent US
+                craftspeople cut, join, and finish your piece to order in solid American hardwood —
+                six to eight weeks, because nothing is waiting in a warehouse. The remaining balance is invoiced once the staining is
                 complete — not before.
               </li>
               <li>
@@ -343,7 +345,7 @@ const SECTIONS: Section[] = [
         question: 'Why is the price higher than big-box cribs?',
         answer: (
           <p>
-            You are paying for solid hardwood construction, US manufacturing, convertible longevity,
+            You are paying for solid hardwood from US craftspeople, convertible longevity,
             and finish and safety choices aimed at real nursery use—not a disposable particle-board
             cycle. If you would like a side-by-side of two Heirloom styles for your budget, ask via{' '}
             <Link href="/contact" className="doc-link">
