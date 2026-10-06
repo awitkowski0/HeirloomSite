@@ -533,3 +533,118 @@ export function sendWelcomeCoupon(
   `;
   return send(email, 'A welcome gift for your nursery', html);
 }
+
+// ---------------------------------------------------------------------------
+// Contact inquiries (POST /api/inquiry)
+// ---------------------------------------------------------------------------
+
+/**
+ * Where a contact inquiry is delivered.
+ *
+ * The address /contact has published since day one (src/app/contact/page.tsx),
+ * and the binding constraint on this endpoint is that the visitor's message
+ * goes to this inbox and to nowhere else - a caller must not be able to choose
+ * a recipient, or the endpoint becomes a relay. Kept here rather than in the
+ * route so the page and the mailer read the same literal instead of drifting
+ * two copies apart.
+ */
+export const SUPPORT_INBOX = 'HeirloomCribs.Care@HeirloomCribsandMore.com';
+
+export interface InquiryDetails {
+  name: string;
+  email: string;
+  message: string;
+  /** Optional context fields from the contact form; absent when left blank. */
+  phone?: string;
+  zip?: string;
+  interest?: string;
+  timing?: string;
+}
+
+/**
+ * The shop's copy of a contact inquiry ΓÇö the deliverable.
+ *
+ * `/contact` used to hand off to `mailto:`, so this alert is what makes a
+ * contact attempt exist server-side at all: if the visitor's mail client never
+ * opened before, nobody ever knew they asked. Reply-To is the visitor, so
+ * answering from the inbox reaches them without retyping the address.
+ *
+ * Fails soft like every other send: the caller decides what to tell the
+ * visitor when this comes back false.
+ */
+export function sendInquiryAlert(inquiry: InquiryDetails): Promise<boolean> {
+  const context = [
+    inquiry.phone ? `<p><strong>Phone:</strong> ${esc(inquiry.phone)}</p>` : '',
+    inquiry.zip ? `<p><strong>Delivery ZIP:</strong> ${esc(inquiry.zip)}</p>` : '',
+    inquiry.interest ? `<p><strong>Considering:</strong> ${esc(inquiry.interest)}</p>` : '',
+    inquiry.timing ? `<p><strong>Timing:</strong> ${esc(inquiry.timing)}</p>` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const html = `
+    <p><strong>New contact inquiry</strong></p>
+    <p>${esc(inquiry.name)} &lt;${esc(inquiry.email)}&gt;</p>
+    ${context}
+    <p style="white-space: pre-wrap">${esc(inquiry.message)}</p>
+  `;
+  return send(SUPPORT_INBOX, `Contact from ${inquiry.name}`, html, inquiry.email);
+}
+
+/**
+ * The visitor's acknowledgement ΓÇö the copy package's ┬º3 body, sent as ┬º3 says
+ * immediately on submit (`docs/customer-auto-response-basics.md`, final since
+ * 2026-08-06).
+ *
+ * Two edits are plumbing, not copy: the two URLs point at the routes this site
+ * actually serves (`/products/cribs`, `/safety` ΓÇö the package was written when
+ * the storefront was Shopify and `/collections/baby-cribs` and `/pages/safety`
+ * were its paths), and `{{first_name}}` resolves to the visitor's first name
+ * with "there" as the package's own fallback.
+ *
+ * Reply-To is replyToAddress(): a reply has to land in a real mailbox, or a
+ * customer answering the one email we actually sent goes nowhere.
+ */
+export function sendInquiryAck(inquiry: InquiryDetails): Promise<boolean> {
+  const first = inquiry.name.trim().split(/\s+/)[0] || 'there';
+
+  const html = `
+    <p>Hi ${esc(first)},</p>
+
+    <p>Thank you for contacting Heirloom Cribs and More. We received your message
+    and a real person on our team will follow up.</p>
+
+    <p>To help us reply with exact options and timing, you can answer any of these
+    now (reply to this email):</p>
+
+    <ol>
+      <li>Which crib style are you considering? (or send a link to the product page)</li>
+      <li>Preferred wood and stain, if you know them</li>
+      <li>Delivery zip code</li>
+      <li>Ideal delivery window (month is fine)</li>
+    </ol>
+
+    <p><strong>What to expect when you order:</strong></p>
+    <ul>
+      <li>Solid hardwood, US-made convertible cribs built for the long term</li>
+      <li>50% deposit starts production; balance due before shipping</li>
+      <li>We&rsquo;ll confirm current lead time and delivery options for your location</li>
+      <li>48-hour cancellation window (as stated on the product page)</li>
+    </ul>
+
+    <p>
+      Browse cribs: <a href="https://heirloomcribsandmore.com/products/cribs">https://heirloomcribsandmore.com/products/cribs</a><br>
+      Safety &amp; certifications: <a href="https://heirloomcribsandmore.com/safety">https://heirloomcribsandmore.com/safety</a>
+    </p>
+
+    <p>If your question is urgent, reply to this email with &ldquo;URGENT&rdquo; in the
+    first line and your phone number.</p>
+
+    <p>
+      &mdash; Heirloom Cribs and More<br>
+      Nazareth / Lehigh Valley, Pennsylvania<br>
+      Women-owned &middot; Solid hardwood &middot; Made in the USA
+    </p>
+  `;
+  return send(inquiry.email, 'Thanks for reaching out ΓÇö next step for your crib', html, replyToAddress());
+}
