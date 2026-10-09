@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     'Educational safe-sleep and crib-transition guidance from AAP, CPSC, NIH/NICHD, and CDC, with official references. Informational only—not medical advice.',
   alternates: { canonical: '/safe-sleep' },
+  openGraph: { url: '/safe-sleep' },
 };
 
 const AAP = 'https://www.healthychildren.org/English/ages-stages/baby/sleep/Pages/A-Parents-Guide-to-Safe-Sleep.aspx';

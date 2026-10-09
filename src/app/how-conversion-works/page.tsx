@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   description:
     'How a Heirloom 4-in-1 convertible crib moves from crib to toddler bed, daybed, and full-size bed with model-matched kits—and what to confirm before you buy.',
   alternates: { canonical: '/how-conversion-works' },
+  openGraph: { url: '/how-conversion-works' },
 };
 
 export default function ConversionPage() {

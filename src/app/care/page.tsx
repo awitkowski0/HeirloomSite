@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     'How to clean and care for solid hardwood nursery furniture, what to expect from the finishes, delivery and lead times, and what to do if something arrives damaged.',
   alternates: { canonical: '/care' },
+  openGraph: { url: '/care' },
 };
 
 export default function CarePage() {

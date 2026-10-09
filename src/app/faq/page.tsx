@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description:
     'Answers on solid hardwood cribs, finishes, 4-in-1 conversion, ordering, shipping, and safety standards from Heirloom Cribs and More (Nazareth / Lehigh Valley, PA).',
   alternates: { canonical: '/faq' },
+  openGraph: { url: '/faq' },
 };
 
 /*
@@ -47,9 +48,9 @@ const SECTIONS: Section[] = [
         question: 'Are your cribs solid hardwood?',
         answer: (
           <p>
-            Yes. Our cribs are crafted from solid American hardwoods. Where a product page states
-            “no particle board / no MDF / no veneer,” that language is intentional and specific to
-            that piece.
+            Yes. The cribs we offer are solid American hardwood, crafted by Amish and independent
+            US craftspeople. Where a product page states “no particle board / no MDF / no veneer,”
+            that language is intentional and specific to that piece.
           </p>
         ),
       },
@@ -68,8 +69,9 @@ const SECTIONS: Section[] = [
         question: 'Where are the cribs made?',
         answer: (
           <p>
-            Our cribs are made in the USA. Heirloom Cribs and More is a women-owned business based
-            in the Nazareth / Lehigh Valley, Pennsylvania area.
+            The cribs we sell are made in the USA by Amish and independent US craftspeople. You buy
+            through us. Heirloom Cribs and More is a women-owned shop in the Nazareth / Lehigh Valley,
+            Pennsylvania area — we are the reseller, not the factory.
           </p>
         ),
       },
@@ -100,7 +102,8 @@ const SECTIONS: Section[] = [
           <p>
             Yes. Most cribs offer wood and stain options on the product page. If you are unsure
             which finish will match your nursery, use <strong>Get Personal Assistance</strong> and
-            share photos or inspiration before you place a deposit.
+            share photos or inspiration before Confirm Order. Nothing is charged until after that
+            call.
           </p>
         ),
       },
@@ -158,20 +161,36 @@ const SECTIONS: Section[] = [
         question: 'How does ordering work?',
         answer: (
           <>
+            <p>Here is the same path you will see on our homepage.</p>
             <ol className="doc-list">
-              <li>Choose your crib style, wood, and stain.</li>
               <li>
-                Place a <strong>50% deposit</strong> (non-refundable as stated on the product page);
-                production begins.
+                <strong>Choose and Customize.</strong> Pick the silhouette first; the hardwood and
+                the finish follow.
               </li>
-              <li>We confirm estimated lead time and delivery options for your location.</li>
               <li>
-                The <strong>balance is due before shipping</strong>. Inspect on delivery.
+                <strong>Confirm Order</strong> (this is the quality check). Nothing is charged when
+                you place an order. We read it, check the details with you, and only then ask for
+                anything. No card is taken at checkout — the order is a commitment, not a charge. We
+                call to confirm the stain, the kit list, and the delivery before anything is built.
+                A secure Stripe invoice follows, usually within one business day. A minimum 50%
+                deposit begins production.
+              </li>
+              <li>
+                <strong>Built and Finishing by Hand.</strong> Amish and independent US
+                craftspeople cut, join, and finish your piece to order in solid American hardwood —
+                six to eight weeks, because nothing is waiting in a warehouse. The remaining balance is invoiced once the staining is
+                complete — not before.
+              </li>
+              <li>
+                <strong>Delivered to Your Nursery.</strong> You choose Threshold (to the door) or
+                White Glove (delivery and assembly in your home) when you order. Both are handled by
+                our trusted partners, not a freight terminal, and limited to three flights of
+                stairs.
               </li>
             </ol>
             <p>
-              There is a <strong>48-hour cancellation window</strong> as stated on the product page
-              terms.
+              Checkout terms include a <strong>48-hour cancellation window</strong> from the order
+              date. Read those terms before you pay the deposit, and ask us if anything is unclear.
             </p>
           </>
         ),
@@ -180,10 +199,10 @@ const SECTIONS: Section[] = [
         question: 'How long until my crib ships?',
         answer: (
           <p>
-            These are made-to-order pieces, so timing depends on current production and your finish
-            choices. We confirm a planning estimate for your order and location rather than
-            publishing a one-size-fits-all “ships in X days” promise. Share your target month via{' '}
-            <strong>Get Personal Assistance</strong> for the most useful estimate. See{' '}
+            These are made-to-order pieces — six to eight weeks, the same window on our homepage,
+            because nothing is waiting in a warehouse. We confirm a planning estimate for your order
+            on the Confirm Order call. Share your target month via{' '}
+            <strong>Get Personal Assistance</strong> if you have a nursery deadline. See{' '}
             <Link href="/timeline" className="doc-link">
               Timeline
             </Link>
@@ -195,10 +214,11 @@ const SECTIONS: Section[] = [
         question: 'Can I cancel after I order?',
         answer: (
           <p>
-            Product pages state a <strong>48-hour cancellation window</strong>. The deposit is{' '}
-            <strong>non-refundable</strong> as written on the product page because production starts
-            with your order. Read the terms on the page you purchase from and ask us before
-            depositing if anything is unclear.
+            Nothing is charged when you first place the order, so Confirm Order happens before any
+            deposit. Checkout terms include a <strong>48-hour cancellation window</strong> from the
+            order date. Once a deposit is paid, it is <strong>non-refundable</strong> as written in
+            those terms, because production starts with that payment. Ask us before you pay the
+            deposit if anything is unclear.
           </p>
         ),
       },
@@ -208,12 +228,12 @@ const SECTIONS: Section[] = [
     heading: 'Shipping and delivery',
     entries: [
       {
-        question: 'Do you ship nationwide?',
+        question: 'Where do you deliver?',
         answer: (
           <p>
-            We ship to customers across the U.S., with delivery method and cost depending on your
-            location and the piece. Freight for solid hardwood furniture is not the same as a
-            small-parcel carton. We confirm options when we have your <strong>zip code</strong>.
+            We deliver in <strong>PA, NJ, NY, CT, OH, MD, and VA</strong> — the same states checkout
+            will accept. If you are unsure whether your address is in range, send us your zip and we
+            will confirm options for you. We do <strong>not</strong> ship nationwide.
           </p>
         ),
       },
@@ -221,9 +241,10 @@ const SECTIONS: Section[] = [
         question: 'Is white-glove delivery available?',
         answer: (
           <p>
-            White-glove or threshold-style delivery may be available depending on carrier and
-            region. Standard freight options may also apply. Tell us your zip code and we will
-            outline what is realistic for your address, including stairs or apartment constraints.
+            Yes. You choose Threshold or White Glove when you order, inside the states we deliver
+            to. Threshold is delivery to the door. White Glove is delivery and assembly in your
+            home. Both are handled by our trusted partners, not a freight terminal, and limited to
+            three flights of stairs. We confirm what fits your address on the Confirm Order call.
           </p>
         ),
       },
@@ -231,9 +252,9 @@ const SECTIONS: Section[] = [
         question: 'Who assembles the crib?',
         answer: (
           <p>
-            Assembly expectations depend on the product and delivery level selected. Many families
-            assemble with the included instructions; some delivery services offer placement-only or
-            full assembly. We clarify what your quote includes before you pay the final balance.
+            It depends on the delivery tier you choose. White Glove includes assembly in your home.
+            With Threshold, you assemble using the included instructions. We clarify what your order
+            includes before the balance is invoiced.
           </p>
         ),
       },
@@ -321,21 +342,32 @@ const SECTIONS: Section[] = [
     heading: 'Price and deposits',
     entries: [
       {
-        question: 'Why is the price higher than big-box cribs?',
+        question: 'What am I paying for with an Heirloom crib?',
         answer: (
-          <p>
-            You are paying for solid hardwood construction, US manufacturing, convertible longevity,
-            and finish and safety choices aimed at real nursery use—not a disposable particle-board
-            cycle. If you would like a side-by-side of two Heirloom styles for your budget, ask via{' '}
-            <Link href="/contact" className="doc-link">
-              Get Personal Assistance
-            </Link>
-            . See also{' '}
-            <Link href="/why-hardwood" className="doc-link">
-              Why Solid Hardwood Matters
-            </Link>
-            .
-          </p>
+          <>
+            <p>
+              You’re paying for a solid American hardwood crib made to order for your nursery—and
+              for the years it stays with your family as it grows with your child.
+            </p>
+            <p>
+              We source nursery case goods crafted by Amish and independent US craftspeople from
+              maple, cherry, or red oak—never veneer over particle board. Finishes are non-toxic
+              and baby-safe, and every crib meets or exceeds CPSC and ASTM standards—details live
+              on our {SafetyLink} and each product page. One crib converts to a toddler bed, a
+              daybed, and a full bed when the kits for your style are in place; that’s what we mean
+              by Built to Grow Up. When you’re ready to order, you choose Threshold delivery to the
+              door or White Glove with in-home assembly, and we confirm what fits your address
+              before production starts.
+            </p>
+            <p>
+              If you’re weighing two styles for your nursery and budget, ask us on Confirm Order
+              before any deposit—we’ll walk you through what’s in each one. See also{' '}
+              <Link href="/why-hardwood" className="doc-link">
+                Why Solid Hardwood Matters
+              </Link>
+              .
+            </p>
+          </>
         ),
       },
       {
@@ -343,9 +375,11 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             The product page shows the crib price for the configuration displayed. Wood and stain
-            options follow the choices on that page. Shipping and delivery are typically confirmed
-            for your zip and are separate from the furniture price unless the page explicitly says
-            otherwise. The deposit is 50% to start production; the balance is due before shipping.
+            options follow the choices on that page. Delivery is quoted for your address (Threshold
+            or White Glove) and is separate from the furniture price unless the page explicitly says
+            otherwise. Nothing is charged when you first place the order. After Confirm Order, a
+            minimum 50% deposit begins production; the remaining balance is invoiced once staining
+            is complete — not before.
           </p>
         ),
       },

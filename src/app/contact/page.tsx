@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     'Reach Heirloom Cribs and More by email or phone about an order, a repair, or a question about our furniture.',
   alternates: { canonical: '/contact' },
+  openGraph: { url: '/contact' },
 };
 
 const EMAIL = 'HeirloomCribs.Care@HeirloomCribsandMore.com';

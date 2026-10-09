@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description:
     'What solid hardwood means for crib strength, longevity through conversion, finish behavior, and evaluating materials—US-made Heirloom cribs from Amish and independent craftspeople.',
   alternates: { canonical: '/why-hardwood' },
+  openGraph: { url: '/why-hardwood' },
 };
 
 export default function HardwoodPage() {
