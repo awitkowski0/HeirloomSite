@@ -145,3 +145,40 @@ export async function validateCoupon(
   });
   return parse<ValidateCouponResponse>(res);
 }
+
+export interface InquiryRequest {
+  name: string;
+  email: string;
+  message: string;
+  /** Optional context fields from the contact form. */
+  phone?: string;
+  zip?: string;
+  interest?: string;
+  timing?: string;
+  /** Cloudflare Turnstile token; required only when the server has a secret. */
+  turnstileToken?: string;
+}
+
+export interface InquiryResponse {
+  ok: true;
+  /**
+   * Whether the acknowledgement email actually went out. The shop alert is
+   * delivered either way (a 503 says otherwise) - this only decides whether the
+   * success screen may promise an email, for the same reason
+   * CreateQuoteResponse.confirmationSent exists.
+   */
+  customerAckSent: boolean;
+}
+
+export async function submitInquiry(
+  req: InquiryRequest,
+  signal?: AbortSignal
+): Promise<InquiryResponse> {
+  const res = await fetch('/api/inquiry', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+    signal,
+  });
+  return parse<InquiryResponse>(res);
+}
