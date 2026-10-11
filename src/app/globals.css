@@ -2783,8 +2783,8 @@ a.product-inline-link:focus-visible {
   /*
    * Centred in the space above the bottom nav (~80px) rather than parked at
    * the top with a quarter of the screen blank beneath it. The pin's height is
-   * known without measuring: the photograph is 4:5 of the 16px-guttered width,
-   * plus the 60px panel.
+   * known without measuring: the photograph is 5:6 of the 16px-guttered width
+   * (see below), plus the 60px panel.
    *
    * The background is load-bearing. Sticky makes the pin a stacking context,
    * so the photographs' mix-blend-mode: multiply blends against the pin, not
@@ -2793,8 +2793,22 @@ a.product-inline-link:focus-visible {
    */
   .stain-scrub-pin {
     position: sticky;
-    top: max(12px, calc((100svh - 80px - (100vw - 32px) * 1.25 - 60px) / 2));
+    top: max(12px, calc((100svh - 80px - (100vw - 32px) * 5 / 6 - 60px) / 2));
     background-color: var(--background);
+  }
+  /*
+   * Shaped to the photographs, not the generic 4:5 product frame.
+   *
+   * Only cribs have finishes to preview, and every crib photograph is
+   * landscape - 0.8 to 0.9 as tall as wide, 157 of 167 of them. In a portrait
+   * 4:5 box `contain` left a ~75px band of nothing above and below each one,
+   * which read as padding between the photo and the finish name under it. 6:5
+   * fits the common 0.83 exactly and costs the outliers a sliver. The phone
+   * min-height is dropped for the same reason: it would force the band back.
+   */
+  .stain-scrub .product-image {
+    aspect-ratio: 6 / 5;
+    min-height: 0;
   }
   .stain-scrub-layers {
     position: absolute;

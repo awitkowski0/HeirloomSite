@@ -67,10 +67,13 @@ export default function ProductGallery({ images, productName, priority = false, 
   const itemCount = feed?.items.length ?? 0;
   const trackRef = useRef<HTMLDivElement>(null);
   const [scrubIndex, setScrubIndex] = useState<number | null>(null);
+  const [pastPreview, setPastPreview] = useState(false);
   // The finish photographs are only mounted once the photograph is near the
   // viewport on a phone, so nobody on a desktop - or who never scrolls this
   // far - downloads eleven extra images.
   const [nearby, setNearby] = useState(false);
+  // True while the page glides past the preview after "Choose this finish".
+  const jumpingRef = useRef(false);
 
   useEffect(() => {
     if (!scrubOn) return;
@@ -85,7 +88,9 @@ export default function ProductGallery({ images, productName, priority = false, 
       const scrolled = pinTop - track.getBoundingClientRect().top;
       // One step of lead-in showing the selected finish, then one per finish.
       const step = Math.floor(scrolled / SCRUB_STEP_PX) - 1;
-      setScrubIndex(step >= 0 && step < itemCount ? step : null);
+      const inZone = step >= 0 && step < itemCount && !jumpingRef.current;
+      setScrubIndex(inZone ? step : null);
+      setPastPreview(step >= itemCount);
     };
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
@@ -104,6 +109,38 @@ export default function ProductGallery({ images, productName, priority = false, 
   }, [scrubOn, itemCount]);
 
   const preview = scrubOn ? scrubIndex : null;
+
+  /*
+   * After "Choose this finish", carry the visitor past the rest of the
+   * preview to where the photograph lets go - the chosen finish in the photo,
+   * the bundle and price directly under it. That is the next decision, and
+   * otherwise they would have to scroll through every remaining finish to get
+   * there. The preview is frozen for the glide, or the finishes still ahead
+   * would flash past on the way.
+   */
+  const scrollPastPreview = () => {
+    const track = trackRef.current;
+    const pin = track?.firstElementChild as HTMLElement | null;
+    if (!track || !pin) return;
+    const pinTop = parseFloat(getComputedStyle(pin).top) || 0;
+    const zone = (itemCount + 1) * SCRUB_STEP_PX;
+    // +2: landing a fraction short of the zone's end would leave it one step
+    // inside, still frozen, with nothing left to scroll and un-freeze it.
+    const target = window.scrollY + track.getBoundingClientRect().top - pinTop + zone + 2;
+
+    jumpingRef.current = true;
+    setScrubIndex(null);
+    const release = () => {
+      jumpingRef.current = false;
+      window.removeEventListener('scrollend', release);
+    };
+    window.addEventListener('scrollend', release);
+    // scrollend is not everywhere yet (older Safari); never stay frozen.
+    setTimeout(release, 1500);
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: target, behavior: reduceMotion ? 'instant' : 'smooth' });
+  };
 
   /*
    * A product with no images is a missing asset, not a stock state.
@@ -209,14 +246,17 @@ export default function ProductGallery({ images, productName, priority = false, 
                     className="button-secondary stain-scrub-choose"
                     onClick={() => {
                       setIndex(0);
+                      // Selects, and moves the address bar to this finish's
+                      // URL (the configurator's syncUrl).
                       feed.onChoose(preview);
+                      scrollPastPreview();
                     }}
                   >
                     Choose this finish
                   </button>
                 ) : (
                   <p className="label-caps stain-scrub-hint">
-                    {preview === null ? 'Scroll to preview every finish' : 'Selected'}
+                    {preview === null && !pastPreview ? 'Scroll to preview every finish' : 'Selected'}
                   </p>
                 )}
               </div>
