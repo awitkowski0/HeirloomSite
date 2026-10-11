@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { Stain } from '@/types';
 import { getStainColor, stainLabel } from '@/lib/stainColors';
 import { formatPrice } from '@/lib/format';
@@ -39,6 +40,31 @@ export default function StainSelector({
   onSelect,
   label = 'Choose Stain Finish',
 }: Props) {
+  const listRef = useRef<HTMLDivElement>(null);
+
+  /*
+   * Keep the selected swatch in view in the phone rail.
+   *
+   * The selection can now change from outside the rail - a swipe on the
+   * photograph - and the rail would otherwise sit still while the ring moved
+   * off its edge. Horizontal only, and only on the list itself: scrollIntoView
+   * would also scroll the page to the rail, yanking a visitor who is looking
+   * at the photograph back up to the pickers.
+   */
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || list.scrollWidth <= list.clientWidth) return;
+    const button = list.querySelector<HTMLElement>('[aria-checked="true"]');
+    if (!button) return;
+    const listBox = list.getBoundingClientRect();
+    const box = button.getBoundingClientRect();
+    if (box.left >= listBox.left && box.right <= listBox.right) return;
+    list.scrollBy({
+      left: box.left - listBox.left - (listBox.width - box.width) / 2,
+      behavior: 'smooth',
+    });
+  }, [selected]);
+
   if (stains.length === 0) return null;
 
   return (
@@ -46,7 +72,7 @@ export default function StainSelector({
       <div className="config-header">
         <h3 className="label-caps">02. {label}</h3>
       </div>
-      <div className="stain-list" role="radiogroup" aria-label={label}>
+      <div ref={listRef} className="stain-list" role="radiogroup" aria-label={label}>
         {stains.map(stain => {
           const isSelected = selected === stain.name;
           const color = getStainColor(stain.name);

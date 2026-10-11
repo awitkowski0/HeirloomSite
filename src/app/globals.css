@@ -2758,6 +2758,91 @@ a.product-inline-link:focus-visible {
   min-height: 420px;
   background-color: transparent;
 }
+/*
+ * Phone scroll preview (ProductGallery). The track adds --scrub-length of
+ * page below the photograph; the pin sticks in place on screen while that
+ * length scrolls past, and ProductGallery fades a different finish in
+ * every 80px of it. Then the track ends, the pin scrolls away with it, and the
+ * page carries straight on to the bundle and the price. No nested scroller and
+ * no captured gesture, so the scroll is never trapped.
+ *
+ * From 768px none of this applies: no --scrub-length is set and nothing is
+ * sticky.
+ */
+.stain-scrub-panel {
+  display: none;
+}
+@media (max-width: 767px) {
+  /* A spacer, not padding-bottom: a sticky element is confined to its
+     containing block's CONTENT box, so padding gave the pin nowhere to go. */
+  .stain-scrub::after {
+    content: '';
+    display: block;
+    height: var(--scrub-length, 0px);
+  }
+  /*
+   * Centred in the space above the bottom nav (~80px) rather than parked at
+   * the top with a quarter of the screen blank beneath it. The pin's height is
+   * known without measuring: the photograph is 4:5 of the 16px-guttered width,
+   * plus the 60px panel.
+   *
+   * The background is load-bearing. Sticky makes the pin a stacking context,
+   * so the photographs' mix-blend-mode: multiply blends against the pin, not
+   * the page - transparent, which brought back the white plate they were shot
+   * on.
+   */
+  .stain-scrub-pin {
+    position: sticky;
+    top: max(12px, calc((100svh - 80px - (100vw - 32px) * 1.25 - 60px) / 2));
+    background-color: var(--background);
+  }
+  .stain-scrub-layers {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .stain-scrub-layers img {
+    opacity: 0;
+    transition: opacity 160ms ease;
+  }
+  .stain-scrub-layers img.is-visible {
+    opacity: 1;
+  }
+  .product-image.is-previewing .product-image-trigger img {
+    opacity: 0;
+  }
+  .stain-scrub-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding-top: 12px;
+  }
+  .stain-scrub-name {
+    margin: 0;
+    font-family: var(--font-label);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .stain-scrub-count {
+    margin-left: 8px;
+    color: var(--on-surface-variant);
+  }
+  .stain-scrub-hint {
+    margin: 0;
+    color: var(--on-surface-variant);
+  }
+  .stain-scrub-choose {
+    flex-shrink: 0;
+    width: auto;
+    padding: 10px 16px;
+  }
+}
+
 .product-image--empty {
   display: flex;
   align-items: center;
