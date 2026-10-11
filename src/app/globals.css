@@ -523,6 +523,22 @@ body {
   border-color: var(--accent);
 }
 
+/*
+ * The cribs landing page on a phone is just the gallery.
+ *
+ * On a wide screen the All Cribs / Mini Cribs cards and the finish pills sit
+ * comfortably above the grid. On a phone they were two screens of chrome - the
+ * finish filter alone wraps twenty-odd pills - before the first crib. Neither
+ * holds an image, so display:none costs no wasted requests, and the children
+ * stay reachable from the category bar and the crumbs.
+ */
+@media (max-width: 767px) {
+  .subcategory-nav--desktop-only,
+  .finish-browser .gallery-header {
+    display: none;
+  }
+}
+
 /* A note under a fieldset's options, applying to the set rather than to any
    one of them: the stair limit on delivery, the Affirm instruction on payment. */
 .fieldset-note {
@@ -1098,19 +1114,31 @@ main {
  * (screen readers still get name, price and stock state) while taking no space.
  * At 768px and up the same buttons become a vertical list with that text
  * visible. Nothing is mounted twice and no image is requested twice.
+ *
+ * Snapping is `proximity`, not `mandatory`. With mandatory, every flick of a
+ * rail of 48px swatches was pulled back to the nearest centre the moment the
+ * finger lifted, so momentum never carried past two or three stains and a
+ * twenty-finish crib took a dozen swipes to cross. Proximity still settles a
+ * slow drag onto a swatch but lets a fling travel. overscroll-behavior stops a
+ * swipe that hits either end from turning into a browser back-gesture.
+ *
+ * The inline padding keeps the selected swatch's outline, and the first and
+ * last swatches, clear of the clipping edge.
  */
 .stain-list {
   display: flex;
   flex-direction: row;
   gap: 8px;
   overflow-x: auto;
-  padding: 8px 0;
-  scroll-snap-type: x mandatory;
+  padding: 8px 4px;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: 4px;
+  overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
 }
 .stain-list .stain-button {
   position: relative;
-  scroll-snap-align: center;
+  scroll-snap-align: start;
   flex-shrink: 0;
   flex-direction: column;
   width: auto;
@@ -1154,7 +1182,7 @@ main {
     overflow-x: visible;
     overflow-y: auto;
     max-height: 320px;
-    padding-right: 8px;
+    padding: 8px 8px 8px 0;
     scroll-snap-type: none;
   }
   .stain-list .stain-button {
@@ -1205,12 +1233,17 @@ main {
   text-align: left;
 }
 
-.stain-button:hover {
-  background-color: var(--surface-container-low);
-}
+/* Hover devices only. On touch, :active fires as soon as a finger lands, so
+   every swipe across the stain rail shrank whichever swatch it started on and
+   the rail visibly jittered under the finger. */
+@media (hover: hover) {
+  .stain-button:hover {
+    background-color: var(--surface-container-low);
+  }
 
-.stain-button:active {
-  transform: scale(0.98);
+  .stain-button:active {
+    transform: scale(0.98);
+  }
 }
 
 /* Selection is a terracotta marker rule plus a weight change, not a background
@@ -1602,9 +1635,12 @@ main {
     font-size: 10px;
     padding: 6px 4px;
   }
+  /* No touch-action: none here. Nothing on the photograph handles a gesture
+     (it is a tap-to-open button), and `none` meant a swipe that began on it -
+     a third of the screen, directly above the stains - could not scroll the
+     page at all. */
   .product-image {
     min-height: 320px;
-    touch-action: none;
   }
   .product-image img {
     object-fit: contain;
@@ -1612,6 +1648,50 @@ main {
   .configuration-panel {
     gap: 28px;
   }
+
+  /*
+   * Phone order: name, then the style and stain pickers, then the photograph
+   * and everything else.
+   *
+   * The pickers live inside .configuration-panel, after the photograph, the
+   * thumbnails and the whole bundle box - so on a phone the stains were three
+   * screens down. Moving them is done here, not in the markup: both wrappers
+   * become display: contents so their children are items of this one grid,
+   * and `order` lifts the name and the two .config-section pickers to the
+   * top. One DOM tree, as AGENTS.md requires; nothing is mounted twice.
+   *
+   * The pickers sit directly above the photograph, so tapping a stain swaps
+   * the picture just below the finger rather than off-screen.
+   *
+   * The breadcrumb goes too: on a phone it was a wrapped line of chrome above
+   * the name, and the bottom nav and back gesture already cover it. Its
+   * BreadcrumbList JSON-LD is a separate <script> and is unaffected.
+   */
+  .product-page > .breadcrumb {
+    display: none;
+  }
+  .product-layout {
+    grid-template-areas: none;
+  }
+  .product-layout > .product-showcase,
+  .product-layout > .configuration-panel {
+    display: contents;
+  }
+  /* Their children are the grid items now, so they need the min-width guard
+     `.product-layout > *` gives - without it the stain rail's eleven swatches
+     widened the page to ~670px again and the rail itself never scrolled. */
+  .product-showcase > *,
+  .configuration-panel > * {
+    min-width: 0;
+  }
+  .product-layout > .product-title {
+    grid-area: auto;
+    order: -2;
+  }
+  .product-layout .config-section {
+    order: -1;
+  }
+
   .stain-strip .stain-swatch {
     width: 52px;
     height: 52px;
@@ -2713,6 +2793,8 @@ a.product-inline-link:focus-visible {
   gap: 8px;
   overflow-x: auto;
   padding: 4px;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .stain-swatch-img {
   width: 100%;

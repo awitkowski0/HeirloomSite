@@ -124,9 +124,15 @@ export default async function CategoryPage({
         "Cribs" is choosing between the full range and the minis, and the grid
         below still shows the whole branch for anyone who would rather just
         look.
+
+        Wide screens only: on a phone the cribs page is just the gallery (see
+        .subcategory-nav--desktop-only in globals.css).
       */}
       {node.children && node.children.length > 0 && (
-        <nav className="subcategory-nav" aria-label={`${node.name} subcategories`}>
+        <nav
+          className="subcategory-nav subcategory-nav--desktop-only"
+          aria-label={`${node.name} subcategories`}
+        >
           {node.children.map(child => (
             <Link key={child.slug} href={`/products/${child.slug}`} className="subcategory-card">
               <span className="body-lg">{child.name}</span>
@@ -138,7 +144,10 @@ export default async function CategoryPage({
         </nav>
       )}
 
-      <section aria-label={`${node.name} products`}>
+      <section
+        aria-label={`${node.name} products`}
+        className={showFinishBrowser ? 'finish-browser' : undefined}
+      >
         {showFinishBrowser ? (
           <GalleryBrowser products={cribFinishes} />
         ) : (
