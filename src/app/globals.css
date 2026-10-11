@@ -1494,12 +1494,6 @@ main {
   text-align: center;
 }
 
-@media (max-width: 767px) {
-  .product-card-text {
-    display: none;
-  }
-}
-
 /* Filter pills scrollable on mobile */
 
 @media (max-width: 767px) {
@@ -2593,6 +2587,24 @@ main {
 }
 .view-finishes-btn .material-symbols-outlined {
   font-size: 16px;
+}
+
+/* On a phone the card keeps its name and drops the rest - price, rules and
+   the finishes button - so the cribs page stays a gallery you can still tell
+   apart without tapping into every photograph. After the base rules above on
+   purpose: same specificity, so it has to come later to win. */
+@media (max-width: 767px) {
+  .product-card-text {
+    padding-top: 12px;
+  }
+  .product-card-text h3 {
+    margin-bottom: 0;
+    font-size: var(--text-headline-md);
+  }
+  .product-card-price-row,
+  .view-finishes-btn {
+    display: none;
+  }
 }
 
 /* ===========================================================================
