@@ -4,14 +4,15 @@ import { useState, useMemo, useEffect, type ReactNode } from 'react';
 import { productAddedToCart, productViewed, variantConfigured } from '@/lib/analytics';
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
-import ProductGallery from './ProductGallery';
+import ProductGallery, { type FeedItem } from './ProductGallery';
 import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
 import BundleBuilder from './BundleBuilder';
 import { formatPrice } from '@/lib/format';
-import { variantLabel as formatVariant } from '@/lib/labels';
+import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
+import { stainLabel } from '@/lib/stainColors';
 import { variantHref } from '@/lib/variants';
 import { useDelistedProducts } from '@/lib/useDelistedProducts';
 import type { InventoryItem, Stain, VariantType } from '@/types';
@@ -162,6 +163,30 @@ export default function ProductConfigurator({
   }, [currentStain, currentConfig]);
 
   /*
+   * The finishes the phone scroll preview rolls through, in picker order.
+   *
+   * Whichever axis is the colour: the stains under the selected wood for a
+   * `wood` product, the variants themselves for a `finish` one. Out-of-stock
+   * and image-less finishes are left out - previewing something that cannot
+   * be bought, or a blank, is a dead end. `size` and `none`
+   * products get no feed.
+   */
+  const feedItems = useMemo<FeedItem[]>(() => {
+    if (variantType === 'wood') {
+      return (currentConfig?.stains ?? [])
+        .filter(s => s.inStock && s.image)
+        .map(s => ({ key: s.name, label: stainLabel(s.name), image: s.image! }));
+    }
+    if (variantType === 'finish') {
+      return configurations.flatMap(c => {
+        const stain = c.stains.find(s => s.inStock && s.image);
+        return stain ? [{ key: c.wood, label: humanizeWood(c.wood), image: stain.image! }] : [];
+      });
+    }
+    return [];
+  }, [variantType, currentConfig, configurations]);
+
+  /*
    * Funnel step 1, fired once per product page.
    *
    * The old 'product_view' capture was keyed on wood and stain, so it re-fired
@@ -223,6 +248,17 @@ export default function ProductConfigurator({
     setUserWood(wood);
     setUserStain(nextStain);
     syncUrl(wood, nextStain);
+  };
+
+  const feedKey = variantType === 'wood' ? selection.stain : selection.wood;
+  const feed = {
+    items: feedItems,
+    activeIndex: feedItems.findIndex(i => i.key === feedKey),
+    onChoose: (i: number) => {
+      const key = feedItems[i].key;
+      if (variantType === 'wood') handleStainChange(key);
+      else handleWoodChange(key);
+    },
   };
 
   const isWoodSoldOut = (wood: string) => {
@@ -334,7 +370,7 @@ export default function ProductConfigurator({
 
   return (
     <>
-      <div className="product-layout">
+      <div className={hasBundle ? 'product-layout product-layout--bundle' : 'product-layout'}>
         {/*
           The name is a direct child of the grid, not part of either column.
           On a phone it is the first thing on the page, above the photograph;
@@ -346,7 +382,7 @@ export default function ProductConfigurator({
         {title}
 
         <div className="product-showcase">
-          <ProductGallery images={galleryImages} productName={productName} priority />
+          <ProductGallery images={galleryImages} productName={productName} priority feed={feed} />
 
           {/*
             Under the photograph, not in the decision column and not at the
