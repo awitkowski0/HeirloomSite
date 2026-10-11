@@ -334,7 +334,7 @@ export default function ProductConfigurator({
 
   return (
     <>
-      <div className="product-layout">
+      <div className={hasBundle ? 'product-layout product-layout--bundle' : 'product-layout'}>
         {/*
           The name is a direct child of the grid, not part of either column.
           On a phone it is the first thing on the page, above the photograph;

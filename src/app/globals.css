@@ -1686,6 +1686,21 @@ main {
     order: -1;
   }
 
+  /*
+   * With a bundle, the flattened phone column ran: bundle box (ending in its
+   * Bundle Total), the bundle's copy of the add button, the crib-only price,
+   * then the main add button - two identical "ADD 2 ITEMS" buttons with a
+   * price between them that disagreed with both. On a phone the main button
+   * already comes straight after the bundle, so the copy goes, and so does the
+   * crib-only price: the bundle box shows the crib's own price row and the
+   * total the button charges. A button and a text block, no images, so
+   * hiding them is the CSS-first switch AGENTS.md asks for.
+   */
+  .product-layout--bundle .bundle-cta,
+  .product-layout--bundle .pricing-section {
+    display: none;
+  }
+
   .stain-strip .stain-swatch {
     width: 52px;
     height: 52px;
