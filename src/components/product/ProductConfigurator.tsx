@@ -111,7 +111,15 @@ export default function ProductConfigurator({
   // Only a wood-variant product has a separate finish axis; for a finish-variant
   // product the variant selector IS the finish selector.
   const showStainStep = variantType === 'wood';
-  const showDeliveryMessage = variantType === 'wood';
+  const shippingBody =
+    slug === 'mission'
+      ? 'Curbside $219 in PA, NJ, DE, and MD. Quote for other states. White Glove add-on $249. Metro White Glove quote only.'
+      : slug === 'french-country-crib-slat-style-front'
+        ? 'Curbside $379 in PA, NJ, DE, and MD. Quote for other states. White Glove add-on $209. Metro White Glove quote only.'
+        : slug === 'nightstand-2-drawer'
+          ? 'Curbside $219 in PA, NJ, DE, and MD. Quote for other states. White Glove add-on $249. Metro White Glove quote only.'
+          : undefined;
+  const showDeliveryMessage = variantType === 'wood' || Boolean(shippingBody);
 
   /**
    * Legacy ?wood= / ?stain= links only.
@@ -485,7 +493,7 @@ export default function ProductConfigurator({
                 answered the least important of the four questions a first-time
                 buyer has, and left the other three - cost of delivery, safety,
                 who to ask - unanswered at the point of decision. */}
-            {showDeliveryMessage && <PurchaseAssurances />}
+            {showDeliveryMessage && <PurchaseAssurances shippingBody={shippingBody} />}
           </section>
 
           {description}

@@ -42,10 +42,17 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
   },
 ];
 
-export default function PurchaseAssurances() {
+export default function PurchaseAssurances({ shippingBody }: { shippingBody?: string }) {
+  const rows = shippingBody
+    ? ASSURANCES.map(a =>
+        a.icon === 'local_shipping'
+          ? { ...a, title: 'Curbside or white-glove delivery', body: shippingBody }
+          : a
+      )
+    : ASSURANCES;
   return (
     <ul className="assurances">
-      {ASSURANCES.map(a => (
+      {rows.map(a => (
         <li key={a.title} className="assurance">
           <span className="material-symbols-outlined assurance-icon" aria-hidden="true">
             {a.icon}
