@@ -52,7 +52,7 @@ export const SHIPPING_METHODS: readonly ShippingMethod[] = [
     name: 'White Glove Delivery',
     description:
       'White-glove delivery includes delivery and assembly in your home for up to three flights of stairs.',
-    cents: 75_000,
+    cents: 47_500,
   },
 ];
 

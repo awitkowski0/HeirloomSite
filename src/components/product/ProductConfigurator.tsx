@@ -111,7 +111,7 @@ export default function ProductConfigurator({
   // Only a wood-variant product has a separate finish axis; for a finish-variant
   // product the variant selector IS the finish selector.
   const showStainStep = variantType === 'wood';
-  const showDeliveryMessage = variantType === 'wood';
+  const showDeliveryMessage = true;
 
   /**
    * Legacy ?wood= / ?stain= links only.
