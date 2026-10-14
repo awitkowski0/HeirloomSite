@@ -13,6 +13,7 @@
   "bundle": [
     "mackenzie-toddler-bed",
     "mackenzie-full-bed-rail-kit",
+    "34-guard-rail",
     "crib-mattress"
   ],
   "related": [
@@ -25,6 +26,7 @@
   "collection": "Mackenzie",
   "bundlePriceOverrides": {
     "mackenzie-toddler-bed": 109,
-    "mackenzie-full-bed-rail-kit": 481
+    "mackenzie-full-bed-rail-kit": 481,
+    "34-guard-rail": 320
   }
 }
