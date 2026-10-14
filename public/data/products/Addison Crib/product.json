@@ -11,6 +11,8 @@
   "title": "Addison Crib",
   "metaDescription": "Welcome your little one in timeless style with the Addison Crib, a centerpiece designed to grow with your family.",
   "bundle": [
+    "addison-toddler-bed",
+    "addison-full-bed-rail-kit",
     "crib-mattress"
   ],
   "related": [
@@ -19,10 +21,10 @@
     "addison-6-drawer-dresser",
     "addison-3-drawer-nightstand"
   ],
-  "includes": [
-    "addison-toddler-bed",
-    "addison-full-bed-rail-kit",
-    "34-guard-rail"
-  ],
-  "collection": "Addison"
+  "includes": [],
+  "collection": "Addison",
+  "bundlePriceOverrides": {
+    "addison-toddler-bed": 109,
+    "addison-full-bed-rail-kit": 481
+  }
 }

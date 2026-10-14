@@ -11,6 +11,8 @@
   "title": "French Country Crib (Panel Style Front)",
   "metaDescription": "Make a timeless statement with the French Country Crib featuring a panel-style front.",
   "bundle": [
+    "toddler-conversion-rail",
+    "full-bed-rail-kit",
     "crib-mattress"
   ],
   "related": [
@@ -21,10 +23,10 @@
     "french-country-3-drawer-dresser-with-door-and-changing-table",
     "french-country-6-drawer-dresser-with-changing-table"
   ],
-  "includes": [
-    "toddler-conversion-rail",
-    "full-bed-rail-kit",
-    "34-guard-rail"
-  ],
-  "collection": "French Country"
+  "includes": [],
+  "collection": "French Country",
+  "bundlePriceOverrides": {
+    "toddler-conversion-rail": 109,
+    "full-bed-rail-kit": 481
+  }
 }

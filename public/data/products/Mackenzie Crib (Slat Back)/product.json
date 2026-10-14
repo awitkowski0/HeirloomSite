@@ -11,6 +11,8 @@
   "title": "Mackenzie Crib (Slat Back)",
   "metaDescription": "Clean lines and open design define the Mackenzie Slat Back Crib, a 4-in-1 convertible crib crafted from solid hardwood in a warm Brown Maple finish.",
   "bundle": [
+    "mackenzie-toddler-bed",
+    "mackenzie-full-bed-rail-kit",
     "crib-mattress"
   ],
   "related": [
@@ -19,10 +21,10 @@
     "mackenzie-6-drawer-dresser",
     "mackenzie-nightstand"
   ],
-  "includes": [
-    "mackenzie-toddler-bed",
-    "mackenzie-full-bed-rail-kit",
-    "34-guard-rail"
-  ],
-  "collection": "Mackenzie"
+  "includes": [],
+  "collection": "Mackenzie",
+  "bundlePriceOverrides": {
+    "mackenzie-toddler-bed": 109,
+    "mackenzie-full-bed-rail-kit": 481
+  }
 }
