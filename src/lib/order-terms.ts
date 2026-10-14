@@ -43,14 +43,15 @@ export interface ShippingMethod {
 export const SHIPPING_METHODS: readonly ShippingMethod[] = [
   {
     id: 'threshold',
-    name: 'Threshold Delivery',
-    description: 'Delivery to the door.',
-    cents: 68_500,
+    name: 'Curbside Delivery',
+    description: 'Delivery to the curb or driveway of your home',
+    cents: 35_000,
   },
   {
     id: 'white_glove',
     name: 'White Glove Delivery',
-    description: 'White-glove delivery and assembly in your home.',
+    description:
+      'White-glove delivery includes delivery and assembly in your home for up to three flights of stairs.',
     cents: 75_000,
   },
 ];
@@ -60,7 +61,8 @@ export const SHIPPING_METHODS: readonly ShippingMethod[] = [
  * in each description - a limit that appears twice reads as two different
  * limits, and someone comparing the options should be weighing what differs.
  */
-export const SHIPPING_LIMIT_NOTE = 'Both are limited to three flights of stairs.';
+export const SHIPPING_LIMIT_NOTE =
+  'Review our Shipping Information for more details on delivery information';
 
 /** The cheaper of the two, so an untouched checkout quotes the lower number. */
 export const DEFAULT_SHIPPING_METHOD: ShippingMethodId = 'threshold';

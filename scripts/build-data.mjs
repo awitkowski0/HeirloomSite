@@ -310,6 +310,7 @@ for (const dirName of productDirs) {
     includes: meta.includes || [],
     bundle: meta.bundle || [],
     related: meta.related || [],
+    bundlePriceOverrides: meta.bundlePriceOverrides || null,
   });
 
   // Build the image index in this same pass. Previously this was a second loop
@@ -394,7 +395,7 @@ function soleConfig(slug) {
   return { wood: rows[0].wood, stainName: stains[0].name };
 }
 
-function resolveRelation(dirName, field, slugs, ownSlug) {
+function resolveRelation(dirName, field, slugs, ownSlug, priceOverrides) {
   if (!Array.isArray(slugs)) {
     relationProblems.push(`${dirName}: ${field} must be an array of product slugs`);
     return [];
@@ -441,10 +442,12 @@ function resolveRelation(dirName, field, slugs, ownSlug) {
       continue;
     }
     seen.add(slug);
+    const override =
+      priceOverrides && priceOverrides[target.slug] != null ? Number(priceOverrides[target.slug]) : null;
     out.push({
       slug: target.slug,
       productName: target.productName,
-      price: target.minPrice,
+      price: override != null && !Number.isNaN(override) ? override : target.minPrice,
       image: target.defaultImage,
       category: target.category,
       // Null for a `related` target with real choices; those are links, not
@@ -459,7 +462,13 @@ function resolveRelation(dirName, field, slugs, ownSlug) {
 let bundleCount = 0;
 for (const declared of declaredRelations) {
   const includes = resolveRelation(declared.dirName, 'includes', declared.includes, declared.slug);
-  const bundle = resolveRelation(declared.dirName, 'bundle', declared.bundle, declared.slug);
+  const bundle = resolveRelation(
+    declared.dirName,
+    'bundle',
+    declared.bundle,
+    declared.slug,
+    declared.bundlePriceOverrides || null
+  );
   const related = resolveRelation(declared.dirName, 'related', declared.related, declared.slug);
   if (bundle.length > 0) bundleCount++;
   // Every inventory row for this product carries the same relations: they are

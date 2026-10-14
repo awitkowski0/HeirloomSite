@@ -2,7 +2,7 @@
   "productName": "Moyerton",
   "category": "Cribs",
   "variantType": "wood",
-  "description": "Rustic warmth and heirloom quality come together in the Moyerton Convertible Crib, solid hardwood construction with charming panel details that feel cozy from day one. It converts easily through four stages so you never need to buy another bed, and the sturdy handcrafted frame stands up to years of real family life.\n\nBeautiful finishes and thoughtful design make this the crib you’ll be glad you chose every single night.\n\nIf you would like help choosing a finish, confirming timing, or picturing how this piece fits your nursery plans, use Get Personal Assistance. We reply the same or next business day so you can decide with full information, at your own pace.",
+  "description": "Rustic warmth and heirloom quality come together in the Moyerton Convertible Crib, solid hardwood construction with charming panel details that feel cozy from day one. It converts easily through four stages so you never need to buy another bed, and the sturdy handcrafted frame stands up to years of real family life.\n\nBeautiful finishes and thoughtful design make this the crib you\u2019ll be glad you chose every single night.\n\nIf you would like help choosing a finish, confirming timing, or picturing how this piece fits your nursery plans, use Get Personal Assistance. We reply the same or next business day so you can decide with full information, at your own pace.",
   "extendedDescription": null,
   "tags": [],
   "addons": [],
@@ -11,11 +11,13 @@
   "title": "Moyerton",
   "metaDescription": "Rustic warmth and heirloom quality come together in the Moyerton Convertible Crib, solid hardwood construction with charming panel details that feel.",
   "bundle": [
-    "crib-mattress"
-  ],
-  "includes": [
     "toddler-conversion-rail",
     "full-bed-rail-kit",
-    "34-guard-rail"
-  ]
+    "crib-mattress"
+  ],
+  "includes": [],
+  "bundlePriceOverrides": {
+    "toddler-conversion-rail": 304.54,
+    "full-bed-rail-kit": 304.54
+  }
 }

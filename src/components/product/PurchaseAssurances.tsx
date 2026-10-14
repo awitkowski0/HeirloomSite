@@ -20,8 +20,8 @@ import Link from 'next/link';
 const ASSURANCES: { icon: string; title: string; body: string; href?: string }[] = [
   {
     icon: 'local_shipping',
-    title: 'Threshold or white-glove delivery',
-    body: 'Delivered by our trusted partners, priced at checkout. No surprise freight bill on arrival.',
+    title: 'Curbside or white-glove delivery',
+    body: 'Curbside $350. White-glove delivery includes delivery and assembly in your home for up to three flights of stairs.',
   },
   {
     icon: 'verified_user',
