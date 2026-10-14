@@ -54,6 +54,6 @@ Tell the user:
 
 ## Env vars required
 Set these in `.env` (never commit):
-- `GITHUB_TOKEN` — GitHub personal access token with `repo` scope
+- HeirloomSite push: Windows Credential Manager `GitHub - https://api.github.com/philwitkowski` (account OAuth). Workspace `GITHUB_TOKEN` (fine-grained PAT) cannot push this repo.
 - `VERCEL_TOKEN` — Vercel access token (from Vercel dashboard → Settings → Tokens)
 - `VERCEL_PROJECT_ID` — optional, auto-detected from `vercel.json` or git remote

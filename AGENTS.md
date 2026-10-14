@@ -72,7 +72,9 @@ intentionally remove a product, lower it.
 ## Feature workflow
 1. Branch off `dev`: `feature-<kebab-title>-<timestamp>`
 2. Implement, verify (`npm run lint`, `npm run typecheck`, `npm run build`)
-3. Commit, push, then `node scripts/create-pr.mjs "<title>"`
+3. Commit, push, then `node scripts/create-pr.mjs "<title>"` (PR to `dev` only; never push `dev`)
+
+Push auth is **not** workspace `GITHUB_TOKEN` (fine-grained PAT → 403 on this repo). Use the GitHub account OAuth in Windows Credential Manager: target `GitHub - https://api.github.com/philwitkowski`, user `philwitkowski`. Documented in OneDrive `.env.shared` as `HEIRLOOM_SITE_*`. Never put that credential in a remote URL.
 
 ## Hiding a product
 
