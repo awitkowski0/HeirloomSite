@@ -11,11 +11,13 @@
   "title": "Hudson",
   "metaDescription": "Clean, contemporary lines meet old-world strength in the Hudson Convertible Crib.",
   "bundle": [
-    "crib-mattress"
-  ],
-  "includes": [
     "toddler-conversion-rail",
     "full-bed-rail-kit",
-    "34-guard-rail"
-  ]
+    "crib-mattress"
+  ],
+  "includes": [],
+  "bundlePriceOverrides": {
+    "toddler-conversion-rail": 315,
+    "full-bed-rail-kit": 314
+  }
 }
