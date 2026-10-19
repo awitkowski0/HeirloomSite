@@ -28,6 +28,8 @@ export interface Recommendation {
   image: string | null;
   wood: string | null;
   stainName: string | null;
+  /** price is the recommending parent's bundle price (bundlePriceOverrides). */
+  bundleOverride?: boolean;
 }
 
 interface Props {
@@ -50,7 +52,11 @@ export default function AlsoLike({ recommendations, disabled }: Props) {
    */
   const seen = new Set<string>();
   const items: Recommendation[] = [];
+  // The cart line that recommended each item, so a bundle-priced add-on is
+  // added against that parent (pricing.ts resolves the price server-side).
+  const parentOf = new Map<string, { productName: string; wood: string }>();
   for (const line of cart) {
+    if (line.bundledWith) continue;
     for (const rec of recommendations[line.productName] || []) {
       if (inCart.has(rec.productName) || seen.has(rec.slug)) continue;
       // Never recommend something that has been de-listed: an Add button is
@@ -60,6 +66,7 @@ export default function AlsoLike({ recommendations, disabled }: Props) {
       if (!rec.wood || !rec.stainName) continue;
       seen.add(rec.slug);
       items.push(rec);
+      parentOf.set(rec.slug, { productName: line.productName, wood: line.wood });
     }
   }
 
@@ -85,10 +92,12 @@ export default function AlsoLike({ recommendations, disabled }: Props) {
               disabled={disabled}
               aria-label={`Add ${rec.productName} to your order`}
               onClick={() => {
+                const parent = parentOf.get(rec.slug);
                 const line = {
                   productName: rec.productName,
                   wood: rec.wood as string,
                   stainName: rec.stainName as string,
+                  ...(rec.bundleOverride && parent ? { bundledWith: parent } : {}),
                 };
                 productAddedToCart({
                   product_name: line.productName,

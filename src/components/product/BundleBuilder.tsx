@@ -122,7 +122,10 @@ export default function BundleBuilder({
                     checked={isOn}
                     onChange={() => onToggle(item.slug)}
                   />
-                  <span className="bundle-price body-md">+{formatPrice(item.price)}</span>
+                  {/* The add-on's own item price, shown plainly (no "+"): for a crib with
+                      bundlePriceOverrides this is that crib's rail price. Variant
+                      surcharges in StainSelector keep their "(+$x)" delta. */}
+                  <span className="bundle-price body-md">{formatPrice(item.price)}</span>
                 </li>
               );
             })}

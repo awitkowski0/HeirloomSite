@@ -600,9 +600,10 @@ for (const item of inventory) {
   const recs = (item.bundle || []).map(r => ({
     slug: r.slug,
     productName: r.productName,
-    // A recommendation is added as a standalone line, so it shows the price it
-    // is charged at alone - never a parent's bundle override.
-    price: r.listPrice ?? r.price,
+    // For a parent with bundlePriceOverrides this is the parent's bundle price;
+    // AlsoLike then adds the line with bundledWith so pricing.ts charges it.
+    price: r.price,
+    ...(r.bundleOverride ? { bundleOverride: true } : {}),
     image: r.image,
     wood: r.wood,
     stainName: r.stainName,
