@@ -444,10 +444,15 @@ function resolveRelation(dirName, field, slugs, ownSlug, priceOverrides) {
     seen.add(slug);
     const override =
       priceOverrides && priceOverrides[target.slug] != null ? Number(priceOverrides[target.slug]) : null;
+    const hasOverride = override != null && !Number.isNaN(override);
     out.push({
       slug: target.slug,
       productName: target.productName,
-      price: override != null && !Number.isNaN(override) ? override : target.minPrice,
+      price: hasOverride ? override : target.minPrice,
+      // A per-parent bundle price (product.json bundlePriceOverrides). The cart
+      // line carries bundledWith so src/lib/pricing.ts can charge this price
+      // only alongside this parent; listPrice is what the item costs alone.
+      ...(hasOverride ? { bundleOverride: true, listPrice: target.minPrice } : {}),
       image: target.defaultImage,
       category: target.category,
       // Null for a `related` target with real choices; those are links, not
@@ -595,7 +600,9 @@ for (const item of inventory) {
   const recs = (item.bundle || []).map(r => ({
     slug: r.slug,
     productName: r.productName,
-    price: r.price,
+    // A recommendation is added as a standalone line, so it shows the price it
+    // is charged at alone - never a parent's bundle override.
+    price: r.listPrice ?? r.price,
     image: r.image,
     wood: r.wood,
     stainName: r.stainName,
@@ -616,6 +623,12 @@ const pricing = inventory.map(item => ({
   wood: item.wood,
   basePrice: item.basePrice,
   addons: (item.addons || []).map(a => ({ name: a.name, price: a.price ?? 0 })),
+  // Bundle prices this product (the parent) grants its add-ons. pricing.ts
+  // applies one only to a line that names this parent in bundledWith AND only
+  // while this parent is in the same cart.
+  bundleOverrides: (item.bundle || [])
+    .filter(r => r.bundleOverride && r.wood && r.stainName)
+    .map(r => ({ productName: r.productName, wood: r.wood, stainName: r.stainName, price: r.price })),
   stains: item.stains.map(s => ({
     name: s.name,
     priceAddition: s.priceAddition || 0,

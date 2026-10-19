@@ -28,6 +28,10 @@ export interface RelatedProduct {
    */
   wood: string | null;
   stainName: string | null;
+  /** True when `price` is this parent's bundlePriceOverrides price, not the item's own. */
+  bundleOverride?: boolean;
+  /** The item's own price when `price` is a bundle override. */
+  listPrice?: number;
 }
 
 export interface Addon {
@@ -164,4 +168,15 @@ export interface CartItem {
   addons?: CartAddon[];
   /** What comes with this line, already paid for. Never sent to the server. */
   includes?: CartInclude[];
+  /**
+   * The parent line whose bundle price this add-on line was added at. Sent to
+   * the server, which looks the price up itself (the client price is ignored)
+   * and only while that parent is in the same cart.
+   */
+  bundledWith?: CartParentRef;
+}
+
+export interface CartParentRef {
+  productName: string;
+  wood: string;
 }

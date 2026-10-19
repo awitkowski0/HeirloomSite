@@ -317,6 +317,11 @@ export default function ProductConfigurator({
         productName: bundleItem.productName,
         wood: bundleItem.wood,
         stainName: bundleItem.stainName,
+        // Only an overridden row names its parent; the server re-derives the
+        // price from that parent's catalogue entry and ignores this line's price.
+        ...(bundleItem.bundleOverride
+          ? { bundledWith: { productName: currentConfig.productName, wood: selection.wood } }
+          : {}),
       };
       productAddedToCart({
         product_name: line.productName,

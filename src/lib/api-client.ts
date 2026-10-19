@@ -6,6 +6,8 @@ export interface CartItemPayload {
   stainName: string;
   quantity: number;
   addons?: Array<{ name: string }>;
+  /** Parent line for a bundle-priced add-on; the server resolves the price. */
+  bundledWith?: { productName: string; wood: string };
 }
 
 export interface OrderTotals {

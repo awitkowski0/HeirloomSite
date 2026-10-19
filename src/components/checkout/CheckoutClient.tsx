@@ -226,6 +226,10 @@ export default function CheckoutClient({ recommendations }: Props) {
     stainName: item.stainName,
     quantity: item.quantity,
     addons: item.addons?.map(a => ({ name: a.name })),
+    // No price: the server looks the bundle price up from this parent itself.
+    ...(item.bundledWith
+      ? { bundledWith: { productName: item.bundledWith.productName, wood: item.bundledWith.wood } }
+      : {}),
   }));
 
   /**
