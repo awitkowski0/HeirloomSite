@@ -9,6 +9,7 @@ import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
+import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import BundleBuilder from './BundleBuilder';
 import { formatPrice } from '@/lib/format';
 import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
@@ -111,7 +112,9 @@ export default function ProductConfigurator({
   // Only a wood-variant product has a separate finish axis; for a finish-variant
   // product the variant selector IS the finish selector.
   const showStainStep = variantType === 'wood';
-  const showDeliveryMessage = variantType === 'wood';
+  // Every furniture order carries a delivery charge, so the assurance block
+  // (delivery tiers etc.) follows the category, not the variant type.
+  const showDeliveryMessage = showsPurchaseAssurances(configurations[0]?.category);
 
   /**
    * Legacy ?wood= / ?stain= links only.

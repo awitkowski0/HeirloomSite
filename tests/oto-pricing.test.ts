@@ -10,6 +10,10 @@
  * split 20% toddler / 80% full (the market split: every priced competitor
  * puts ~16-21% of the pair on the toddler kit, and the OTO book costs are
  * $30 / $155), in whole dollars with an exact sum: crib + both kits = package.
+ * One exception: a paired kit never costs more than the same kit bought on
+ * its own, so where 20% of the pair would exceed the standalone toddler kit
+ * ($109) the toddler kit is capped there and the full kit takes the rest -
+ * French Country Slat: 20% of $550 = $110 -> $109 / $441.
  *
  * Each crib line pairs with its OWN builder's kits (Addison kits for Addison,
  * etc.); the French Country cribs share OTO-401A/B with the Fisher cribs,
@@ -26,7 +30,7 @@ const OTO: readonly Oto[] = [
   { name: 'Addison Crib', sku: 'OTO-1201', crib: 2500, pkg: 2950, toddler: 'Addison Toddler Bed Rail Kit', full: 'Addison Full Bed Rail Kit', split: [90, 360] },
   { name: 'Addison Crib with Raised Panel Headboard', sku: 'OTO-1202', crib: 2650, pkg: 3100, toddler: 'Addison Toddler Bed Rail Kit', full: 'Addison Full Bed Rail Kit', split: [90, 360] },
   { name: 'French Country Crib (Panel Style Front)', sku: 'OTO-402', crib: 2700, pkg: 3200, toddler: 'Toddler Bed Rail Kit', full: 'Full Bed Rail Kit', split: [100, 400] },
-  { name: 'French Country Crib (Slat Style Front)', sku: 'OTO-401', crib: 2300, pkg: 2850, toddler: 'Toddler Bed Rail Kit', full: 'Full Bed Rail Kit', split: [110, 440] },
+  { name: 'French Country Crib (Slat Style Front)', sku: 'OTO-401', crib: 2300, pkg: 2850, toddler: 'Toddler Bed Rail Kit', full: 'Full Bed Rail Kit', split: [109, 441] },
   { name: 'Mackenzie Crib (Panel Back)', sku: 'OTO-1402', crib: 2450, pkg: 2900, toddler: 'Mackenzie Toddler Bed Rail Kit', full: 'Mackenzie Full Bed Rail Kit', split: [90, 360] },
   { name: 'Mackenzie Crib (Slat Back)', sku: 'OTO-1401', crib: 2450, pkg: 2900, toddler: 'Mackenzie Toddler Bed Rail Kit', full: 'Mackenzie Full Bed Rail Kit', split: [90, 360] },
   { name: 'Newport Crib', sku: 'OTO-1301', crib: 1900, pkg: 2350, toddler: 'Newport Toddler Bed Rail Kit', full: 'Newport Full Bed Rail Kit', split: [90, 360] },
@@ -78,8 +82,12 @@ function asCart(row: PricingRow, p: Oto, lines: Line[]): PricedCartLineInput[] {
 for (const p of OTO) {
   test(`${p.name} (${p.sku}): crib, each kit, both kits = package, pick list, delivery`, () => {
     assert.equal(p.split[0] + p.split[1], p.pkg - p.crib, 'split sums to package - crib');
-    assert.equal(p.split[0], Math.round((p.pkg - p.crib) * 0.2), 'toddler kit is 20% of the pair (market split)');
-    assert.equal(p.split[1], (p.pkg - p.crib) - p.split[0], 'full kit is the other 80%');
+    const pair = p.pkg - p.crib;
+    // 20/80 market split, except the toddler kit is capped at its standalone price.
+    assert.equal(p.split[0], Math.min(Math.round(pair * 0.2), TODDLER_LIST), 'toddler kit is 20% of the pair, capped at the standalone kit price');
+    assert.equal(p.split[1], pair - p.split[0], 'full kit is the rest of the pair');
+    assert.ok(p.split[0] <= TODDLER_LIST, `${p.name}: paired toddler kit $${p.split[0]} exceeds standalone $${TODDLER_LIST}`);
+    assert.ok(p.split[1] <= FULL_LIST, `${p.name}: paired full kit $${p.split[1]} exceeds standalone $${FULL_LIST}`);
     const rows = rowsFor(p.name);
     assert.ok(rows.length > 0, `${p.name} missing from data/pricing.json`);
     for (const row of rows) {
@@ -144,7 +152,7 @@ test('shared kits OTO-401A/B: Fisher $250 and French Country add-on prices stay 
     cribLine(fcSlat), kitLine(fcSlat, 'Toddler Bed Rail Kit'), kitLine(fcSlat, 'Full Bed Rail Kit'),
   ];
   const priced = priceCart(cart, 'NJ', 'threshold');
-  assert.deepEqual(priced.lines.map(l => l.unitCents / 100), [2000, 250, 250, 2300, 110, 440]);
+  assert.deepEqual(priced.lines.map(l => l.unitCents / 100), [2000, 250, 250, 2300, 109, 441]);
   assert.equal(priced.subtotalCents, cents(2500 + 2850));
   // Standalone kit prices unchanged.
   assert.equal(rowsFor('Toddler Bed Rail Kit')[0].basePrice, TODDLER_LIST);
