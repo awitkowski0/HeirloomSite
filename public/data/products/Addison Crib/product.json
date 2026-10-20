@@ -24,7 +24,7 @@
   "includes": [],
   "collection": "Addison",
   "bundlePriceOverrides": {
-    "addison-toddler-bed": 225,
-    "addison-full-bed-rail-kit": 225
+    "addison-toddler-bed": 90,
+    "addison-full-bed-rail-kit": 360
   }
 }

@@ -26,7 +26,7 @@
   "includes": [],
   "collection": "French Country",
   "bundlePriceOverrides": {
-    "toddler-conversion-rail": 250,
-    "full-bed-rail-kit": 250
+    "toddler-conversion-rail": 100,
+    "full-bed-rail-kit": 400
   }
 }
