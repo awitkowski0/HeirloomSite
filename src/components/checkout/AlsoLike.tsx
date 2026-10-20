@@ -30,6 +30,8 @@ export interface Recommendation {
   stainName: string | null;
   /** price is the recommending parent's bundle price (bundlePriceOverrides). */
   bundleOverride?: boolean;
+  /** The item's own price when `price` is a bundle override. */
+  listPrice?: number;
 }
 
 interface Props {
@@ -110,6 +112,9 @@ export default function AlsoLike({ recommendations, disabled }: Props) {
                   ...line,
                   id: cartItemId(line),
                   price: rec.price,
+                  ...(line.bundledWith && typeof rec.listPrice === 'number'
+                    ? { listPrice: rec.listPrice }
+                    : {}),
                   image: rec.image || '',
                   quantity: 1,
                 });

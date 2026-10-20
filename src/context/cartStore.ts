@@ -130,6 +130,9 @@ export function parseStoredCart(raw: string | null): CartItem[] {
       price: e.price,
       image: typeof e.image === 'string' ? e.image : '',
       includes,
+      ...(typeof e.listPrice === 'number' && Number.isFinite(e.listPrice) && e.listPrice >= 0
+        ? { listPrice: e.listPrice }
+        : {}),
       // Clamped to the same ceiling the server enforces, so a cart restored
       // from localStorage can never carry a line checkout will reject.
       quantity: Math.min(e.quantity, MAX_QUANTITY_PER_LINE),

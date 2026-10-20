@@ -3,6 +3,12 @@ import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { faqPageJsonLd, jsonLdScript } from '@/lib/seo';
 import { nodeTextCompact } from '@/lib/node-text';
+import { formatPriceApprox } from '@/lib/format';
+import { shippingCentsFor } from '@/lib/order-terms';
+
+/* The delivery charges, from the same constant the checkout bills from. */
+const CURBSIDE = formatPriceApprox(shippingCentsFor('threshold') / 100);
+const WHITE_GLOVE = formatPriceApprox(shippingCentsFor('white_glove') / 100);
 
 export const metadata: Metadata = {
   title: 'FAQ',
@@ -182,8 +188,9 @@ const SECTIONS: Section[] = [
                 complete — not before.
               </li>
               <li>
-                <strong>Delivered to Your Nursery.</strong> You choose Threshold (to the door) or
-                White Glove (delivery and assembly in your home) when you order. Both are handled by
+                <strong>Delivered to Your Nursery.</strong> You choose Curbside ({CURBSIDE}, to the
+                curb) or White Glove ({WHITE_GLOVE}, delivery and assembly in your home) when you
+                order. Both are handled by
                 our trusted partners, not a freight terminal, and limited to three flights of
                 stairs.
               </li>
@@ -241,9 +248,9 @@ const SECTIONS: Section[] = [
         question: 'Is white-glove delivery available?',
         answer: (
           <p>
-            Yes. You choose Threshold or White Glove when you order, inside the states we deliver
-            to. Threshold is delivery to the door. White Glove is delivery and assembly in your
-            home. Both are handled by our trusted partners, not a freight terminal, and limited to
+            Yes. You choose Curbside or White Glove when you order, inside the states we deliver
+            to. Curbside is {CURBSIDE} per order, delivered to the curb at your address. White Glove
+            is {WHITE_GLOVE} per order, delivered and assembled in your home. Both are handled by our trusted partners, not a freight terminal, and limited to
             three flights of stairs. We confirm what fits your address on the Confirm Order call.
           </p>
         ),
@@ -253,7 +260,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             It depends on the delivery tier you choose. White Glove includes assembly in your home.
-            With Threshold, you assemble using the included instructions. We clarify what your order
+            With Curbside, you assemble using the included instructions. We clarify what your order
             includes before the balance is invoiced.
           </p>
         ),
@@ -355,8 +362,8 @@ const SECTIONS: Section[] = [
               and baby-safe, and every crib meets or exceeds CPSC and ASTM standards—details live
               on our {SafetyLink} and each product page. One crib converts to a toddler bed, a
               daybed, and a full bed when the kits for your style are in place; that’s what we mean
-              by Built to Grow Up. When you’re ready to order, you choose Threshold delivery to the
-              door or White Glove with in-home assembly, and we confirm what fits your address
+              by Built to Grow Up. When you’re ready to order, you choose Curbside delivery ({CURBSIDE}) or
+              White Glove with in-home assembly ({WHITE_GLOVE}), and we confirm what fits your address
               before production starts.
             </p>
             <p>
@@ -375,8 +382,8 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             The product page shows the crib price for the configuration displayed. Wood and stain
-            options follow the choices on that page. Delivery is quoted for your address (Threshold
-            or White Glove) and is separate from the furniture price unless the page explicitly says
+            options follow the choices on that page. Delivery is one charge per order (Curbside
+            {CURBSIDE} or White Glove {WHITE_GLOVE}) and is separate from the furniture price unless the page explicitly says
             otherwise. Nothing is charged when you first place the order. After Confirm Order, a
             minimum 50% deposit begins production; the remaining balance is invoiced once staining
             is complete — not before.

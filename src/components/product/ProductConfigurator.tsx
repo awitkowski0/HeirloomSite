@@ -334,6 +334,9 @@ export default function ProductConfigurator({
         ...line,
         id: cartItemId(line),
         price: bundleItem.price,
+        ...(bundleItem.bundleOverride && typeof bundleItem.listPrice === 'number'
+          ? { listPrice: bundleItem.listPrice }
+          : {}),
         image: bundleItem.image || '',
         quantity: 1,
       });

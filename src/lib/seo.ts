@@ -175,7 +175,7 @@ export function productJsonLd(opts: {
        *
        * shippingRate is the CHEAPER of the two delivery tiers, not 0. It said
        * 0 while the site believed delivery was included; advertising free
-       * shipping in structured data and then charging $685 at checkout is the
+       * shipping in structured data and then charging for delivery at checkout is the
        * kind of mismatch Google issues merchant listing penalties for, and it
        * is a promise to a customer we would not keep. See SHIPPING_METHODS in
        * src/lib/order-terms.ts.

@@ -174,6 +174,12 @@ export interface CartItem {
    * and only while that parent is in the same cart.
    */
   bundledWith?: CartParentRef;
+  /**
+   * The item's own catalogue price, stored with a bundle-priced line so the
+   * cart can show what the server will charge if the parent leaves the cart
+   * (see src/lib/cart-pricing.ts). Display only; the server never reads it.
+   */
+  listPrice?: number;
 }
 
 export interface CartParentRef {

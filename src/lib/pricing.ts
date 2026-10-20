@@ -317,8 +317,8 @@ export function priceCart(
   /*
    * Tax is on (subtotal - discount) PLUS delivery. A coupon is a seller-funded
    * discount, so the customer is taxed on what they actually pay, same as PA
-   * taxes the delivery charge on a taxable item (a $685 delivery adds $41.10 of
-   * tax on a PA order).
+   * taxes the delivery charge on a taxable item (a $175 curbside delivery adds
+   * $10.50 of tax on a PA order).
    */
   const taxCents = taxCentsFor(state, subtotalCents - discountCents + shippingCents);
 

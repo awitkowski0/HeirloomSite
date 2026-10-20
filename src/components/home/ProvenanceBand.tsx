@@ -44,7 +44,7 @@ const COLUMNS = [
   {
     icon: 'local_shipping',
     label: 'Personal delivery guidance',
-    lines: ['Threshold or white-glove delivery', 'by our trusted partners.'],
+    lines: ['Curbside or white-glove delivery', 'by our trusted partners.'],
   },
   {
     icon: 'sync_alt',

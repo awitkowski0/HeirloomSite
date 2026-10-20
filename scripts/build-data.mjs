@@ -603,7 +603,7 @@ for (const item of inventory) {
     // For a parent with bundlePriceOverrides this is the parent's bundle price;
     // AlsoLike then adds the line with bundledWith so pricing.ts charges it.
     price: r.price,
-    ...(r.bundleOverride ? { bundleOverride: true } : {}),
+    ...(r.bundleOverride ? { bundleOverride: true, listPrice: r.listPrice } : {}),
     image: r.image,
     wood: r.wood,
     stainName: r.stainName,

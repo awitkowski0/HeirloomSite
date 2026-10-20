@@ -1,4 +1,11 @@
 import Link from 'next/link';
+import { formatPriceApprox } from '@/lib/format';
+import { shippingCentsFor } from '@/lib/order-terms';
+
+/* Read from order-terms so this line can never quote a different number from
+   the checkout that charges it. */
+const CURBSIDE = formatPriceApprox(shippingCentsFor('threshold') / 100);
+const WHITE_GLOVE = formatPriceApprox(shippingCentsFor('white_glove') / 100);
 
 /*
  * The four questions a first-time buyer of a $2,500 crib from an unknown brand
@@ -12,7 +19,7 @@ import Link from 'next/link';
  * Every line is checked against what the site can back. Delivery is a PRICED
  * choice at checkout, so this names the tiers instead of promising they are
  * free - it said "no shipping charge at checkout" while the checkout was about
- * to add $685. The lead time is the one the catalogue quotes; the standards
+ * to add a delivery charge. The lead time is the one the catalogue quotes; the standards
  * claim is the one already made in 180 product descriptions and consolidated
  * on /safety.
  */
@@ -20,8 +27,8 @@ import Link from 'next/link';
 const ASSURANCES: { icon: string; title: string; body: string; href?: string }[] = [
   {
     icon: 'local_shipping',
-    title: 'Threshold or white-glove delivery',
-    body: 'Delivered by our trusted partners, priced at checkout. No surprise freight bill on arrival.',
+    title: `Curbside ${CURBSIDE} or white-glove ${WHITE_GLOVE} delivery`,
+    body: 'Delivered by our trusted partners, one charge per order, chosen at checkout. No surprise freight bill on arrival.',
   },
   {
     icon: 'verified_user',
