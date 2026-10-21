@@ -13,6 +13,7 @@ import {
 import type { CartItem } from '@/types';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 import { chargedSubtotalCents } from '@/lib/cart-pricing';
+import { hasBundlePrice } from '@/lib/bundle-prices';
 
 export { cartItemId, itemKey } from './cartStore';
 
@@ -75,7 +76,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       totalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
       // What the server will charge, not the sum of stored prices: a rail kept
       // after its crib is removed reverts to its own price (src/lib/cart-pricing.ts).
-      subtotal: chargedSubtotalCents(cart) / 100,
+      subtotal: chargedSubtotalCents(cart, hasBundlePrice) / 100,
     }),
     [cart, hydrated, addToCart, removeFromCart, updateQuantity, clearCart]
   );

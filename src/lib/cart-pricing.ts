@@ -30,6 +30,9 @@ export interface PricedCartLineInput {
   bundledWith?: { productName: string; wood: string };
 }
 
+/** Whether `parent` has a bundle price for `kit` (from src/data/bundle-prices.json). */
+export type BundlePriceLookup = (parentProductName: string, kitProductName: string) => boolean;
+
 const SEP = String.fromCharCode(0);
 const keyOf = (productName: string, wood: string) => `${productName}${SEP}${wood}`;
 
@@ -37,7 +40,10 @@ const keyOf = (productName: string, wood: string) => `${productName}${SEP}${wood
  * Whether each line gets its bundle price, by the server's rule. Lines without
  * `bundledWith` are always `false` (they are charged their own price anyway).
  */
-export function bundleEligibility(lines: readonly PricedCartLineInput[]): boolean[] {
+export function bundleEligibility(
+  lines: readonly PricedCartLineInput[],
+  hasBundlePrice?: BundlePriceLookup
+): boolean[] {
   const parentUnits = new Map<string, number>();
   for (const l of lines) {
     if (l.bundledWith) continue;
@@ -47,6 +53,9 @@ export function bundleEligibility(lines: readonly PricedCartLineInput[]): boolea
   const used = new Map<string, number>();
   return lines.map(l => {
     if (!l.bundledWith) return false;
+    // The server only honours the price if the parent's catalogue row lists an
+    // override for this kit; without the lookup (tests, no catalogue) assume it does.
+    if (hasBundlePrice && !hasBundlePrice(l.bundledWith.productName, l.productName)) return false;
     const parentKey = keyOf(l.bundledWith.productName, l.bundledWith.wood);
     const usedKey = `${parentKey}${SEP}${l.productName}`;
     const u = used.get(usedKey) ?? 0;
@@ -57,15 +66,21 @@ export function bundleEligibility(lines: readonly PricedCartLineInput[]): boolea
 }
 
 /** The unit price each line will be charged, in dollars. */
-export function chargedUnitPrices(lines: readonly PricedCartLineInput[]): number[] {
-  const eligible = bundleEligibility(lines);
+export function chargedUnitPrices(
+  lines: readonly PricedCartLineInput[],
+  hasBundlePrice?: BundlePriceLookup
+): number[] {
+  const eligible = bundleEligibility(lines, hasBundlePrice);
   return lines.map((l, i) =>
     l.bundledWith && !eligible[i] && typeof l.listPrice === 'number' ? l.listPrice : l.price
   );
 }
 
 /** The cart subtotal as it will be charged, in integer cents. */
-export function chargedSubtotalCents(lines: readonly PricedCartLineInput[]): number {
-  const unit = chargedUnitPrices(lines);
+export function chargedSubtotalCents(
+  lines: readonly PricedCartLineInput[],
+  hasBundlePrice?: BundlePriceLookup
+): number {
+  const unit = chargedUnitPrices(lines, hasBundlePrice);
   return lines.reduce((sum, l, i) => sum + Math.round(unit[i] * 100) * l.quantity, 0);
 }

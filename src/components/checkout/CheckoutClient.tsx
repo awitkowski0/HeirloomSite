@@ -12,6 +12,7 @@ import {
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 import { chargedUnitPrices } from '@/lib/cart-pricing';
+import { hasBundlePrice } from '@/lib/bundle-prices';
 import {
   DEFAULT_SHIPPING_METHOD,
   SHIPPING_METHODS,
@@ -181,7 +182,7 @@ export default function CheckoutClient({ recommendations }: Props) {
    */
   const estSubtotalCents = toCents(subtotal);
   // Per line, by the same rule the server bills by (src/lib/cart-pricing.ts).
-  const chargedUnit = chargedUnitPrices(cart);
+  const chargedUnit = chargedUnitPrices(cart, hasBundlePrice);
   const estDiscountCents = appliedCoupon
     ? Math.min(estSubtotalCents, appliedCoupon.amountOffCents)
     : 0;

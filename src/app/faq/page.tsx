@@ -382,7 +382,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             The product page shows the crib price for the configuration displayed. Wood and stain
-            options follow the choices on that page. Delivery is one charge per order (Curbside
+            options follow the choices on that page. Delivery is one charge per order (Curbside{' '}
             {CURBSIDE} or White Glove {WHITE_GLOVE}) and is separate from the furniture price unless the page explicitly says
             otherwise. Nothing is charged when you first place the order. After Confirm Order, a
             minimum 50% deposit begins production; the remaining balance is invoiced once staining

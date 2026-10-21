@@ -493,6 +493,19 @@ for (const declared of declaredRelations) {
       relationProblems.push(`${declared.dirName}: bundleOptional/bundleUnchecked names "${slug}", which is not in its bundle`);
     }
   }
+  /*
+   * bundlePriceOverrides is keyed by bundle slug. A key that is not in the bundle matches no row and
+   * silently charges list price; a non-numeric or non-positive value would reach pricing.json as a
+   * nonsense (or negative) bundled line. Both fail the build like the two lists above.
+   */
+  for (const [slug, price] of Object.entries(declared.bundlePriceOverrides || {})) {
+    if (!(declared.bundle || []).includes(slug)) {
+      relationProblems.push(`${declared.dirName}: bundlePriceOverrides names "${slug}", which is not in its bundle`);
+    }
+    if (typeof price !== 'number' || !Number.isFinite(price) || price <= 0) {
+      relationProblems.push(`${declared.dirName}: bundlePriceOverrides["${slug}"] must be a positive number, got ${JSON.stringify(price)}`);
+    }
+  }
   const related = resolveRelation(declared.dirName, 'related', declared.related, declared.slug);
   if (bundle.length > 0) bundleCount++;
   // Every inventory row for this product carries the same relations: they are
@@ -634,6 +647,19 @@ writeFileSync(
   JSON.stringify(recommendations) + "\n"
 );
 
+/*
+ * Which kits a parent has a bundle price for, by productName. The cart cannot
+ * import the catalogue, but it must apply the server's rule (pricing.ts: the
+ * parent's row lists an override for this kit) or its summary shows a bundle
+ * price the invoice will not charge. Small enough for the global cart provider.
+ */
+const bundlePrices = {};
+for (const [parent, recs] of Object.entries(recommendations)) {
+  const kits = recs.filter(r => r.bundleOverride).map(r => r.productName);
+  if (kits.length > 0) bundlePrices[parent] = kits;
+}
+writeFileSync(join(root, "src", "data", "bundle-prices.json"), JSON.stringify(bundlePrices) + "\n");
+
 // Pricing table: the only catalogue data /api/quotes needs. Imported
 // statically by src/lib/pricing.ts so it is always in the function bundle -- public/ is
 // uploaded to the CDN, not traced into the lambda, so a runtime readFileSync
@@ -688,5 +714,6 @@ console.log(`  public/data/inventory.json:  ${inventory.length} items, ${stainRo
 console.log(`  public/data/products.json:   ${productIndex.length} products`);
 console.log(`  public/data/images.json:     ${allImages.length} images`);
 console.log(`  src/data/search-docs.json:   ${searchDocs.length} docs`);
+console.log(`  src/data/bundle-prices.json: ${Object.keys(bundlePrices).length} parents`);
 console.log(`  src/data/recommendations.json: ${Object.keys(recommendations).length} products`);
 console.log(`  data/pricing.json:           ${pricing.length} rows`);
