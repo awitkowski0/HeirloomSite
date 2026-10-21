@@ -62,7 +62,7 @@ export default function TimelinePage() {
             is complete — not before</strong>.
           </li>
           <li>
-            <strong>04 Delivered to Your Nursery.</strong> You choose Threshold (to the door) or
+            <strong>04 Delivered to Your Nursery.</strong> You choose Curbside (to the curb) or
             White Glove (delivery + assembly in your home). Both are handled by our trusted
             partners and limited to three flights of stairs. We deliver in <strong>PA, NJ, NY, CT,
             OH, MD, and VA</strong>; confirm your zip with us if you&rsquo;re unsure. We do not ship

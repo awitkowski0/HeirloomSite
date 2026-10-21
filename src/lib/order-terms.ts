@@ -24,7 +24,16 @@
  * charged nothing for it - in the checkout summary, the product page
  * assurances, the invoice footer and the Product JSON-LD. That was wrong: it
  * is quoted separately, and shipping every order for nothing was giving away
- * $685 at a minimum on each one.
+ * the delivery charge on each one.
+ *
+ * Amounts (2026-10-20): curbside $175, white glove $225 - the customer charges
+ * on the pricing app's Costs tab. They replace the earlier flat $685 threshold
+ * / $750 white glove. Two tiers only; there is no third.
+ *
+ * The id 'threshold' is kept for the curbside tier on purpose: it is the value
+ * older checkout bundles and stored sessions send in `shippingMethod`, and
+ * renaming it would turn those requests into "Choose a delivery method" errors.
+ * Only the customer-facing name and amount changed.
  *
  * Prices are flat per ORDER, not per item: a crib and its dresser go on one
  * truck. If that ever stops being true this is where it changes.
@@ -43,15 +52,15 @@ export interface ShippingMethod {
 export const SHIPPING_METHODS: readonly ShippingMethod[] = [
   {
     id: 'threshold',
-    name: 'Threshold Delivery',
-    description: 'Delivery to the door.',
-    cents: 68_500,
+    name: 'Curbside Delivery',
+    description: 'Delivery to the curb at your address.',
+    cents: 17_500,
   },
   {
     id: 'white_glove',
     name: 'White Glove Delivery',
     description: 'White-glove delivery and assembly in your home.',
-    cents: 75_000,
+    cents: 22_500,
   },
 ];
 

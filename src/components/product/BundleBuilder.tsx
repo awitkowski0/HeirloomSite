@@ -105,24 +105,34 @@ export default function BundleBuilder({
             {items.map(item => {
               const isOn = selected.has(item.slug);
               return (
-                <li key={item.slug} className="bundle-row">
-                  <span className="bundle-thumb">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- 48px thumbnail. */}
-                    {item.image ? <img src={item.image} alt="" /> : null}
-                  </span>
-                  {/* The whole row is the label, so the tap target is the row
-                      rather than a 16px box - this is a phone-first checkout. */}
-                  <label className="bundle-name body-md" htmlFor={`bundle-${item.slug}`}>
-                    {item.productName}
+                <li key={item.slug}>
+                  {/* Checkbox, thumbnail, then name and price, on one row. The
+                      whole row is the <label>, so the tap target is the row
+                      rather than a 20px box - this is a phone-first checkout -
+                      and keyboard focus on the checkbox outlines the row
+                      (.bundle-option:has(:focus-visible) in globals.css). */}
+                  <label
+                    className="bundle-row bundle-option"
+                    htmlFor={`bundle-${item.slug}`}
+                    data-checked={isOn ? 'true' : 'false'}
+                  >
+                    <input
+                      type="checkbox"
+                      id={`bundle-${item.slug}`}
+                      className="bundle-check"
+                      checked={isOn}
+                      onChange={() => onToggle(item.slug)}
+                    />
+                    <span className="bundle-thumb">
+                      {/* eslint-disable-next-line @next/next/no-img-element -- 48px thumbnail. */}
+                      {item.image ? <img src={item.image} alt="" /> : null}
+                    </span>
+                    <span className="bundle-name body-md">{item.productName}</span>
+                    {/* The add-on's own item price, shown plainly (no "+"): for a crib with
+                        bundlePriceOverrides this is that crib's rail price. Variant
+                        surcharges in StainSelector keep their "(+$x)" delta. */}
+                    <span className="bundle-price body-md">{formatPrice(item.price)}</span>
                   </label>
-                  <input
-                    type="checkbox"
-                    id={`bundle-${item.slug}`}
-                    className="bundle-check"
-                    checked={isOn}
-                    onChange={() => onToggle(item.slug)}
-                  />
-                  <span className="bundle-price body-md">+{formatPrice(item.price)}</span>
                 </li>
               );
             })}

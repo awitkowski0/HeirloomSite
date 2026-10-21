@@ -1,5 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { formatPriceApprox } from '@/lib/format';
+import { shippingCentsFor } from '@/lib/order-terms';
+
+const CURBSIDE = formatPriceApprox(shippingCentsFor('threshold') / 100);
+const WHITE_GLOVE = formatPriceApprox(shippingCentsFor('white_glove') / 100);
 
 export const metadata: Metadata = {
   title: 'Care & Finishes',
@@ -72,8 +77,9 @@ export default function CarePage() {
         <h2 className="headline-md">Delivery and lead time</h2>
         <p>
           Pieces are built after you order rather than pulled from a warehouse, so expect roughly
-          six to eight weeks before delivery. Delivery is included in the price — there is no
-          separate shipping charge at checkout, and no surprise freight bill on arrival.
+          six to eight weeks before delivery. Delivery is one charge per order, chosen at checkout —
+          Curbside {CURBSIDE} or White Glove {WHITE_GLOVE} — and there is no surprise freight bill
+          on arrival.
         </p>
         <p>
           Inspect the piece before you assemble it. If anything is damaged in transit, photograph
