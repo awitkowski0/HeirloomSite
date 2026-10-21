@@ -31,5 +31,8 @@
   "bundleOptional": [
     "newport-34-guard-rail",
     "newport-full-guard-rail"
+  ],
+  "bundleUnchecked": [
+    "newport-full-guard-rail"
   ]
 }

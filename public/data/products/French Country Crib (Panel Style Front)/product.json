@@ -35,5 +35,8 @@
   "bundleOptional": [
     "french-country-34-guard-rail",
     "guard-rail"
+  ],
+  "bundleUnchecked": [
+    "guard-rail"
   ]
 }

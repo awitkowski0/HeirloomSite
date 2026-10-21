@@ -32,5 +32,8 @@
   "bundleOptional": [
     "mackenzie-34-guard-rail",
     "mackenzie-full-guard-rail"
+  ],
+  "bundleUnchecked": [
+    "mackenzie-full-guard-rail"
   ]
 }

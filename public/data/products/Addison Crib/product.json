@@ -34,5 +34,8 @@
   "bundleOptional": [
     "34-guard-rail",
     "full-guard-rail"
+  ],
+  "bundleUnchecked": [
+    "full-guard-rail"
   ]
 }

@@ -89,10 +89,11 @@ export default function ProductConfigurator({
   const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
   // Display only - already inside the crib's price, never added to the cart.
   const includedItems = (configurations[0]?.includes ?? []).filter(i => !isDelisted(i.slug));
-  // Optional extras (the guard rails, bundleOptional) start unticked: they are
-  // not part of the package, so the default bundle total stays the package.
+  // Every row starts ticked except those the product marks bundleUnchecked
+  // (OTO: the full guard rail). A ticked optional rail adds its own price on
+  // top of the package; it is never part of the package itself.
   const [bundleSelected, setBundleSelected] = useState<Set<string>>(
-    () => new Set(bundleItems.filter(i => !i.optional).map(i => i.slug))
+    () => new Set(bundleItems.filter(i => !i.startsUnchecked).map(i => i.slug))
   );
   /*
    * What pressing Add to Cart will actually put in the cart. Derived rather

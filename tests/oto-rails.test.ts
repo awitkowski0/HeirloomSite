@@ -17,9 +17,12 @@
  * add-on price (bundlePriceOverrides). The per-crib SKUs had no price
  * anywhere, so their own price is the v1.4 value.
  *
- * The rails are NOT in the package: they start unticked, the package total
- * (crib + both kits) is unchanged, and each rail adds exactly its price in
- * the cart, the checkout summary and the server pricer alike.
+ * The rails are NOT in the package (bundleOptional): the package total (crib
+ * + both kits) is unchanged, and each rail adds exactly its price in the cart,
+ * the checkout summary and the server pricer alike. Default ticks (Phil,
+ * 2026-10-20 9:49 PM): every row starts ticked except the full guard rail
+ * (bundleUnchecked), so the initial picker total is package + 3/4 rail +
+ * mattress.
  *
  * Left off on purpose (no price anywhere - book, 8808 or site): Mini Newport's
  * Twin Bed Conversion OTO-1380B, and the Mackenzie kit SKUs OTO-1401A /
@@ -57,7 +60,7 @@ for (const c of CRIBS) { KIT_LIST[c.toddler] = 109; KIT_LIST[c.full] = 481; }
 
 interface Override { productName: string; wood: string; stainName: string; price: number }
 interface PricingRow { productName: string; wood: string; basePrice: number; bundleOverrides?: Override[]; stains: Array<{ name: string; inStock: boolean }> }
-interface BundleRow { productName: string; slug: string; price: number; listPrice?: number; bundleOverride?: boolean; optional?: boolean; image: string | null; category: string | null }
+interface BundleRow { productName: string; slug: string; price: number; listPrice?: number; bundleOverride?: boolean; optional?: boolean; startsUnchecked?: boolean; image: string | null; category: string | null }
 interface InventoryRow { productName: string; sku: string; basePrice: number; category: string | null; bundle?: BundleRow[] }
 type Line = { productName: string; wood: string; stainName: string; quantity?: number; bundledWith?: { productName: string; wood: string } };
 
@@ -100,17 +103,20 @@ for (const c of CRIBS) {
     assert.ok(invRows.length > 0, `${c.name} missing from inventory`);
     for (const inv of invRows) {
       assert.deepEqual(
-        (inv.bundle ?? []).map(b => [b.productName, b.price, b.bundleOverride ?? false, b.listPrice ?? null, b.optional ?? false]),
+        (inv.bundle ?? []).map(b => [b.productName, b.price, b.bundleOverride ?? false, b.listPrice ?? null, b.optional ?? false, !(b.startsUnchecked ?? false)]),
         [
-          [c.toddler, c.split[0], true, KIT_LIST[c.toddler], false],
-          [c.full, c.split[1], true, KIT_LIST[c.full], false],
-          [r34.name, r34.price, r34.override, r34.override ? r34.list : null, true],
-          [rFull.name, rFull.price, rFull.override, rFull.override ? rFull.list : null, true],
-          [MATTRESS, MATTRESS_PRICE, false, null, false],
+          [c.toddler, c.split[0], true, KIT_LIST[c.toddler], false, true],
+          [c.full, c.split[1], true, KIT_LIST[c.full], false, true],
+          [r34.name, r34.price, r34.override, r34.override ? r34.list : null, true, true],
+          [rFull.name, rFull.price, rFull.override, rFull.override ? rFull.list : null, true, false],
+          [MATTRESS, MATTRESS_PRICE, false, null, false, true],
         ],
-        `${c.name} pick list (name, price, add-on price?, own price, starts unticked?)`
+        `${c.name} pick list (name, price, add-on price?, own price, outside the package?, starts ticked?)`
       );
       for (const b of inv.bundle ?? []) assert.ok(b.image, `${c.name}: ${b.productName} has a thumbnail`);
+      // Initial picker total = crib + every row that starts ticked = package + 3/4 rail + mattress.
+      const initial = inv.basePrice + (inv.bundle ?? []).filter(b => !b.startsUnchecked).reduce((sum, b) => sum + b.price, 0);
+      assert.equal(initial, c.pkg + r34.price + MATTRESS_PRICE, `${c.name} initial picker total`);
       const img = (n: string) => (inv.bundle ?? []).find(b => b.productName === n)?.image ?? '';
       assert.match(img(r34.name), /3_4_guard_rail_0\.jpg$|34_guard_rail_0\.jpg$/, `${r34.name} uses the 3/4 guard rail photo`);
       assert.match(img(rFull.name), /full_guard_rail_0\.jpg$|guard_rail_0\.jpg$/, `${rFull.name} uses the full guard rail photo`);
@@ -142,6 +148,13 @@ for (const c of CRIBS) {
         assert.equal(cartSubtotalCents(lines), cents(expected), `${where} ${label} (server)`);
         assert.equal(chargedSubtotalCents(asCart(row, c, lines)), cents(expected), `${where} ${label} (cart = checkout)`);
       }
+      // The default cart (Add to Cart without touching the picker): crib, both
+      // kits, 3/4 rail, mattress - server = cart = checkout = the initial total.
+      const mat = addOnLine(row, MATTRESS, false);
+      const defaults = [cribLine(row), ...kits, l34, mat];
+      const matCart = (ls: Line[]) => asCart(row, c, ls.filter(l => l !== mat)).concat(ls.includes(mat) ? [{ productName: MATTRESS, wood: mat.wood, quantity: 1, price: MATTRESS_PRICE }] : []);
+      assert.equal(cartSubtotalCents(defaults), cents(c.pkg + r34.price + MATTRESS_PRICE), `${where} default cart (server)`);
+      assert.equal(chargedSubtotalCents(matCart(defaults)), cents(c.pkg + r34.price + MATTRESS_PRICE), `${where} default cart (cart = checkout)`);
       const all = [cribLine(row), ...kits, l34, lFull];
       assert.equal(priceCart(all, 'NJ', 'threshold').totalCents, cents(c.pkg + r34.price + rFull.price + 175), `${where} + curbside`);
       assert.equal(priceCart(all, 'NJ', 'white_glove').totalCents, cents(c.pkg + r34.price + rFull.price + 225), `${where} + white glove`);
@@ -168,6 +181,11 @@ test('only OTO cribs list guard rails; Fisher cribs keep kits + mattress', () =>
     assert.deepEqual((inv.bundle ?? []).map(b => b.productName), ['Toddler Bed Rail Kit', 'Full Bed Rail Kit', MATTRESS], `${fisher} pick list`);
     assert.equal((inv.bundle ?? []).some(b => railNames.has(b.productName)), false);
   }
-  // Every rail on a pick list starts unticked; nothing else does.
-  for (const inv of inventory) for (const b of inv.bundle ?? []) assert.equal(b.optional ?? false, railNames.has(b.productName), `${inv.productName}: ${b.productName} optional flag`);
+  // Only the guard rails are outside the package, and only the full guard
+  // rails start unticked; on Fisher (and everywhere else) every row starts ticked.
+  const fullRails = new Set(CRIBS.map(c => c.rails[1].name));
+  for (const inv of inventory) for (const b of inv.bundle ?? []) {
+    assert.equal(b.optional ?? false, railNames.has(b.productName), `${inv.productName}: ${b.productName} optional flag`);
+    assert.equal(b.startsUnchecked ?? false, fullRails.has(b.productName), `${inv.productName}: ${b.productName} starts unticked`);
+  }
 });
