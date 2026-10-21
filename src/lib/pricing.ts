@@ -3,9 +3,10 @@ import pricingTable from '../../data/pricing.json';
 import { MAX_CART_LINES, MAX_QUANTITY_PER_LINE } from './cart-limits';
 import {
   DEFAULT_SHIPPING_METHOD,
-  isShippableState,
+  UNPUBLISHED_DELIVERY_MESSAGE,
+  deliveryChargeFor,
+  isPublishedDeliveryArea,
   isShippingMethodId,
-  shippingCentsFor,
   taxCentsFor,
   type ShippingMethodId,
 } from './order-terms';
@@ -25,15 +26,12 @@ import {
  */
 
 /*
- * Delivery is included in the product price.
+ * Delivery is charged separately, by tier, on the merchandise subtotal.
  *
- * This was 15_000 - $150 added on top of the item total, server-side, in the
- * amount actually charged to the card. With delivery built into the price
- * that overcharged every order by $150.
- *
- * The constant itself now lives in ./order-terms, which the client checkout
- * imports too - it was declared separately in both places, as was the tax
- * rate. Re-exported here so existing server-side import sites do not care.
+ * It is not included in the product price. priceCart recomputes the charge
+ * from that subtotal via deliveryChargeFor in ./order-terms. The request
+ * does not carry an amount, and a client-sent one would be ignored: the
+ * invoice line is this number.
  */
 export { MAX_CART_LINES, MAX_QUANTITY_PER_LINE };
 
@@ -313,7 +311,8 @@ export function priceCart(
   // pre-tax, pre-shipping portion of the order negative.
   const discountCents = coupon ? Math.min(coupon.amountOffCents, subtotalCents) : 0;
 
-  const shippingCents = shippingCentsFor(shippingMethod);
+  // Merchandise subtotal, before the coupon. The client does not send this charge.
+  const shippingCents = deliveryChargeFor(subtotalCents, shippingMethod);
   /*
    * Tax is on (subtotal - discount) PLUS delivery. A coupon is a seller-funded
    * discount, so the customer is taxed on what they actually pay, same as PA
@@ -449,8 +448,13 @@ export function validateShipping(body: Record<string, unknown>): ShippingDetails
    * checks above.
    */
   const state = field('state').toUpperCase();
-  if (!isShippableState(state)) {
-    throw new PricingError('We do not deliver to that state yet. Please contact us.');
+  /*
+   * PA, NJ, and MD only, and not an NJ ZIP in the excluded metro. No price is
+   * computed for anything else — this throws before priceCart runs, so a
+   * hand-made request cannot buy a published rate for an unpublished address.
+   */
+  if (!isPublishedDeliveryArea(state, zip)) {
+    throw new PricingError(UNPUBLISHED_DELIVERY_MESSAGE);
   }
 
   return {

@@ -1,7 +1,7 @@
 import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
-import { SHIPPABLE_STATE_CODES, cheapestShippingCents } from './order-terms';
-import { fromCents } from './format';
+import { SHIPPABLE_STATE_CODES, deliveryChargeFor } from './order-terms';
+import { fromCents, toCents } from './format';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
@@ -131,6 +131,32 @@ export function webSiteJsonLd(): JsonLd {
   };
 }
 
+/**
+ * Handling time in business days, from the builder prefix on the SKU.
+ *
+ * Old Town Oak (OTO) 30–40, Kids Comfort (KC) 40, Fisher's (FQP) 50–70.
+ * A SKU with no furniture-builder prefix (rugs, lamps) keeps the previous
+ * six-to-eight week window. Google reads unitCode DAY as business days.
+ */
+export function handlingBusinessDays(
+  sku: string | null | undefined
+): { minValue: number; maxValue: number } {
+  const prefix = (sku ?? '').trim().split(/[\s-]/, 1)[0]?.toUpperCase() ?? '';
+  if (prefix === 'OTO') return { minValue: 30, maxValue: 40 };
+  if (prefix === 'KC') return { minValue: 40, maxValue: 40 };
+  if (prefix === 'FQP') return { minValue: 50, maxValue: 70 };
+  return { minValue: 42, maxValue: 56 };
+}
+
+/**
+ * Curbside charge for a product's price, in cents. Falls back to the $175
+ * floor when the price is missing.
+ */
+export function productShippingCents(priceDollars: number): number {
+  if (!Number.isFinite(priceDollars) || priceDollars < 0) return deliveryChargeFor(0, 'threshold');
+  return deliveryChargeFor(toCents(priceDollars), 'threshold');
+}
+
 export function productJsonLd(opts: {
   productName: string;
   slug: string;
@@ -141,6 +167,8 @@ export function productJsonLd(opts: {
 }): JsonLd {
   const { low, high } = priceRange(opts.configurations);
   const anyInStock = opts.configurations.some(c => c.stains.some(s => s.inStock !== false));
+  const sku = opts.sku || opts.configurations.find(c => c.sku)?.sku || null;
+  const handling = handlingBusinessDays(sku);
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -162,9 +190,8 @@ export function productJsonLd(opts: {
         ? 'https://schema.org/InStock'
         : 'https://schema.org/OutOfStock',
       /*
-       * The furniture is made to order with a six-to-eight week lead time, and
-       * until now nothing in the markup said so - the page promised one thing
-       * and the structured data implied stock on a shelf.
+       * The furniture is made to order. Handling time is the builder's window
+       * in business days, so the markup does not imply the piece is on a shelf.
        *
        * schema.org/MadeToOrder would be the literal term, but Google does not
        * support it in the `availability` enum (BackOrder, Discontinued,
@@ -173,21 +200,22 @@ export function productJsonLd(opts: {
        * orderable - so the lead time is expressed where Google actually reads
        * it, as handling time.
        *
-       * shippingRate is the CHEAPER of the two delivery tiers, not 0. It said
-       * 0 while the site believed delivery was included; advertising free
-       * shipping in structured data and then charging for delivery at checkout is the
-       * kind of mismatch Google issues merchant listing penalties for, and it
-       * is a promise to a customer we would not keep. See SHIPPING_METHODS in
+       * shippingRate is the Curbside charge for this product's price (the low
+       * price of the aggregate offer), not a flat figure and not 0. Advertising
+       * free shipping and then charging for delivery is a promise we would not
+       * keep. Higher configurations can land in a higher band at checkout,
+       * where the charge is recomputed from the cart. A missing price falls
+       * back to the $175 Curbside floor. See deliveryChargeFor in
        * src/lib/order-terms.ts.
        */
       shippingDetails: {
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: fromCents(cheapestShippingCents()),
+          value: fromCents(productShippingCents(low)),
           currency: 'USD',
         },
-        // The regional route, not the whole country - see SHIPPABLE_STATE_CODES.
+        // US regions PA, NJ, MD — the same list checkout delivers to.
         shippingDestination: {
           '@type': 'DefinedRegion',
           addressCountry: 'US',
@@ -197,9 +225,10 @@ export function productJsonLd(opts: {
           '@type': 'ShippingDeliveryTime',
           handlingTime: {
             '@type': 'QuantitativeValue',
-            minValue: 42,
-            maxValue: 56,
+            minValue: handling.minValue,
+            maxValue: handling.maxValue,
             unitCode: 'DAY',
+            unitText: 'business days',
           },
         },
       },

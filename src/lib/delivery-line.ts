@@ -1,5 +1,5 @@
 import { formatPriceApprox } from './format';
-import { shippingCentsFor } from './order-terms';
+import { deliveryChargeFor } from './order-terms';
 
 /*
  * The purchase-assurance block under Add to Cart (delivery tiers, standards,
@@ -28,7 +28,7 @@ export function showsPurchaseAssurances(category: string | null | undefined): bo
 /* Read from order-terms so this line can never quote a different number from
    the checkout that charges it. */
 export function deliveryLineTitle(): string {
-  const curbside = formatPriceApprox(shippingCentsFor('threshold') / 100);
-  const whiteGlove = formatPriceApprox(shippingCentsFor('white_glove') / 100);
-  return `Curbside ${curbside} or white-glove ${whiteGlove} delivery`;
+  const curbside = formatPriceApprox(deliveryChargeFor(0, 'threshold') / 100);
+  const whiteGlove = formatPriceApprox(deliveryChargeFor(0, 'white_glove') / 100);
+  return `Curbside from ${curbside} or white-glove from ${whiteGlove} delivery`;
 }

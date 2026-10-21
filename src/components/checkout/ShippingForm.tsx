@@ -4,8 +4,9 @@ import AddressAutocomplete from './AddressAutocomplete';
 import {
   SHIPPABLE_STATES,
   UNSHIPPABLE_STATES,
+  UNPUBLISHED_DELIVERY_MESSAGE,
+  isExcludedMetroZip,
   isShippableState,
-  stateName,
 } from '@/lib/order-terms';
 
 export interface ShippingValues {
@@ -95,10 +96,12 @@ export function validateShipping(values: ShippingValues): Partial<Record<keyof S
   // cleared - but the state decides both the delivery route and whether sales
   // tax is charged, so it is worth saying out loud rather than letting the
   // server be the first to notice.
-  if (values.state.trim() && !isShippableState(values.state.trim().toUpperCase())) {
-    errors.state =
-      `We don't deliver to ${stateName(values.state.trim())} yet — ` +
-      'contact us and we will see what we can arrange.';
+  const stateCode = values.state.trim().toUpperCase();
+  if (stateCode && !isShippableState(stateCode)) {
+    errors.state = UNPUBLISHED_DELIVERY_MESSAGE;
+  }
+  if (stateCode === 'NJ' && isExcludedMetroZip(values.zip)) {
+    errors.zip = UNPUBLISHED_DELIVERY_MESSAGE;
   }
   return errors;
 }

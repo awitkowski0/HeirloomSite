@@ -20,23 +20,18 @@
 /*
  * Delivery is CHARGED, and the customer chooses how.
  *
- * The site previously said delivery was included in the product price and
- * charged nothing for it - in the checkout summary, the product page
- * assurances, the invoice footer and the Product JSON-LD. That was wrong: it
- * is quoted separately, and shipping every order for nothing was giving away
- * the delivery charge on each one.
+ * The charge is not in the product price. It is one amount per order, chosen
+ * at checkout, and it steps up with the merchandise subtotal. A crib and its
+ * dresser still share one truck. If that ever stops being true this is where
+ * it changes.
  *
- * Amounts (2026-10-20): curbside $175, white glove $225 - the customer charges
- * on the pricing app's Costs tab. They replace the earlier flat $685 threshold
- * / $750 white glove. Two tiers only; there is no third.
+ * The id 'threshold' is the cheaper option on purpose: older checkout bundles
+ * and stored sessions send it in `shippingMethod`, and renaming it would turn
+ * those requests into "Choose a delivery method" errors. The customer-facing
+ * label is Curbside.
  *
- * The id 'threshold' is kept for the curbside tier on purpose: it is the value
- * older checkout bundles and stored sessions send in `shippingMethod`, and
- * renaming it would turn those requests into "Choose a delivery method" errors.
- * Only the customer-facing name and amount changed.
- *
- * Prices are flat per ORDER, not per item: a crib and its dresser go on one
- * truck. If that ever stops being true this is where it changes.
+ * Bands are "from this merchandise subtotal and up", in integer cents. Compare
+ * cents, never dollars: 2499.99 * 100 is not a safe threshold.
  */
 export type ShippingMethodId = 'threshold' | 'white_glove';
 
@@ -46,22 +41,37 @@ export interface ShippingMethod {
   /* Shown under the name at checkout. Confirm the exact service wording with
      the carrier before launch - these describe the industry-standard tiers. */
   description: string;
-  cents: number;
 }
 
 export const SHIPPING_METHODS: readonly ShippingMethod[] = [
   {
     id: 'threshold',
-    name: 'Curbside Delivery',
+    name: 'Curbside',
     description: 'Delivery to the curb at your address.',
-    cents: 17_500,
   },
   {
     id: 'white_glove',
-    name: 'White Glove Delivery',
+    name: 'White Glove',
     description: 'White-glove delivery and assembly in your home.',
-    cents: 22_500,
   },
+];
+
+export interface DeliveryBand {
+  /** Merchandise subtotal, in cents, at which this band starts (inclusive). */
+  fromCents: number;
+  threshold: number;
+  white_glove: number;
+}
+
+/** The only delivery price list. Checkout, the invoice, and emails all read it. */
+export const DELIVERY_BANDS: readonly DeliveryBand[] = [
+  { fromCents: 0, threshold: 17_500, white_glove: 29_900 },
+  { fromCents: 250_000, threshold: 32_500, white_glove: 42_500 },
+  { fromCents: 350_000, threshold: 42_500, white_glove: 55_000 },
+  { fromCents: 450_000, threshold: 57_500, white_glove: 72_500 },
+  { fromCents: 600_000, threshold: 72_500, white_glove: 92_500 },
+  { fromCents: 750_000, threshold: 85_000, white_glove: 110_000 },
+  { fromCents: 900_000, threshold: 115_000, white_glove: 147_500 },
 ];
 
 /*
@@ -85,13 +95,33 @@ export function shippingMethodById(id: ShippingMethodId): ShippingMethod {
   return method;
 }
 
-export function shippingCentsFor(id: ShippingMethodId): number {
-  return shippingMethodById(id).cents;
+/**
+ * Delivery charge for a merchandise subtotal, in integer cents.
+ *
+ * `subtotalCents` is the goods total before coupon, tax, and this charge.
+ * The band is the highest `fromCents` that the subtotal has reached.
+ * Callers that price an order must pass the cart subtotal. The opening band
+ * ($0) is only the floor, not the charge for a real cart.
+ */
+export function deliveryChargeFor(subtotalCents: number, option: ShippingMethodId): number {
+  // Validates the id. An unknown method must not price as $0.
+  shippingMethodById(option);
+  const subtotal = Number.isFinite(subtotalCents) ? Math.max(0, Math.round(subtotalCents)) : 0;
+  let cents = DELIVERY_BANDS[0][option];
+  for (const band of DELIVERY_BANDS) {
+    if (subtotal >= band.fromCents) cents = band[option];
+  }
+  return cents;
 }
 
-/** The lowest delivery price, for the "from" figure in Product JSON-LD. */
+/** Opening-band charge (merchandise subtotal of $0). Not the cart charge. */
+export function shippingCentsFor(id: ShippingMethodId): number {
+  return deliveryChargeFor(0, id);
+}
+
+/** The lowest delivery price, the Curbside floor. */
 export function cheapestShippingCents(): number {
-  return Math.min(...SHIPPING_METHODS.map(m => m.cents));
+  return deliveryChargeFor(0, 'threshold');
 }
 
 /** The only state the shop has nexus in, so the only one it collects tax for. */
@@ -188,17 +218,51 @@ export function isUsState(code: string): boolean {
  * phone. Enforced on the server too - the <select> is a convenience, not a
  * control.
  *
- * Widening the route is this array plus nothing else.
+ * Widening the route is this array. NJ ZIPs in EXCLUDED_METRO_ZIPS are
+ * inside the state list but not given a published price.
  */
-export const SHIPPABLE_STATE_CODES: readonly string[] = [
-  'PA',
-  'NJ',
-  'NY',
-  'CT',
-  'OH',
-  'MD',
-  'VA',
-];
+export const SHIPPABLE_STATE_CODES: readonly string[] = ['PA', 'NJ', 'MD'];
+
+/**
+ * Keystone's excluded metro is NYC (5 boroughs), Long Island and Newark NJ
+ * (Phil, 2026-10-21). NY is not a delivery state at all, so the only ZIPs we
+ * need here are Newark's city ZIPs: exact 5-digit matches, so Elizabeth,
+ * Jersey City, Hoboken etc. stay deliverable.
+ */
+export const EXCLUDED_METRO_ZIPS: readonly string[] = ['07101', '07102', '07103', '07104', '07105', '07106', '07107', '07108', '07112', '07114', '07175', '07184', '07188', '07189', '07191', '07192', '07193', '07194', '07195', '07198', '07199'];
+
+/**
+ * Shown when we will not quote delivery: a state outside PA/NJ/MD, or an NJ
+ * ZIP in the excluded metro. The checkout links "contact us" at /contact.
+ */
+export const UNPUBLISHED_DELIVERY_MESSAGE =
+  "We don't publish delivery pricing for this area. Please contact us for delivery options.";
+
+/** First five ZIP digits, or '' when there are not yet five. */
+export function zip5(zip: string): string {
+  const digits = zip.replace(/\D/g, '');
+  return digits.length >= 5 ? digits.slice(0, 5) : '';
+}
+
+/** True for an NJ ZIP in the excluded Newark metro set. */
+export function isExcludedMetroZip(zip: string): boolean {
+  const five = zip5(zip);
+  return five !== '' && EXCLUDED_METRO_ZIPS.includes(five);
+}
+
+/**
+ * True when checkout may show a delivery price for this state and ZIP.
+ *
+ * An empty state is not published: the caller that still wants an estimate
+ * before an address is typed must decide that itself. NJ is published except
+ * for the excluded Newark ZIPs.
+ */
+export function isPublishedDeliveryArea(state: string, zip: string): boolean {
+  const code = state.trim().toUpperCase();
+  if (!isShippableState(code)) return false;
+  if (code === 'NJ' && isExcludedMetroZip(zip)) return false;
+  return true;
+}
 
 const SHIPPABLE = new Set(SHIPPABLE_STATE_CODES);
 
@@ -227,9 +291,8 @@ export function stateName(code: string): string {
  * not "untaxed pending a lookup", genuinely zero, and the checkout says so.
  *
  * `taxableCents` is subtotal PLUS delivery rather than subtotal alone.
- * Delivery is $0 today so the two are identical, but PA taxes delivery charges
- * on a taxable item, so passing the base in this shape means reinstating a
- * delivery fee does not silently start under-collecting.
+ * PA taxes the delivery charge on a taxable item, so the base passed here
+ * includes deliveryChargeFor() — leaving it off would under-collect.
  *
  * KNOWN LIMITATION, deliberate: this is the flat 6% state rate. Allegheny
  * County adds 1% (7% total) and Philadelphia adds 2% (8% total), and this

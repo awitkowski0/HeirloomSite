@@ -24,7 +24,7 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
   {
     icon: 'local_shipping',
     title: deliveryLineTitle(),
-    body: 'Delivered by our trusted partners, one charge per order, chosen at checkout. No surprise freight bill on arrival.',
+    body: 'The charge depends on your order total. Delivered by our trusted partners, one charge per order, chosen at checkout. No surprise freight bill on arrival.',
   },
   {
     icon: 'verified_user',

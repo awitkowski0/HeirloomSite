@@ -19,7 +19,8 @@ import {
   SHIPPING_LIMIT_NOTE,
   TAXED_STATE,
   affirmEligible,
-  shippingCentsFor,
+  deliveryChargeFor,
+  isPublishedDeliveryArea,
   splitPayment,
   taxCentsFor,
   type PaymentOption,
@@ -186,7 +187,15 @@ export default function CheckoutClient({ recommendations }: Props) {
   const estDiscountCents = appliedCoupon
     ? Math.min(estSubtotalCents, appliedCoupon.amountOffCents)
     : 0;
-  const estShippingCents = cart.length > 0 ? shippingCentsFor(shippingMethod) : 0;
+  /*
+   * An empty state is not an out-of-area address yet, so the tier for the
+   * cart still shows. A state outside PA/NJ/MD, or an NJ ZIP in the excluded
+   * metro, gets no price at all.
+   */
+  const deliveryQuoted =
+    shipping.state.trim() === '' || isPublishedDeliveryArea(shipping.state, shipping.zip);
+  const estShippingCents =
+    cart.length > 0 && deliveryQuoted ? deliveryChargeFor(estSubtotalCents, shippingMethod) : 0;
   const estTaxCents = taxCentsFor(
     shipping.state,
     estSubtotalCents - estDiscountCents + estShippingCents
@@ -491,34 +500,45 @@ export default function CheckoutClient({ recommendations }: Props) {
             */}
             <fieldset className="checkout-fieldset deposit-choice" disabled={submitting}>
               <legend className="headline-md">Shipping method</legend>
-              {SHIPPING_METHODS.map(method => (
-                <label
-                  key={method.id}
-                  className="deposit-option"
-                  data-selected={shippingMethod === method.id}
-                >
-                  <input
-                    type="radio"
-                    name="shippingMethod"
-                    value={method.id}
-                    checked={shippingMethod === method.id}
-                    onChange={() => setShippingMethod(method.id)}
-                  />
-                  <span className="deposit-option-body">
-                    <span className="body-lg">
-                      {method.name} — {formatPrice(fromCents(method.cents))}
-                    </span>
-                    <span className="body-md text-on-surface-variant">{method.description}</span>
-                  </span>
-                </label>
-              ))}
-              {/* Applies to both tiers, so it sits under the pair. */}
-              <p className="body-md text-on-surface-variant fieldset-note">
-                {SHIPPING_LIMIT_NOTE}
-              </p>
+              {deliveryQuoted ? (
+                <>
+                  {SHIPPING_METHODS.map(method => (
+                    <label
+                      key={method.id}
+                      className="deposit-option"
+                      data-selected={shippingMethod === method.id}
+                    >
+                      <input
+                        type="radio"
+                        name="shippingMethod"
+                        value={method.id}
+                        checked={shippingMethod === method.id}
+                        onChange={() => setShippingMethod(method.id)}
+                      />
+                      <span className="deposit-option-body">
+                        <span className="body-lg">
+                          {method.name} —{' '}
+                          {formatPrice(fromCents(deliveryChargeFor(estSubtotalCents, method.id)))}
+                        </span>
+                        <span className="body-md text-on-surface-variant">{method.description}</span>
+                      </span>
+                    </label>
+                  ))}
+                  {/* Applies to both tiers, so it sits under the pair. */}
+                  <p className="body-md text-on-surface-variant fieldset-note">
+                    {SHIPPING_LIMIT_NOTE}
+                  </p>
+                  <p className="checkout-hint">
+                    Delivery charge is based on your order total; see{' '}
+                    <Link href="/shipping">Delivery</Link>.
+                  </p>
+                </>
+              ) : (
+                <UnpublishedDeliveryNote />
+              )}
             </fieldset>
 
-            <fieldset className="checkout-fieldset deposit-choice" disabled={submitting}>
+            <fieldset className="checkout-fieldset deposit-choice" disabled={submitting || !deliveryQuoted}>
               <legend className="headline-md">How you&rsquo;d like to pay</legend>
               {(
                 [
@@ -623,6 +643,7 @@ export default function CheckoutClient({ recommendations }: Props) {
               disabled={
                 submitting ||
                 !agreedToTerms ||
+                !deliveryQuoted ||
                 turnstileStatus === 'pending' ||
                 turnstileStatus === 'error'
               }
@@ -746,7 +767,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                 <dt>
                   {SHIPPING_METHODS.find(m => m.id === shippingMethod)?.name ?? 'Delivery'}
                 </dt>
-                <dd>{formatPrice(fromCents(totals.shippingCents))}</dd>
+                <dd>{deliveryQuoted ? formatPrice(fromCents(totals.shippingCents)) : '—'}</dd>
               </div>
               {/*
                 The label carries the reason. Sales tax is charged only where
@@ -787,6 +808,14 @@ export default function CheckoutClient({ recommendations }: Props) {
               )}
             </dl>
 
+            {deliveryQuoted ? (
+              <p className="checkout-hint">
+                Delivery charge is based on your order total; see <Link href="/shipping">Delivery</Link>.
+              </p>
+            ) : (
+              <UnpublishedDeliveryNote />
+            )}
+
             {!serverTotals && (
               <p className="checkout-hint">
                 Totals are confirmed on the invoice we send you.
@@ -805,5 +834,14 @@ export default function CheckoutClient({ recommendations }: Props) {
         </div>
       </div>
     </div>
+  );
+}
+
+function UnpublishedDeliveryNote() {
+  return (
+    <p className="checkout-hint" role="status">
+      We don&rsquo;t publish delivery pricing for this area. Please{' '}
+      <Link href="/contact">contact us</Link> for delivery options.
+    </p>
   );
 }

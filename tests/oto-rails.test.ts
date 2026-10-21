@@ -33,6 +33,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { priceCart, cartSubtotalCents } from '../src/lib/pricing';
 import { chargedSubtotalCents, type PricedCartLineInput } from '../src/lib/cart-pricing';
+import { deliveryChargeFor } from '../src/lib/order-terms';
 
 interface Rail { name: string; sku: string; price: number; list: number; override: boolean }
 interface Crib { name: string; crib: number; pkg: number; toddler: string; full: string; split: [number, number]; rails: [Rail, Rail] }
@@ -156,8 +157,17 @@ for (const c of CRIBS) {
       assert.equal(cartSubtotalCents(defaults), cents(c.pkg + r34.price + MATTRESS_PRICE), `${where} default cart (server)`);
       assert.equal(chargedSubtotalCents(matCart(defaults)), cents(c.pkg + r34.price + MATTRESS_PRICE), `${where} default cart (cart = checkout)`);
       const all = [cribLine(row), ...kits, l34, lFull];
-      assert.equal(priceCart(all, 'NJ', 'threshold').totalCents, cents(c.pkg + r34.price + rFull.price + 175), `${where} + curbside`);
-      assert.equal(priceCart(all, 'NJ', 'white_glove').totalCents, cents(c.pkg + r34.price + rFull.price + 225), `${where} + white glove`);
+      const goods = cents(c.pkg + r34.price + rFull.price);
+      assert.equal(
+        priceCart(all, 'NJ', 'threshold').totalCents,
+        goods + deliveryChargeFor(goods, 'threshold'),
+        `${where} + curbside`
+      );
+      assert.equal(
+        priceCart(all, 'NJ', 'white_glove').totalCents,
+        goods + deliveryChargeFor(goods, 'white_glove'),
+        `${where} + white glove`
+      );
       // A rail bought without its crib is charged its own price, cart and server alike.
       const alone = [l34, lFull];
       assert.equal(cartSubtotalCents(alone), cents(r34.list + rFull.list), `${where} rails alone (server)`);

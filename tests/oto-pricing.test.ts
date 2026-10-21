@@ -24,6 +24,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { priceCart, cartSubtotalCents } from '../src/lib/pricing';
 import { chargedSubtotalCents, type PricedCartLineInput } from '../src/lib/cart-pricing';
+import { deliveryChargeFor } from '../src/lib/order-terms';
 
 interface Oto { name: string; sku: string; crib: number; pkg: number; toddler: string; full: string; split: [number, number] }
 const OTO: readonly Oto[] = [
@@ -110,8 +111,17 @@ for (const p of OTO) {
         assert.equal(chargedSubtotalCents(asCart(row, p, lines)), cents(expected), `${where} ${label} (cart)`);
       }
       const both = [cribLine(row), kitLine(row, p.toddler), kitLine(row, p.full)];
-      assert.equal(priceCart(both, 'NJ', 'threshold').totalCents, cents(p.pkg + 175), `${where} package + curbside`);
-      assert.equal(priceCart(both, 'NJ', 'white_glove').totalCents, cents(p.pkg + 225), `${where} package + white glove`);
+      const goods = cents(p.pkg);
+      assert.equal(
+        priceCart(both, 'NJ', 'threshold').totalCents,
+        goods + deliveryChargeFor(goods, 'threshold'),
+        `${where} package + curbside`
+      );
+      assert.equal(
+        priceCart(both, 'NJ', 'white_glove').totalCents,
+        goods + deliveryChargeFor(goods, 'white_glove'),
+        `${where} package + white glove`
+      );
       // Kits without the crib: their own standalone prices, cart and server alike.
       const alone = [kitLine(row, p.toddler), kitLine(row, p.full)];
       assert.equal(cartSubtotalCents(alone), cents(TODDLER_LIST + FULL_LIST));
