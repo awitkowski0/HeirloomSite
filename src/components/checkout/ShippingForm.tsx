@@ -3,7 +3,6 @@
 import AddressAutocomplete from './AddressAutocomplete';
 import {
   SHIPPABLE_STATES,
-  UNSHIPPABLE_STATES,
   UNPUBLISHED_DELIVERY_MESSAGE,
   isExcludedMetroZip,
   isShippableState,
@@ -162,26 +161,14 @@ export default function ShippingForm({
                 >
                   <option value="">Select a state</option>
                   {/*
-                    Every state, in two groups, rather than only the seven we
-                    deliver to. A missing option is a puzzle - someone in Texas
-                    scrolls the list twice and leaves without knowing whether we
-                    are broken or simply do not go there. Offering it and then
-                    saying so answers the question.
+                    Only the states we deliver to (PA, NJ, MD). Anyone elsewhere is
+                    pointed to /contact; the server enforces the same list.
                   */}
-                  <optgroup label="We deliver here">
-                    {SHIPPABLE_STATES.map(s => (
-                      <option key={s.code} value={s.code}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Not yet — ask us">
-                    {UNSHIPPABLE_STATES.map(s => (
-                      <option key={s.code} value={s.code}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </optgroup>
+                  {SHIPPABLE_STATES.map(s => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
+                  ))}
                 </select>
               ) : (
                 <input

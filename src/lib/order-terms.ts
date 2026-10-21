@@ -79,7 +79,8 @@ export const DELIVERY_BANDS: readonly DeliveryBand[] = [
  * in each description - a limit that appears twice reads as two different
  * limits, and someone comparing the options should be weighing what differs.
  */
-export const SHIPPING_LIMIT_NOTE = 'Both are limited to three flights of stairs.';
+export const SHIPPING_LIMIT_NOTE =
+  'White Glove includes up to 3 flights of stairs. Curbside is curb-only: no stairs and no indoor delivery.';
 
 /** The cheaper of the two, so an untouched checkout quotes the lower number. */
 export const DEFAULT_SHIPPING_METHOD: ShippingMethodId = 'threshold';
