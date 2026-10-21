@@ -13,6 +13,8 @@
   "bundle": [
     "west-lake-toddler-bed",
     "west-lake-full-bed-rail-kit",
+    "west-lake-34-guard-rail",
+    "west-lake-full-guard-rail",
     "crib-mattress"
   ],
   "related": [
@@ -27,5 +29,9 @@
   "bundlePriceOverrides": {
     "west-lake-toddler-bed": 90,
     "west-lake-full-bed-rail-kit": 360
-  }
+  },
+  "bundleOptional": [
+    "west-lake-34-guard-rail",
+    "west-lake-full-guard-rail"
+  ]
 }

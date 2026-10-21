@@ -32,6 +32,11 @@ export interface RelatedProduct {
   bundleOverride?: boolean;
   /** The item's own price when `price` is a bundle override. */
   listPrice?: number;
+  /**
+   * Not part of the package (product.json bundleOptional - the guard rails):
+   * the pick-list checkbox starts unticked. Package kits and the mattress start ticked.
+   */
+  optional?: boolean;
 }
 
 export interface Addon {

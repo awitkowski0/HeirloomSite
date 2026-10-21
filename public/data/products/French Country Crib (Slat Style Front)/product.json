@@ -13,6 +13,8 @@
   "bundle": [
     "toddler-conversion-rail",
     "full-bed-rail-kit",
+    "french-country-34-guard-rail",
+    "guard-rail",
     "crib-mattress"
   ],
   "related": [
@@ -27,6 +29,11 @@
   "collection": "French Country",
   "bundlePriceOverrides": {
     "toddler-conversion-rail": 109,
-    "full-bed-rail-kit": 441
-  }
+    "full-bed-rail-kit": 441,
+    "guard-rail": 265
+  },
+  "bundleOptional": [
+    "french-country-34-guard-rail",
+    "guard-rail"
+  ]
 }

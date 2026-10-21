@@ -93,9 +93,9 @@ for (const p of OTO) {
     for (const row of rows) {
       const where = `${p.name} / ${row.wood}`;
       assert.equal(row.basePrice, p.crib, `${where} crib price`);
-      // Only the package kits carry an add-on price for this crib.
+      // The package kits' add-on prices (guard-rail prices: tests/oto-rails.test.ts).
       assert.deepEqual(
-        (row.bundleOverrides ?? []).map(o => [o.productName, o.price]).sort(),
+        (row.bundleOverrides ?? []).filter(o => o.productName === p.toddler || o.productName === p.full).map(o => [o.productName, o.price]).sort(),
         [[p.full, p.split[1]], [p.toddler, p.split[0]]].sort(),
         `${where} add-on prices`
       );
@@ -117,13 +117,15 @@ for (const p of OTO) {
       assert.equal(cartSubtotalCents(alone), cents(TODDLER_LIST + FULL_LIST));
       assert.equal(chargedSubtotalCents(asCart(row, p, alone)), cents(TODDLER_LIST + FULL_LIST));
     }
-    // Pick list on the product page: exactly the two package kits (at the
-    // add-on price, with a thumbnail) and the mattress at its own price.
+    // Pick list on the product page: the two package kits first (at the
+    // add-on price, with a thumbnail), the mattress last at its own price. The
+    // optional guard rails in between are checked in tests/oto-rails.test.ts.
     for (const inv of inventory.filter(i => i.productName === p.name)) {
       assert.equal(inv.basePrice, p.crib);
       assert.deepEqual(inv.includes ?? [], [], `${p.name}: nothing listed as included`);
+      const list = (inv.bundle ?? []).map(b => [b.productName, b.price, b.bundleOverride ?? false, b.listPrice ?? null]);
       assert.deepEqual(
-        (inv.bundle ?? []).map(b => [b.productName, b.price, b.bundleOverride ?? false, b.listPrice ?? null]),
+        [list[0], list[1], list[list.length - 1]],
         [
           [p.toddler, p.split[0], true, TODDLER_LIST],
           [p.full, p.split[1], true, FULL_LIST],

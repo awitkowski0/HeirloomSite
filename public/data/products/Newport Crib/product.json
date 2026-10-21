@@ -13,6 +13,8 @@
   "bundle": [
     "newport-toddler-bed",
     "newport-full-bed-rail-kit",
+    "newport-34-guard-rail",
+    "newport-full-guard-rail",
     "crib-mattress"
   ],
   "related": [
@@ -25,5 +27,9 @@
   "bundlePriceOverrides": {
     "newport-toddler-bed": 90,
     "newport-full-bed-rail-kit": 360
-  }
+  },
+  "bundleOptional": [
+    "newport-34-guard-rail",
+    "newport-full-guard-rail"
+  ]
 }

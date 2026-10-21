@@ -311,6 +311,7 @@ for (const dirName of productDirs) {
     bundle: meta.bundle || [],
     related: meta.related || [],
     bundlePriceOverrides: meta.bundlePriceOverrides || null,
+    bundleOptional: meta.bundleOptional || [],
   });
 
   // Build the image index in this same pass. Previously this was a second loop
@@ -395,7 +396,7 @@ function soleConfig(slug) {
   return { wood: rows[0].wood, stainName: stains[0].name };
 }
 
-function resolveRelation(dirName, field, slugs, ownSlug, priceOverrides) {
+function resolveRelation(dirName, field, slugs, ownSlug, priceOverrides, optionalSlugs) {
   if (!Array.isArray(slugs)) {
     relationProblems.push(`${dirName}: ${field} must be an array of product slugs`);
     return [];
@@ -453,6 +454,9 @@ function resolveRelation(dirName, field, slugs, ownSlug, priceOverrides) {
       // line carries bundledWith so src/lib/pricing.ts can charge this price
       // only alongside this parent; listPrice is what the item costs alone.
       ...(hasOverride ? { bundleOverride: true, listPrice: target.minPrice } : {}),
+      // product.json bundleOptional: an extra that is not part of the package
+      // (the guard rails), so its checkbox starts unticked on the product page.
+      ...(optionalSlugs && optionalSlugs.includes(target.slug) ? { optional: true } : {}),
       image: target.defaultImage,
       category: target.category,
       // Null for a `related` target with real choices; those are links, not
@@ -472,8 +476,18 @@ for (const declared of declaredRelations) {
     'bundle',
     declared.bundle,
     declared.slug,
-    declared.bundlePriceOverrides || null
+    declared.bundlePriceOverrides || null,
+    declared.bundleOptional
   );
+  /*
+   * bundleOptional names rows of this product's own bundle. One that is not in
+   * the bundle is a typo that would otherwise do nothing, so it fails the build.
+   */
+  for (const slug of declared.bundleOptional || []) {
+    if (!(declared.bundle || []).includes(slug)) {
+      relationProblems.push(`${declared.dirName}: bundleOptional names "${slug}", which is not in its bundle`);
+    }
+  }
   const related = resolveRelation(declared.dirName, 'related', declared.related, declared.slug);
   if (bundle.length > 0) bundleCount++;
   // Every inventory row for this product carries the same relations: they are

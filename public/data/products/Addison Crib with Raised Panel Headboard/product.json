@@ -13,6 +13,8 @@
   "bundle": [
     "addison-toddler-bed",
     "addison-full-bed-rail-kit",
+    "34-guard-rail",
+    "full-guard-rail",
     "crib-mattress"
   ],
   "related": [
@@ -25,6 +27,12 @@
   "collection": "Addison",
   "bundlePriceOverrides": {
     "addison-toddler-bed": 90,
-    "addison-full-bed-rail-kit": 360
-  }
+    "addison-full-bed-rail-kit": 360,
+    "34-guard-rail": 275,
+    "full-guard-rail": 265
+  },
+  "bundleOptional": [
+    "34-guard-rail",
+    "full-guard-rail"
+  ]
 }
