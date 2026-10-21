@@ -71,18 +71,29 @@ export default function CarePage() {
       <section>
         <h2 className="headline-md">Delivery and lead time</h2>
         <p>
-          Pieces are built after you order rather than pulled from a warehouse, so expect roughly
-          six to eight weeks before delivery. Delivery is included in the price — there is no
-          separate shipping charge at checkout, and no surprise freight bill on arrival.
+          Pieces are built after you order rather than pulled from a warehouse. Lead times depend
+          on the builder and are estimates we confirm when you order: about 6–8 weeks for Old Town
+          Oak, about 8 weeks for Kids Comfort, and 10–14 weeks for Fisher&rsquo;s. Delivery is
+          charged separately at checkout (Curbside or White Glove, based on your cart total). White
+          Glove includes up to 3 flights of stairs. See{' '}
+          <Link href="/shipping" className="doc-link">
+            Delivery
+          </Link>{' '}
+          for areas and prices.
         </p>
         <p>
-          Inspect the piece before you assemble it. If anything is damaged in transit, photograph
-          it and{' '}
+          Inspect your furniture before the driver leaves, and note any visible damage on the
+          delivery receipt when you sign it. If you find concealed damage or a defect later,
+          photograph it and{' '}
           <Link href="/contact" className="doc-link">
             contact us
           </Link>{' '}
-          before assembly — it is far easier to resolve at that point than after the piece is
-          built.
+          in writing within 5 business days, before assembly if you can. We coordinate the repair
+          or replacement with the builder and handle the claim with the carrier. See{' '}
+          <Link href="/returns" className="doc-link">
+            Returns, Cancellations &amp; Refunds
+          </Link>
+          .
         </p>
       </section>
 

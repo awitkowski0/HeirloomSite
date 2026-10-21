@@ -28,11 +28,12 @@ export default function TimelinePage() {
           finished-goods warehouse for your configuration.
         </p>
         <p>
-          Because each piece is built after Confirm Order and deposit, timing depends on current
-          production and your finish choices. We confirm a planning estimate for your order rather
-          than publishing a one-size-fits-all &ldquo;ships in X days&rdquo; promise. Our{' '}
-          <Link href="/care" className="doc-link">Care &amp; Finishes guide</Link> publishes
-          roughly <strong>six to eight weeks</strong> before delivery as the typical range.
+          Because each piece is built after Confirm Order and deposit, timing depends on the
+          builder and your finish choices. Lead times are estimates we confirm at order time, per
+          builder: Old Town Oak about <strong>6–8 weeks</strong>, Kids Comfort about{' '}
+          <strong>8 weeks</strong>, Fisher&rsquo;s <strong>10–14 weeks</strong>. See{' '}
+          <Link href="/shipping" className="doc-link">Delivery</Link> for areas, options and
+          charges.
         </p>
       </section>
 
@@ -52,21 +53,23 @@ export default function TimelinePage() {
             you place an order. We read it, check the details with you, and only then ask for
             anything. No card is taken at checkout — the order is a commitment, not a charge. We
             call to confirm the stain, the kit list, and the delivery before anything is built. A
-            secure Stripe invoice follows, usually within one business day. A <strong>minimum 50%
-            deposit</strong> begins production.
+            secure Stripe invoice follows within 48 hours of the order. Custom orders require a{' '}
+            <strong>50% deposit</strong>. You can pay by credit card or Affirm.
           </li>
           <li>
             <strong>03 Built and Finishing by Hand.</strong> Your piece is cut, joined, and
-            finished to order in solid American hardwood by Amish and independent US craftspeople —
-            typically six to eight weeks. The remaining balance is invoiced <strong>once staining
-            is complete — not before</strong>.
+            finished to order in solid American hardwood by Amish and independent US craftspeople.
+            Lead times are estimates confirmed at order time: Old Town Oak about 6–8 weeks, Kids
+            Comfort about 8 weeks, Fisher&rsquo;s 10–14 weeks. The remaining balance must be paid{' '}
+            <strong>before we schedule final delivery</strong>.
           </li>
           <li>
-            <strong>04 Delivered to Your Nursery.</strong> You choose Threshold (to the door) or
-            White Glove (delivery + assembly in your home). Both are handled by our trusted
-            partners and limited to three flights of stairs. We deliver in <strong>PA, NJ, NY, CT,
-            OH, MD, and VA</strong>; confirm your zip with us if you&rsquo;re unsure. We do not ship
-            nationwide.
+            <strong>04 Delivered to Your Nursery.</strong> You choose Curbside (to the curb) or
+            White Glove (into your home, with unpacking, assembly and placement). White Glove
+            includes up to 3 flights of stairs. We deliver in{' '}
+            <strong>PA, NJ (excluding the New York City / North Jersey metro area) and MD</strong>;
+            confirm your zip with us if you&rsquo;re unsure. See{' '}
+            <Link href="/shipping" className="doc-link">Delivery</Link>.
           </li>
         </ol>
       </section>
@@ -74,10 +77,10 @@ export default function TimelinePage() {
       <section>
         <h2 className="headline-md">How long does a custom crib take?</h2>
         <p>
-          Expect roughly <strong>six to eight weeks</strong> before delivery — the same range on
-          Care &amp; Finishes and the homepage journey. We&rsquo;ll confirm a planning estimate on the
-          Confirm Order call. Share your target month when you reach out if you have a nursery
-          deadline.
+          Lead times are estimates we confirm at order time, per builder: Old Town Oak about{' '}
+          <strong>6–8 weeks</strong>, Kids Comfort about <strong>8 weeks</strong>, Fisher&rsquo;s{' '}
+          <strong>10–14 weeks</strong>. Share your target month when you reach out if you have a
+          nursery deadline.
         </p>
       </section>
 
@@ -85,14 +88,16 @@ export default function TimelinePage() {
       <section>
         <h2 className="headline-md">Deposits, cancellation, and balance</h2>
         <ul className="doc-list">
-          <li><strong>Before deposit:</strong> Nothing is charged at checkout. You can talk with
-            us during Confirm Order before any payment.</li>
-          <li><strong>Deposit:</strong> A minimum 50% deposit on the Stripe invoice begins
-            production. Deposit and cancellation terms after payment are those stated on the
-            product page you ordered from — read them before you pay; ask us if anything&rsquo;s
-            unclear.</li>
-          <li><strong>Balance:</strong> Invoiced <strong>once staining is complete — not before</strong>
-            (homepage), then delivery.</li>
+          <li><strong>Before deposit:</strong> Nothing is charged at checkout. You can cancel at
+            no cost until the deposit is paid — tell us in writing.</li>
+          <li><strong>Deposit:</strong> Custom orders require a 50% deposit. Once the deposit is
+            received, the order goes to the builder and cannot be cancelled, and the deposit is
+            non-refundable. See{' '}
+            <Link href="/terms" className="doc-link">Terms of Sale</Link>
+            {' '}and{' '}
+            <Link href="/returns" className="doc-link">Returns, Cancellations &amp; Refunds</Link>.</li>
+          <li><strong>Balance:</strong> The remaining balance must be paid{' '}
+            <strong>before we schedule final delivery</strong>.</li>
         </ul>
       </section>
 
@@ -101,7 +106,8 @@ export default function TimelinePage() {
         <ol className="doc-list">
           <li>Preferred crib style (or a few you&rsquo;re comparing).</li>
           <li>Wood / stain ideas if you have them.</li>
-          <li>Delivery zip code — we serve PA, NJ, NY, CT, OH, MD, and VA.</li>
+          <li>Delivery zip code — we serve PA, NJ (excluding the New York City / North Jersey
+            metro area) and MD.</li>
           <li>Ideal delivery window; a month is fine.</li>
           <li>What&rsquo;s included for your SKU (rails / conversion parts — check the product page;
             we&rsquo;ll confirm the kit list on the Confirm Order call).</li>

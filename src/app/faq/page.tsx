@@ -172,25 +172,34 @@ const SECTIONS: Section[] = [
                 you place an order. We read it, check the details with you, and only then ask for
                 anything. No card is taken at checkout — the order is a commitment, not a charge. We
                 call to confirm the stain, the kit list, and the delivery before anything is built.
-                A secure Stripe invoice follows, usually within one business day. A minimum 50%
-                deposit begins production.
+                A secure Stripe invoice follows within 48 hours of the order. Custom orders require
+                a 50% deposit. You can pay by credit card or Affirm.
               </li>
               <li>
                 <strong>Built and Finishing by Hand.</strong> Amish and independent US
-                craftspeople cut, join, and finish your piece to order in solid American hardwood —
-                six to eight weeks, because nothing is waiting in a warehouse. The remaining balance is invoiced once the staining is
-                complete — not before.
+                craftspeople cut, join, and finish your piece to order in solid American hardwood.
+                Lead times are estimates we confirm at order time, per builder: Old Town Oak about
+                6–8 weeks, Kids Comfort about 8 weeks, Fisher&rsquo;s 10–14 weeks. The remaining
+                balance must be paid before we schedule final delivery.
               </li>
               <li>
-                <strong>Delivered to Your Nursery.</strong> You choose Threshold (to the door) or
-                White Glove (delivery and assembly in your home) when you order. Both are handled by
-                our trusted partners, not a freight terminal, and limited to three flights of
-                stairs.
+                <strong>Delivered to Your Nursery.</strong> You choose Curbside or White Glove when
+                you order. Curbside is a one-person crew to the curb; White Glove is a two-person
+                crew into your home, with unpacking, assembly, placement, and packing-material
+                removal. White Glove includes up to 3 flights of stairs. See{' '}
+                <Link href="/shipping" className="doc-link">
+                  Delivery
+                </Link>
+                .
               </li>
             </ol>
             <p>
-              Checkout terms include a <strong>48-hour cancellation window</strong> from the order
-              date. Read those terms before you pay the deposit, and ask us if anything is unclear.
+              You can cancel at no cost until the deposit is paid. Once the deposit is received, the
+              order goes to the builder and cannot be cancelled. Read the{' '}
+              <Link href="/terms" className="doc-link">
+                Terms of Sale
+              </Link>{' '}
+              before you pay the deposit, and ask us if anything is unclear.
             </p>
           </>
         ),
@@ -199,10 +208,10 @@ const SECTIONS: Section[] = [
         question: 'How long until my crib ships?',
         answer: (
           <p>
-            These are made-to-order pieces — six to eight weeks, the same window on our homepage,
-            because nothing is waiting in a warehouse. We confirm a planning estimate for your order
-            on the Confirm Order call. Share your target month via{' '}
-            <strong>Get Personal Assistance</strong> if you have a nursery deadline. See{' '}
+            These are made-to-order pieces. Lead times are estimates, confirmed at order time, per
+            builder: Old Town Oak about 6–8 weeks, Kids Comfort about 8 weeks, Fisher&rsquo;s 10–14
+            weeks. Share your target month via <strong>Get Personal Assistance</strong> if you have
+            a nursery deadline. See{' '}
             <Link href="/timeline" className="doc-link">
               Timeline
             </Link>
@@ -214,11 +223,15 @@ const SECTIONS: Section[] = [
         question: 'Can I cancel after I order?',
         answer: (
           <p>
-            Nothing is charged when you first place the order, so Confirm Order happens before any
-            deposit. Checkout terms include a <strong>48-hour cancellation window</strong> from the
-            order date. Once a deposit is paid, it is <strong>non-refundable</strong> as written in
-            those terms, because production starts with that payment. Ask us before you pay the
-            deposit if anything is unclear.
+            Nothing is charged when you first place the order, so you can cancel at no cost until
+            the deposit is paid — just tell us in writing. Once the deposit is received, the order
+            goes to the builder and cannot be cancelled, and the deposit is{' '}
+            <strong>non-refundable</strong>. Made-to-order case goods cannot be returned, exchanged
+            or refunded; other product types follow the policy on their product page. See{' '}
+            <Link href="/returns" className="doc-link">
+              Returns, Cancellations &amp; Refunds
+            </Link>
+            .
           </p>
         ),
       },
@@ -231,9 +244,17 @@ const SECTIONS: Section[] = [
         question: 'Where do you deliver?',
         answer: (
           <p>
-            We deliver in <strong>PA, NJ, NY, CT, OH, MD, and VA</strong> — the same states checkout
-            will accept. If you are unsure whether your address is in range, send us your zip and we
-            will confirm options for you. We do <strong>not</strong> ship nationwide.
+            We deliver in <strong>PA, NJ (excluding the New York City / North Jersey metro area) and
+            MD</strong>. If you are unsure whether your address is in range, send us your zip and we
+            will confirm options for you. For any other area,{' '}
+            <Link href="/contact" className="doc-link">
+              contact us
+            </Link>{' '}
+            for delivery options; these are quoted individually. See{' '}
+            <Link href="/shipping" className="doc-link">
+              Delivery
+            </Link>
+            .
           </p>
         ),
       },
@@ -241,10 +262,15 @@ const SECTIONS: Section[] = [
         question: 'Is white-glove delivery available?',
         answer: (
           <p>
-            Yes. You choose Threshold or White Glove when you order, inside the states we deliver
-            to. Threshold is delivery to the door. White Glove is delivery and assembly in your
-            home. Both are handled by our trusted partners, not a freight terminal, and limited to
-            three flights of stairs. We confirm what fits your address on the Confirm Order call.
+            Yes. You choose Curbside or White Glove when you order, inside the areas we deliver to.
+            Curbside is a one-person crew to the curb at your address; you (or someone there) help
+            unload and carry the piece inside. White Glove is a two-person crew into your home:
+            unpacking, assembly, placement, and packing-material removal. White Glove includes up to
+            3 flights of stairs. We confirm what fits your address on the Confirm Order call. See{' '}
+            <Link href="/shipping" className="doc-link">
+              Delivery
+            </Link>
+            .
           </p>
         ),
       },
@@ -252,9 +278,10 @@ const SECTIONS: Section[] = [
         question: 'Who assembles the crib?',
         answer: (
           <p>
-            It depends on the delivery tier you choose. White Glove includes assembly in your home.
-            With Threshold, you assemble using the included instructions. We clarify what your order
-            includes before the balance is invoiced.
+            It depends on the delivery tier you choose. White Glove includes unpacking, assembly and
+            placement in your home. White Glove includes up to 3 flights of stairs. Curbside does
+            not include carrying items indoors, unpacking, assembly or placement. We clarify what
+            your order includes before we schedule final delivery.
           </p>
         ),
       },
@@ -355,9 +382,9 @@ const SECTIONS: Section[] = [
               and baby-safe, and every crib meets or exceeds CPSC and ASTM standards—details live
               on our {SafetyLink} and each product page. One crib converts to a toddler bed, a
               daybed, and a full bed when the kits for your style are in place; that’s what we mean
-              by Built to Grow Up. When you’re ready to order, you choose Threshold delivery to the
-              door or White Glove with in-home assembly, and we confirm what fits your address
-              before production starts.
+              by Built to Grow Up. When you’re ready to order, you choose Curbside delivery to the
+              curb or White Glove with in-home assembly. White Glove includes up to 3 flights of
+              stairs. We confirm what fits your address before production starts.
             </p>
             <p>
               If you’re weighing two styles for your nursery and budget, ask us on Confirm Order
@@ -375,11 +402,11 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             The product page shows the crib price for the configuration displayed. Wood and stain
-            options follow the choices on that page. Delivery is quoted for your address (Threshold
-            or White Glove) and is separate from the furniture price unless the page explicitly says
-            otherwise. Nothing is charged when you first place the order. After Confirm Order, a
-            minimum 50% deposit begins production; the remaining balance is invoiced once staining
-            is complete — not before.
+            options follow the choices on that page. Delivery is charged separately at checkout
+            (Curbside or White Glove, based on your cart subtotal). Nothing is charged when you
+            first place the order. After Confirm Order, custom orders require a 50% deposit; you
+            can pay by credit card or Affirm. The remaining balance must be paid before we schedule
+            final delivery.
           </p>
         ),
       },

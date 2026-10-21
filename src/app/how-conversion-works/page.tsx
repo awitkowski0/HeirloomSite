@@ -198,13 +198,13 @@ export default function ConversionPage() {
             is complete — not before.
           </li>
           <li>
-            <strong>04 Delivered to Your Nursery</strong> — Threshold or White Glove; we deliver in
-            PA, NJ, NY, CT, OH, MD, and VA. Confirm your zip with us.
+            <strong>04 Delivered to Your Nursery</strong> — Curbside or White Glove; we deliver in
+            PA, NJ (excluding the New York City / North Jersey metro area) and MD. Confirm your zip with us.
           </li>
         </ol>
         <p>
           Ask us before you put a deposit down if anything about stages or kits is unclear.
-          Cancellation and deposit terms after payment are on the product page.
+          Cancellation and deposit terms are on our <Link href="/returns">Returns, Cancellations &amp; Refunds</Link> page.
         </p>
       </section>
       <section>
@@ -215,7 +215,7 @@ export default function ConversionPage() {
           <li>What mattress sizes does each stage require?</li>
           <li>What is the current lead time for my style, wood, and stain?</li>
           <li>
-            Threshold or White Glove — which fits my address (and zip in PA/NJ/NY/CT/OH/MD/VA)?
+            Curbside or White Glove — which fits my address (and zip in PA, NJ or MD)?
           </li>
         </ul>
       </section>
