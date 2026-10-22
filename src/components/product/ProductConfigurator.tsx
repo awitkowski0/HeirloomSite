@@ -9,6 +9,7 @@ import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
+import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import BundleBuilder from './BundleBuilder';
 import { formatPrice } from '@/lib/format';
 import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
@@ -88,8 +89,11 @@ export default function ProductConfigurator({
   const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
   // Display only - already inside the crib's price, never added to the cart.
   const includedItems = (configurations[0]?.includes ?? []).filter(i => !isDelisted(i.slug));
+  // Every row starts ticked except those the product marks bundleUnchecked
+  // (OTO: the full guard rail). A ticked optional rail adds its own price on
+  // top of the package; it is never part of the package itself.
   const [bundleSelected, setBundleSelected] = useState<Set<string>>(
-    () => new Set(bundleItems.map(i => i.slug))
+    () => new Set(bundleItems.filter(i => !i.startsUnchecked).map(i => i.slug))
   );
   /*
    * What pressing Add to Cart will actually put in the cart. Derived rather
@@ -111,7 +115,9 @@ export default function ProductConfigurator({
   // Only a wood-variant product has a separate finish axis; for a finish-variant
   // product the variant selector IS the finish selector.
   const showStainStep = variantType === 'wood';
-  const showDeliveryMessage = variantType === 'wood';
+  // Every furniture order carries a delivery charge, so the assurance block
+  // (delivery tiers etc.) follows the category, not the variant type.
+  const showDeliveryMessage = showsPurchaseAssurances(configurations[0]?.category);
 
   /**
    * Legacy ?wood= / ?stain= links only.
@@ -317,6 +323,11 @@ export default function ProductConfigurator({
         productName: bundleItem.productName,
         wood: bundleItem.wood,
         stainName: bundleItem.stainName,
+        // Only an overridden row names its parent; the server re-derives the
+        // price from that parent's catalogue entry and ignores this line's price.
+        ...(bundleItem.bundleOverride
+          ? { bundledWith: { productName: currentConfig.productName, wood: selection.wood } }
+          : {}),
       };
       productAddedToCart({
         product_name: line.productName,
@@ -329,6 +340,9 @@ export default function ProductConfigurator({
         ...line,
         id: cartItemId(line),
         price: bundleItem.price,
+        ...(bundleItem.bundleOverride && typeof bundleItem.listPrice === 'number'
+          ? { listPrice: bundleItem.listPrice }
+          : {}),
         image: bundleItem.image || '',
         quantity: 1,
       });

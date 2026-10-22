@@ -42,11 +42,22 @@ interface PricingStain {
   priceAddition: number;
   inStock: boolean;
 }
+/*
+ * A bundle price this row (a parent, e.g. a Fisher crib) grants one of its
+ * add-on products, from product.json bundlePriceOverrides via build-data.
+ */
+interface PricingBundleOverride {
+  productName: string;
+  wood: string;
+  stainName: string;
+  price: number;
+}
 interface PricingRow {
   productName: string;
   wood: string;
   basePrice: number;
   addons: Array<{ name: string; price: number }>;
+  bundleOverrides?: PricingBundleOverride[];
   stains: PricingStain[];
 }
 
@@ -84,6 +95,8 @@ export interface IncomingCartLine {
   stainName: unknown;
   quantity?: unknown;
   addons?: unknown;
+  /** { productName, wood } of the parent line this add-on was bundled with. */
+  bundledWith?: unknown;
 }
 
 export interface PricedLine {
@@ -94,6 +107,8 @@ export interface PricedLine {
   quantity: number;
   lineCents: number;
   addons: Array<{ name: string; priceCents: number }>;
+  /** Set when the line was charged its parent's bundle price rather than its own. */
+  bundlePricedWith?: { productName: string; wood: string };
 }
 
 /** A validated, fixed-amount-off coupon, resolved against Stripe by src/lib/coupon.ts. */
@@ -138,6 +153,29 @@ function priceLines(cart: unknown): { lines: PricedLine[]; subtotalCents: number
   }
 
   const lines: PricedLine[] = [];
+
+  /*
+   * Bundle prices are resolved here, from the catalogue, never from the request.
+   *
+   * A line may name the parent it was bundled with (bundledWith). It gets the
+   * parent's bundlePriceOverrides price only if (a) that parent's own pricing
+   * row lists an override for exactly this product/wood/stain, and (b) the
+   * parent is a plain line in this same cart, with at most one bundle-priced
+   * unit per parent unit. Anything else - a rail bought alone, a rail named
+   * with a crib that has no override, or whose crib is not in the cart - is
+   * charged its own catalogue price, exactly as before.
+   */
+  const parentUnits = new Map<string, number>();
+  for (const raw of cart as IncomingCartLine[]) {
+    if (typeof raw !== 'object' || raw === null || raw.bundledWith !== undefined) continue;
+    if (typeof raw.productName !== 'string' || typeof raw.wood !== 'string') continue;
+    const qty = typeof raw.quantity === 'number' && Number.isInteger(raw.quantity) && raw.quantity > 0
+      ? raw.quantity
+      : 1;
+    const key = `${raw.productName}${KEY_SEP}${raw.wood}`;
+    parentUnits.set(key, (parentUnits.get(key) ?? 0) + qty);
+  }
+  const bundleUnitsUsed = new Map<string, number>();
 
   for (const raw of cart as IncomingCartLine[]) {
     if (typeof raw !== 'object' || raw === null) throw new PricingError('Invalid cart line');
@@ -202,8 +240,31 @@ function priceLines(cart: unknown): { lines: PricedLine[]; subtotalCents: number
       }
     }
 
+    let bundlePricedWith: PricedLine['bundlePricedWith'];
+    let bundleCents: number | null = null;
+    if (raw.bundledWith !== undefined) {
+      const ref = raw.bundledWith as { productName?: unknown; wood?: unknown } | null;
+      if (typeof ref !== 'object' || ref === null) throw new PricingError('Invalid bundledWith');
+      const parentName = asString(ref.productName, 'bundledWith productName');
+      const parentWood = asString(ref.wood, 'bundledWith wood');
+      const parentKey = `${parentName}${KEY_SEP}${parentWood}`;
+      const override = byKey
+        .get(parentKey)
+        ?.bundleOverrides?.find(
+          o => o.productName === productName && o.wood === wood && o.stainName === stainName
+        );
+      const usedKey = `${parentKey}${KEY_SEP}${productName}`;
+      const used = bundleUnitsUsed.get(usedKey) ?? 0;
+      if (override && used + quantity <= (parentUnits.get(parentKey) ?? 0)) {
+        bundleUnitsUsed.set(usedKey, used + quantity);
+        bundleCents = Math.round(override.price * 100);
+        bundlePricedWith = { productName: parentName, wood: parentWood };
+      }
+    }
+
     const addonCents = addons.reduce((sum, a) => sum + a.priceCents, 0);
-    const unitCents = Math.round((row.basePrice + (stain.priceAddition || 0)) * 100) + addonCents;
+    const unitCents =
+      (bundleCents ?? Math.round((row.basePrice + (stain.priceAddition || 0)) * 100)) + addonCents;
     lines.push({
       productName,
       wood,
@@ -212,6 +273,7 @@ function priceLines(cart: unknown): { lines: PricedLine[]; subtotalCents: number
       quantity,
       lineCents: unitCents * quantity,
       addons,
+      ...(bundlePricedWith ? { bundlePricedWith } : {}),
     });
   }
 
@@ -255,8 +317,8 @@ export function priceCart(
   /*
    * Tax is on (subtotal - discount) PLUS delivery. A coupon is a seller-funded
    * discount, so the customer is taxed on what they actually pay, same as PA
-   * taxes the delivery charge on a taxable item (a $685 delivery adds $41.10 of
-   * tax on a PA order).
+   * taxes the delivery charge on a taxable item (a $175 curbside delivery adds
+   * $10.50 of tax on a PA order).
    */
   const taxCents = taxCentsFor(state, subtotalCents - discountCents + shippingCents);
 

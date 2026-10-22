@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "test": "node scripts/build-data.mjs && node --conditions=react-server --import ./tests/register.mjs --test \"tests/**/*.test.ts\"",
     "data:build": "node scripts/build-data.mjs"
   },
   "dependencies": {

@@ -1,6 +1,6 @@
 'use client';
 
-import type { CartItem, CartAddon, CartInclude } from '@/types';
+import type { CartItem, CartAddon, CartInclude, CartParentRef } from '@/types';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
 
 const STORAGE_KEY = 'heirloom_cart';
@@ -20,13 +20,18 @@ const EVENT = 'heirloom_cart_change';
  */
 
 export function itemKey(
-  item: Pick<CartItem, 'productName' | 'wood' | 'stainName' | 'addons'>
+  item: Pick<CartItem, 'productName' | 'wood' | 'stainName' | 'addons' | 'bundledWith'>
 ): string {
   const addonKey = (item.addons || [])
     .map(a => `${a.name}:${a.price}:${a.stainName || ''}`)
     .sort()
     .join('|');
-  return [item.productName, item.wood, item.stainName, addonKey].join(' ');
+  const parts = [item.productName, item.wood, item.stainName, addonKey];
+  // Only appended when present, so every existing line keeps its id. A rail
+  // added at one crib's bundle price is a different line from the same rail
+  // bought alone or with another crib.
+  if (item.bundledWith) parts.push(`with:${item.bundledWith.productName}/${item.bundledWith.wood}`);
+  return parts.join(' ');
 }
 
 /**
@@ -39,7 +44,7 @@ export function itemKey(
  * "-" (e.g. "3/4 Guard Rail"). Deriving from itemKey keeps them in sync.
  */
 export function cartItemId(
-  item: Pick<CartItem, 'productName' | 'wood' | 'stainName' | 'addons'>
+  item: Pick<CartItem, 'productName' | 'wood' | 'stainName' | 'addons' | 'bundledWith'>
 ): string {
   const key = itemKey(item);
   let hash = 0x811c9dc5;
@@ -60,6 +65,15 @@ function isCartInclude(value: unknown): value is CartInclude {
   if (typeof value !== 'object' || value === null) return false;
   const i = value as Record<string, unknown>;
   return typeof i.productName === 'string' && i.productName.length > 0;
+}
+
+function isCartParentRef(value: unknown): value is CartParentRef {
+  if (typeof value !== 'object' || value === null) return false;
+  const p = value as Record<string, unknown>;
+  return (
+    typeof p.productName === 'string' && p.productName.length > 0 &&
+    typeof p.wood === 'string' && p.wood.length > 0
+  );
 }
 
 function isCartAddon(value: unknown): value is CartAddon {
@@ -105,7 +119,10 @@ export function parseStoredCart(raw: string | null): CartItem[] {
     const includes = Array.isArray(e.includes)
       ? (e.includes.filter(isCartInclude) as CartInclude[])
       : undefined;
-    const base = { productName: e.productName, wood: e.wood, stainName: e.stainName, addons };
+    const bundledWith = isCartParentRef(e.bundledWith)
+      ? { productName: e.bundledWith.productName, wood: e.bundledWith.wood }
+      : undefined;
+    const base = { productName: e.productName, wood: e.wood, stainName: e.stainName, addons, bundledWith };
     out.push({
       ...base,
       id: typeof e.id === 'string' && e.id ? e.id : cartItemId(base),
@@ -113,6 +130,9 @@ export function parseStoredCart(raw: string | null): CartItem[] {
       price: e.price,
       image: typeof e.image === 'string' ? e.image : '',
       includes,
+      ...(typeof e.listPrice === 'number' && Number.isFinite(e.listPrice) && e.listPrice >= 0
+        ? { listPrice: e.listPrice }
+        : {}),
       // Clamped to the same ceiling the server enforces, so a cart restored
       // from localStorage can never carry a line checkout will reject.
       quantity: Math.min(e.quantity, MAX_QUANTITY_PER_LINE),

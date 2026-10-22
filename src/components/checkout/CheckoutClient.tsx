@@ -11,6 +11,8 @@ import {
 } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
+import { chargedUnitPrices } from '@/lib/cart-pricing';
+import { hasBundlePrice } from '@/lib/bundle-prices';
 import {
   DEFAULT_SHIPPING_METHOD,
   SHIPPING_METHODS,
@@ -179,6 +181,8 @@ export default function CheckoutClient({ recommendations }: Props) {
    * overriding this is for.
    */
   const estSubtotalCents = toCents(subtotal);
+  // Per line, by the same rule the server bills by (src/lib/cart-pricing.ts).
+  const chargedUnit = chargedUnitPrices(cart, hasBundlePrice);
   const estDiscountCents = appliedCoupon
     ? Math.min(estSubtotalCents, appliedCoupon.amountOffCents)
     : 0;
@@ -226,6 +230,10 @@ export default function CheckoutClient({ recommendations }: Props) {
     stainName: item.stainName,
     quantity: item.quantity,
     addons: item.addons?.map(a => ({ name: a.name })),
+    // No price: the server looks the bundle price up from this parent itself.
+    ...(item.bundledWith
+      ? { bundledWith: { productName: item.bundledWith.productName, wood: item.bundledWith.wood } }
+      : {}),
   }));
 
   /**
@@ -634,7 +642,7 @@ export default function CheckoutClient({ recommendations }: Props) {
           <div className="order-summary">
             <h2 className="headline-md">Order Summary</h2>
             <ul className="order-summary-items">
-              {cart.map(item => (
+              {cart.map((item, idx) => (
                 <li key={item.id}>
                   <div className="order-summary-thumb">
                     {/* eslint-disable-next-line @next/next/no-img-element -- 80px
@@ -648,7 +656,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                         {variantLabel(item.wood, item.stainName)}
                       </p>
                     )}
-                    <p className="body-md">{formatPrice(item.price)}</p>
+                    <p className="body-md">{formatPrice(chargedUnit[idx])}</p>
                     {/*
                       What arrives with this line, already inside its price.
                       
