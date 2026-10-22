@@ -132,20 +132,45 @@ export function webSiteJsonLd(): JsonLd {
 }
 
 /**
+ * Furniture builders, keyed by the SKU prefix (OTO-1201, FQP-301, KC-10).
+ *
+ * Handling windows (JSON-LD and the Merchant Center feed) and the feed's
+ * `g:brand` both read this table, so a new builder is one row. Kids Comfort
+ * is already here for when those pieces land in the catalogue. The store
+ * name is never a brand — Google Shopping would treat every builder as one
+ * manufacturer.
+ */
+export const BUILDERS = {
+  OTO: { name: 'Old Town Oak', handling: { minValue: 30, maxValue: 40 } },
+  FQP: { name: 'Fisher', handling: { minValue: 50, maxValue: 70 } },
+  KC: { name: 'Kids Comfort', handling: { minValue: 40, maxValue: 40 } },
+} as const;
+
+export type BuilderCode = keyof typeof BUILDERS;
+
+/** First token of a SKU (`OTO`, `FQP`, `KC`), or null when it is not a builder. */
+export function skuBuilderCode(sku: string | null | undefined): BuilderCode | null {
+  const prefix = (sku ?? '').trim().split(/[\s-]/, 1)[0]?.toUpperCase() ?? '';
+  return prefix in BUILDERS ? (prefix as BuilderCode) : null;
+}
+
+/** Builder display name for a SKU, or null. Never the store name. */
+export function builderBrand(sku: string | null | undefined): string | null {
+  const code = skuBuilderCode(sku);
+  return code ? BUILDERS[code].name : null;
+}
+
+/**
  * Handling time in business days, from the builder prefix on the SKU.
  *
- * Old Town Oak (OTO) 30–40, Kids Comfort (KC) 40, Fisher's (FQP) 50–70.
  * A SKU with no furniture-builder prefix (rugs, lamps) keeps the previous
  * six-to-eight week window. Google reads unitCode DAY as business days.
  */
 export function handlingBusinessDays(
   sku: string | null | undefined
 ): { minValue: number; maxValue: number } {
-  const prefix = (sku ?? '').trim().split(/[\s-]/, 1)[0]?.toUpperCase() ?? '';
-  if (prefix === 'OTO') return { minValue: 30, maxValue: 40 };
-  if (prefix === 'KC') return { minValue: 40, maxValue: 40 };
-  if (prefix === 'FQP') return { minValue: 50, maxValue: 70 };
-  return { minValue: 42, maxValue: 56 };
+  const code = skuBuilderCode(sku);
+  return code ? BUILDERS[code].handling : { minValue: 42, maxValue: 56 };
 }
 
 /**
