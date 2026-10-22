@@ -211,7 +211,7 @@ function totalsRows(priced: PricedCart, quote: QuoteResult, taxState: string): s
     );
   }
   rows.push(
-    `<tr><td>${esc(shippingMethodById(priced.shippingMethod).name)}</td><td align="right">${money(priced.shippingCents)}</td></tr>`,
+    `<tr><td>${esc(shippingMethodById(priced.shippingMethod).invoiceLabel)}</td><td align="right">${money(priced.shippingCents)}</td></tr>`,
     `<tr><td>Sales tax${priced.taxCents > 0 ? ` (${esc(taxState)} 6%)` : ''}</td><td align="right">${money(priced.taxCents)}</td></tr>`,
     `<tr><td><strong>Order total</strong></td><td align="right"><strong>${money(priced.totalCents)}</strong></td></tr>`,
     `<tr><td><strong>Due now</strong></td><td align="right"><strong>${money(quote.split.dueNowCents)}</strong></td></tr>`

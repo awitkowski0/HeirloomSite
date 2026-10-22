@@ -1,7 +1,8 @@
 /*
- * The "Curbside $175 or white-glove $225 delivery" assurance block on product
- * pages (src/lib/delivery-line.ts, used by ProductConfigurator). Run with
- * `npm test`.
+ * The "Curbside from $175 or white-glove from $299 delivery" assurance block on
+ * product pages (src/lib/delivery-line.ts, used by ProductConfigurator). The
+ * amounts are the opening band; checkout charges the band for the cart.
+ * Run with `npm test`.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,8 +13,8 @@ interface InventoryRow { productName: string; category: string | null; variantTy
 const inventory = JSON.parse(readFileSync(new URL('../public/data/inventory.json', import.meta.url), 'utf8')) as InventoryRow[];
 const byName = new Map(inventory.map(r => [r.productName, r]));
 
-test('delivery line wording and amounts come from order-terms ($175 / $225)', () => {
-  assert.equal(deliveryLineTitle(), 'Curbside $175 or white-glove $225 delivery');
+test('delivery line wording and opening-band amounts come from order-terms ($175 / $299)', () => {
+  assert.equal(deliveryLineTitle(), 'Curbside from $175 or white-glove from $299 delivery');
 });
 
 test('every crib and mini crib shows the delivery line, whatever its variant type', () => {

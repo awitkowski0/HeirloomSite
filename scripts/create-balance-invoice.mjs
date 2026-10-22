@@ -141,7 +141,7 @@ const invoice = await stripe.invoices.create(
     automatic_tax: { enabled: false },
     description: `Balance on completion - website order ${orderRef}`,
     custom_fields: [{ name: 'Order', value: orderRef.slice(0, 30) }],
-    footer: 'Delivery and setup are included. The deposit on this order has been paid.',
+    footer: 'The deposit on this order has been paid. Delivery was included in the original order total.',
     shipping_details: deposit.shipping_details ?? undefined,
     metadata: {
       order_ref: orderRef,

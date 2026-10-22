@@ -3,8 +3,10 @@
 import AddressAutocomplete from './AddressAutocomplete';
 import {
   SHIPPABLE_STATES,
-  UNSHIPPABLE_STATES,
+  UNPUBLISHED_DELIVERY_MESSAGE,
+  isExcludedMetroZip,
   isShippableState,
+  isValidUsZip,
   stateName,
 } from '@/lib/order-terms';
 
@@ -84,8 +86,8 @@ export function validateShipping(values: ShippingValues): Partial<Record<keyof S
   if (values.email.trim() && !EMAIL_RE.test(values.email.trim())) {
     errors.email = 'Enter a valid email address';
   }
-  if (values.zip.trim() && !/^[A-Za-z0-9][A-Za-z0-9\- ]{2,11}$/.test(values.zip.trim())) {
-    errors.zip = 'Enter a valid ZIP code';
+  if (values.zip.trim() && !isValidUsZip(values.zip)) {
+    errors.zip = 'Enter a valid 5-digit ZIP code';
   }
   if (values.phone.trim() && !isUsPhone(values.phone)) {
     errors.phone = 'Enter a 10-digit US phone number';
@@ -95,10 +97,12 @@ export function validateShipping(values: ShippingValues): Partial<Record<keyof S
   // cleared - but the state decides both the delivery route and whether sales
   // tax is charged, so it is worth saying out loud rather than letting the
   // server be the first to notice.
-  if (values.state.trim() && !isShippableState(values.state.trim().toUpperCase())) {
-    errors.state =
-      `We don't deliver to ${stateName(values.state.trim())} yet — ` +
-      'contact us and we will see what we can arrange.';
+  const stateCode = values.state.trim().toUpperCase();
+  if (stateCode && !isShippableState(stateCode)) {
+    errors.state = UNPUBLISHED_DELIVERY_MESSAGE;
+  }
+  if (isExcludedMetroZip(values.zip)) {
+    errors.zip = UNPUBLISHED_DELIVERY_MESSAGE;
   }
   return errors;
 }
@@ -159,26 +163,25 @@ export default function ShippingForm({
                 >
                   <option value="">Select a state</option>
                   {/*
-                    Every state, in two groups, rather than only the seven we
-                    deliver to. A missing option is a puzzle - someone in Texas
-                    scrolls the list twice and leaves without knowing whether we
-                    are broken or simply do not go there. Offering it and then
-                    saying so answers the question.
+                    Only the states we deliver to (PA, NJ, MD). Anyone elsewhere is
+                    pointed to /contact; the server enforces the same list.
                   */}
-                  <optgroup label="We deliver here">
-                    {SHIPPABLE_STATES.map(s => (
-                      <option key={s.code} value={s.code}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Not yet — ask us">
-                    {UNSHIPPABLE_STATES.map(s => (
-                      <option key={s.code} value={s.code}>
-                        {s.name}
-                      </option>
-                    ))}
-                  </optgroup>
+                  {/*
+                    Address autofill can set a state we do not serve. Without
+                    this the select would look empty while the form still held
+                    the value, and the customer would not see why checkout
+                    refuses. Shown, disabled, and explained by the error.
+                  */}
+                  {values.state && !isShippableState(values.state.trim().toUpperCase()) && (
+                    <option value={values.state} disabled>
+                      {stateName(values.state)} (not a delivery state)
+                    </option>
+                  )}
+                  {SHIPPABLE_STATES.map(s => (
+                    <option key={s.code} value={s.code}>
+                      {s.name}
+                    </option>
+                  ))}
                 </select>
               ) : (
                 <input

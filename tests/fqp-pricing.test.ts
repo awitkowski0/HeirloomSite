@@ -16,7 +16,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { priceCart, cartSubtotalCents } from '../src/lib/pricing';
 import { chargedSubtotalCents, chargedUnitPrices, type PricedCartLineInput } from '../src/lib/cart-pricing';
-import { SHIPPING_METHODS, shippingCentsFor, cheapestShippingCents } from '../src/lib/order-terms';
+import { SHIPPING_METHODS, deliveryChargeFor, cheapestShippingCents } from '../src/lib/order-terms';
 
 const FISHER: ReadonlyArray<{ name: string; sku: string; crib: number; pkg: number }> = [
   { name: 'Arched Top', sku: 'FQP-201', crib: 2050, pkg: 2550 },
@@ -94,16 +94,16 @@ function asCart(row: PricingRow, lines: Line[]): PricedCartLineInput[] {
   });
 }
 
-test('delivery: exactly two tiers, curbside $175 and white glove $225', () => {
+test('delivery: Curbside and White Glove, opening band $175 and $299', () => {
   assert.deepEqual(
-    SHIPPING_METHODS.map(m => [m.id, m.name, m.cents]),
+    SHIPPING_METHODS.map(m => [m.id, m.name]),
     [
-      ['threshold', 'Curbside Delivery', 17_500],
-      ['white_glove', 'White Glove Delivery', 22_500],
+      ['threshold', 'Curbside'],
+      ['white_glove', 'White Glove'],
     ]
   );
-  assert.equal(shippingCentsFor('threshold'), 17_500);
-  assert.equal(shippingCentsFor('white_glove'), 22_500);
+  assert.equal(deliveryChargeFor(0, 'threshold'), 17_500);
+  assert.equal(deliveryChargeFor(0, 'white_glove'), 29_900);
   assert.equal(cheapestShippingCents(), 17_500);
 });
 
@@ -143,23 +143,28 @@ for (const p of FISHER) {
         assert.equal(chargedSubtotalCents(asCart(row, lines)), cents(expected), `${where} ${label} (cart)`);
       }
 
-      // Cart total with each delivery tier (NJ: no sales tax).
+      // Cart total with each delivery tier (NJ: no sales tax). The charge is the
+      // band for the merchandise subtotal, recomputed here — not a flat add-on.
       const both = [cribLine(row), kitLine(row, TODDLER), kitLine(row, RAILS)];
+      const curbCents = deliveryChargeFor(cents(p.pkg), 'threshold');
+      const gloveCents = deliveryChargeFor(cents(p.pkg), 'white_glove');
       const curb = priceCart(both, 'NJ', 'threshold');
       assert.equal(curb.subtotalCents, cents(p.pkg));
-      assert.equal(curb.shippingCents, 17_500);
+      assert.equal(curb.shippingCents, curbCents);
       assert.equal(curb.taxCents, 0);
-      assert.equal(curb.totalCents, cents(p.pkg + 175), `${where} package + curbside`);
+      assert.equal(curb.totalCents, cents(p.pkg) + curbCents, `${where} package + curbside`);
       const glove = priceCart(both, 'NJ', 'white_glove');
-      assert.equal(glove.shippingCents, 22_500);
-      assert.equal(glove.totalCents, cents(p.pkg + 225), `${where} package + white glove`);
+      assert.equal(glove.shippingCents, gloveCents);
+      assert.equal(glove.totalCents, cents(p.pkg) + gloveCents, `${where} package + white glove`);
       // PA: 6% on goods plus delivery.
       const pa = priceCart(both, 'PA', 'threshold');
-      assert.equal(pa.taxCents, Math.round((cents(p.pkg + 175) * 600) / 10_000));
-      assert.equal(pa.totalCents, cents(p.pkg + 175) + pa.taxCents);
+      assert.equal(pa.taxCents, Math.round(((cents(p.pkg) + curbCents) * 600) / 10_000));
+      assert.equal(pa.totalCents, cents(p.pkg) + curbCents + pa.taxCents);
       // Crib alone with each tier.
-      assert.equal(priceCart([cribLine(row)], 'NJ', 'threshold').totalCents, cents(p.crib + 175));
-      assert.equal(priceCart([cribLine(row)], 'NJ', 'white_glove').totalCents, cents(p.crib + 225));
+      const cribCurb = deliveryChargeFor(cents(p.crib), 'threshold');
+      const cribGlove = deliveryChargeFor(cents(p.crib), 'white_glove');
+      assert.equal(priceCart([cribLine(row)], 'NJ', 'threshold').totalCents, cents(p.crib) + cribCurb);
+      assert.equal(priceCart([cribLine(row)], 'NJ', 'white_glove').totalCents, cents(p.crib) + cribGlove);
     }
 
     // The product page picker reads its prices from inventory.json.
