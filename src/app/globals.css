@@ -3335,6 +3335,14 @@ a.product-inline-link:focus-visible {
   height: 20px;
   flex-shrink: 0;
 }
+.terms-scroll a,
+.terms-full-links a {
+  color: var(--accent);
+  text-underline-offset: 2px;
+}
+.terms-full-links {
+  margin: 12px 0 0;
+}
 
 /* Order summary */
 .order-summary {
@@ -3521,6 +3529,41 @@ a.product-inline-link:focus-visible {
 .doc-link {
   color: var(--accent);
   text-underline-offset: 3px;
+}
+
+.doc-table-wrap {
+  overflow-x: auto;
+  margin: 0 0 16px;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  line-height: 1.5;
+}
+
+.doc-table th,
+.doc-table td {
+  border-bottom: 1px solid var(--rule);
+  padding: 10px 16px 10px 0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.doc-table th {
+  font-weight: 600;
+  color: var(--on-surface);
+}
+
+.doc-table td {
+  color: var(--on-surface);
+}
+
+.doc-table th:not(:first-child),
+.doc-table td:not(:first-child) {
+  text-align: right;
+  padding-right: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------------------------------------------------------------------------

@@ -62,6 +62,15 @@ export default function Footer() {
                 <Link href="/care">Care &amp; Finishes</Link>
               </li>
               <li>
+                <Link href="/shipping">Delivery</Link>
+              </li>
+              <li>
+                <Link href="/returns">Returns &amp; Cancellations</Link>
+              </li>
+              <li>
+                <Link href="/terms">Terms</Link>
+              </li>
+              <li>
                 <Link href="/contact">Contact Us</Link>
               </li>
               <li>
