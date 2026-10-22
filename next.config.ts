@@ -48,6 +48,7 @@ const nextConfig: NextConfig = {
   // ever becomes dynamic, the JSON must be traced into the lambda bundle.
   outputFileTracingIncludes: {
     '/api/**/*': ['./public/data/*.json'],
+    '/feed.xml': ['./public/data/*.json'],
   },
 
   images: {
