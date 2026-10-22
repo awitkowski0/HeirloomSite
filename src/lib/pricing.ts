@@ -6,6 +6,7 @@ import {
   UNPUBLISHED_DELIVERY_MESSAGE,
   deliveryChargeFor,
   isPublishedDeliveryArea,
+  isValidUsZip,
   isShippingMethodId,
   taxCentsFor,
   type ShippingMethodId,
@@ -412,8 +413,10 @@ export function validateShipping(body: Record<string, unknown>): ShippingDetails
   }
 
   const zip = field('zip');
-  if (!/^[A-Za-z0-9][A-Za-z0-9\- ]{2,11}$/.test(zip)) {
-    throw new PricingError('Invalid postal code');
+  // Strict: delivery is priced and gated from this, and every area we serve is
+  // US. Anything looser would let '0710' or 'O7102' slip past the Newark ZIP list.
+  if (!isValidUsZip(zip)) {
+    throw new PricingError('Enter a valid 5-digit ZIP code');
   }
 
   /*

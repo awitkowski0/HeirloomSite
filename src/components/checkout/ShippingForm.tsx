@@ -6,6 +6,8 @@ import {
   UNPUBLISHED_DELIVERY_MESSAGE,
   isExcludedMetroZip,
   isShippableState,
+  isValidUsZip,
+  stateName,
 } from '@/lib/order-terms';
 
 export interface ShippingValues {
@@ -84,8 +86,8 @@ export function validateShipping(values: ShippingValues): Partial<Record<keyof S
   if (values.email.trim() && !EMAIL_RE.test(values.email.trim())) {
     errors.email = 'Enter a valid email address';
   }
-  if (values.zip.trim() && !/^[A-Za-z0-9][A-Za-z0-9\- ]{2,11}$/.test(values.zip.trim())) {
-    errors.zip = 'Enter a valid ZIP code';
+  if (values.zip.trim() && !isValidUsZip(values.zip)) {
+    errors.zip = 'Enter a valid 5-digit ZIP code';
   }
   if (values.phone.trim() && !isUsPhone(values.phone)) {
     errors.phone = 'Enter a 10-digit US phone number';
@@ -99,7 +101,7 @@ export function validateShipping(values: ShippingValues): Partial<Record<keyof S
   if (stateCode && !isShippableState(stateCode)) {
     errors.state = UNPUBLISHED_DELIVERY_MESSAGE;
   }
-  if (stateCode === 'NJ' && isExcludedMetroZip(values.zip)) {
+  if (isExcludedMetroZip(values.zip)) {
     errors.zip = UNPUBLISHED_DELIVERY_MESSAGE;
   }
   return errors;
@@ -164,6 +166,17 @@ export default function ShippingForm({
                     Only the states we deliver to (PA, NJ, MD). Anyone elsewhere is
                     pointed to /contact; the server enforces the same list.
                   */}
+                  {/*
+                    Address autofill can set a state we do not serve. Without
+                    this the select would look empty while the form still held
+                    the value, and the customer would not see why checkout
+                    refuses. Shown, disabled, and explained by the error.
+                  */}
+                  {values.state && !isShippableState(values.state.trim().toUpperCase()) && (
+                    <option value={values.state} disabled>
+                      {stateName(values.state)} (not a delivery state)
+                    </option>
+                  )}
                   {SHIPPABLE_STATES.map(s => (
                     <option key={s.code} value={s.code}>
                       {s.name}

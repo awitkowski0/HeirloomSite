@@ -41,17 +41,22 @@ export interface ShippingMethod {
   /* Shown under the name at checkout. Confirm the exact service wording with
      the carrier before launch - these describe the industry-standard tiers. */
   description: string;
+  /* Invoice, email and footer wording. `name` is the short radio-button label
+     and reads wrongly on a bill ("Curbside" is not a line item). */
+  invoiceLabel: string;
 }
 
 export const SHIPPING_METHODS: readonly ShippingMethod[] = [
   {
     id: 'threshold',
     name: 'Curbside',
+    invoiceLabel: 'Curbside delivery',
     description: 'Delivery to the curb at your address.',
   },
   {
     id: 'white_glove',
     name: 'White Glove',
+    invoiceLabel: 'White Glove delivery',
     description: 'White-glove delivery and assembly in your home.',
   },
 ];
@@ -239,30 +244,48 @@ export const EXCLUDED_METRO_ZIPS: readonly string[] = ['07101', '07102', '07103'
 export const UNPUBLISHED_DELIVERY_MESSAGE =
   "We don't publish delivery pricing for this area. Please contact us for delivery options.";
 
-/** First five ZIP digits, or '' when there are not yet five. */
-export function zip5(zip: string): string {
-  const digits = zip.replace(/\D/g, '');
-  return digits.length >= 5 ? digits.slice(0, 5) : '';
+/** A US ZIP exactly as delivery is priced from it: 12345 or 12345-6789. */
+export function isValidUsZip(zip: string): boolean {
+  return /^\d{5}(-\d{4})?$/.test(zip.trim());
 }
 
-/** True for an NJ ZIP in the excluded Newark metro set. */
+/** The five-digit ZIP, or '' unless the whole value is a valid US ZIP. */
+export function zip5(zip: string): string {
+  return isValidUsZip(zip) ? zip.trim().slice(0, 5) : '';
+}
+
+/**
+ * True for a ZIP in the excluded Newark metro set. Checked whatever state was
+ * picked: a Newark ZIP does not become deliverable by pairing it with PA.
+ */
 export function isExcludedMetroZip(zip: string): boolean {
   const five = zip5(zip);
   return five !== '' && EXCLUDED_METRO_ZIPS.includes(five);
 }
 
+/** Why checkout will not quote delivery yet, or 'ok'. */
+export type DeliveryAreaStatus = 'ok' | 'zip_missing' | 'zip_invalid' | 'state' | 'excluded_zip';
+
 /**
- * True when checkout may show a delivery price for this state and ZIP.
+ * The single rule for "may a delivery price be shown or billed for this
+ * address". Checkout, the form and the server all go through it.
  *
- * An empty state is not published: the caller that still wants an estimate
- * before an address is typed must decide that itself. NJ is published except
- * for the excluded Newark ZIPs.
+ * A price needs BOTH a delivery state and a strictly valid ZIP. An empty ZIP
+ * is 'zip_missing' (not yet typed, nothing to report); anything typed that is
+ * not 12345 / 12345-6789 is 'zip_invalid'.
  */
-export function isPublishedDeliveryArea(state: string, zip: string): boolean {
+export function deliveryAreaStatus(state: string, zip: string): DeliveryAreaStatus {
   const code = state.trim().toUpperCase();
-  if (!isShippableState(code)) return false;
-  if (code === 'NJ' && isExcludedMetroZip(zip)) return false;
-  return true;
+  if (code !== '' && !isShippableState(code)) return 'state';
+  if (zip.trim() === '') return 'zip_missing';
+  if (!isValidUsZip(zip)) return 'zip_invalid';
+  if (isExcludedMetroZip(zip)) return 'excluded_zip';
+  return code === '' ? 'zip_missing' : 'ok';
+}
+
+/** True when checkout may show a delivery price for this state and ZIP. */
+export function isPublishedDeliveryArea(state: string, zip: string): boolean {
+  return deliveryAreaStatus(state, zip) === 'ok';
 }
 
 const SHIPPABLE = new Set(SHIPPABLE_STATE_CODES);
@@ -275,10 +298,6 @@ export function isShippableState(code: string): boolean {
   return SHIPPABLE.has(code);
 }
 
-/** The states we do NOT deliver to, still offered so we can say why. */
-export const UNSHIPPABLE_STATES: readonly UsState[] = US_STATES.filter(
-  s => !SHIPPABLE.has(s.code)
-);
 
 /** "Texas" for "TX". Falls back to the code so a message is never blank. */
 export function stateName(code: string): string {

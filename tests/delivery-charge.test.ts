@@ -10,6 +10,7 @@ import {
   EXCLUDED_METRO_ZIPS,
   SHIPPABLE_STATE_CODES,
   UNPUBLISHED_DELIVERY_MESSAGE,
+  deliveryAreaStatus,
   deliveryChargeFor,
   isPublishedDeliveryArea,
 } from '../src/lib/order-terms';
@@ -70,8 +71,35 @@ test('published delivery area: PA and MD and NJ outside Newark allowed; NY, VA a
   assert.equal(isPublishedDeliveryArea('NJ', '07302'), true);
   assert.equal(isPublishedDeliveryArea('NJ', '07201'), true);
   assert.equal(isPublishedDeliveryArea('NJ', '07601'), true);
-  // Partial ZIP is not matched.
-  assert.equal(isPublishedDeliveryArea('NJ', '0710'), true);
+  // A ZIP must be complete and numeric: a malformed Newark ZIP is not a way round the list.
+  for (const zip of ['0710', '7102', '071', 'O7102', '07102 ', '', '  ']) {
+    assert.equal(isPublishedDeliveryArea('NJ', zip), false, `NJ "${zip}"`);
+  }
+  // A Newark ZIP does not become deliverable by pairing it with another state.
+  assert.equal(isPublishedDeliveryArea('PA', '07102'), false);
+  // ZIP+4 is accepted, and the Newark check sees through it.
+  assert.equal(isPublishedDeliveryArea('PA', '17101-1234'), true);
+  assert.equal(isPublishedDeliveryArea('NJ', '07102-1234'), false);
+  // No price until there is a state AND a ZIP.
+  assert.equal(isPublishedDeliveryArea('', '17101'), false);
+  assert.equal(isPublishedDeliveryArea('PA', ''), false);
+});
+
+test('deliveryAreaStatus says why a price is withheld', () => {
+  assert.equal(deliveryAreaStatus('PA', '17101'), 'ok');
+  assert.equal(deliveryAreaStatus('PA', ''), 'zip_missing');
+  assert.equal(deliveryAreaStatus('', '17101'), 'zip_missing');
+  assert.equal(deliveryAreaStatus('PA', '1710'), 'zip_invalid');
+  assert.equal(deliveryAreaStatus('NJ', '07102'), 'excluded_zip');
+  assert.equal(deliveryAreaStatus('PA', '07102'), 'excluded_zip');
+  assert.equal(deliveryAreaStatus('NY', '10001'), 'state');
+  assert.equal(deliveryAreaStatus('NY', ''), 'state');
+});
+
+test('server rejects malformed ZIPs outright', () => {
+  for (const zip of ['0710', '7102', 'O7102', '1710A', '12345-678']) {
+    assert.throws(() => validateShipping(address('NJ', zip)), PricingError, zip);
+  }
 });
 
 function address(state: string, zip: string): Record<string, unknown> {

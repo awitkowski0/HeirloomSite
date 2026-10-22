@@ -20,9 +20,10 @@ import {
   TAXED_STATE,
   affirmEligible,
   deliveryChargeFor,
-  isPublishedDeliveryArea,
+  deliveryAreaStatus,
   splitPayment,
   taxCentsFor,
+  type DeliveryAreaStatus,
   type PaymentOption,
   type ShippingMethodId,
 } from '@/lib/order-terms';
@@ -32,6 +33,7 @@ import {
   checkoutEmailEntered,
   checkoutFailed,
   checkoutStarted,
+  deliveryAreaRejected,
   quoteSubmitted,
 } from '@/lib/analytics';
 import ShippingForm, { EMAIL_RE, validateShipping, type ShippingValues } from './ShippingForm';
@@ -188,12 +190,39 @@ export default function CheckoutClient({ recommendations }: Props) {
     ? Math.min(estSubtotalCents, appliedCoupon.amountOffCents)
     : 0;
   /*
-   * An empty state is not an out-of-area address yet, so the tier for the
-   * cart still shows. A state outside PA/NJ/MD, or an NJ ZIP in the excluded
-   * metro, gets no price at all.
+   * No delivery price until the address says where it is going: a delivery
+   * state AND a valid ZIP. Before that the tier is withheld rather than
+   * estimated, so nobody is quoted a number for an address we may not serve.
    */
-  const deliveryQuoted =
-    shipping.state.trim() === '' || isPublishedDeliveryArea(shipping.state, shipping.zip);
+  const deliveryStatus = deliveryAreaStatus(shipping.state, shipping.zip);
+  const deliveryQuoted = deliveryStatus === 'ok';
+  /*
+   * Record the demand we turn away: a state we do not serve, a Newark ZIP, or a
+   * ZIP that is not a ZIP, along with what is in the cart. Debounced so a ZIP
+   * is reported once it has stopped changing rather than per keystroke, and
+   * de-duplicated so re-renders and the submit path cannot report it twice.
+   * An empty ZIP is just "not typed yet" and is never reported.
+   */
+  const reportedAreaRef = useRef('');
+  useEffect(() => {
+    if (!hydrated || cart.length === 0) return;
+    if (deliveryStatus === 'ok' || deliveryStatus === 'zip_missing') return;
+    const key = `${deliveryStatus}|${shipping.state}|${shipping.zip.trim()}`;
+    if (reportedAreaRef.current === key) return;
+    const timer = setTimeout(() => {
+      reportedAreaRef.current = key;
+      deliveryAreaRejected({
+        reason: deliveryStatus,
+        state: shipping.state.trim().toUpperCase(),
+        zip: shipping.zip.trim().slice(0, 10),
+        item_count: cart.reduce((n, i) => n + i.quantity, 0),
+        cart_value: subtotal,
+        items: cart.slice(0, 20).map(i => ({ product: i.productName, quantity: i.quantity })),
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [hydrated, cart, subtotal, deliveryStatus, shipping.state, shipping.zip]);
+
   const estShippingCents =
     cart.length > 0 && deliveryQuoted ? deliveryChargeFor(estSubtotalCents, shippingMethod) : 0;
   const estTaxCents = taxCentsFor(
@@ -534,7 +563,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                   </p>
                 </>
               ) : (
-                <UnpublishedDeliveryNote />
+                <DeliveryNote status={deliveryStatus} />
               )}
             </fieldset>
 
@@ -813,7 +842,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                 Delivery charge is based on your order total; see <Link href="/shipping">Delivery</Link>.
               </p>
             ) : (
-              <UnpublishedDeliveryNote />
+              <DeliveryNote status={deliveryStatus} />
             )}
 
             {!serverTotals && (
@@ -837,7 +866,21 @@ export default function CheckoutClient({ recommendations }: Props) {
   );
 }
 
-function UnpublishedDeliveryNote() {
+function DeliveryNote({ status }: { status: DeliveryAreaStatus }) {
+  if (status === 'zip_missing') {
+    return (
+      <p className="checkout-hint" role="status">
+        Enter your state and ZIP code to see delivery options and pricing.
+      </p>
+    );
+  }
+  if (status === 'zip_invalid') {
+    return (
+      <p className="checkout-hint" role="status">
+        Enter a valid 5-digit ZIP code to see delivery pricing.
+      </p>
+    );
+  }
   return (
     <p className="checkout-hint" role="status">
       We don&rsquo;t publish delivery pricing for this area. Please{' '}
