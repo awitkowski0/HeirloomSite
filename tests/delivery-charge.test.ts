@@ -16,7 +16,6 @@ import {
 } from '../src/lib/order-terms';
 import { PricingError, priceCart, validateShipping } from '../src/lib/pricing';
 import { handlingBusinessDays, productJsonLd, productShippingCents } from '../src/lib/seo';
-import type { InventoryItem } from '../src/types';
 
 const EDGES: ReadonlyArray<[number, number, number, string]> = [
   [0, 17_500, 29_900, '$0'],
@@ -168,31 +167,6 @@ test('priceCart recomputes delivery from the merchandise subtotal', () => {
   assert.equal(two.shippingCents, 55_000);
 });
 
-function configuration(price: number, sku: string): InventoryItem {
-  return {
-    productName: 'Test Crib',
-    wood: 'Oak',
-    category: 'Cribs',
-    collection: null,
-    variantType: 'wood',
-    description: null,
-    extendedDescription: null,
-    title: null,
-    metaDescription: null,
-    basePrice: price,
-    tags: [],
-    sku,
-    slug: 'test-crib',
-    dimensions: null,
-    weight: null,
-    addons: [],
-    includes: [],
-    bundle: [],
-    related: [],
-    stains: [{ name: 'Natural', inStock: true, priceAddition: 0 }],
-  };
-}
-
 test('product JSON-LD shipping rate follows the Curbside tier, destination is PA/NJ/MD, handling time follows the builder', () => {
   assert.deepEqual(handlingBusinessDays('OTO-1201'), { minValue: 30, maxValue: 40 });
   assert.deepEqual(handlingBusinessDays('KC-10'), { minValue: 40, maxValue: 40 });
@@ -204,12 +178,13 @@ test('product JSON-LD shipping rate follows the Curbside tier, destination is PA
   assert.deepEqual(handlingBusinessDays('rdir-1'), { minValue: 42, maxValue: 56 });
 
   const ld = productJsonLd({
-    productName: 'Test Crib',
-    slug: 'test-crib',
+    name: 'Test Crib',
+    path: '/product/test-crib',
     description: 'A crib',
     images: [],
     sku: 'OTO-1201',
-    configurations: [configuration(2500, 'OTO-1201')],
+    priceDollars: 2500,
+    inStock: true,
   });
   const offers = ld.offers as {
     shippingDetails: {
@@ -226,12 +201,13 @@ test('product JSON-LD shipping rate follows the Curbside tier, destination is PA
   assert.equal(offers.shippingDetails.deliveryTime.handlingTime.unitText, 'business days');
 
   const fisher = productJsonLd({
-    productName: 'Hudson',
-    slug: 'hudson',
+    name: 'Hudson',
+    path: '/product/hudson',
     description: 'A crib',
     images: [],
     sku: 'FQP-301',
-    configurations: [configuration(1950, 'FQP-301')],
+    priceDollars: 1950,
+    inStock: true,
   });
   const fisherOffers = fisher.offers as { shippingDetails: { shippingRate: { value: number } } };
   assert.equal(fisherOffers.shippingDetails.shippingRate.value, 175);
