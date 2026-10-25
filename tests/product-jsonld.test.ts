@@ -91,3 +91,28 @@ test('no invented identifiers, ratings or business address', () => {
   }
   assert.ok(BRAND_SITE_URL.startsWith('https://'));
 });
+
+test('return policy text is the exact /returns wording (returns + cancellation), nothing invented', async () => {
+  const { readFileSync } = await import('node:fs');
+  const { RETURNS_POLICY_TEXT, CANCELLATION_POLICY_TEXT } = await import('../src/lib/seo');
+  const page = readFileSync(new URL('../src/app/returns/page.tsx', import.meta.url), 'utf8')
+    .replace(/\{' '\}/g, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ');
+  assert.ok(page.includes(RETURNS_POLICY_TEXT), 'returns sentence not on /returns');
+  assert.ok(page.includes(`Cancelling: ${CANCELLATION_POLICY_TEXT}`), 'cancellation wording not on /returns');
+  const policy = ld().offers.hasMerchantReturnPolicy as Record<string, unknown>;
+  assert.equal(policy.description, `${RETURNS_POLICY_TEXT} Cancelling: ${CANCELLATION_POLICY_TEXT}`);
+  for (const k of ['merchantReturnDays', 'returnFees', 'returnMethod', 'refundType', 'returnShippingFeesAmount']) {
+    assert.ok(!(k in policy), `no ${k} for a no-returns policy`);
+  }
+});
+
+test('no origin / made-in claims in Product markup (PA/NJ/MD is the delivery area only)', () => {
+  const p = ld();
+  const json = JSON.stringify(p);
+  for (const k of ['countryOfOrigin', 'countryOfAssembly', 'areaServed', 'address', 'manufacturer']) {
+    assert.ok(!json.includes(`"${k}"`), `unexpected ${k}`);
+  }
+  assert.doesNotMatch(json, /pennsylvania|made in|artisan/i);
+});

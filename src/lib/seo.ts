@@ -186,12 +186,30 @@ export function productShippingCents(priceDollars: number): number {
 export const RETURNS_PATH = '/returns';
 
 /**
+ * The /returns wording the return policy markup quotes, verbatim.
+ *
+ * Returns: the "Made-to-order furniture: no returns" section. Cancellation:
+ * the "Cancelling" paragraph. Keep these in step with src/app/returns/page.tsx
+ * (tests/product-jsonld.test.ts reads that file and fails if they drift).
+ * Nothing here is paraphrased and no period or number is added: the
+ * cancellation window is "before your deposit is paid", an event rather than
+ * a fixed number of days, so it has no schema.org property and is carried as
+ * text only.
+ */
+export const RETURNS_POLICY_TEXT =
+  'Made-to-order case goods cannot be returned, exchanged or refunded.';
+export const CANCELLATION_POLICY_TEXT =
+  'You can cancel at no cost at any point before your deposit is paid. Just tell us in ' +
+  'writing. After the deposit is received, the order cannot be cancelled.';
+
+/**
  * schema.org MerchantReturnPolicy for the made-to-order furniture.
  *
- * /returns: "Made-to-order case goods cannot be returned, exchanged or
- * refunded." That is MerchantReturnNotPermitted, so the policy carries no
- * return window, fees or method - there is no return to describe. Delivery is
- * US only (PA, NJ, MD), hence applicableCountry US.
+ * MerchantReturnNotPermitted: custom-built pieces cannot be returned. Delivery
+ * is US only, hence applicableCountry US. schema.org has no cancellation
+ * property, so the /returns cancellation wording rides in `description`
+ * (a Thing property every MerchantReturnPolicy has), quoted exactly, and
+ * merchantReturnLink points at /returns, where both texts live.
  */
 export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
   return {
@@ -199,6 +217,7 @@ export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
     applicableCountry: 'US',
     returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
     merchantReturnLink: absoluteUrl(RETURNS_PATH),
+    description: `${RETURNS_POLICY_TEXT} Cancelling: ${CANCELLATION_POLICY_TEXT}`,
   };
 }
 
