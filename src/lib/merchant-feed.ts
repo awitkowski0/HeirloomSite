@@ -8,6 +8,8 @@ import {
   BRAND_SITE_URL,
   SITE_NAME,
   builderBrand,
+  skuBuilderCode,
+  type BuilderCode,
   handlingBusinessDays,
   stripSiteSuffix,
 } from './seo';
@@ -155,18 +157,42 @@ export function itemColor(item: InventoryItem): string | null {
 }
 
 /**
- * `g:material`: only what the site itself states. A `wood` variant names the
- * species on the page ("Brown Maple"); otherwise the product description must
- * say it ("Crafted from solid hardwood with a rich Brown Maple finish").
- * Products that only say "solid wood" / "solid hardwoods" get nothing.
+ * `g:material` for a piece sold in the builder's BASE wood: what each builder's
+ * price book calls its base (lowest-cost) maple column. Heirloom prices every
+ * feed item from that column, so this is the wood the advertised price buys.
+ *   OTO  OTO_2026_Pricelist_0226.xlsx, Wholesale sheet, column header
+ *        "Brown Maple (unfinished)".
+ *   FQP  FQP_2026_Pricelist_0326.xlsx, "Price List - 3-15-26" sheet, header
+ *        row "CRIBS | Maple/Oak | Cherry": Maple/Oak is the base column,
+ *        sold as Brown Maple (Cherry is the upgrade column).
+ *   KC   KC_2026_Pricelist_0426-1.xlsx, "Kids Comfort" sheet, base column
+ *        "Oak, B.Maple, Sap Cherry, Unfinished": B.Maple = Brown Maple.
+ */
+export const BUILDER_BASE_MATERIAL: Readonly<Record<BuilderCode, string>> = {
+  OTO: 'Brown Maple',
+  FQP: 'Brown Maple',
+  KC: 'Brown Maple',
+};
+
+/** Wood segment of a variant SKU (`OTO-1201-BrownMaple_OCS_100_Natural` -> BrownMaple). */
+const SKU_WOOD = /-(BrownMaple|CherryWood|RedOak)_/i;
+
+/**
+ * `g:material`, from the builder's price book rather than the product copy.
+ *
+ * A `wood` variant names its column outright ("BrownMaple"); a variant SKU
+ * carries the same wood segment; otherwise the item is the builder's base
+ * column (BUILDER_BASE_MATERIAL). A SKU with no known builder gets nothing.
  */
 export function itemMaterial(item: InventoryItem): string | null {
   if (item.variantType === 'wood' && WOOD_SPECIES[item.wood]) return WOOD_SPECIES[item.wood];
-  const text = `${item.description ?? ''} ${item.extendedDescription ?? ''}`;
-  if (/\bbrown maple\b/i.test(text)) return 'Brown Maple';
-  if (/\bred oak\b/i.test(text)) return 'Red Oak';
-  if (/\bcherry (?:wood|hardwood)\b|\bsolid cherry\b/i.test(text)) return 'Cherry';
-  return null;
+  const skuWood = item.sku?.match(SKU_WOOD)?.[1];
+  if (skuWood) {
+    const key = Object.keys(WOOD_SPECIES).find(k => k.toLowerCase() === skuWood.toLowerCase());
+    if (key) return WOOD_SPECIES[key];
+  }
+  const code = skuBuilderCode(item.sku);
+  return code ? BUILDER_BASE_MATERIAL[code] : null;
 }
 
 /**

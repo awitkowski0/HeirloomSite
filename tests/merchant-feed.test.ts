@@ -6,6 +6,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   FEED_HEADERS,
+  BUILDER_BASE_MATERIAL,
   FEED_TITLE_NAMES,
   GOOGLE_PRODUCT_CATEGORY,
   additionalImages,
@@ -231,7 +232,7 @@ test('every feed title names the product type; Fisher cribs lead with the builde
   assert.equal(FEED_TITLE_NAMES['arched-top'], 'Fisher Arched Top Crib');
 });
 
-test('color only for single-finish items; material only where the site states it; no mpn / age_group', () => {
+test('color only for single-finish items; material from the builder price book base column; no mpn / age_group', () => {
   const inventory = getInventory();
   const xml = merchantFeedXml(inventory);
   const carbon = itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon');
@@ -242,10 +243,15 @@ test('color only for single-finish items; material only where the site states it
   assert.deepEqual(tags(mission, 'g:color'), [], 'finish is chosen at order time');
   assert.deepEqual(tags(mission, 'g:material'), ['Brown Maple']);
   assert.deepEqual(tags(itemWithId(xml, 'OTO-1303'), 'g:color'), []);
-  // "solid wood" only: no material claimed.
-  assert.deepEqual(tags(itemWithId(xml, 'OTO-410'), 'g:material'), []);
-  assert.deepEqual(tags(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), 'g:material'), []);
-  assert.equal(itemMaterial(configuration({ description: 'Solid hardwood.' })), null);
+  // Price book base column, not the product copy: OTO "Brown Maple (unfinished)",
+  // FQP "Maple/Oak" (sold as Brown Maple), KC "Oak, B.Maple, Sap Cherry".
+  assert.deepEqual(tags(itemWithId(xml, 'OTO-410'), 'g:material'), ['Brown Maple']);
+  assert.deepEqual(tags(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), 'g:material'), ['Brown Maple']);
+  assert.deepEqual(BUILDER_BASE_MATERIAL, { OTO: 'Brown Maple', FQP: 'Brown Maple', KC: 'Brown Maple' });
+  assert.equal(itemMaterial(configuration({ description: 'Solid hardwood.', sku: 'KC-10' })), 'Brown Maple');
+  assert.equal(itemMaterial(configuration({ sku: 'OTO-1201-CherryWood_OCS_100_Natural' })), 'Cherry');
+  assert.equal(itemMaterial(configuration({ sku: 'rdir-1' })), null);
+  assert.equal(tags(xml, 'g:material').length, tags(xml, 'g:id').length);
   assert.equal(itemColor(configuration({ variantType: 'none', wood: 'Default Title' })), null);
   assert.doesNotMatch(xml, /<g:mpn>|<g:gtin>|<g:age_group>/);
 });
