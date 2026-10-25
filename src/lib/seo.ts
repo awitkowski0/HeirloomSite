@@ -182,38 +182,95 @@ export function productShippingCents(priceDollars: number): number {
   return deliveryChargeFor(toCents(priceDollars), 'threshold');
 }
 
+/** The returns page `hasMerchantReturnPolicy` points at. */
+export const RETURNS_PATH = '/returns';
+
+/**
+ * The /returns wording the return policy markup quotes, verbatim.
+ *
+ * Returns: the "Made-to-order furniture: no returns" section. Cancellation:
+ * the "Cancelling" paragraph. Keep these in step with src/app/returns/page.tsx
+ * (tests/product-jsonld.test.ts reads that file and fails if they drift).
+ * Nothing here is paraphrased and no period or number is added: the
+ * cancellation window is "before your deposit is paid", an event rather than
+ * a fixed number of days, so it has no schema.org property and is carried as
+ * text only.
+ */
+export const RETURNS_POLICY_TEXT =
+  'Made-to-order case goods cannot be returned, exchanged or refunded.';
+export const CANCELLATION_POLICY_TEXT =
+  'You can cancel at no cost at any point before your deposit is paid. Just tell us in ' +
+  'writing. After the deposit is received, the order cannot be cancelled.';
+
+/**
+ * schema.org MerchantReturnPolicy for the made-to-order furniture.
+ *
+ * MerchantReturnNotPermitted: custom-built pieces cannot be returned. Delivery
+ * is US only, hence applicableCountry US. schema.org has no cancellation
+ * property, so the /returns cancellation wording rides in `description`
+ * (a Thing property every MerchantReturnPolicy has), quoted exactly, and
+ * merchantReturnLink points at /returns, where both texts live.
+ */
+export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    applicableCountry: 'US',
+    returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+    merchantReturnLink: absoluteUrl(RETURNS_PATH),
+    description: `${RETURNS_POLICY_TEXT} Cancelling: ${CANCELLATION_POLICY_TEXT}`,
+  };
+}
+
+/**
+ * Product JSON-LD for one product page: the base page or one wood/finish page.
+ *
+ * Exactly one Offer, for the configuration the page renders and at the price
+ * the page shows (`price-current`), so the markup describes what this URL
+ * sells rather than the whole product family. A colour page is its own
+ * product: its name carries the colour, `sku` is that colour's SKU (the same
+ * value the Merchant Center feed sends as `g:id`) and `url` / `offers.url`
+ * are the page's own canonical URL.
+ *
+ * `brand` is the furniture builder, from the same BUILDERS table the feed's
+ * `g:brand` reads; Heirloom is the seller, not the manufacturer. A SKU with no
+ * builder prefix (rugs, lamps) keeps the store name, as before.
+ *
+ * Deliberately absent: aggregateRating / review (there are none), gtin (the
+ * builders publish none), mpn (the SKU is the store's code, not a confirmed
+ * manufacturer part number), priceValidUntil (prices have no end date) and
+ * transitTime (the site quotes a handling window only).
+ */
 export function productJsonLd(opts: {
-  productName: string;
-  slug: string;
+  /** Display name for this page: "Newport Crib", or "Newport Crib in Carbon" on a colour page. */
+  name: string;
+  /** Canonical path of THIS page (`/product/newport-crib/carbon`). */
+  path: string;
   description: string;
   images: string[];
+  /** SKU of the configuration this page renders. */
   sku: string | null;
-  configurations: InventoryItem[];
+  /** The price this page displays, in dollars. */
+  priceDollars: number;
+  inStock: boolean;
 }): JsonLd {
-  const { low, high } = priceRange(opts.configurations);
-  const anyInStock = opts.configurations.some(c => c.stains.some(s => s.inStock !== false));
-  const sku = opts.sku || opts.configurations.find(c => c.sku)?.sku || null;
+  const sku = opts.sku || null;
   const handling = handlingBusinessDays(sku);
+  const url = absoluteUrl(opts.path);
+  const brand = builderBrand(sku) ?? SITE_NAME;
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: opts.productName,
+    name: opts.name,
     description: opts.description,
     image: opts.images.map(absoluteUrl),
-    ...(opts.sku ? { sku: opts.sku } : {}),
-    brand: { '@type': 'Brand', name: SITE_NAME },
-    url: absoluteUrl(`/product/${opts.slug}`),
-    // Most products have several wood variants at different prices, so a single
-    // Offer would misreport the price. AggregateOffer is the honest shape.
+    ...(sku ? { sku } : {}),
+    brand: { '@type': 'Brand', name: brand },
+    url,
     offers: {
-      '@type': 'AggregateOffer',
+      '@type': 'Offer',
+      url,
+      price: opts.priceDollars,
       priceCurrency: 'USD',
-      lowPrice: low,
-      highPrice: high,
-      offerCount: opts.configurations.length,
-      availability: anyInStock
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
       /*
        * The furniture is made to order. Handling time is the builder's window
        * in business days, so the markup does not imply the piece is on a shelf.
@@ -224,20 +281,23 @@ export function productJsonLd(opts: {
        * PreOrder, PreSale, SoldOut). InStock remains correct - the item IS
        * orderable - so the lead time is expressed where Google actually reads
        * it, as handling time.
-       *
-       * shippingRate is the Curbside charge for this product's price (the low
-       * price of the aggregate offer), not a flat figure and not 0. Advertising
-       * free shipping and then charging for delivery is a promise we would not
-       * keep. Higher configurations can land in a higher band at checkout,
-       * where the charge is recomputed from the cart. A missing price falls
-       * back to the $175 Curbside floor. See deliveryChargeFor in
-       * src/lib/order-terms.ts.
+       */
+      availability: opts.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+      /*
+       * shippingRate is the Curbside charge for this page's price, not a flat
+       * figure and not 0. Advertising free shipping and then charging for
+       * delivery is a promise we would not keep. A multi-item cart can land in
+       * a higher band at checkout, where the charge is recomputed from the
+       * cart. A missing price falls back to the $175 Curbside floor. See
+       * deliveryChargeFor in src/lib/order-terms.ts. Same rate the feed sends.
        */
       shippingDetails: {
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: fromCents(productShippingCents(low)),
+          value: fromCents(productShippingCents(opts.priceDollars)),
           currency: 'USD',
         },
         // US regions PA, NJ, MD — the same list checkout delivers to.
@@ -257,7 +317,7 @@ export function productJsonLd(opts: {
           },
         },
       },
-      url: absoluteUrl(`/product/${opts.slug}`),
+      hasMerchantReturnPolicy: merchantReturnPolicyJsonLd(),
     },
   };
 }
