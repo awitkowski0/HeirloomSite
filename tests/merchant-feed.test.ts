@@ -6,7 +6,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   FEED_HEADERS,
+  FEED_TITLE_NAMES,
+  GOOGLE_PRODUCT_CATEGORY,
+  additionalImages,
   feedItems,
+  itemColor,
+  itemMaterial,
   itemGroupId,
   merchantFeedXml,
   merchantPrice,
@@ -190,4 +195,73 @@ test('Kids Comfort items pick up brand and handling from the builder table', () 
   assert.match(item, /&lt;oak&gt; &amp; &quot;quotes&quot;\./);
   assert.equal(tags(item, 'g:min_handling_time')[0], '40');
   assert.equal(tags(item, 'g:max_handling_time')[0], '40');
+});
+
+test('google_product_category uses exact Google taxonomy strings, one per site category', () => {
+  const xml = merchantFeedXml(getInventory());
+  const allowed = new Set([
+    'Furniture &gt; Baby &amp; Toddler Furniture &gt; Cribs &amp; Toddler Beds',
+    'Furniture &gt; Baby &amp; Toddler Furniture &gt; Changing Tables',
+    'Furniture &gt; Cabinets &amp; Storage &gt; Dressers',
+    'Furniture &gt; Tables &gt; Nightstands',
+  ]);
+  const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
+  for (const item of items) {
+    const cats = tags(item, 'g:google_product_category');
+    assert.equal(cats.length, 1, item.slice(0, 120));
+    assert.ok(allowed.has(cats[0]), cats[0]);
+    assert.equal(tags(item, 'g:product_type').length, 1);
+  }
+  assert.equal(GOOGLE_PRODUCT_CATEGORY.Chests, GOOGLE_PRODUCT_CATEGORY.Dressers);
+  assert.match(tags(itemWithId(xml, 'OTO-1303'), 'g:google_product_category')[0], /Nightstands$/);
+  assert.match(
+    tags(itemWithId(xml, 'FQP 107 Madison Changing Table 6 Drawer'), 'g:google_product_category')[0],
+    /Changing Tables$/
+  );
+});
+
+test('every feed title names the product type; Fisher cribs lead with the builder', () => {
+  const xml = merchantFeedXml(getInventory());
+  for (const title of tags(xml, 'g:title')) {
+    assert.match(title, /crib|dresser|chest|nightstand|changing table/i, title);
+  }
+  assert.match(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), /<g:title>Fisher Arched Top Crib in Seely<\/g:title>/);
+  assert.match(itemWithId(xml, 'FQP-101'), /<g:title>Fisher Mission Crib in Brown Maple<\/g:title>/);
+  assert.match(itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon'), /<g:title>Newport Crib in Carbon<\/g:title>/);
+  assert.equal(FEED_TITLE_NAMES['arched-top'], 'Fisher Arched Top Crib');
+});
+
+test('color only for single-finish items; material only where the site states it; no mpn / age_group', () => {
+  const inventory = getInventory();
+  const xml = merchantFeedXml(inventory);
+  const carbon = itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon');
+  assert.deepEqual(tags(carbon, 'g:color'), ['Carbon']);
+  assert.deepEqual(tags(carbon, 'g:material'), ['Brown Maple']);
+  assert.deepEqual(tags(itemWithId(xml, 'OTO-1201-BrownMaple_OCS_100_Asbury-Brown'), 'g:color'), ['Asbury Brown']);
+  const mission = itemWithId(xml, 'FQP-101');
+  assert.deepEqual(tags(mission, 'g:color'), [], 'finish is chosen at order time');
+  assert.deepEqual(tags(mission, 'g:material'), ['Brown Maple']);
+  assert.deepEqual(tags(itemWithId(xml, 'OTO-1303'), 'g:color'), []);
+  // "solid wood" only: no material claimed.
+  assert.deepEqual(tags(itemWithId(xml, 'OTO-410'), 'g:material'), []);
+  assert.deepEqual(tags(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), 'g:material'), []);
+  assert.equal(itemMaterial(configuration({ description: 'Solid hardwood.' })), null);
+  assert.equal(itemColor(configuration({ variantType: 'none', wood: 'Default Title' })), null);
+  assert.doesNotMatch(xml, /<g:mpn>|<g:gtin>|<g:age_group>/);
+});
+
+test('additional images: other real photos of the same wood item only, max 10, never the main image', () => {
+  const inventory = getInventory();
+  const xml = merchantFeedXml(inventory);
+  const mission = itemWithId(xml, 'FQP-101');
+  const main = tags(mission, 'g:image_link')[0];
+  const extra = tags(mission, 'g:additional_image_link');
+  assert.ok(extra.length > 0 && extra.length <= 10);
+  assert.ok(!extra.includes(main));
+  assert.equal(new Set(extra).size, extra.length);
+  for (const url of extra) assert.match(url, /^https:\/\/heirloomcribsandmore\.com\/data\/products\/Mission\//);
+  // Single-finish and single-photo items get none (another colour is another product).
+  assert.deepEqual(tags(itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon'), 'g:additional_image_link'), []);
+  assert.deepEqual(tags(itemWithId(xml, 'OTO-1303'), 'g:additional_image_link'), []);
+  assert.deepEqual(additionalImages(configuration()), []);
 });
