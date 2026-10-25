@@ -20,7 +20,7 @@ export default function HardwoodPage() {
         generation.
       </p>
       <p>
-        The hardwood cribs we offer are solid American hardwood — brown maple, cherry, and red oak —
+        The hardwood cribs we offer are solid American hardwood — brown maple —
         not veneer over particle board. Heirloom Cribs and More is the <strong>reseller</strong>; Amish
         and independent US craftspeople make the case goods.
       </p>
