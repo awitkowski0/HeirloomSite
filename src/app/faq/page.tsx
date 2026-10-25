@@ -380,7 +380,7 @@ const SECTIONS: Section[] = [
             </p>
             <p>
               We source nursery case goods crafted by Amish and independent US craftspeople from
-              maple, cherry, or red oak—never veneer over particle board. Finishes are non-toxic
+              solid brown maple—never veneer over particle board. Finishes are non-toxic
               and baby-safe, and every crib meets or exceeds CPSC and ASTM standards—details live
               on our {SafetyLink} and each product page. One crib converts to a toddler bed, a
               daybed, and a full bed when the kits for your style are in place; that’s what we mean

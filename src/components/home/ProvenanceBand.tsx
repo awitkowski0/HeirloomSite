@@ -3,11 +3,13 @@
  * Each is checked against the catalogue - none of these are new claims, all
  * four already appear elsewhere on the site.
  *
- * Forest to Family Provenance -> the species list is maple, cherry and red
- * oak. The brief's copy said "maple, cherry, walnut & oak", but there is no
- * walnut anywhere in the catalogue - zero occurrences across 273
- * configurations - so advertising it would send buyers looking for a wood
- * they cannot order. Add it here when there is a walnut product to sell.
+ * Forest to Family Provenance -> the species is brown maple: the base wood
+ * column in every builder's price book (OTO "Brown Maple (unfinished)", FQP
+ * "Maple/Oak", KC "Oak, B.Maple, Sap Cherry") and the only wood the shop
+ * sells (Cherry Wood and Red Oak variants are hidden in build-data). The
+ * brief's copy said "maple, cherry, walnut & oak"; advertising a wood the
+ * catalogue does not sell sends buyers looking for something they cannot
+ * order. Add a species here when there is a product in it to sell.
  * "Solid American hardwoods" is kept rather than a "Made in USA" claim:
  * the species claim is about the material, which the catalogue supports,
  * whereas country-of-origin manufacturing is an FTC-regulated claim that
@@ -34,7 +36,7 @@ const COLUMNS = [
   {
     icon: 'forest',
     label: 'Solid American hardwoods',
-    lines: ['Sustainably sourced maple,', 'cherry and red oak.'],
+    lines: ['Sustainably sourced', 'solid brown maple.'],
   },
   {
     icon: 'verified',
