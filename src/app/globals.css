@@ -4342,3 +4342,71 @@ a.product-inline-link:focus-visible {
   font-size: 0.875rem;
   color: var(--color-on-surface-variant, #5c574e);
 }
+
+/* ===========================================================================
+   Builder / About / Woods split header (text left, image or quote panel right)
+   The media box is 600x500 CSS px on desktop; images are 1200x1000 (6:5) and
+   800x1000 crops served downscaled, never upscaled.
+   =========================================================================== */
+.builder-header {
+  padding-top: 56px;
+}
+.builder-header h1 {
+  margin: 8px 0 0;
+}
+.builder-header .builder-header__sub {
+  margin: 20px 0 24px;
+  color: var(--on-surface-variant);
+}
+.builder-header .button-primary {
+  margin-top: 4px;
+}
+.builder-header__contact {
+  margin: 16px 0 0;
+  color: var(--on-surface-variant);
+}
+.builder-header__contact a {
+  color: inherit;
+}
+.builder-header__media {
+  margin: 0;
+}
+.builder-header__media picture,
+.builder-header__media img {
+  display: block;
+}
+.builder-header__media img {
+  width: 100%;
+  height: auto;
+  max-width: 600px;
+  border-radius: 8px;
+}
+.builder-header__media figcaption {
+  margin-top: 8px;
+}
+.builder-panel {
+  background: #c8cec6;
+  border-radius: 8px;
+  padding: 2rem 1.75rem;
+  display: flex;
+  align-items: center;
+}
+.builder-panel blockquote {
+  margin: 0;
+}
+.builder-panel cite {
+  display: block;
+  margin-top: 12px;
+}
+@media (min-width: 900px) {
+  .builder-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 600px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  .builder-panel {
+    min-height: 500px;
+    max-width: 600px;
+  }
+}
