@@ -6,15 +6,27 @@ import { SUPPORT_INBOX } from '@/lib/email';
 const SUPPORT_EMAIL = SUPPORT_INBOX.toLowerCase();
 
 // Q#-dependent copy, one place each, for easy swapping if Phil's answers change.
-// (About: Q1, Q4, Q5, Q7, Q8. Q2/Q3/Q6/Q9 render nothing by decision.)
-const Q = {
+// (About: Q1, Q3, Q4, Q5, Q7, Q8. Q2/Q6/Q9 render nothing by decision.)
+// Q3 is ON by default (MKT Director/Brand). To strike it, set q3WomanOwned to '' or delete the key.
+// Self-description only: never add a certification word to this line.
+const Q: Record<string, string> = {
   q1: `Heirloom Cribs & More brings handcrafted, made-to-order nursery furniture from three builders to families in Pennsylvania, New Jersey and Maryland.`,
+  q3WomanOwned: `Heirloom Cribs & More is a woman-owned business.`,
   q4: `Each builder is introduced in its own words on its own page.`,
   q5: `our warehouse in Bethlehem, Pennsylvania`,
   q7Babylist: `If you're building a baby registry, pieces on our site can be added to a Babylist registry, and we can also create a custom order that can be added to your personal Babylist registry.`,
   q8Sub: `three builders`,
   q8KidsComfort: `Kids Comfort pieces aren't listed on our site yet; they are available on request.`,
 };
+
+// 'Our story': Phil's own words (revised-r3/about-heirloom.md), copied verbatim.
+const OUR_STORY = [
+  `When we found out we were going to become grandparents, we began searching for a crib for our first grandchild. We wanted something special: beautiful, well-made, and built to last for generations.`,
+  `Twenty-eight years ago, when we were expecting our own daughter, we found a solid wood crib that became a cherished part of our family's story. As we searched for that same quality for our grandson, we realized how difficult it was to find heirloom-quality nursery furniture in the Lehigh Valley.`,
+  `That realization inspired us to create a place where families can find beautifully crafted, solid wood cribs designed to become part of their family's story.`,
+  `Because we believe a crib is more than just furniture. It's where memories begin, and we hope the pieces we offer will be treasured for generations to come.`,
+  `Thank you for letting us be a small part of your family's story.`,
+];
 
 export const metadata: Metadata = {
   title: { absolute: 'About Heirloom Cribs & More | How We Work' },
@@ -62,11 +74,19 @@ export default function AboutHeirloomPage() {
       <div className="doc-page">
         <hr className="doc-rule" />
         <section>
+          <h2 className="headline-md">Our story</h2>
+          {OUR_STORY.map((para) => (
+            <p key={para}>{para}</p>
+          ))}
+        </section>
+
+        <section>
           <h2 className="headline-md">Who we are</h2>
           <p>{Q.q1}</p>
           <p>
             {`We don't build furniture. Old Town Oak, Fisher's Quality Products and Kids Comfort do, and we resell their work. Everything between you and the workshop is ours: the questions before you order, the confirmation call, the invoice, the delivery and any damage claim after your furniture arrives.`}
           </p>
+          {Q.q3WomanOwned ? <p>{Q.q3WomanOwned}</p> : null}
         </section>
 
         <section>

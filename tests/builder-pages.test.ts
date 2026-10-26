@@ -85,11 +85,54 @@ test('(e2) builder pages deep-link /about-heirloom#how-an-order-works', () => {
   }
 });
 
-test('(f) Q3 woman-owned line is never rendered', () => {
+test('(f) Q3 woman-owned line: ON on About only, driven from the Q constants, after Who we are p2', () => {
+  const r = rendered(ABOUT);
+  assert.ok(r.includes("q3WomanOwned: `Heirloom Cribs & More is a woman-owned business.`"), 'Q3 constant missing');
+  assert.ok(r.includes('{Q.q3WomanOwned ? <p>{Q.q3WomanOwned}</p> : null}'), 'Q3 not rendered from Q constant');
+  const who = r.indexOf('>Who we are</h2>');
+  const p2 = r.indexOf("We don't build furniture.");
+  const q3 = r.indexOf('{Q.q3WomanOwned ?');
+  const next = r.indexOf('id="how-an-order-works"');
+  assert.ok(who > 0 && who < p2 && p2 < q3 && q3 < next, 'Q3 line not after the Who we are second paragraph');
+  assert.equal((r.match(/woman-owned/gi) || []).length, 1, 'woman-owned should appear exactly once on About');
   for (const [name, p] of Object.entries(PAGES)) {
-    assert.ok(!/woman-owned/i.test(rendered(p)), `${name} renders the Q3 woman-owned line`);
+    if (name !== 'about') assert.ok(!/woman-owned/i.test(rendered(p)), `${name} renders a woman-owned line`);
     assert.ok(!/women-owned/i.test(rendered(p)), `${name} renders a women-owned line`);
   }
+});
+
+test('(f2) no "certified" with woman-owned / on About, and no Instagram link on any page', () => {
+  // Builder pages quote builders' own "certified to CPSIA/ASTM" and "Ohio Certified Stains" lines; those stay.
+  assert.ok(!/certified/i.test(src(ABOUT)), 'About contains "certified"');
+  for (const [name, p] of Object.entries(PAGES)) {
+    assert.ok(!/(certified[^\n]{0,40}wom[ae]n-owned|wom[ae]n-owned[^\n]{0,40}certified)/i.test(src(p)), `${name} pairs certified with woman-owned`);
+    assert.ok(!/instagram/i.test(rendered(p)), `${name} renders Instagram`);
+    assert.ok(!/instagram\.com|@heirloomcribs\b/i.test(src(p)), `${name} links Instagram`);
+  }
+});
+
+const OUR_STORY: string[] = [
+  "When we found out we were going to become grandparents, we began searching for a crib for our first grandchild. We wanted something special: beautiful, well-made, and built to last for generations.",
+  "Twenty-eight years ago, when we were expecting our own daughter, we found a solid wood crib that became a cherished part of our family's story. As we searched for that same quality for our grandson, we realized how difficult it was to find heirloom-quality nursery furniture in the Lehigh Valley.",
+  "That realization inspired us to create a place where families can find beautifully crafted, solid wood cribs designed to become part of their family's story.",
+  "Because we believe a crib is more than just furniture. It's where memories begin, and we hope the pieces we offer will be treasured for generations to come.",
+  "Thank you for letting us be a small part of your family's story."
+];
+
+test('(f3) Our story: H2 after the sub-headline and before Who we are, five paragraphs verbatim', () => {
+  const r = rendered(ABOUT);
+  const sub = r.indexOf('builder-header__sub');
+  const story = r.indexOf('>Our story</h2>');
+  const who = r.indexOf('>Who we are</h2>');
+  assert.ok(sub > 0 && sub < story && story < who, 'Our story is not between the sub-headline and Who we are');
+  const block = r.slice(story, who);
+  assert.ok(block.includes('OUR_STORY.map'), 'Our story does not render OUR_STORY');
+  assert.ok(!/<blockquote|<img|<picture/.test(block), 'Our story must have no pull quote or image');
+  assert.equal(OUR_STORY.length, 5);
+  for (const para of OUR_STORY) {
+    assert.ok(r.includes('`' + para + '`,'), `story paragraph missing or altered: ${para.slice(0, 40)}`);
+  }
+  assert.ok(!/<!--|SOURCE:/.test(r), 'md HTML comments must not be rendered');
 });
 
 test('(g) no raw [[DEFAULT-Q#: ]] marker syntax leaks into any page', () => {

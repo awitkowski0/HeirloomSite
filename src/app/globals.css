@@ -4457,3 +4457,19 @@ a.product-inline-link:focus-visible {
   display: block;
   margin-top: 8px;
 }
+
+/* About header (Round 5): let the email under the CTA wrap, and keep the
+   'Talk to us' card off that line when the header stacks on mobile. */
+.builder-header__text,
+.builder-header__contact {
+  min-width: 0;
+}
+.builder-header__contact,
+.builder-header__contact a {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 899px) {
+  .builder-header__text + .builder-panel--card {
+    margin-top: 16px;
+  }
+}
