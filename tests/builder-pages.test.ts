@@ -6,6 +6,7 @@ import { sizeOf } from './helpers/image-size.mjs';
 
 const ABOUT = 'src/app/about-heirloom/page.tsx';
 const PAGES = {
+  about: 'src/app/about-heirloom/page.tsx',
   oto: 'src/app/builders/old-town-oak/page.tsx',
   fqp: 'src/app/builders/fishers-quality-products/page.tsx',
   kc: 'src/app/builders/kids-comfort/page.tsx',
@@ -36,6 +37,7 @@ test('(a) all five pages export a default component and metadata with a canonica
 
 test('(b) canonical uses relative brand paths (never a vercel.app host)', () => {
   const expected: Record<string, string> = {
+    about: '/about-heirloom',
     oto: '/builders/old-town-oak',
     fqp: '/builders/fishers-quality-products',
     kc: '/builders/kids-comfort',
@@ -125,8 +127,51 @@ test('(j) all five routes build (prerendered in the Next build manifest)', () =>
     // Build not run in this context; skip rather than false-fail.
     return;
   }
-  for (const route of ['/builders/old-town-oak', '/builders/fishers-quality-products', '/builders/kids-comfort', '/woods-and-finishes']) {
+  for (const route of ['/about-heirloom', '/builders/old-town-oak', '/builders/fishers-quality-products', '/builders/kids-comfort', '/woods-and-finishes']) {
     assert.ok(out.includes(route), `route ${route} not in build manifest`);
   }
   void execSync;
+});
+
+test('(k) every page uses the primary button for Get Personal Assistance', () => {
+  for (const [name, p] of Object.entries(PAGES)) {
+    assert.match(src(p), /className="button-primary"[^>]*>\s*Get Personal Assistance|Get Personal Assistance<\/Link>/, `${name} missing primary button`);
+    assert.ok(src(p).includes('className="button-primary"'), `${name} has no button-primary`);
+  }
+  assert.ok(src(ABOUT).includes('className="button-primary"'), 'About has no button-primary');
+});
+
+test('(l) image header pages serve a responsive <picture> with a downscaled mobile crop', () => {
+  const imagePages = { oto: PAGES.oto, woods: PAGES.woods };
+  for (const [name, p] of Object.entries(imagePages)) {
+    const s = src(p);
+    assert.ok(s.includes('<picture>'), `${name} has no <picture>`);
+    assert.match(s, /<source[^>]*media="\(max-width[^>]*srcSet="[^"]*-mobile\.jpg"/, `${name} has no mobile <source>`);
+  }
+});
+
+test('(m) no builder image is upscaled: declared widths (img + source) never exceed native, and the 600px box downscales', () => {
+  for (const [name, p] of Object.entries(PAGES)) {
+    const s = src(p);
+    // <img ... src="/images/builders/..." ... width={N}>
+    const imgRe = /<img[\s\S]*?src="(\/images\/builders\/[^"]+)"[\s\S]*?width=\{(\d+)\}/g;
+    let m: RegExpExecArray | null;
+    while ((m = imgRe.exec(s)) !== null) {
+      const [, srcPath, wStr] = m;
+      const { width } = sizeOf(`public${srcPath}`);
+      assert.ok(Number(wStr) <= width, `${name} img ${srcPath} declares ${wStr} > native ${width}`);
+      assert.ok(width >= 600, `${name} img ${srcPath} native ${width} < 600 box (would upscale)`);
+    }
+    // <source ... srcSet="/images/builders/..." width={N}>
+    const srcRe = /<source[^>]*srcSet="(\/images\/builders\/[^"]+)"[^>]*width=\{(\d+)\}/g;
+    while ((m = srcRe.exec(s)) !== null) {
+      const [, srcPath, wStr] = m;
+      const { width } = sizeOf(`public${srcPath}`);
+      assert.ok(Number(wStr) <= width, `${name} source ${srcPath} declares ${wStr} > native ${width}`);
+    }
+  }
+});
+
+test('(n) Old Town Oak sub-headline matches the revised copy', () => {
+  assert.ok(src(PAGES.oto).includes('A furniture business in Topeka, Indiana, that specializes in baby furniture. Its 2026 catalog says it has been in business for 21 years.'), 'OTO sub-headline not updated');
 });
