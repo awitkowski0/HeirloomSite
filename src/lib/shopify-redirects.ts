@@ -14,7 +14,9 @@
  *     "candidate" product matches below, pending Phil's review), so it is not
  *     cached and can be promoted to 308 once confirmed;
  *   - URLs with no true equivalent are NOT listed here and keep returning 404
- *     on purpose (see the PR body): the two "weak" FQP conversion-kit handles.
+ *     on purpose (see the PR body): the two "weak" FQP conversion-kit handles, plus /pages/my-journey,
+ *     /collections/newport-collection, /collections/box-tops, the discontinued
+ *     area-rug product and the Shopify system URLs.
  *
  * Hosts: every source is path-only, so Next matches it on whatever host serves
  * the deployment (apex heirloomcribsandmore.com and www alike). Query strings
@@ -99,8 +101,47 @@ export const SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE: ShopifyRedirect[] = [
   { source: '/products/three-quarter-guard-rail', destination: '/product/34-guard-rail', permanent: false },
 ];
 
+
+/*
+ * Topic 2: old Shopify pages/policies/collections/cart that have a TRUE
+ * equivalent on the new site -> permanent 308. Targets verified to return 200:
+ * /safety /contact /faq /care /privacy /returns /shipping /terms /products
+ * /products/cribs /checkout. (/privacy covers the data-sharing opt-out; /care is
+ * the furniture-care page; /checkout is the Vercel cart.)
+ */
+export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
+  { source: '/pages/safety', destination: '/safety', permanent: true },
+  { source: '/pages/contact', destination: '/contact', permanent: true },
+  { source: '/pages/faq', destination: '/faq', permanent: true },
+  { source: '/pages/caring-for-your-custom-wood-furniture', destination: '/care', permanent: true },
+  { source: '/pages/data-sharing-opt-out', destination: '/privacy', permanent: true },
+  { source: '/policies/refund-policy', destination: '/returns', permanent: true },
+  { source: '/policies/privacy-policy', destination: '/privacy', permanent: true },
+  { source: '/policies/shipping-policy', destination: '/shipping', permanent: true },
+  { source: '/policies/terms-of-service', destination: '/terms', permanent: true },
+  { source: '/collections/all', destination: '/products', permanent: true },
+  { source: '/collections/frontpage', destination: '/products', permanent: true },
+  { source: '/collections/baby-cribs', destination: '/products/cribs', permanent: true },
+  { source: '/cart', destination: '/checkout', permanent: true },
+];
+
+/*
+ * Topic 2: /pages/about-us has no true equivalent (there is no /about page), so
+ * per Phil it goes to the homepage as a NON-cached 307 rather than a 308.
+ * Everything else with no equivalent is left as 404 (see the PR body):
+ * /pages/my-journey, /collections/newport-collection, /collections/box-tops, the
+ * discontinued area-rug product, and the Shopify system URLs (/password,
+ * /v1/produce, /services/login_with_shop/*, /customer_authentication/login,
+ * /account*, /blogs*).
+ */
+export const SHOPIFY_PAGE_REDIRECTS_TEMPORARY: ShopifyRedirect[] = [
+  { source: '/pages/about-us', destination: '/', permanent: false },
+];
+
 /** Every Shopify-leftover redirect, in one list for next.config.ts and tests. */
 export const SHOPIFY_REDIRECTS: ShopifyRedirect[] = [
   ...SHOPIFY_PRODUCT_REDIRECTS_PERMANENT,
   ...SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE,
+  ...SHOPIFY_PAGE_REDIRECTS_PERMANENT,
+  ...SHOPIFY_PAGE_REDIRECTS_TEMPORARY,
 ];
