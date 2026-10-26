@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { SHOPIFY_REDIRECTS } from './src/lib/shopify-redirects';
 
 /*
  * The origins PostHog is reached on, for the CSP below.
@@ -158,6 +159,14 @@ const nextConfig: NextConfig = {
         destination: '/search?q=:q',
         permanent: false,
       },
+      /*
+       * Redirects for URLs left behind by the retired Shopify storefront
+       * (old /products/<handle>, /pages/*, /policies/*, /collections/all etc.).
+       * Kept in src/lib/shopify-redirects.ts as plain data so the table can be
+       * unit-tested; see that file for the status (308 vs 307) rationale and the
+       * URLs deliberately left as 404.
+       */
+      ...SHOPIFY_REDIRECTS,
     ];
   },
 
