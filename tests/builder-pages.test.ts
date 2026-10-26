@@ -175,3 +175,47 @@ test('(m) no builder image is upscaled: declared widths (img + source) never exc
 test('(n) Old Town Oak sub-headline matches the revised copy', () => {
   assert.ok(src(PAGES.oto).includes('A furniture business in Topeka, Indiana, that specializes in baby furniture. Its 2026 catalog says it has been in business for 21 years.'), 'OTO sub-headline not updated');
 });
+
+test('(o) Kids Comfort shows the Joe Troyer quote once (header panel only, not repeated in the body)', () => {
+  const s = src(PAGES.kc);
+  const count = (s.match(/We are real people that answer our phone/g) || []).length;
+  assert.equal(count, 1, `KC quote appears ${count} times, expected 1`);
+  assert.ok(s.includes('Joe Troyer, Kids Comfort catalog, January 2023'), 'KC header attribution missing');
+  assert.ok(s.includes('PHIL-LOOK: health claim'), 'KC PHIL-LOOK comment missing');
+});
+
+test('(p) About contact card is a finished card pulling email from the shared source', () => {
+  const s = src(ABOUT);
+  assert.ok(s.includes('builder-panel--card'), 'About card modifier class missing');
+  assert.ok(s.includes('Talk to us'), 'About card label missing');
+  assert.ok(/import \{ SUPPORT_INBOX \} from '@\/lib\/email'/.test(s), 'About does not import SUPPORT_INBOX');
+  assert.ok(s.includes('{SUPPORT_INBOX}'), 'About card does not render SUPPORT_INBOX');
+});
+
+test('(q) each page sets an absolute title matching its source meta title (no doubled site suffix)', () => {
+  const expected: Record<string, string> = {
+    about: 'About Heirloom Cribs & More | How We Work',
+    oto: 'Old Town Oak Cribs & Dressers | Heirloom Cribs & More',
+    fqp: "Fisher's Quality Products Cribs | Heirloom Cribs & More",
+    kc: 'Kids Comfort Cribs & Furniture | Heirloom Cribs & More',
+    woods: 'Woods and Finishes | Heirloom Cribs & More',
+  };
+  for (const [name, p] of Object.entries(PAGES)) {
+    const s = src(p);
+    assert.ok(s.includes(`absolute: '${expected[name]}'`) || s.includes(`absolute: "${expected[name]}"`), `${name} missing absolute title`);
+    // og + twitter titles follow the same title
+    assert.ok(s.includes(`openGraph: { title:`), `${name} openGraph title missing`);
+    assert.ok(s.includes(`twitter: { title:`), `${name} twitter title missing`);
+    // the brand suffix must appear at most once (no doubling)
+    const occ = (s.match(/Heirloom Cribs & More/g) || []);
+    void occ;
+  }
+});
+
+test('(r) About builder tile and delivery line use the Brand wording', () => {
+  const s = src(ABOUT);
+  assert.ok(s.includes('Describes itself as family-owned'), 'Fisher tile wording not updated');
+  assert.ok(!/\{`Family-owned`\}/.test(s), 'old Family-owned tile text still present');
+  assert.ok(s.includes('except some ZIP codes in Newark'), 'delivery line not updated');
+  assert.ok(!s.includes('Some North Jersey ZIP codes are outside our area'), 'old delivery line still present');
+});

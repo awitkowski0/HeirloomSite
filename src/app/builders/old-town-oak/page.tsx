@@ -10,11 +10,12 @@ const Q = {
 const OTO_FINISHES = `FC Almond · Shadow FC24427 · Tavern · Golden Brown · Michael's Cherry Low Sheen · FC 30529 · Sealy · Cappuccino · Summit Path · Rich Tobacco · Kona · Oatmilk · Granola · FC 19093 Dark Knight · Butter · S-14 Medium Cherry · OCS-113 Michael's Cherry · Hoosier Special · Harvest · FC19852 Antique Slate · FC Carbon · Amber · Earthtone FC40592 · RR-003 Bernett Slate Paint / Glaze · Muted Gray · Limed Oak · 922 Sealy · 7992 Sealy · 7992 Asbury Brown · 5190 Old World Mission`;
 
 export const metadata: Metadata = {
-  title: 'Old Town Oak Cribs & Dressers | Heirloom Cribs & More',
+  title: { absolute: 'Old Town Oak Cribs & Dressers | Heirloom Cribs & More' },
   description:
     'Old Town Oak makes cribs and dressers. Read its own words on construction and safety, see its woods and finishes, then order through us.',
   alternates: { canonical: '/builders/old-town-oak' },
-  openGraph: { url: '/builders/old-town-oak' },
+  openGraph: { title: 'Old Town Oak Cribs & Dressers | Heirloom Cribs & More', url: '/builders/old-town-oak' },
+  twitter: { title: 'Old Town Oak Cribs & Dressers | Heirloom Cribs & More' },
 };
 
 export default function OldTownOakPage() {

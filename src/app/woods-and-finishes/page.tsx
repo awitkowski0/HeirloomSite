@@ -14,11 +14,12 @@ const KC_STAINS = `OCS-100 natural · 101 S-2 · 102 fruitwood · 103 M-X · 104
 const KC_PAINTS = `Antique White · Black · Celery · Chelsea Grey · Country White · Decorator White · Georgian · Glacier · Grey Sky · Metropolitan · Millington Gold · Panda White · Pearl · Regal Blue · Sand Dollar · White`;
 
 export const metadata: Metadata = {
-  title: 'Woods and Finishes | Heirloom Cribs & More',
+  title: { absolute: 'Woods and Finishes | Heirloom Cribs & More' },
   description:
     "Our cribs are listed in brown maple with a choice of stains. Our builders' catalogs show many more woods and finishes. Here they are, builder by builder.",
   alternates: { canonical: '/woods-and-finishes' },
-  openGraph: { url: '/woods-and-finishes' },
+  openGraph: { title: 'Woods and Finishes | Heirloom Cribs & More', url: '/woods-and-finishes' },
+  twitter: { title: 'Woods and Finishes | Heirloom Cribs & More' },
 };
 
 export default function WoodsAndFinishesPage() {

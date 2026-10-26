@@ -4410,3 +4410,28 @@ a.product-inline-link:focus-visible {
     max-width: 600px;
   }
 }
+
+/* About contact card: finished card, top-aligned, height follows its content
+   (no dead space in a tall sage box). Links match the muted header-contact style. */
+.builder-panel--card {
+  align-items: flex-start;
+  min-height: 0;
+}
+.builder-contact-card p {
+  margin: 0 0 8px;
+}
+.builder-contact-card p:last-child {
+  margin-bottom: 0;
+}
+.builder-contact-card .label-caps {
+  margin: 0 0 12px;
+}
+.builder-contact-card a {
+  color: inherit;
+}
+@media (min-width: 900px) {
+  .builder-panel--card {
+    min-height: 0;
+    align-items: flex-start;
+  }
+}

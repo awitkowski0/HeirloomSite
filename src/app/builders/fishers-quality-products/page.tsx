@@ -8,11 +8,12 @@ const Q = {
 };
 
 export const metadata: Metadata = {
-  title: "Fisher's Quality Products Cribs | Heirloom Cribs & More",
+  title: { absolute: "Fisher's Quality Products Cribs | Heirloom Cribs & More" },
   description:
     "Fisher's Quality Products, a shop that describes itself as family-owned, makes convertible cribs and changing tables. Read its story and order with us.",
   alternates: { canonical: '/builders/fishers-quality-products' },
-  openGraph: { url: '/builders/fishers-quality-products' },
+  openGraph: { title: "Fisher's Quality Products Cribs | Heirloom Cribs & More", url: '/builders/fishers-quality-products' },
+  twitter: { title: "Fisher's Quality Products Cribs | Heirloom Cribs & More" },
 };
 
 export default function FishersQualityProductsPage() {

@@ -13,11 +13,12 @@ const KC_STAINS = `OCS-100 natural · 101 S-2 · 102 fruitwood · 103 M-X · 104
 const KC_PAINTS = `Antique White · Black · Celery · Chelsea Grey · Country White · Decorator White · Georgian · Glacier · Grey Sky · Metropolitan · Millington Gold · Panda White · Pearl · Regal Blue · Sand Dollar · White`;
 
 export const metadata: Metadata = {
-  title: 'Kids Comfort Cribs & Furniture | Heirloom Cribs & More',
+  title: { absolute: 'Kids Comfort Cribs & Furniture | Heirloom Cribs & More' },
   description:
     'Kids Comfort, a Sugarcreek, Ohio shop, offers cribs and children\'s furniture, with an organic finish option. Available on request from Heirloom Cribs & More.',
   alternates: { canonical: '/builders/kids-comfort' },
-  openGraph: { url: '/builders/kids-comfort' },
+  openGraph: { title: 'Kids Comfort Cribs & Furniture | Heirloom Cribs & More', url: '/builders/kids-comfort' },
+  twitter: { title: 'Kids Comfort Cribs & Furniture | Heirloom Cribs & More' },
 };
 
 export default function KidsComfortPage() {
@@ -50,12 +51,7 @@ export default function KidsComfortPage() {
         <hr className="doc-rule" />
         <section>
           <h2 className="headline-md">In Joe Troyer's words</h2>
-          <p>{`Kids Comfort's catalog carries a letter from its owner headed "To Our Customers." Here are two passages from it:`}</p>
-          <blockquote>
-            <p>
-              {`"We are real people that answer our phone and personally work with you to accomplish your goals. Our objective is to treat our customers the way we expect to be treated and give nothing but complete satisfaction."`}
-            </p>
-          </blockquote>
+          <p>{`Kids Comfort's catalog carries a letter from its owner headed "To Our Customers." Here is a passage from it:`}</p>
           <blockquote>
             <p>{`"As the owner of Kids Comfort … we realize the importance of quality, safety, endurance, and service. In closing my goal is to serve you."`}</p>
             <cite>{`Joe Troyer, owner, Kids Comfort catalog, January 2023`}</cite>

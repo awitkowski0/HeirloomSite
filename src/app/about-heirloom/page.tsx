@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SUPPORT_INBOX } from '@/lib/email';
 
 // Q#-dependent copy, one place each, for easy swapping if Phil's answers change.
 // (About: Q1, Q4, Q5, Q7, Q8. Q2/Q3/Q6/Q9 render nothing by decision.)
@@ -13,11 +14,12 @@ const Q = {
 };
 
 export const metadata: Metadata = {
-  title: 'About Heirloom Cribs & More | How We Work',
+  title: { absolute: 'About Heirloom Cribs & More | How We Work' },
   description:
     'Heirloom Cribs & More brings handcrafted, made-to-order nursery furniture from three builders to families in PA, NJ and MD. See how ordering works.',
   alternates: { canonical: '/about-heirloom' },
-  openGraph: { url: '/about-heirloom' },
+  openGraph: { title: 'About Heirloom Cribs & More | How We Work', url: '/about-heirloom' },
+  twitter: { title: 'About Heirloom Cribs & More | How We Work' },
 };
 
 export default function AboutHeirloomPage() {
@@ -37,20 +39,21 @@ export default function AboutHeirloomPage() {
             <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care@heirloomcribsandmore.com</a>
           </p>
         </div>
-        {/* About has no photo (no Heirloom photos exist): contact card on the right. */}
-        <div className="builder-panel">
-          <div>
-            <p style={{ margin: 0 }}>
+        {/* About has no photo (no Heirloom photos exist): finished contact card on the right. */}
+        <aside className="builder-panel builder-panel--card">
+          <div className="builder-contact-card">
+            <p className="label-caps text-on-surface-variant">Talk to us</p>
+            <p>
               {`Phone: `}
               <a href="tel:+14842931840">(484) 293-1840</a>
             </p>
-            <p style={{ margin: '8px 0 0' }}>
+            <p>
               {`Email: `}
-              <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care@heirloomcribsandmore.com</a>
+              <a href={`mailto:${SUPPORT_INBOX}`}>{SUPPORT_INBOX}</a>
             </p>
-            <p style={{ margin: '8px 0 0' }}>{`Pennsylvania, New Jersey and Maryland`}</p>
+            <p>{`Pennsylvania, New Jersey and Maryland`}</p>
           </div>
-        </div>
+        </aside>
       </header>
 
       <div className="doc-page">
@@ -99,7 +102,7 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">Delivery</h2>
           <p>
-            {`Orders ship from ${Q.q5} with our professional furniture delivery partner, blanket-wrapped and strapped in transit. We deliver in Pennsylvania, New Jersey and Maryland. Some North Jersey ZIP codes are outside our area, so confirm yours with us.`}
+            {`Orders ship from ${Q.q5} with our professional furniture delivery partner, blanket-wrapped and strapped in transit. We deliver in Pennsylvania, New Jersey and Maryland, except some ZIP codes in Newark.`}
           </p>
           <p>{`You choose one of two services:`}</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
@@ -168,7 +171,7 @@ export default function AboutHeirloomPage() {
             </Link>
             <div style={{ flex: '1 1 220px', background: '#C8CEC6', borderRadius: 8, padding: '24px 20px', maxWidth: 400 }}>
               <Link href="/builders/fishers-quality-products" className="doc-link"><strong>Fisher's Quality Products</strong></Link>
-              <p style={{ margin: '8px 0 0' }}>{`Family-owned`}</p>
+              <p style={{ margin: '8px 0 0' }}>{`Describes itself as family-owned`}</p>
             </div>
             <div style={{ flex: '1 1 220px', background: '#C8CEC6', borderRadius: 8, padding: '24px 20px', maxWidth: 400 }}>
               <Link href="/builders/kids-comfort" className="doc-link"><strong>Kids Comfort</strong></Link>
