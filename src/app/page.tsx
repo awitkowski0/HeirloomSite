@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { getShowroom, getInventory } from '@/lib/content';
 import { variantHref } from '@/lib/variants';
 import { organizationJsonLd, webSiteJsonLd,
@@ -117,7 +118,7 @@ export default function HomePage() {
         <JourneyStep
           n="03"
           title="Built and Finishing by Hand"
-          lead="Your piece is cut, joined and finished to order in solid American hardwood — six to eight weeks, because nothing is waiting in a warehouse."
+          lead={<>Your piece is cut, joined and finished to order in solid American hardwood. <Link href="/timeline">Made to order</Link>. We confirm your lead time when you order.</>}
         >
           <JourneyPoints
             points={[

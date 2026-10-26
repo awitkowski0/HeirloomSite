@@ -15,7 +15,7 @@
 interface Props {
   n: string;
   title: string;
-  lead: string;
+  lead: React.ReactNode;
   children?: React.ReactNode;
 }
 
