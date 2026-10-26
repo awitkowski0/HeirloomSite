@@ -27,10 +27,9 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
     body: 'The charge depends on your order total. Delivered by our trusted partners, one charge per order, chosen at checkout. No surprise freight bill on arrival.',
   },
   {
-    icon: 'verified_user',
-    title: 'Built to CPSC and ASTM standards',
+    icon: 'handyman',
+    title: 'Built to convert as they grow',
     body: 'Solid hardwood and hardware made to be taken apart and rebuilt as it converts.',
-    href: '/safety',
   },
   {
     icon: 'schedule',

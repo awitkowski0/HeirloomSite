@@ -61,6 +61,7 @@ test('no "meets/exceeds ... CPSC/ASTM" claim in copy files', () => {
   for (const f of COPY_FILES) {
     assert.ok(!MEETS.test(rendered(f)), `${f} still has a meets/exceeds claim`);
     assert.ok(!/exceeds?\s+all\s+safety\s+standards/i.test(rendered(f)), `${f} has "exceeds all safety standards"`);
+    assert.ok(!/Built to CPSC and ASTM/i.test(rendered(f)), `${f} has "Built to CPSC and ASTM"`);
   }
 });
 
