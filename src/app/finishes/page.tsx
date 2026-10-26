@@ -73,8 +73,7 @@ export default function FinishesPage() {
               Safety
             </Link>
             : finishes are non-toxic and baby-safe throughout, including on the top rails (where a
-            teething child may put their mouth). Every crib we sell meets or exceeds CPSC and ASTM
-            standards.
+            teething child may put their mouth).
           </li>
         </ul>
         <p>

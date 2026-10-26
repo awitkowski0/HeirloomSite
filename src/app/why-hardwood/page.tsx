@@ -115,8 +115,8 @@ export default function HardwoodPage() {
           <Link href="/safety" className="doc-link">
             Safety
           </Link>{' '}
-          page: every crib we sell is built to meet or exceed CPSC and ASTM standards, with non-toxic,
-          baby-safe finishes. Confirm details on the specific product page.
+          page: the CPSC and ASTM safety standards that govern cribs, and the non-toxic, baby-safe
+          finishes we use. Confirm details on the specific product page.
         </p>
       </section>
       <section>

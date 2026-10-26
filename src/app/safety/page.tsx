@@ -43,11 +43,10 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Standards</h2>
         <p>
-          Every crib we sell is built to meet or exceed the CPSC and ASTM safety standards that
-          govern cribs sold in the United States, and is finished with non-toxic, baby-safe
-          materials. Cribs are among the most tightly regulated pieces of furniture sold in the
-          US: fixed sides, slat strength and spacing, mattress support and hardware durability are
-          all covered.
+          CPSC and ASTM safety standards govern cribs sold in the United States, and every crib we
+          sell is finished with non-toxic, baby-safe materials. Cribs are among the most tightly
+          regulated pieces of furniture sold in the US: fixed sides, slat strength and spacing,
+          mattress support and hardware durability are all covered.
         </p>
         {CERTIFICATIONS.length > 0 && (
           <ul className="doc-list">
