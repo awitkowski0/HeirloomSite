@@ -233,7 +233,10 @@ test('(p) About contact card is a finished card pulling email from the shared so
   assert.ok(s.includes('Talk to us'), 'About card label missing');
   assert.ok(/import \{ SUPPORT_INBOX \} from '@\/lib\/email'/.test(s), 'About does not import SUPPORT_INBOX');
   assert.ok(s.includes('SUPPORT_INBOX.toLowerCase()'), 'About card does not lowercase the shared inbox');
-  assert.ok(s.includes('{SUPPORT_EMAIL}'), 'About card does not render the lowercased SUPPORT_EMAIL');
+  assert.ok(s.includes("SUPPORT_EMAIL.split('@')"), 'About card email is not split at @ from SUPPORT_EMAIL');
+  assert.ok(/\{SUPPORT_EMAIL_USER\}\s*<wbr \/>\s*\{`@\$\{SUPPORT_EMAIL_HOST\}`\}/.test(s), 'About card email lacks <wbr /> before @');
+  assert.ok(s.includes('href={`mailto:${SUPPORT_EMAIL}`}'), 'About card mailto changed');
+  assert.ok(s.includes('<a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care<wbr />@heirloomcribsandmore.com</a>'), 'About header email lacks <wbr /> before @ or mailto changed');
 });
 
 test('(q) each page sets an absolute title matching its source meta title (no doubled site suffix)', () => {

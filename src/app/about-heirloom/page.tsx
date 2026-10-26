@@ -4,6 +4,8 @@ import { SUPPORT_INBOX } from '@/lib/email';
 
 // Display the shared support inbox in lowercase, matching every other page.
 const SUPPORT_EMAIL = SUPPORT_INBOX.toLowerCase();
+// Split at '@' so a <wbr /> can offer a clean line break before the domain on narrow screens.
+const [SUPPORT_EMAIL_USER, SUPPORT_EMAIL_HOST] = SUPPORT_EMAIL.split('@');
 
 // Q#-dependent copy, one place each, for easy swapping if Phil's answers change.
 // (About: Q1, Q3, Q4, Q5, Q7, Q8. Q2/Q6/Q9 render nothing by decision.)
@@ -51,7 +53,7 @@ export default function AboutHeirloomPage() {
           <p className="builder-header__contact">
             <a href="tel:+14842931840">(484) 293-1840</a>
             {` · `}
-            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care@heirloomcribsandmore.com</a>
+            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care<wbr />@heirloomcribsandmore.com</a>
           </p>
         </div>
         {/* About has no photo (no Heirloom photos exist): finished contact card on the right. */}
@@ -64,7 +66,11 @@ export default function AboutHeirloomPage() {
             </p>
             <p>
               {`Email: `}
-              <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+              <a href={`mailto:${SUPPORT_EMAIL}`}>
+                {SUPPORT_EMAIL_USER}
+                <wbr />
+                {`@${SUPPORT_EMAIL_HOST}`}
+              </a>
             </p>
             <p>{`Pennsylvania, New Jersey and Maryland`}</p>
           </div>
