@@ -4,8 +4,8 @@ import { readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 import { sizeOf } from './helpers/image-size.mjs';
 
+const ABOUT = 'src/app/about-heirloom/page.tsx';
 const PAGES = {
-  about: 'src/app/about-heirloom/page.tsx',
   oto: 'src/app/builders/old-town-oak/page.tsx',
   fqp: 'src/app/builders/fishers-quality-products/page.tsx',
   kc: 'src/app/builders/kids-comfort/page.tsx',
@@ -36,7 +36,6 @@ test('(a) all five pages export a default component and metadata with a canonica
 
 test('(b) canonical uses relative brand paths (never a vercel.app host)', () => {
   const expected: Record<string, string> = {
-    about: '/about-heirloom',
     oto: '/builders/old-town-oak',
     fqp: '/builders/fishers-quality-products',
     kc: '/builders/kids-comfort',
@@ -74,9 +73,14 @@ test('(d) no links to deliberately-excluded routes on any of the five pages', ()
   }
 });
 
-test('(e) About H2 "How an order works" carries id="how-an-order-works"', () => {
-  assert.match(src(PAGES.about), /id="how-an-order-works"[^>]*>How an order works|How an order works<\/h2>/);
-  assert.ok(src(PAGES.about).includes('id="how-an-order-works"'), 'anchor id missing');
+test('(e) About page keeps id="how-an-order-works" so builder deep-links resolve', () => {
+  assert.ok(src(ABOUT).includes('id="how-an-order-works"'), 'About anchor id missing');
+});
+
+test('(e2) builder pages deep-link /about-heirloom#how-an-order-works', () => {
+  for (const name of ['oto', 'fqp', 'kc'] as const) {
+    assert.ok(src(PAGES[name]).includes('/about-heirloom#how-an-order-works'), `${name} missing About deep-link`);
+  }
 });
 
 test('(f) Q3 woman-owned line is never rendered', () => {
@@ -121,7 +125,7 @@ test('(j) all five routes build (prerendered in the Next build manifest)', () =>
     // Build not run in this context; skip rather than false-fail.
     return;
   }
-  for (const route of ['/about-heirloom', '/builders/old-town-oak', '/builders/fishers-quality-products', '/builders/kids-comfort', '/woods-and-finishes']) {
+  for (const route of ['/builders/old-town-oak', '/builders/fishers-quality-products', '/builders/kids-comfort', '/woods-and-finishes']) {
     assert.ok(out.includes(route), `route ${route} not in build manifest`);
   }
   void execSync;
