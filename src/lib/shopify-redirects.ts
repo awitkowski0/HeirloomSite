@@ -7,16 +7,22 @@
  * rule, /gallery, the retired /products/<category> slugs, /products?search=)
  * are untouched and defined there, not here.
  *
+ * Targets reconciled across three sources: the Merchant Center GSC 404 audit
+ * (redirect-map-2026-10-26.csv, the authority for the 46 URLs Google actually
+ * reported), the CoS Shopify sweep handle list (handles-62.tsv) and REPORT.md
+ * (the other old Shopify URL shapes, probed live). Where the sources disagreed,
+ * the true-equivalent (usually SKU-matched) target won; those are flagged in the
+ * PR body.
+ *
  * Status choice:
- *   - permanent (308) only where the destination is a TRUE equivalent of the
- *     old page (the same product);
- *   - temporary (307) where the destination is reasonable but unconfirmed (the
- *     "candidate" product matches below, pending Phil's review), so it is not
- *     cached and can be promoted to 308 once confirmed;
+ *   - permanent (308) where the destination is a confirmed TRUE equivalent;
+ *   - temporary (307) where the match is medium-confidence and Phil may still
+ *     change the target (the "candidate" product matches and data-sharing-opt-out
+ *     below), so it is not cached and can be promoted to 308 once confirmed;
  *   - URLs with no true equivalent are NOT listed here and keep returning 404
- *     on purpose (see the PR body): the two "weak" FQP conversion-kit handles, plus /pages/my-journey,
- *     /collections/newport-collection, /collections/box-tops, the discontinued
- *     area-rug product and the Shopify system URLs.
+ *     on purpose (see the PR body): the two "weak" FQP conversion-kit handles,
+ *     /pages/my-journey, /collections/box-tops, the discontinued area-rug
+ *     product, and the Shopify system URLs.
  *
  * Hosts: every source is path-only, so Next matches it on whatever host serves
  * the deployment (apex heirloomcribsandmore.com and www alike). Query strings
@@ -29,7 +35,7 @@ export interface ShopifyRedirect {
   permanent: boolean;
 }
 
-/* 55 old /products/<handle> URLs with an exact or strong equivalent (308). */
+/* 57 old /products/<handle> URLs with an exact, strong or SKU-matched equivalent (308). */
 export const SHOPIFY_PRODUCT_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   { source: '/products/mission-style', destination: '/product/mission', permanent: true },
   { source: '/products/arched-top', destination: '/product/arched-top', permanent: true },
@@ -86,6 +92,8 @@ export const SHOPIFY_PRODUCT_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   { source: '/products/west-lake-toddler-bed', destination: '/product/west-lake-toddler-bed', permanent: true },
   { source: '/products/west-lake-full-bed-rail-kit', destination: '/product/west-lake-full-bed-rail-kit', permanent: true },
   { source: '/products/full-guard-rail', destination: '/product/full-guard-rail', permanent: true },
+  { source: '/products/oto-401a-toddler-rail', destination: '/product/toddler-conversion-rail', permanent: true },
+  { source: '/products/oto-490-guard-rail', destination: '/product/guard-rail', permanent: true },
 ];
 
 /*
@@ -94,10 +102,8 @@ export const SHOPIFY_PRODUCT_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
  * 307 (not cached) and can be promoted to 308 once confirmed.
  */
 export const SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE: ShopifyRedirect[] = [
-  { source: '/products/oto-401a-toddler-rail', destination: '/product/toddler-conversion-rail', permanent: false },
   { source: '/products/oto-401b-bed-rail', destination: '/product/full-bed-rail-kit', permanent: false },
   { source: '/products/oto-475-3-4-guard-rail', destination: '/product/34-guard-rail', permanent: false },
-  { source: '/products/oto-490-guard-rail', destination: '/product/full-guard-rail', permanent: false },
   { source: '/products/three-quarter-guard-rail', destination: '/product/34-guard-rail', permanent: false },
 ];
 
@@ -106,15 +112,16 @@ export const SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE: ShopifyRedirect[] = [
  * Topic 2: old Shopify pages/policies/collections/cart that have a TRUE
  * equivalent on the new site -> permanent 308. Targets verified to return 200:
  * /safety /contact /faq /care /privacy /returns /shipping /terms /products
- * /products/cribs /checkout. (/privacy covers the data-sharing opt-out; /care is
- * the furniture-care page; /checkout is the Vercel cart.)
+ * /products/cribs /collections/newport /checkout. (/care is the furniture-care
+ * page; /collections/newport is the Newport range page; /checkout is the Vercel
+ * cart. The Merchant map's newport-collection -> /collections/newport is here;
+ * the app's own -style-collection logic in collections.ts handles the rest.)
  */
 export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   { source: '/pages/safety', destination: '/safety', permanent: true },
   { source: '/pages/contact', destination: '/contact', permanent: true },
   { source: '/pages/faq', destination: '/faq', permanent: true },
   { source: '/pages/caring-for-your-custom-wood-furniture', destination: '/care', permanent: true },
-  { source: '/pages/data-sharing-opt-out', destination: '/privacy', permanent: true },
   { source: '/policies/refund-policy', destination: '/returns', permanent: true },
   { source: '/policies/privacy-policy', destination: '/privacy', permanent: true },
   { source: '/policies/shipping-policy', destination: '/shipping', permanent: true },
@@ -122,20 +129,23 @@ export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   { source: '/collections/all', destination: '/products', permanent: true },
   { source: '/collections/frontpage', destination: '/products', permanent: true },
   { source: '/collections/baby-cribs', destination: '/products/cribs', permanent: true },
+  { source: '/collections/newport-collection', destination: '/collections/newport', permanent: true },
   { source: '/cart', destination: '/checkout', permanent: true },
 ];
 
 /*
- * Topic 2: /pages/about-us has no true equivalent (there is no /about page), so
- * per Phil it goes to the homepage as a NON-cached 307 rather than a 308.
- * Everything else with no equivalent is left as 404 (see the PR body):
- * /pages/my-journey, /collections/newport-collection, /collections/box-tops, the
- * discontinued area-rug product, and the Shopify system URLs (/password,
- * /v1/produce, /services/login_with_shop/*, /customer_authentication/login,
- * /account*, /blogs*).
+ * Topic 2, 307 (medium-confidence, reversible): /pages/about-us has no true
+ * equivalent (there is no /about page), so per Phil it goes to the homepage as a
+ * NON-cached 307; /pages/data-sharing-opt-out -> /privacy is a Merchant
+ * medium-confidence match (the privacy page does carry the opt-out section).
+ * Left as 404 on purpose (see the PR body): /pages/my-journey,
+ * /collections/box-tops, the discontinued area-rug product, and the Shopify
+ * system URLs (/password, /v1/produce, /services/login_with_shop/*,
+ * /customer_authentication/login, /account*, /blogs*).
  */
 export const SHOPIFY_PAGE_REDIRECTS_TEMPORARY: ShopifyRedirect[] = [
   { source: '/pages/about-us', destination: '/', permanent: false },
+  { source: '/pages/data-sharing-opt-out', destination: '/privacy', permanent: false },
 ];
 
 /** Every Shopify-leftover redirect, in one list for next.config.ts and tests. */

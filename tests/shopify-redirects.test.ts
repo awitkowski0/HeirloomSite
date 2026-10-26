@@ -10,11 +10,11 @@ import {
 import { getAllProductSlugs } from '@/lib/content';
 
 test('redirect table has the expected group sizes', () => {
-  assert.equal(SHOPIFY_PRODUCT_REDIRECTS_PERMANENT.length, 55);
-  assert.equal(SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE.length, 5);
+  assert.equal(SHOPIFY_PRODUCT_REDIRECTS_PERMANENT.length, 57);
+  assert.equal(SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE.length, 3);
   assert.equal(SHOPIFY_PAGE_REDIRECTS_PERMANENT.length, 13);
-  assert.equal(SHOPIFY_PAGE_REDIRECTS_TEMPORARY.length, 1);
-  assert.equal(SHOPIFY_REDIRECTS.length, 74);
+  assert.equal(SHOPIFY_PAGE_REDIRECTS_TEMPORARY.length, 2);
+  assert.equal(SHOPIFY_REDIRECTS.length, 75);
 });
 
 test('every rule is well-formed, path-only, with no self-redirect', () => {
@@ -81,13 +81,15 @@ test('spot-check specific mappings and statuses', () => {
   expect('/products/newport-crib', '/product/newport-crib', true);
   expect('/products/mini-newport', '/product/mini-newport-with-mattress', true);
   expect('/products/three-quarter-guard-rail', '/product/34-guard-rail', false);
-  expect('/products/oto-490-guard-rail', '/product/full-guard-rail', false);
+  expect('/products/oto-490-guard-rail', '/product/guard-rail', true);
+  expect('/products/oto-401a-toddler-rail', '/product/toddler-conversion-rail', true);
   expect('/pages/caring-for-your-custom-wood-furniture', '/care', true);
-  expect('/pages/data-sharing-opt-out', '/privacy', true);
+  expect('/pages/data-sharing-opt-out', '/privacy', false);
   expect('/policies/refund-policy', '/returns', true);
   expect('/policies/terms-of-service', '/terms', true);
   expect('/collections/all', '/products', true);
   expect('/collections/baby-cribs', '/products/cribs', true);
+  expect('/collections/newport-collection', '/collections/newport', true);
   expect('/cart', '/checkout', true);
   expect('/pages/about-us', '/', false);
 });
@@ -97,7 +99,6 @@ test('URLs with no true equivalent are deliberately absent (stay 404)', () => {
   for (const left404 of [
     '/products/fqp-102-toddler-conversion-kit',
     '/products/fqp-103-full-bedrails-conversion-kit',
-    '/collections/newport-collection',
     '/collections/box-tops',
     '/pages/my-journey',
     '/password',
@@ -105,6 +106,7 @@ test('URLs with no true equivalent are deliberately absent (stay 404)', () => {
     '/account',
     '/account/login',
     '/blogs/news',
+    '/products/woolable-sheep-of-the-world-tundra-washable-wool-hand-tufted-non-slip-backing-area-rug-blended-sheep-beige',
   ]) {
     assert.ok(!sources.has(left404), `should be left as 404: ${left404}`);
   }
