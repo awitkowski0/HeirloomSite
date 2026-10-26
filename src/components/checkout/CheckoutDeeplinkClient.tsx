@@ -61,9 +61,17 @@ export default function CheckoutDeeplinkClient({ product, quantity, recommendati
       {/*
         Server-rendered summary of the exact product this link resolves to.
         Present in the initial HTML (no sign-in, no client fetch) so a crawler
-        reading the raw response sees the product, price and image.
+        reading the raw response sees the product, price and image. It is
+        `visually-hidden` (clipped, but still in the DOM and the accessibility
+        tree) rather than removed: shoppers land on the normal checkout and must
+        not see a bare unstyled block, but the product name and price have to
+        stay in the raw HTML for Google’s checkout crawler.
       */}
-      <section className="deeplink-summary" aria-label="Selected product" data-feed-id={product.id}>
+      <section
+        className="deeplink-summary visually-hidden"
+        aria-label="Selected product"
+        data-feed-id={product.id}
+      >
         {product.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
