@@ -29,7 +29,7 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
   {
     icon: 'verified_user',
     title: 'Built to CPSC and ASTM standards',
-    body: 'Solid hardwood, non-toxic baby-safe finishes, and hardware made to be taken apart and rebuilt as it converts.',
+    body: 'Solid hardwood and hardware made to be taken apart and rebuilt as it converts.',
     href: '/safety',
   },
   {

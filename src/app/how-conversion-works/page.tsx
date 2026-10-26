@@ -83,11 +83,8 @@ export default function ConversionPage() {
         <p>
           In its first configuration, the crib is a standard full-size crib with a mattress support
           designed for a firm, tight-fitting crib mattress, following current safe-sleep guidance and
-          the product&rsquo;s safety standards (meet or exceed CPSC and ASTM — see our{' '}
-          <Link href="/safety" className="doc-link">
-            Safety page
-          </Link>
-          ).
+          the product&rsquo;s safety standards (CPSC and ASTM standards cover cribs; questions about a
+          specific piece? Ask us).
         </p>
       </section>
       <hr className="doc-rule" />

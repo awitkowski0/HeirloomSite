@@ -122,7 +122,6 @@ export default function HomePage() {
           <JourneyPoints
             points={[
               'Solid brown maple hardwood. Never veneer over particle board.',
-              'Non-toxic, baby-safe finishes, hand-applied.',
               'The remaining balance is invoiced once the staining is complete — not before.',
             ]}
           />

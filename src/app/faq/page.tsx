@@ -86,10 +86,9 @@ const SECTIONS: Section[] = [
         question: 'Are the finishes safe for a nursery?',
         answer: (
           <p>
-            Every finish we offer is non-toxic and baby-safe, including on the top rails, and we
-            describe them on each product page and our {SafetyLink}. Do not assume any particular
-            third-party certification applies to a given piece — confirm it on that product page
-            before you order. For what GREENGUARD Gold does and does not cover, see{' '}
+            We describe our finishes on each product page and our {SafetyLink}. Do not assume any
+            particular third-party certification applies to a given piece — confirm it on that
+            product page before you order. For what GREENGUARD Gold does and does not cover, see{' '}
             <Link href="/finishes" className="doc-link">
               Finishes &amp; Nursery Air Quality
             </Link>
@@ -297,9 +296,9 @@ const SECTIONS: Section[] = [
         answer: (
           <>
             <p>
-              Every crib we sell is built to meet or exceed the CPSC and ASTM safety standards that
-              apply to full-size cribs, with non-toxic, baby-safe finishes. Confirm the details for
-              a particular model on its product page.
+              Cribs sold in the United States are covered by CPSC and ASTM standards. Heirloom Cribs
+              &amp; More resells; each builder makes its own compliance statements. Questions about a
+              specific piece? Ask us.
             </p>
             <p>
               Authoritative detail always lives on the {SafetyLink}. We do not replace safe-sleep
@@ -380,9 +379,8 @@ const SECTIONS: Section[] = [
             </p>
             <p>
               We source nursery case goods crafted by Amish and independent US craftspeople from
-              maple, cherry, or red oak—never veneer over particle board. Finishes are non-toxic
-              and baby-safe, and every crib meets or exceeds CPSC and ASTM standards—details live
-              on our {SafetyLink} and each product page. One crib converts to a toddler bed, a
+              brown maple—never veneer over particle board. Details live on our {SafetyLink} and
+              each product page. One crib converts to a toddler bed, a
               daybed, and a full bed when the kits for your style are in place; that’s what we mean
               by Built to Grow Up. When you’re ready to order, you choose Curbside delivery to the
               curb or White Glove with in-home assembly. White Glove includes up to 3 flights of
