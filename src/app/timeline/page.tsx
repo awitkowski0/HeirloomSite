@@ -67,8 +67,8 @@ export default function TimelinePage() {
             <strong>04 Delivered to Your Nursery.</strong> You choose Curbside (to the curb) or
             White Glove (into your home, with unpacking, assembly and placement). White Glove
             includes up to 3 flights of stairs. We deliver in{' '}
-            <strong>PA, NJ (excluding the New York City / North Jersey metro area) and MD</strong>;
-            confirm your zip with us if you&rsquo;re unsure. See{' '}
+            <strong>Pennsylvania, New Jersey and Maryland</strong>, except some ZIP codes in Newark;
+            other areas may be available by request and are quoted individually. See{' '}
             <Link href="/shipping" className="doc-link">Delivery</Link>.
           </li>
         </ol>
@@ -106,8 +106,8 @@ export default function TimelinePage() {
         <ol className="doc-list">
           <li>Preferred crib style (or a few you&rsquo;re comparing).</li>
           <li>Wood / stain ideas if you have them.</li>
-          <li>Delivery zip code — we serve PA, NJ (excluding the New York City / North Jersey
-            metro area) and MD.</li>
+          <li>Delivery ZIP code — we deliver in Pennsylvania, New Jersey and Maryland, except some
+            ZIP codes in Newark.</li>
           <li>Ideal delivery window; a month is fine.</li>
           <li>What&rsquo;s included for your SKU (rails / conversion parts — check the product page;
             we&rsquo;ll confirm the kit list on the Confirm Order call).</li>
