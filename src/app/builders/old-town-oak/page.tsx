@@ -1,10 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+// Q#-dependent copy, one place each (OTO: Q4, Q7).
+const Q = {
+  q4: `Old Town Oak is one of three builders Heirloom resells. We introduce it here in its own words.`,
+  q7: `For an Old Town Oak wood or finish that isn't on our product pages, contact us with what you have in mind.`,
+};
+
+const OTO_FINISHES = `FC Almond · Shadow FC24427 · Tavern · Golden Brown · Michael's Cherry Low Sheen · FC 30529 · Sealy · Cappuccino · Summit Path · Rich Tobacco · Kona · Oatmilk · Granola · FC 19093 Dark Knight · Butter · S-14 Medium Cherry · OCS-113 Michael's Cherry · Hoosier Special · Harvest · FC19852 Antique Slate · FC Carbon · Amber · Earthtone FC40592 · RR-003 Bernett Slate Paint / Glaze · Muted Gray · Limed Oak · 922 Sealy · 7992 Sealy · 7992 Asbury Brown · 5190 Old World Mission`;
+
 export const metadata: Metadata = {
-  title: 'Old Town Oak — one of our builders',
+  title: 'Old Town Oak Cribs & Dressers | Heirloom Cribs & More',
   description:
-    'Old Town Oak builds solid hardwood cribs and case goods in Topeka, Indiana. Meet the builder behind many of the pieces Heirloom Cribs and More offers, made in the USA.',
+    'Old Town Oak makes cribs and dressers. Read its own words on construction and safety, see its woods and finishes, then order through us.',
   alternates: { canonical: '/builders/old-town-oak' },
   openGraph: { url: '/builders/old-town-oak' },
 };
@@ -12,94 +20,140 @@ export const metadata: Metadata = {
 export default function OldTownOakPage() {
   return (
     <div className="container doc-page">
-      <p className="label-caps text-on-surface-variant">Our builders</p>
-      <h1 className="headline-xl">Old Town Oak</h1>
-      <p className="body-lg doc-lede">
-        Old Town Oak is a furniture shop in Topeka, Indiana, owned by Marlin Miller, building since
-        2005. Heirloom Cribs and More is a Pennsylvania-based reseller &mdash; we don&rsquo;t build the
-        furniture ourselves. Old Town Oak builds it in Indiana, made in the USA, and we bring it to
-        your nursery.
-      </p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-start' }}>
+        <div style={{ flex: '1 1 320px' }}>
+          <p className="label-caps text-on-surface-variant">Our builders</p>
+          <h1 className="headline-xl">Old Town Oak</h1>
+          <p className="body-lg doc-lede">
+            {`A furniture business based in Topeka, Indiana, that specializes in baby furniture and, by its 2026 catalog's count, has been in business for 21 years. You order through Heirloom Cribs & More, and we handle the call, the invoice and the delivery.`}
+          </p>
+          <p>
+            <Link href="/contact" className="doc-link">Get Personal Assistance</Link>
+          </p>
+        </div>
+        <figure style={{ flex: '1 1 320px', maxWidth: 600, margin: 0 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- OTO-desktop crop, native 1200x1000, capped to <=600 CSS px (no upscale). */}
+          <img
+            src="/images/builders/oto-west-lake-chest-desktop.jpg"
+            alt="Old Town Oak West Lake chest with six drawers, arched base and metal pulls, in a golden-brown finish"
+            width={1200}
+            height={1000}
+            style={{ width: '100%', height: 'auto', maxWidth: 600, display: 'block', borderRadius: 8 }}
+          />
+          <figcaption className="label-caps">
+            <Link href="/product/west-lake-chest" className="doc-link">West Lake chest, Old Town Oak</Link>
+          </figcaption>
+        </figure>
+      </div>
+
+      <hr className="doc-rule" />
+      <section>
+        <h2 className="headline-md">Who they are</h2>
+        <p>
+          {`Old Town Oak's catalog cover reads "Specializing in Baby Furniture." Its 2026 catalog says: "Having been in business for 21 years, we can offer you the quality cribs and dressers you expect and deserve."`}
+        </p>
+        <p>{Q.q4}</p>
+      </section>
 
       <section>
-        <h2 className="headline-md">What they make</h2>
+        <h2 className="headline-md">How it's built</h2>
+        <p>{`In Old Town Oak's words:`}</p>
+        <blockquote>
+          <p>
+            {`"Our cribs are sturdy and durable with mortise and tenon joints and a substructure made of steel inserts and connector bolts. Our dressers feature dovetail wood drawer boxes and full extension slides, all features that make sure our baby furniture will stand the test of time."`}
+          </p>
+          <cite>{`Old Town Oak, 2026 catalog`}</cite>
+        </blockquote>
+        <blockquote>
+          <p>
+            {`"Tool and hardware kit comes standard attached to every crib spring with easy to read and understand instructions. Panels are specially marked for ease of assembly."`}
+          </p>
+          <cite>{`Old Town Oak, 2026 catalog`}</cite>
+        </blockquote>
+        <p>{`Each piece also carries a signature. In the catalog's words, "every piece is signed by the artisan, Marlin Miller."`}</p>
+        <p>{`With Curbside delivery, you assemble the crib with that kit and the marked panels. White Glove delivery includes assembly.`}</p>
+      </section>
+
+      <section>
+        <h2 className="headline-md">Crib, toddler bed, full bed</h2>
         <p>
-          Cribs, matching dressers (many with a changing-box top option), chests, nightstands, and
-          conversion add-ons (a toddler day bed and full bed) for their crib collections.
+          {`Old Town Oak states in its 2026 catalog: "Each crib is designed with a unique three stage system that adjusts with the age or size of your child. Use one piece of furniture for your child from newborn into adulthood."`}
         </p>
         <p>
-          Collections we have on file include Addison, French Country, Mackenzie, Newport and West
-          Lake, plus the newer Willow, Carmen, Cheyenne, Cordova, Palisade and Tahoe.
+          {`Its catalog calls the third stage a double bed; on our site it is the full bed. The toddler bed and the full bed rail kit are listed as separate pieces in the Addison, Mackenzie, Newport and West Lake collections.`}
         </p>
       </section>
 
-      <hr className="doc-rule" />
+      <section>
+        <h2 className="headline-md">Safety and compliance, in Old Town Oak's words</h2>
+        <p>
+          {`The statements below are Old Town Oak's own, quoted from its 2026 catalog (PDF pages 3 and 4). Heirloom Cribs & More does not build furniture and makes no safety claims of its own.`}
+        </p>
+        <p>
+          {`Old Town Oak states: "All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs."`}
+        </p>
+        <p>
+          {`Old Town Oak states: "For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species."`}
+        </p>
+      </section>
 
       <section>
         <h2 className="headline-md">Woods and finishes</h2>
         <p>
-          Woods listed by the builder: sap cherry, cherry, red oak, brown soft maple, quarter-sawn
-          white oak and grey elm. Maple is a wood, not a finish.
+          {`On our site, Old Town Oak cribs are listed in brown maple with ten stains: Natural, Almond, Asbury Brown, Carbon, Earthtone, Ebony, Harvest, Manchester, Michaels Cherry and Sandstone.`}
         </p>
         <p>
-          Old Town Oak&rsquo;s stains come from Spectrum Finishing. The Brown Maple stain names in our
-          files include Almond, Asbury-Brown, Carbon, Earthtone, Ebony, Harvest, Manchester,
-          Michaels-Cherry, Natural and Sandstone.
+          {`The shop's own range is much wider. Its 2026 catalog names these woods: "Sap Cherry, Cherry, Red Oak, Brown Soft Maple, White Oak Quartersawn, and Grey Elm." Those other woods are not listed on our site.`}
+        </p>
+        <p>{`Old Town Oak's catalog shows these finishes. Our site lists the ten stains above.`}</p>
+        <p>{OTO_FINISHES}</p>
+        <p>
+          {`${Q.q7} More on how woods and stains work: `}
+          <Link href="/woods-and-finishes" className="doc-link">Woods and finishes</Link>
+          {`.`}
         </p>
       </section>
 
       <section>
-        <h2 className="headline-md">How it&rsquo;s built</h2>
-        <p>Mortise-and-tenon cribs with steel inserts, and dovetailed dresser drawers.</p>
-      </section>
-
-      <hr className="doc-rule" />
-
-      <section>
-        <h2 className="headline-md">Safety, in Old Town Oak&rsquo;s own words</h2>
-        <p>
-          The safety wording below is Old Town Oak&rsquo;s own, quoted from the builder&rsquo;s
-          documents we hold on file. For the standards that apply to a specific piece, confirm the
-          details on that product&rsquo;s page.
-        </p>
-        <p>
-          Old Town Oak has third-party test reports from Bureau Veritas Consumer Products Services
-          (Buffalo, NY) for its crib styles. Each report states the sample{' '}
-          <q>MEETS</q> the listed requirements &mdash; for example,{' '}
-          <q>The requirements of 16 CFR Part 1219, &lsquo;Safety Standard for Full-Size Baby
-          Cribs&rsquo;</q> (and, on several reports, ASTM F1169).
-        </p>
-        <p>
-          For dressers, Old Town Oak&rsquo;s General Certificate of Conformity states:{' '}
-          <q>
-            Old Town Oak, LLC certifies that the above product complies with the following regulation
-            standards: ASTM F2057-23 &ndash; Standard Safety Specification for Clothing Storage units.
-            ASTM F3096-23 - Furniture Tipping Restraint 16 CFR 1261 &ndash; Safety Standard for
-            Clothing Storage Units
-          </q>{' '}
-          (that certificate covers the Monterey 6-drawer dresser). Their STURDY Act notice says:{' '}
-          <q>Interlocks on all products, and counterweights as needed. (Nightstands are exempt)</q>.
-        </p>
-      </section>
-
-      <hr className="doc-rule" />
-
-      <section>
-        <h2 className="headline-md">Lead time</h2>
-        <p>About 6&ndash;8 weeks, confirmed when you order.</p>
+        <h2 className="headline-md">Old Town Oak on our site</h2>
+        <p>{`Five collections, each with a crib, a dresser and a nightstand:`}</p>
+        <ul>
+          <li><Link href="/collections/addison" className="doc-link">Addison</Link></li>
+          <li><Link href="/collections/french-country" className="doc-link">French Country</Link></li>
+          <li><Link href="/collections/mackenzie" className="doc-link">Mackenzie</Link></li>
+          <li>
+            <Link href="/collections/newport" className="doc-link">Newport</Link>
+            {`, including the `}
+            <Link href="/product/mini-newport-with-mattress" className="doc-link">Mini Newport with Mattress</Link>
+          </li>
+          <li><Link href="/collections/west-lake" className="doc-link">West Lake</Link></li>
+        </ul>
+        <p>{`Lead time is about 6 to 8 weeks, confirmed when you order.`}</p>
       </section>
 
       <section>
-        <h2 className="headline-md">Ordering through Heirloom</h2>
+        <h2 className="headline-md">What we handle on an Old Town Oak order</h2>
+        <ul>
+          <li>{`Before anything is built, we call to confirm your stain, the kit list and your delivery.`}</li>
+          <li>{`We send a Stripe invoice for the 50% deposit. The build starts when the deposit is in.`}</li>
+          <li>
+            {`When the furniture is ready, we contact you to schedule delivery, Curbside or White Glove. Shipping is charged by cart subtotal; see `}
+            <Link href="/shipping" className="doc-link">Delivery</Link>
+            {`.`}
+          </li>
+          <li>{`If something arrives damaged, we arrange the repair or replacement with Old Town Oak and handle the carrier claim.`}</li>
+        </ul>
         <p>
-          Every piece is made to order. We confirm your details, then take a 50% deposit. You can
-          cancel at no cost any time before the deposit is paid; once it&rsquo;s paid, the order goes
-          to the builder and can&rsquo;t be cancelled, and made-to-order pieces can&rsquo;t be
-          returned. Delivery is charged by cart total: Curbside (drop-off) or White Glove, which is
-          the only option that includes assembly. See{' '}
-          <Link href="/shipping" className="doc-link">Delivery</Link> and{' '}
-          <Link href="/returns" className="doc-link">Returns &amp; Cancellations</Link> for full
-          terms.
+          {`The full order steps are on `}
+          <Link href="/about-heirloom#how-an-order-works" className="doc-link">About Heirloom</Link>
+          {`.`}
+        </p>
+        <p>
+          <Link href="/contact" className="doc-link">Get Personal Assistance</Link>
+          {` · `}
+          <a href="tel:+14842931840" className="doc-link">(484) 293-1840</a>
+          {` · `}
+          <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">heirloomcribs.care@heirloomcribsandmore.com</a>
         </p>
       </section>
     </div>

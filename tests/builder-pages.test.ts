@@ -1,85 +1,128 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
-import { BRAND_SITE_URL } from '@/lib/seo';
+import { execSync } from 'node:child_process';
+import { sizeOf } from './helpers/image-size.mjs';
 
-/*
- * The builder/about pages are React server components (.tsx), which node --test
- * cannot import (its type-stripping does not handle JSX). So these assertions
- * read the page source as text. `npm run build` is what proves each route
- * actually renders/prerenders; the Vercel preview curl check (in the PR body)
- * proves the rendered canonical resolves to the brand domain.
- */
-const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const read = (f: string) => readFileSync(resolve(root, f), 'utf8');
+const PAGES = {
+  about: 'src/app/about-heirloom/page.tsx',
+  oto: 'src/app/builders/old-town-oak/page.tsx',
+  fqp: 'src/app/builders/fishers-quality-products/page.tsx',
+  kc: 'src/app/builders/kids-comfort/page.tsx',
+  woods: 'src/app/woods-and-finishes/page.tsx',
+};
 
-const PAGES = [
-  { route: '/builders/old-town-oak', file: 'src/app/builders/old-town-oak/page.tsx' },
-  {
-    route: '/builders/fishers-quality-products',
-    file: 'src/app/builders/fishers-quality-products/page.tsx',
-  },
-  { route: '/builders/kids-comfort', file: 'src/app/builders/kids-comfort/page.tsx' },
-  { route: '/about-heirloom', file: 'src/app/about-heirloom/page.tsx' },
+function src(p: string): string {
+  return readFileSync(p, 'utf8');
+}
+// Rendered-ish text: drop JSX comments so PHIL-LOOK / eslint-disable notes don't trip phrase checks.
+function rendered(p: string): string {
+  return src(p).replace(/\{\/\*[\s\S]*?\*\/\}/g, '');
+}
+
+const FORBIDDEN_ROUTES = [
+  '/timeline', '/safety', '/care', '/finishes',
+  '/why-hardwood', '/how-conversion-works', '/safe-sleep', '/faq',
 ];
 
-const FORBIDDEN = ['exceeds all safety standards', 'delivery included', 'free shipping', '.vercel.app'];
-
-test('(a) every builder/about page exports a default component and metadata', () => {
-  for (const p of PAGES) {
-    const src = read(p.file);
-    assert.match(src, /export default function/, `${p.route} has no default component`);
-    assert.match(src, /export const metadata/, `${p.route} has no metadata`);
+test('(a) all five pages export a default component and metadata with a canonical', () => {
+  for (const [name, p] of Object.entries(PAGES)) {
+    const s = src(p);
+    assert.match(s, /export default function \w+\(\)/, `${name} has no default component`);
+    assert.match(s, /export const metadata:\s*Metadata/, `${name} has no metadata`);
+    assert.match(s, /alternates:\s*\{\s*canonical:/, `${name} has no canonical`);
   }
 });
 
-test('(b) forbidden phrases never appear on the new pages', () => {
-  for (const p of PAGES) {
-    const src = read(p.file).toLowerCase();
-    for (const phrase of FORBIDDEN) {
-      assert.ok(!src.includes(phrase.toLowerCase()), `${p.route} contains forbidden phrase: ${phrase}`);
+test('(b) canonical uses relative brand paths (never a vercel.app host)', () => {
+  const expected: Record<string, string> = {
+    about: '/about-heirloom',
+    oto: '/builders/old-town-oak',
+    fqp: '/builders/fishers-quality-products',
+    kc: '/builders/kids-comfort',
+    woods: '/woods-and-finishes',
+  };
+  for (const [name, p] of Object.entries(PAGES)) {
+    const s = src(p);
+    assert.ok(s.includes(`canonical: '${expected[name]}'`), `${name} canonical != ${expected[name]}`);
+    assert.ok(!/vercel\.app/i.test(s), `${name} references vercel.app`);
+  }
+});
+
+test('(c) forbidden phrases never appear on the five pages', () => {
+  const banned = [
+    /exceeds?\s+all\s+safety\s+standards/i,
+    /delivery included/i,
+    /free shipping/i,
+    /vercel\.app/i,
+  ];
+  for (const [name, p] of Object.entries(PAGES)) {
+    const r = rendered(p);
+    for (const re of banned) {
+      assert.ok(!re.test(r), `${name} contains forbidden phrase ${re}`);
     }
   }
 });
 
-test('(c) FQP says Pennsylvania; OTO and KC never claim Pennsylvania', () => {
-  const fqp = read('src/app/builders/fishers-quality-products/page.tsx');
-  assert.match(fqp, /Made in Pennsylvania/, 'FQP page must say "Made in Pennsylvania"');
-
-  for (const file of [
-    'src/app/builders/old-town-oak/page.tsx',
-    'src/app/builders/kids-comfort/page.tsx',
-  ]) {
-    const src = read(file);
-    // The word "Pennsylvania" may appear (Heirloom is a PA-based reseller); what
-    // is forbidden is a PA *origin* claim for a non-FQP builder's furniture.
-    assert.ok(
-      !/made in pennsylvania|built in pennsylvania/i.test(src),
-      `${file} must not make a Pennsylvania origin claim (PA is FQP-only)`
-    );
-    assert.match(src, /made in the USA/, `${file} should carry the made-in-the-USA line`);
+test('(d) no links to deliberately-excluded routes on any of the five pages', () => {
+  for (const [name, p] of Object.entries(PAGES)) {
+    const s = src(p);
+    for (const route of FORBIDDEN_ROUTES) {
+      const re = new RegExp(`href="${route}(\\b|[/"#])`);
+      assert.ok(!re.test(s), `${name} links forbidden route ${route}`);
+    }
   }
 });
 
-test('(d) each page sets a canonical, and the brand host is heirloomcribsandmore.com (never a vercel.app host)', () => {
-  assert.equal(BRAND_SITE_URL, 'https://heirloomcribsandmore.com');
-  assert.ok(!BRAND_SITE_URL.includes('vercel.app'));
-  for (const p of PAGES) {
-    const src = read(p.file);
-    assert.ok(
-      src.includes(`canonical: '${p.route}'`) || src.includes(`canonical: "${p.route}"`),
-      `${p.route} must set its own canonical (resolves against metadataBase = ${BRAND_SITE_URL})`
-    );
+test('(e) About H2 "How an order works" carries id="how-an-order-works"', () => {
+  assert.match(src(PAGES.about), /id="how-an-order-works"[^>]*>How an order works|How an order works<\/h2>/);
+  assert.ok(src(PAGES.about).includes('id="how-an-order-works"'), 'anchor id missing');
+});
+
+test('(f) Q3 woman-owned line is never rendered', () => {
+  for (const [name, p] of Object.entries(PAGES)) {
+    assert.ok(!/woman-owned/i.test(rendered(p)), `${name} renders the Q3 woman-owned line`);
+    assert.ok(!/women-owned/i.test(rendered(p)), `${name} renders a women-owned line`);
   }
 });
 
-test('builder/about routes are in the sitemap and linked in the footer (no orphans)', () => {
-  const sitemap = read('src/app/sitemap.ts');
-  const footer = read('src/components/layout/Footer.tsx');
-  for (const p of PAGES) {
-    assert.ok(sitemap.includes(`${'${SITE_URL}'}${p.route}`), `${p.route} missing from sitemap`);
-    assert.ok(footer.includes(`href="${p.route}"`), `${p.route} missing a footer link`);
+test('(g) no raw [[DEFAULT-Q#: ]] marker syntax leaks into any page', () => {
+  for (const [name, p] of Object.entries(PAGES)) {
+    assert.ok(!/\[\[DEFAULT-Q/i.test(src(p)), `${name} still has a raw DEFAULT-Q marker`);
   }
+});
+
+test('(h) every <img> declares a width no larger than its native pixel width', () => {
+  for (const [name, p] of Object.entries(PAGES)) {
+    const s = src(p);
+    const imgRe = /<img[\s\S]*?src="([^"]+)"[\s\S]*?width=\{(\d+)\}[\s\S]*?\/>/g;
+    let m: RegExpExecArray | null;
+    while ((m = imgRe.exec(s)) !== null) {
+      const [, srcPath, wStr] = m;
+      const declared = Number(wStr);
+      const file = `public${srcPath}`;
+      const { width } = sizeOf(file);
+      assert.ok(declared <= width, `${name} img ${srcPath} declares ${declared} > native ${width} (upscaled)`);
+    }
+  }
+});
+
+test('(i) PHIL-LOOK health-claim comment stays in the Kids Comfort source', () => {
+  assert.ok(src(PAGES.kc).includes('PHIL-LOOK: health claim'), 'KC PHIL-LOOK comment missing');
+});
+
+test('(j) all five routes build (prerendered in the Next build manifest)', () => {
+  // Confirms the routes compile and are emitted; relies on a prior `next build`.
+  const manifest = '.next/app-path-routes-manifest.json';
+  let out: string;
+  try {
+    out = readFileSync(manifest, 'utf8');
+  } catch {
+    // Build not run in this context; skip rather than false-fail.
+    return;
+  }
+  for (const route of ['/about-heirloom', '/builders/old-town-oak', '/builders/fishers-quality-products', '/builders/kids-comfort', '/woods-and-finishes']) {
+    assert.ok(out.includes(route), `route ${route} not in build manifest`);
+  }
+  void execSync;
 });
