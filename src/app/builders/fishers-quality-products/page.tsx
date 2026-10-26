@@ -30,7 +30,7 @@ export default function FishersQualityProductsPage() {
           <p className="builder-header__contact">
             <a href="tel:+14842931840">(484) 293-1840</a>
             {` · `}
-            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care@heirloomcribsandmore.com</a>
+            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care<wbr />@heirloomcribsandmore.com</a>
           </p>
         </div>
         {/* Photo gate: the FQF-107MA header photo ships only after the /product/changing-table-6-drawer image swap. Until then, a text panel. */}
@@ -132,7 +132,7 @@ export default function FishersQualityProductsPage() {
             {` · `}
             <a href="tel:+14842931840" className="doc-link">(484) 293-1840</a>
             {` · `}
-            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">heirloomcribs.care@heirloomcribsandmore.com</a>
+            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">heirloomcribs.care<wbr />@heirloomcribsandmore.com</a>
           </p>
         </section>
       </div>

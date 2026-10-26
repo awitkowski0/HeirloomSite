@@ -131,7 +131,7 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">Delivery</h2>
           <p>
-            {`Orders ship from ${Q.q5} with our professional furniture delivery partner, blanket-wrapped and strapped in transit. We deliver in Pennsylvania, New Jersey and Maryland, except some ZIP codes in Newark.`}
+            {`Orders ship from ${Q.q5} with our professional furniture delivery partner, blanket-wrapped and strapped in transit. We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.`}
           </p>
           <p>{`You choose one of two services:`}</p>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
@@ -230,7 +230,7 @@ export default function AboutHeirloomPage() {
           <p style={{ margin: '4px 0 0' }}>
             {`Email: `}
             <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
-              heirloomcribs.care@heirloomcribsandmore.com
+              heirloomcribs.care<wbr />@heirloomcribsandmore.com
             </a>
           </p>
         </section>

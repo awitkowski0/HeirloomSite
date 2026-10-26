@@ -263,6 +263,25 @@ test('(r) About builder tile and delivery line use the Brand wording', () => {
   const s = src(ABOUT);
   assert.ok(s.includes('Describes itself as family-owned'), 'Fisher tile wording not updated');
   assert.ok(!/\{`Family-owned`\}/.test(s), 'old Family-owned tile text still present');
-  assert.ok(s.includes('except some ZIP codes in Newark'), 'delivery line not updated');
+  assert.ok(
+    s.includes('We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.'),
+    'delivery line not updated',
+  );
+  assert.ok(!s.includes('except some ZIP codes in Newark'), 'old "except some ZIP codes in Newark" still present');
+  assert.ok(!/outside our (delivery )?area|do not deliver|don't deliver|can't deliver|cannot deliver/i.test(s), 'flat no on delivery');
   assert.ok(!s.includes('Some North Jersey ZIP codes are outside our area'), 'old delivery line still present');
+});
+
+test('(s) every email shown as text on About and builder pages has <wbr /> before @; mailto unchanged', () => {
+  for (const name of ['about', 'oto', 'fqp', 'kc'] as const) {
+    const s = src(PAGES[name]);
+    const bare = s.replace(/mailto:heirloomcribs\.care@heirloomcribsandmore\.com/g, '');
+    assert.ok(!/heirloomcribs\.care@heirloomcribsandmore\.com/i.test(bare), `${name} shows an email without <wbr /> before @`);
+    const visible = (s.match(/heirloomcribs\.care<wbr \/>@heirloomcribsandmore\.com/g) || []).length;
+    const hrefs = (s.match(/href="mailto:heirloomcribs\.care@heirloomcribsandmore\.com"/g) || []).length;
+    assert.equal(visible, hrefs, `${name}: each literal mailto link should show the <wbr /> address`);
+  }
+  const about = src(ABOUT);
+  assert.equal((about.match(/href="mailto:heirloomcribs\.care@heirloomcribsandmore\.com"/g) || []).length, 2, 'About header + Talk to us section mailto');
+  assert.ok(/\{SUPPORT_EMAIL_USER\}\s*<wbr \/>\s*\{`@\$\{SUPPORT_EMAIL_HOST\}`\}/.test(about), 'About card email lacks <wbr />');
 });

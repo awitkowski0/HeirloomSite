@@ -35,7 +35,7 @@ export default function KidsComfortPage() {
           <p className="builder-header__contact">
             <a href="tel:+14842931840">(484) 293-1840</a>
             {` · `}
-            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care@heirloomcribsandmore.com</a>
+            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care<wbr />@heirloomcribsandmore.com</a>
           </p>
         </div>
         {/* No clean, confirmed-real Kids Comfort photo on file (IMAGE-PICKS.md): owner-quote panel on the right. */}
@@ -139,7 +139,7 @@ export default function KidsComfortPage() {
             {` · `}
             <a href="tel:+14842931840" className="doc-link">(484) 293-1840</a>
             {` · `}
-            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">heirloomcribs.care@heirloomcribsandmore.com</a>
+            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">heirloomcribs.care<wbr />@heirloomcribsandmore.com</a>
           </p>
         </section>
       </div>
