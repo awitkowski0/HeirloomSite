@@ -189,7 +189,8 @@ test('(p) About contact card is a finished card pulling email from the shared so
   assert.ok(s.includes('builder-panel--card'), 'About card modifier class missing');
   assert.ok(s.includes('Talk to us'), 'About card label missing');
   assert.ok(/import \{ SUPPORT_INBOX \} from '@\/lib\/email'/.test(s), 'About does not import SUPPORT_INBOX');
-  assert.ok(s.includes('{SUPPORT_INBOX}'), 'About card does not render SUPPORT_INBOX');
+  assert.ok(s.includes('SUPPORT_INBOX.toLowerCase()'), 'About card does not lowercase the shared inbox');
+  assert.ok(s.includes('{SUPPORT_EMAIL}'), 'About card does not render the lowercased SUPPORT_EMAIL');
 });
 
 test('(q) each page sets an absolute title matching its source meta title (no doubled site suffix)', () => {

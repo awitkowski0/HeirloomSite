@@ -4435,3 +4435,25 @@ a.product-inline-link:focus-visible {
     align-items: flex-start;
   }
 }
+
+/* Contact card: let a long email wrap inside the card on narrow screens. */
+.builder-panel {
+  min-width: 0;
+}
+.builder-contact-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.builder-contact-card a {
+  overflow-wrap: anywhere;
+}
+
+/* Body quotes: the global reset zeroes blockquote margins, so the attribution
+   sat flush against the next paragraph. Restore normal spacing. */
+.doc-page blockquote {
+  margin: 0 0 16px;
+}
+.doc-page cite {
+  display: block;
+  margin-top: 8px;
+}

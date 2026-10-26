@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SUPPORT_INBOX } from '@/lib/email';
 
+// Display the shared support inbox in lowercase, matching every other page.
+const SUPPORT_EMAIL = SUPPORT_INBOX.toLowerCase();
+
 // Q#-dependent copy, one place each, for easy swapping if Phil's answers change.
 // (About: Q1, Q4, Q5, Q7, Q8. Q2/Q3/Q6/Q9 render nothing by decision.)
 const Q = {
@@ -49,7 +52,7 @@ export default function AboutHeirloomPage() {
             </p>
             <p>
               {`Email: `}
-              <a href={`mailto:${SUPPORT_INBOX}`}>{SUPPORT_INBOX}</a>
+              <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
             </p>
             <p>{`Pennsylvania, New Jersey and Maryland`}</p>
           </div>
