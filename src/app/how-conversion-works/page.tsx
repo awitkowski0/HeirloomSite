@@ -199,8 +199,8 @@ export default function ConversionPage() {
           </li>
           <li>
             <strong>04 Delivered to Your Nursery</strong> — Curbside or White Glove; we deliver in
-            Pennsylvania, New Jersey and Maryland, except some ZIP codes in Newark; other areas may be
-            available by request and are quoted individually.
+            Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted
+            individually. Other areas may be available by request and are quoted individually.
           </li>
         </ol>
         <p>
