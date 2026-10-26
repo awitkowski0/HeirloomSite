@@ -57,3 +57,31 @@ test('Brown Maple is still described as a wood on the home/safety/why-hardwood/f
     assert.match(rendered(f), /brown maple/i, `${f} should still name brown maple`);
   }
 });
+
+test('no "Sustainably sourced" claim remains on the four pages or home components', () => {
+  for (const f of FOUR_PAGES) {
+    assert.ok(!/sustainably sourced/i.test(rendered(f)), `${f} still says "Sustainably sourced"`);
+  }
+});
+
+/*
+ * Heirloom-voice "non-toxic / baby-safe" claims were removed from /safety,
+ * /why-hardwood and the home band (ProvenanceBand) in this revision. Three
+ * instances are intentionally OUT of scope and left in place (reported for
+ * Brand): page.tsx:~125 (home JourneyPoints, not the band), and finishes.tsx
+ * ~95 / ~109 (protected by "do not otherwise rewrite /finishes"). So this guard
+ * is scoped to the surfaces that were cleaned.
+ */
+const NONTOXIC_CLEANED = [
+  'src/app/safety/page.tsx',
+  'src/app/why-hardwood/page.tsx',
+  'src/components/home/ProvenanceBand.tsx',
+];
+
+test('no Heirloom-voice non-toxic/baby-safe claim on the cleaned surfaces (safety, why-hardwood, home band)', () => {
+  for (const f of NONTOXIC_CLEANED) {
+    const src = rendered(f);
+    assert.ok(!/non-toxic/i.test(src), `${f} still has a non-toxic claim`);
+    assert.ok(!/baby-safe/i.test(src), `${f} still has a baby-safe claim`);
+  }
+});

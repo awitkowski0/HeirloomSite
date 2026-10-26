@@ -8,7 +8,7 @@
  * walnut anywhere in the catalogue - zero occurrences across 273
  * configurations - so advertising it would send buyers looking for a wood
  * they cannot order. Add it here when there is a walnut product to sell.
- * "Solid American hardwoods" is kept rather than a "Made in USA" claim:
+ * "Solid brown maple" is kept rather than a "Made in USA" claim:
  * the species claim is about the material, which the catalogue supports,
  * whereas country-of-origin manufacturing is an FTC-regulated claim that
  * nothing in the repo substantiates.
@@ -31,13 +31,13 @@
 const COLUMNS = [
   {
     icon: 'forest',
-    label: 'Solid American hardwoods',
-    lines: ['Sustainably sourced solid', 'brown maple hardwood.'],
+    label: 'Solid brown maple',
+    lines: ['Solid brown maple hardwood,', 'never veneer over particle board.'],
   },
   {
-    icon: 'verified',
+    icon: 'handyman',
     label: 'Solid hardwood, made to order',
-    lines: ['Built new for your nursery —', 'no veneer, no particle board.'],
+    lines: ['Built new for your nursery.', 'No veneer, no particle board.'],
   },
   {
     icon: 'local_shipping',

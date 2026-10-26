@@ -71,16 +71,15 @@ export default function HardwoodPage() {
         <h2 className="headline-md">Material profile and nursery air quality</h2>
         <p>
           Solid hardwood itself does not rely on the same volume of binding resins used in particle
-          board or MDF. Finishes still matter. Every finish we offer is non-toxic and baby-safe,
-          including on the top rails (
+          board or MDF. Finishes still matter; see{' '}
           <Link href="/safety" className="doc-link">
             Safety
-          </Link>
-          ;{' '}
+          </Link>{' '}
+          and{' '}
           <Link href="/care" className="doc-link">
             Care &amp; Finishes
           </Link>
-          ). For more on finishes and emissions language, see{' '}
+          . For more on finishes and emissions language, see{' '}
           <Link href="/finishes" className="doc-link">
             Finishes &amp; Nursery Air Quality
           </Link>
@@ -115,8 +114,8 @@ export default function HardwoodPage() {
           <Link href="/safety" className="doc-link">
             Safety
           </Link>{' '}
-          page: the CPSC and ASTM safety standards that govern cribs, and the non-toxic, baby-safe
-          finishes we use. Confirm details on the specific product page.
+          page: the CPSC and ASTM standards that cover cribs. Ask us for the builder&rsquo;s own
+          statement for your piece. Confirm details on the specific product page.
         </p>
       </section>
       <section>

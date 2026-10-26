@@ -64,16 +64,9 @@ export default function FinishesPage() {
             <Link href="/care" className="doc-link">
               Care &amp; Finishes
             </Link>
-            : every finish we offer is <strong>non-toxic and baby-safe</strong>. Finishes are applied
-            to solid wood (not printed on a laminate), so the grain shows through and no two pieces
-            are identical — the same stain can read differently from one piece of brown maple to the next.
-          </li>
-          <li>
-            <Link href="/safety" className="doc-link">
-              Safety
-            </Link>
-            : finishes are non-toxic and baby-safe throughout, including on the top rails (where a
-            teething child may put their mouth).
+            : finishes are applied to solid wood (not printed on a laminate), so the grain shows
+            through and no two pieces are identical — the same stain can read differently from one
+            piece of brown maple to the next.
           </li>
         </ul>
         <p>
@@ -87,7 +80,7 @@ export default function FinishesPage() {
         <h2 className="headline-md">Solid hardwood and finish: the complete system</h2>
         <p>
           Material and finish work together. Solid American hardwood (brown maple)
-          plus a nursery-appropriate finish is the system parents are evaluating — not the wood alone.
+          plus a finish is the system parents are evaluating — not the wood alone.
           See{' '}
           <Link href="/why-hardwood" className="doc-link">
             Why Solid Hardwood Matters
