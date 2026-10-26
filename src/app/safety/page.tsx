@@ -44,8 +44,8 @@ export default function SafetyPage() {
         <h2 className="headline-md">Standards</h2>
         <p>
           Cribs sold in the United States are covered by CPSC and ASTM standards. Heirloom Cribs
-          &amp; More resells; each builder makes its own compliance statements, and we can send you
-          the statement for your piece.
+          &amp; More resells; each builder makes its own compliance statements. Questions about a
+          specific piece? Ask us.
         </p>
         {CERTIFICATIONS.length > 0 && (
           <ul className="doc-list">

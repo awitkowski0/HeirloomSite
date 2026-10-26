@@ -114,8 +114,8 @@ export default function HardwoodPage() {
           <Link href="/safety" className="doc-link">
             Safety
           </Link>{' '}
-          page: the CPSC and ASTM standards that cover cribs. Ask us for the builder&rsquo;s own
-          statement for your piece. Confirm details on the specific product page.
+          page: the CPSC and ASTM standards that cover cribs. Questions about a specific piece? Ask
+          us. Confirm details on the specific product page.
         </p>
       </section>
       <section>
