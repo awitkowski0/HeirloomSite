@@ -66,7 +66,7 @@ export default function FinishesPage() {
             </Link>
             : every finish we offer is <strong>non-toxic and baby-safe</strong>. Finishes are applied
             to solid wood (not printed on a laminate), so the grain shows through and no two pieces
-            are identical — the same stain can read differently on brown maple than on red oak.
+            are identical — the same stain can read differently from one piece of brown maple to the next.
           </li>
           <li>
             <Link href="/safety" className="doc-link">
@@ -87,7 +87,7 @@ export default function FinishesPage() {
       <section>
         <h2 className="headline-md">Solid hardwood and finish: the complete system</h2>
         <p>
-          Material and finish work together. Solid American hardwood (brown maple, cherry, red oak)
+          Material and finish work together. Solid American hardwood (brown maple)
           plus a nursery-appropriate finish is the system parents are evaluating — not the wood alone.
           See{' '}
           <Link href="/why-hardwood" className="doc-link">

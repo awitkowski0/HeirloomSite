@@ -3,8 +3,8 @@
  * Each is checked against the catalogue - none of these are new claims, all
  * four already appear elsewhere on the site.
  *
- * Forest to Family Provenance -> the species list is maple, cherry and red
- * oak. The brief's copy said "maple, cherry, walnut & oak", but there is no
+ * Forest to Family Provenance -> the species list is brown maple. The brief's
+ * copy said "maple, cherry, walnut & oak", but there is no
  * walnut anywhere in the catalogue - zero occurrences across 273
  * configurations - so advertising it would send buyers looking for a wood
  * they cannot order. Add it here when there is a walnut product to sell.
@@ -34,7 +34,7 @@ const COLUMNS = [
   {
     icon: 'forest',
     label: 'Solid American hardwoods',
-    lines: ['Sustainably sourced maple,', 'cherry and red oak.'],
+    lines: ['Sustainably sourced solid', 'brown maple hardwood.'],
   },
   {
     icon: 'verified',

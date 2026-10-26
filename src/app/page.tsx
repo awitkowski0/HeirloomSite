@@ -121,7 +121,7 @@ export default function HomePage() {
         >
           <JourneyPoints
             points={[
-              'Sustainably sourced maple, cherry and red oak. Never veneer over particle board.',
+              'Sustainably sourced solid brown maple hardwood. Never veneer over particle board.',
               'Non-toxic, baby-safe finishes, hand-applied.',
               'The remaining balance is invoiced once the staining is complete — not before.',
             ]}

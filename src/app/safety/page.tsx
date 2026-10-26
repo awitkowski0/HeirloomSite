@@ -65,7 +65,7 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Materials and construction</h2>
         <p>
-          Our cribs are made from solid American hardwood — brown maple, cherry and red oak — not
+          Our cribs are made from solid American hardwood — brown maple — not
           veneer over particle board. Drawers in the matching case pieces are dovetailed rather
           than stapled. Solid wood matters here for a specific reason: a crib is repeatedly
           disassembled and rebuilt as it converts, and joinery that holds up to that is the
