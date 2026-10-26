@@ -387,7 +387,7 @@ export default function CheckoutClient({ recommendations }: Props) {
         */}
         <p className="body-md">
           <strong>Nothing has been charged.</strong> We&rsquo;re reviewing your order now and
-          will email an invoice from Stripe, usually within one business day.
+          will email an invoice from Stripe within 48 hours of the order.
           {quote.dueLaterCents > 0 ? (
             <>
               {' '}
