@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next';
-import { SHOPIFY_REDIRECTS } from './src/lib/shopify-redirects';
+import { GONE_ROUTE, SHOPIFY_GONE_PATHS, SHOPIFY_REDIRECTS } from './src/lib/shopify-redirects';
 
 /*
  * The origins PostHog is reached on, for the CSP below.
@@ -168,6 +168,19 @@ const nextConfig: NextConfig = {
        */
       ...SHOPIFY_REDIRECTS,
     ];
+  },
+
+  async rewrites() {
+    return {
+      /*
+       * Old-store URLs for withdrawn products answer 410 Gone (redirects()
+       * cannot), via the static route handler at src/app/gone/route.ts.
+       * beforeFiles so the /products/[category] dynamic route never sees them.
+       */
+      beforeFiles: SHOPIFY_GONE_PATHS.map(source => ({ source, destination: GONE_ROUTE })),
+      afterFiles: [],
+      fallback: [],
+    };
   },
 
   async headers() {

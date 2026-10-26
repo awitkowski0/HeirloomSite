@@ -3,18 +3,23 @@ import assert from 'node:assert/strict';
 import {
   SHOPIFY_REDIRECTS,
   SHOPIFY_PRODUCT_REDIRECTS_PERMANENT,
-  SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE,
   SHOPIFY_PAGE_REDIRECTS_PERMANENT,
   SHOPIFY_PAGE_REDIRECTS_TEMPORARY,
+  SHOPIFY_GONE_PATHS,
+  GONE_ROUTE,
 } from '@/lib/shopify-redirects';
+import { GET as goneGET, HEAD as goneHEAD } from '@/app/gone/route';
+import nextConfig from '../next.config';
 import { getAllProductSlugs } from '@/lib/content';
 
 test('redirect table has the expected group sizes', () => {
-  assert.equal(SHOPIFY_PRODUCT_REDIRECTS_PERMANENT.length, 57);
-  assert.equal(SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE.length, 3);
+  assert.equal(SHOPIFY_PRODUCT_REDIRECTS_PERMANENT.length, 60);
   assert.equal(SHOPIFY_PAGE_REDIRECTS_PERMANENT.length, 13);
-  assert.equal(SHOPIFY_PAGE_REDIRECTS_TEMPORARY.length, 2);
-  assert.equal(SHOPIFY_REDIRECTS.length, 75);
+  assert.equal(SHOPIFY_PAGE_REDIRECTS_TEMPORARY.length, 4);
+  assert.equal(SHOPIFY_REDIRECTS.length, 77);
+  assert.equal(SHOPIFY_REDIRECTS.filter(r => r.permanent).length, 73);
+  assert.equal(SHOPIFY_REDIRECTS.filter(r => !r.permanent).length, 4);
+  assert.equal(SHOPIFY_GONE_PATHS.length, 1);
 });
 
 test('every rule is well-formed, path-only, with no self-redirect', () => {
@@ -58,10 +63,66 @@ test('exact/strong product handles are permanent (308)', () => {
   }
 });
 
-test('candidate product handles are temporary (307), pending review', () => {
-  for (const r of SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE) {
-    assert.equal(r.permanent, false, `${r.source} should be temporary`);
+const ruleFor = (source: string) => {
+  const r = SHOPIFY_REDIRECTS.find(x => x.source === source);
+  assert.ok(r, `missing rule: ${source}`);
+  return r!;
+};
+
+// Decision a1: the three rail handles are confirmed, so permanent (308).
+test('a1: /products/oto-401b-bed-rail -> /product/full-bed-rail-kit is 308', () => {
+  const r = ruleFor('/products/oto-401b-bed-rail');
+  assert.equal(r.destination, '/product/full-bed-rail-kit');
+  assert.equal(r.permanent, true);
+});
+
+test('a1: /products/oto-475-3-4-guard-rail -> /product/34-guard-rail is 308', () => {
+  const r = ruleFor('/products/oto-475-3-4-guard-rail');
+  assert.equal(r.destination, '/product/34-guard-rail');
+  assert.equal(r.permanent, true);
+});
+
+test('a1: /products/three-quarter-guard-rail -> /product/34-guard-rail is 308', () => {
+  const r = ruleFor('/products/three-quarter-guard-rail');
+  assert.equal(r.destination, '/product/34-guard-rail');
+  assert.equal(r.permanent, true);
+});
+
+// Decision c1: closest live page, not a true equivalent, so temporary (307).
+test('c1: /pages/my-journey -> / is 307', () => {
+  const r = ruleFor('/pages/my-journey');
+  assert.equal(r.destination, '/');
+  assert.equal(r.permanent, false);
+});
+
+test('c1: /collections/box-tops -> /products/dressers-changing-tables is 307', () => {
+  const r = ruleFor('/collections/box-tops');
+  assert.equal(r.destination, '/products/dressers-changing-tables');
+  assert.equal(r.permanent, false);
+});
+
+// Decision b1: the withdrawn Tundra rug answers 410 Gone.
+const TUNDRA =
+  '/products/woolable-sheep-of-the-world-tundra-washable-wool-hand-tufted-non-slip-backing-area-rug-blended-sheep-beige';
+
+test('b1: the Tundra rug URL is rewritten to the 410 route, not redirected', async () => {
+  assert.ok(SHOPIFY_GONE_PATHS.includes(TUNDRA));
+  assert.ok(!SHOPIFY_REDIRECTS.some(r => r.source === TUNDRA), 'must not also be a redirect');
+  const rewrites = await nextConfig.rewrites!();
+  assert.ok(!Array.isArray(rewrites), 'rewrites should use the phased form');
+  const before = (rewrites as { beforeFiles: { source: string; destination: string }[] }).beforeFiles;
+  assert.ok(
+    before.some(r => r.source === TUNDRA && r.destination === GONE_ROUTE),
+    'missing beforeFiles rewrite for the Tundra rug',
+  );
+});
+
+test('b1: the gone route answers 410 with noindex (GET and HEAD)', async () => {
+  for (const res of [goneGET(), goneHEAD()]) {
+    assert.equal(res.status, 410);
+    assert.equal(res.headers.get('x-robots-tag'), 'noindex');
   }
+  assert.match(await goneGET().text(), /no longer available/);
 });
 
 test('page/policy/collection equivalents are permanent (308)', () => {
@@ -80,7 +141,7 @@ test('spot-check specific mappings and statuses', () => {
   };
   expect('/products/newport-crib', '/product/newport-crib', true);
   expect('/products/mini-newport', '/product/mini-newport-with-mattress', true);
-  expect('/products/three-quarter-guard-rail', '/product/34-guard-rail', false);
+  expect('/products/three-quarter-guard-rail', '/product/34-guard-rail', true);
   expect('/products/oto-490-guard-rail', '/product/guard-rail', true);
   expect('/products/oto-401a-toddler-rail', '/product/toddler-conversion-rail', true);
   expect('/pages/caring-for-your-custom-wood-furniture', '/care', true);
@@ -94,13 +155,11 @@ test('spot-check specific mappings and statuses', () => {
   expect('/pages/about-us', '/', false);
 });
 
-test('URLs with no true equivalent are deliberately absent (stay 404)', () => {
+test('URLs with no equivalent are deliberately absent from the redirects (404, or 410 for the rug)', () => {
   const sources = new Set(SHOPIFY_REDIRECTS.map(r => r.source));
   for (const left404 of [
     '/products/fqp-102-toddler-conversion-kit',
     '/products/fqp-103-full-bedrails-conversion-kit',
-    '/collections/box-tops',
-    '/pages/my-journey',
     '/password',
     '/v1/produce',
     '/account',

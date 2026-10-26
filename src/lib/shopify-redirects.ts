@@ -16,13 +16,12 @@
  *
  * Status choice:
  *   - permanent (308) where the destination is a confirmed TRUE equivalent;
- *   - temporary (307) where the match is medium-confidence and Phil may still
- *     change the target (the "candidate" product matches and data-sharing-opt-out
- *     below), so it is not cached and can be promoted to 308 once confirmed;
- *   - URLs with no true equivalent are NOT listed here and keep returning 404
- *     on purpose (see the PR body): the two "weak" FQP conversion-kit handles,
- *     /pages/my-journey, /collections/box-tops, the discontinued area-rug
- *     product, and the Shopify system URLs.
+ *   - temporary (307) where the target is only the closest live page, not a
+ *     true equivalent, so it is not cached and can change later;
+ *   - 410 Gone for the withdrawn area-rug product (SHOPIFY_GONE_PATHS);
+ *   - URLs with no equivalent at all are NOT listed here and keep returning 404
+ *     on purpose (see the PR body): the two "weak" FQP conversion-kit handles
+ *     and the old-store system URLs.
  *
  * Hosts: every source is path-only, so Next matches it on whatever host serves
  * the deployment (apex heirloomcribsandmore.com and www alike). Query strings
@@ -35,7 +34,11 @@ export interface ShopifyRedirect {
   permanent: boolean;
 }
 
-/* 57 old /products/<handle> URLs with an exact, strong or SKU-matched equivalent (308). */
+/*
+ * 60 old /products/<handle> URLs with a confirmed equivalent (308): exact,
+ * strong or SKU-matched, plus the three guard-rail/bed-rail handles at the end,
+ * which were 307 "candidates" until Phil confirmed them (decision a1).
+ */
 export const SHOPIFY_PRODUCT_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   { source: '/products/mission-style', destination: '/product/mission', permanent: true },
   { source: '/products/arched-top', destination: '/product/arched-top', permanent: true },
@@ -94,18 +97,12 @@ export const SHOPIFY_PRODUCT_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   { source: '/products/full-guard-rail', destination: '/product/full-guard-rail', permanent: true },
   { source: '/products/oto-401a-toddler-rail', destination: '/product/toddler-conversion-rail', permanent: true },
   { source: '/products/oto-490-guard-rail', destination: '/product/guard-rail', permanent: true },
+  // Confirmed by Phil (decision a1): promoted from 307 to 308.
+  { source: '/products/oto-401b-bed-rail', destination: '/product/full-bed-rail-kit', permanent: true },
+  { source: '/products/oto-475-3-4-guard-rail', destination: '/product/34-guard-rail', permanent: true },
+  { source: '/products/three-quarter-guard-rail', destination: '/product/34-guard-rail', permanent: true },
 ];
 
-/*
- * 5 "candidate" /products/<handle> URLs. The target is the most likely match
- * and returns 200, but the mapping is pending Phil's confirmation, so it is a
- * 307 (not cached) and can be promoted to 308 once confirmed.
- */
-export const SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE: ShopifyRedirect[] = [
-  { source: '/products/oto-401b-bed-rail', destination: '/product/full-bed-rail-kit', permanent: false },
-  { source: '/products/oto-475-3-4-guard-rail', destination: '/product/34-guard-rail', permanent: false },
-  { source: '/products/three-quarter-guard-rail', destination: '/product/34-guard-rail', permanent: false },
-];
 
 
 /*
@@ -134,24 +131,47 @@ export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
 ];
 
 /*
- * Topic 2, 307 (medium-confidence, reversible): /pages/about-us has no true
- * equivalent (there is no /about page), so per Phil it goes to the homepage as a
- * NON-cached 307; /pages/data-sharing-opt-out -> /privacy is a Merchant
- * medium-confidence match (the privacy page does carry the opt-out section).
- * Left as 404 on purpose (see the PR body): /pages/my-journey,
- * /collections/box-tops, the discontinued area-rug product, and the Shopify
- * system URLs (/password, /v1/produce, /services/login_with_shop/*,
- * /customer_authentication/login, /account*, /blogs*).
+ * Topic 2, 307 (closest live page, not a true equivalent, so NOT cached and
+ * reversible):
+ *   - /pages/about-us -> / : there is no /about page, so per Phil it goes to
+ *     the homepage;
+ *   - /pages/data-sharing-opt-out -> /privacy : Merchant medium-confidence match
+ *     (the privacy page does carry the opt-out section);
+ *   - /pages/my-journey -> / : the old founder-story page; like about-us there
+ *     is no about page on the site yet, so the homepage is the closest (decision c1);
+ *   - /collections/box-tops -> /products/dressers-changing-tables : box tops
+ *     are the changing-table tops that sit on a dresser; that category is the
+ *     nearest live listing, though no standalone box top is sold (decision c1).
+ * Left as 404 on purpose (see the PR body): the two weak FQP kit handles and the
+ * old-store system URLs (/password, /v1/produce, /services/login_with_shop/*,
+ * /customer_authentication/login, /account*, /blogs*). The withdrawn rug is a
+ * 410, see SHOPIFY_GONE_PATHS below.
  */
 export const SHOPIFY_PAGE_REDIRECTS_TEMPORARY: ShopifyRedirect[] = [
   { source: '/pages/about-us', destination: '/', permanent: false },
   { source: '/pages/data-sharing-opt-out', destination: '/privacy', permanent: false },
+  { source: '/pages/my-journey', destination: '/', permanent: false },
+  { source: '/collections/box-tops', destination: '/products/dressers-changing-tables', permanent: false },
 ];
+
+/*
+ * Old URLs for products that are withdrawn for good: they answer 410 Gone (with
+ * noindex) so Google drops them, instead of a 404 it keeps re-crawling
+ * (decision b1). redirects() cannot return a 410, so next.config.ts rewrites
+ * each path to the tiny route handler at src/app/gone/route.ts, which does.
+ */
+export const SHOPIFY_GONE_PATHS: string[] = [
+  // Lorena Canals Woolable "Sheep of the World - Tundra" area rug (withdrawn,
+  // `hidden: true` in its product.json).
+  '/products/woolable-sheep-of-the-world-tundra-washable-wool-hand-tufted-non-slip-backing-area-rug-blended-sheep-beige',
+];
+
+/** Internal path every gone URL is rewritten to (see src/app/gone/route.ts). */
+export const GONE_ROUTE = '/gone';
 
 /** Every Shopify-leftover redirect, in one list for next.config.ts and tests. */
 export const SHOPIFY_REDIRECTS: ShopifyRedirect[] = [
   ...SHOPIFY_PRODUCT_REDIRECTS_PERMANENT,
-  ...SHOPIFY_PRODUCT_REDIRECTS_CANDIDATE,
   ...SHOPIFY_PAGE_REDIRECTS_PERMANENT,
   ...SHOPIFY_PAGE_REDIRECTS_TEMPORARY,
 ];
