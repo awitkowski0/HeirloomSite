@@ -124,7 +124,7 @@ function el(name: string, value: string): string {
   return `      <${name}>${xmlEscape(value)}</${name}>`;
 }
 
-function itemPriceDollars(item: InventoryItem): number {
+export function itemPriceDollars(item: InventoryItem): number {
   const stain = item.stains.find(s => s.inStock !== false) ?? item.stains[0];
   return item.basePrice + (stain?.priceAddition || 0);
 }
@@ -229,7 +229,7 @@ function isInStock(item: InventoryItem): boolean {
   return item.stains.some(s => s.inStock !== false);
 }
 
-function browsableInventory(): InventoryItem[] {
+export function browsableInventory(): InventoryItem[] {
   const browsable = new Set(getBrowsableProducts().map(p => p.slug));
   return getInventory().filter(item => item.slug && browsable.has(item.slug));
 }

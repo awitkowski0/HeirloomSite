@@ -4342,3 +4342,29 @@ a.product-inline-link:focus-visible {
   font-size: 0.875rem;
   color: var(--color-on-surface-variant, #5c574e);
 }
+
+/* Merchant Center checkout deep link: the product the link resolved to. */
+.deeplink-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.5rem;
+}
+
+.deeplink-summary-image {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.deeplink-summary-name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.deeplink-summary-price {
+  margin: 0.25rem 0 0;
+  color: var(--on-surface-muted);
+}
