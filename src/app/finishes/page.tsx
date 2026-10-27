@@ -92,8 +92,9 @@ export default function FinishesPage() {
         <h2 className="headline-md">Practical questions</h2>
         <h3>Are the finishes safe for a nursery?</h3>
         <p>
-          Yes — every finish we offer is non-toxic and baby-safe per our Care and Safety pages. If
-          your child has a sensitivity, tell us the model you&rsquo;re considering before you order.
+          Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
+          us the model and finish you&rsquo;re considering and we&rsquo;ll point you to that
+          builder&rsquo;s own documentation — especially if your child has a sensitivity.
         </p>
         <h3>Can I choose wood species and stain?</h3>
         <p>
@@ -105,8 +106,8 @@ export default function FinishesPage() {
         <h3>Is every crib GREENGUARD Gold certified?</h3>
         <p>
           Do not assume that. Confirm any GREENGUARD or other certification on the specific product
-          page and Safety page for the model you want. Our live Care/Safety pages today emphasize
-          non-toxic, baby-safe finishes and CPSC/ASTM — not a blanket GREENGUARD claim.
+          page and Safety page for the model you want. Our live Care and Safety pages do not make a
+          blanket GREENGUARD claim.
         </p>
         <h3>Does GREENGUARD Gold mean zero chemicals?</h3>
         <p>

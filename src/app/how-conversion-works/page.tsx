@@ -83,11 +83,8 @@ export default function ConversionPage() {
         <p>
           In its first configuration, the crib is a standard full-size crib with a mattress support
           designed for a firm, tight-fitting crib mattress, following current safe-sleep guidance and
-          the product&rsquo;s safety standards (meet or exceed CPSC and ASTM — see our{' '}
-          <Link href="/safety" className="doc-link">
-            Safety page
-          </Link>
-          ).
+          the product&rsquo;s safety standards (CPSC and ASTM standards cover cribs; questions about a
+          specific piece? Ask us).
         </p>
       </section>
       <hr className="doc-rule" />
@@ -194,7 +191,7 @@ export default function ConversionPage() {
           </li>
           <li>
             <strong>03 Built and Finishing by Hand</strong> — Amish and independent US craftspeople
-            make your piece to order (typically six to eight weeks). Balance is invoiced once staining
+            make your piece to order (we confirm your lead time when you order). Balance is invoiced once staining
             is complete — not before.
           </li>
           <li>
