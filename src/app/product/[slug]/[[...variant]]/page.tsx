@@ -235,8 +235,8 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   const offer = (() => {
     const config = data.config;
     const stain =
-      (resolved.stain && config.stains.find(s => s.name === resolved.stain && s.inStock)) ||
-      config.stains.find(s => s.inStock) ||
+      (resolved.stain && config.stains.find(s => s.name === resolved.stain && s.inStock !== false)) ||
+      config.stains.find(s => s.inStock !== false) ||
       config.stains[0];
     const variantName = resolved.wood
       ? variantLabel(resolved.wood, resolved.stain ?? '').replace(' • ', ', ')
