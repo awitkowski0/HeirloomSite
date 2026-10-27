@@ -50,8 +50,7 @@ export default function CarePage() {
           the room roughly between 35% and 55% relative humidity keeps that movement small.
         </p>
         <p>
-          Colour also shifts. Cherry in particular darkens and warms noticeably in its first year
-          in daylight; maple and oak move less. If a piece is partly covered by something for
+          Colour also shifts a little over time in daylight. If a piece is partly covered by something for
           months, expect a visible line when you move it — rotating what sits on top evens this out.
         </p>
       </section>
@@ -105,7 +104,7 @@ export default function CarePage() {
         <p>
           Every finish we offer is non-toxic and baby-safe. Because they are applied to solid wood
           rather than printed on a laminate, the grain shows through and no two pieces are
-          identical — the same stain reads differently on brown maple than on red oak.
+          identical — the same stain reads differently from one brown maple board to the next.
         </p>
         <p>
           Stain samples on the product pages are photographs of the actual finish on the actual
