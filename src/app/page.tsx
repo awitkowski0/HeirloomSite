@@ -109,7 +109,7 @@ export default function HomePage() {
             points={[
               'No card is taken at checkout — the order is a commitment, not a charge.',
               'We call to confirm the stain, the kit list and the delivery before anything is built.',
-              'A secure Stripe invoice follows within 48 hours of the order. A minimum 50% deposit begins production.',
+              'A secure Stripe invoice follows, usually within one business day. A minimum 50% deposit begins production.',
             ]}
           />
         </JourneyStep>
@@ -121,7 +121,7 @@ export default function HomePage() {
         >
           <JourneyPoints
             points={[
-              'Sustainably sourced solid brown maple. Never veneer over particle board.',
+              'Solid brown maple hardwood. Never veneer over particle board.',
               'Non-toxic, baby-safe finishes, hand-applied.',
               'The remaining balance is invoiced once the staining is complete — not before.',
             ]}

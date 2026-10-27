@@ -47,7 +47,7 @@ export default function HomeHero({ detail, heroImage }: Props) {
 
         <p className="home-hero-sub">
           Hardwood cribs that convert to a toddler bed, a daybed, and a full-size bed.
-          Made to order in solid brown maple.
+          Made to order in solid brown maple hardwood.
         </p>
 
         <Link href="/products/cribs" className="button-primary home-hero-cta">
