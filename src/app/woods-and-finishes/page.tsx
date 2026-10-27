@@ -131,8 +131,8 @@ export default function WoodsAndFinishesPage() {
 
         <section>
           <h2 className="headline-md">What builders don't change</h2>
-          <div style={{ background: 'rgba(200,179,167,0.45)', borderRadius: 8, padding: '16px 20px' }}>
-            <p style={{ margin: 0 }}>{`Kids Comfort's catalog says: "*Due to federal standards, customization on cribs is not available."`}</p>
+          <div className="builder-note">
+            <p>{`Kids Comfort's catalog says: "*Due to federal standards, customization on cribs is not available."`}</p>
           </div>
           <p>{Q.q7Lists}</p>
         </section>
@@ -144,18 +144,18 @@ export default function WoodsAndFinishesPage() {
           </p>
         </section>
 
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-          <section style={{ flex: '1 1 300px', border: '1px solid #C8CEC6', borderRadius: 8, padding: '16px 20px' }}>
+        <div className="builder-cards">
+          <section className="builder-card">
             <h3>Working with a designer</h3>
-            <p style={{ marginBottom: 0 }}>{Q.q7Designer}</p>
+            <p>{Q.q7Designer}</p>
           </section>
-          <section style={{ flex: '1 1 300px', border: '1px solid #C8CEC6', borderRadius: 8, padding: '16px 20px' }}>
+          <section className="builder-card">
             <h3 id="babylist">Babylist</h3>
-            <p style={{ marginBottom: 0 }}>{Q.q7Babylist}</p>
+            <p>{Q.q7Babylist}</p>
           </section>
         </div>
 
-        <p style={{ marginTop: 24 }}>
+        <p className="builder-contact-row">
           <Link href="/contact" className="doc-link">Get Personal Assistance</Link>
           {` · `}
           <a href="tel:+14842931840" className="doc-link">(484) 293-1840</a>

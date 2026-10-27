@@ -8,6 +8,8 @@ import {
   BRAND_SITE_URL,
   SITE_NAME,
   builderBrand,
+  skuBuilderCode,
+  type BuilderCode,
   handlingBusinessDays,
   stripSiteSuffix,
 } from './seo';
@@ -31,6 +33,57 @@ const FEED_CATEGORIES = new Set([
   'Nightstands',
   'Changing Tables',
 ]);
+
+/**
+ * `g:google_product_category`, by site category. Exact strings from Google's
+ * taxonomy (taxonomy-with-ids.en-US.txt, version 2021-09-21):
+ *   6394 Furniture > Baby & Toddler Furniture > Cribs & Toddler Beds
+ *    558 Furniture > Baby & Toddler Furniture > Changing Tables
+ *   4195 Furniture > Cabinets & Storage > Dressers
+ *    462 Furniture > Tables > Nightstands
+ * The site's "Chests" are chests of DRAWERS (Mackenzie Chest, West Lake
+ * Chest...), which Google files under Dressers. Its "Storage Chests" (4205)
+ * are lidded trunks - hope chests, toy chests - and would be wrong here.
+ */
+export const GOOGLE_PRODUCT_CATEGORY: Readonly<Record<string, string>> = {
+  Cribs: 'Furniture > Baby & Toddler Furniture > Cribs & Toddler Beds',
+  'Mini Cribs': 'Furniture > Baby & Toddler Furniture > Cribs & Toddler Beds',
+  'Changing Tables': 'Furniture > Baby & Toddler Furniture > Changing Tables',
+  Dressers: 'Furniture > Cabinets & Storage > Dressers',
+  Chests: 'Furniture > Cabinets & Storage > Dressers',
+  Nightstands: 'Furniture > Tables > Nightstands',
+};
+
+/**
+ * Feed titles for the products whose catalogue name carries no product type.
+ *
+ * "Arched Top in Seely" and "Mission in Brown Maple" tell a shopper nothing
+ * about what the item is. Every Fisher one here is a crib - each description
+ * calls it a "Convertible Crib" / "Style Crib" - and leads with the builder:
+ * "Fisher Arched Top Crib in Seely". The Mini Newport's own copy calls it
+ * "this compact crib". Only the feed title changes; the product name, slug
+ * and page title stay as they are, and the colour suffix is still appended.
+ */
+export const FEED_TITLE_NAMES: Readonly<Record<string, string>> = {
+  'arched-top': 'Fisher Arched Top Crib',
+  bloomington: 'Fisher Bloomington Crib',
+  darlington: 'Fisher Darlington Crib',
+  hudson: 'Fisher Hudson Crib',
+  mission: 'Fisher Mission Crib',
+  moyerton: 'Fisher Moyerton Crib',
+  princeton: 'Fisher Princeton Crib',
+  'mini-newport-with-mattress': 'Mini Newport Crib with Mattress',
+};
+
+/** Wood species the catalogue uses as a `wood` variant, as the site names them. */
+const WOOD_SPECIES: Readonly<Record<string, string>> = {
+  BrownMaple: 'Brown Maple',
+  CherryWood: 'Cherry',
+  RedOak: 'Red Oak',
+};
+
+/** Google allows up to 10 additional images per item. */
+const MAX_ADDITIONAL_IMAGES = 10;
 
 export const FEED_HEADERS = {
   'Content-Type': 'application/xml; charset=utf-8',
@@ -71,16 +124,95 @@ function el(name: string, value: string): string {
   return `      <${name}>${xmlEscape(value)}</${name}>`;
 }
 
-function itemPriceDollars(item: InventoryItem): number {
+export function itemPriceDollars(item: InventoryItem): number {
   const stain = item.stains.find(s => s.inStock !== false) ?? item.stains[0];
   return item.basePrice + (stain?.priceAddition || 0);
 }
 
 function itemTitle(item: InventoryItem): string {
-  const base = stripSiteSuffix(item.title || item.productName);
+  const typed = item.slug ? FEED_TITLE_NAMES[item.slug] : undefined;
+  const name = typed ?? item.productName;
+  const base = typed ?? stripSiteSuffix(item.title || item.productName);
   if (item.variantType === 'none') return base;
   const label = variantLabel(item.wood, '').replace(' • ', ', ');
-  return label ? `${item.productName} in ${label}` : base;
+  return label ? `${name} in ${label}` : base;
+}
+
+/** `g:product_type`: the site's own hierarchy - category, then collection. */
+export function itemProductType(item: InventoryItem): string | null {
+  if (!item.category) return null;
+  return ['Nursery Furniture', item.category, item.collection].filter(Boolean).join(' > ');
+}
+
+/**
+ * `g:color`: the finish, for an item that IS one finish (a `finish` variant -
+ * "Newport Crib in Carbon"). A `wood` item (the Fisher cribs) is sold in a
+ * finish the customer picks at order time, and a `none` item has no colour
+ * choice on the site, so neither gets a colour it does not have.
+ */
+export function itemColor(item: InventoryItem): string | null {
+  if (item.variantType !== 'finish') return null;
+  const label = variantLabel(item.wood, '');
+  return label || null;
+}
+
+/**
+ * `g:material` for a piece sold in the builder's BASE wood: what each builder's
+ * price book calls its base (lowest-cost) maple column. Heirloom prices every
+ * feed item from that column, so this is the wood the advertised price buys.
+ *   OTO  OTO_2026_Pricelist_0226.xlsx, Wholesale sheet, column header
+ *        "Brown Maple (unfinished)".
+ *   FQP  FQP_2026_Pricelist_0326.xlsx, "Price List - 3-15-26" sheet, header
+ *        row "CRIBS | Maple/Oak | Cherry": Maple/Oak is the base column,
+ *        sold as Brown Maple (Cherry is the upgrade column).
+ *   KC   KC_2026_Pricelist_0426-1.xlsx, "Kids Comfort" sheet, base column
+ *        "Oak, B.Maple, Sap Cherry, Unfinished": B.Maple = Brown Maple.
+ */
+export const BUILDER_BASE_MATERIAL: Readonly<Record<BuilderCode, string>> = {
+  OTO: 'Brown Maple',
+  FQP: 'Brown Maple',
+  KC: 'Brown Maple',
+};
+
+/** Wood segment of a variant SKU (`OTO-1201-BrownMaple_OCS_100_Natural` -> BrownMaple). */
+const SKU_WOOD = /-(BrownMaple|CherryWood|RedOak)_/i;
+
+/**
+ * `g:material`, from the builder's price book rather than the product copy.
+ *
+ * A `wood` variant names its column outright ("BrownMaple"); a variant SKU
+ * carries the same wood segment; otherwise the item is the builder's base
+ * column (BUILDER_BASE_MATERIAL). A SKU with no known builder gets nothing.
+ */
+export function itemMaterial(item: InventoryItem): string | null {
+  if (item.variantType === 'wood' && WOOD_SPECIES[item.wood]) return WOOD_SPECIES[item.wood];
+  const skuWood = item.sku?.match(SKU_WOOD)?.[1];
+  if (skuWood) {
+    const key = Object.keys(WOOD_SPECIES).find(k => k.toLowerCase() === skuWood.toLowerCase());
+    if (key) return WOOD_SPECIES[key];
+  }
+  const code = skuBuilderCode(item.sku);
+  return code ? BUILDER_BASE_MATERIAL[code] : null;
+}
+
+/**
+ * `g:additional_image_link`: the site's other real photos of THIS item.
+ *
+ * A `wood` item (one SKU, finish chosen at order time) shows a photo per
+ * finish on its page, and every one is a photo of the item being sold. A
+ * `finish` item is a single colour, so the other colours' photos would show a
+ * different product than the one advertised; `none` items have one photo.
+ */
+export function additionalImages(item: InventoryItem): string[] {
+  if (item.variantType !== 'wood') return [];
+  const main = pickDefaultImage(item.stains);
+  const out: string[] = [];
+  for (const stain of item.stains) {
+    for (const url of [stain.image, ...(stain.gallery ?? []).map(g => g.url)]) {
+      if (url && url !== main && !out.includes(url)) out.push(url);
+    }
+  }
+  return out.slice(0, MAX_ADDITIONAL_IMAGES).map(brandUrl);
 }
 
 function itemDescription(item: InventoryItem): string {
@@ -97,7 +229,7 @@ function isInStock(item: InventoryItem): boolean {
   return item.stains.some(s => s.inStock !== false);
 }
 
-function browsableInventory(): InventoryItem[] {
+export function browsableInventory(): InventoryItem[] {
   const browsable = new Set(getBrowsableProducts().map(p => p.slug));
   return getInventory().filter(item => item.slug && browsable.has(item.slug));
 }
@@ -131,6 +263,11 @@ function renderItem(item: InventoryItem): string {
       `      </g:shipping>`
   ).join('\n');
 
+  const category = item.category ? GOOGLE_PRODUCT_CATEGORY[item.category] : undefined;
+  const productType = itemProductType(item);
+  const color = itemColor(item);
+  const material = itemMaterial(item);
+
   return [
     '    <item>',
     el('g:id', sku),
@@ -139,11 +276,18 @@ function renderItem(item: InventoryItem): string {
     el('g:description', itemDescription(item)),
     el('g:link', itemLink(item)),
     el('g:image_link', brandUrl(image)),
+    ...additionalImages(item).map(url => el('g:additional_image_link', url)),
     el('g:price', price),
     el('g:availability', isInStock(item) ? 'in_stock' : 'out_of_stock'),
     el('g:condition', 'new'),
     el('g:brand', brand),
+    // No g:mpn or g:gtin: the builders publish no GTINs, and the SKU is the
+    // store's code rather than a confirmed manufacturer part number.
     el('g:identifier_exists', 'no'),
+    ...(category ? [el('g:google_product_category', category)] : []),
+    ...(productType ? [el('g:product_type', productType)] : []),
+    ...(color ? [el('g:color', color)] : []),
+    ...(material ? [el('g:material', material)] : []),
     shippingBlocks,
     el('g:min_handling_time', String(handling.minValue)),
     el('g:max_handling_time', String(handling.maxValue)),

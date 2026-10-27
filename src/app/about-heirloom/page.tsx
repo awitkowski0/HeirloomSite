@@ -117,8 +117,8 @@ export default function AboutHeirloomPage() {
               <strong>We schedule delivery.</strong>{` When your furniture is ready, we contact you to set a delivery date. The balance is paid before we schedule final delivery.`}
             </li>
           </ol>
-          <div style={{ background: 'rgba(200,179,167,0.45)', borderRadius: 8, padding: '16px 20px' }}>
-            <p style={{ margin: 0 }}>
+          <div className="builder-note">
+            <p>
               {`Until the deposit is paid, you can cancel at no cost. Just tell us in writing. Once it's paid, the order is with the builder: it can't be cancelled, the deposit is non-refundable, and made-to-order furniture can't be returned. The full terms are on `}
               <Link href="/returns" className="doc-link">Returns, Cancellations &amp; Refunds</Link>
               {` and `}
@@ -134,16 +134,16 @@ export default function AboutHeirloomPage() {
             {`Orders ship from ${Q.q5} with our professional furniture delivery partner, blanket-wrapped and strapped in transit. We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.`}
           </p>
           <p>{`You choose one of two services:`}</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-            <div style={{ flex: '1 1 260px', border: '1px solid #C8CEC6', borderRadius: 8, padding: '16px 20px' }}>
+          <div className="builder-cards">
+            <div className="builder-card">
               <h3>Curbside</h3>
-              <p style={{ marginBottom: 0 }}>
+              <p>
                 {`A one-person crew brings the furniture to the curb at your address. Someone there needs to help unload it and carry it inside. Curbside does not include unpacking, assembly or placement.`}
               </p>
             </div>
-            <div style={{ flex: '1 1 260px', border: '1px solid #C8CEC6', borderRadius: 8, padding: '16px 20px' }}>
+            <div className="builder-card">
               <h3>White Glove</h3>
-              <p style={{ marginBottom: 0 }}>
+              <p>
                 {`A two-person crew brings the furniture into your home, unpacks it, assembles it, sets each piece where you want it and takes the packing away. Up to 3 flights of stairs are included. `}
                 <strong>White Glove is the only service that includes assembly.</strong>
               </p>
@@ -186,25 +186,24 @@ export default function AboutHeirloomPage() {
             <Link href="/woods-and-finishes" className="doc-link">Woods and finishes</Link>
             {`.`}
           </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 16 }}>
-            <Link href="/builders/old-town-oak" style={{ flex: '1 1 220px', textDecoration: 'none', maxWidth: 400 }}>
+          <div className="builder-cards builder-cards--tiles">
+            <Link href="/builders/old-town-oak" className="builder-tile builder-tile--image">
               {/* eslint-disable-next-line @next/next/no-img-element -- tile reuses the 1200x1000 West Lake chest crop, downscaled to <=400 CSS px. */}
               <img
                 src="/images/builders/oto-west-lake-chest-desktop.jpg"
                 alt="Old Town Oak West Lake chest with six drawers, arched base and metal pulls, in a golden-brown finish"
                 width={1200}
                 height={1000}
-                style={{ width: '100%', height: 'auto', maxWidth: 400, display: 'block', borderRadius: 8 }}
               />
               <span className="label-caps">Old Town Oak</span>
             </Link>
-            <div style={{ flex: '1 1 220px', background: '#C8CEC6', borderRadius: 8, padding: '24px 20px', maxWidth: 400 }}>
+            <div className="builder-tile builder-tile--filled">
               <Link href="/builders/fishers-quality-products" className="doc-link"><strong>Fisher's Quality Products</strong></Link>
-              <p style={{ margin: '8px 0 0' }}>{`Describes itself as family-owned`}</p>
+              <p className="builder-tile__meta">{`Describes itself as family-owned`}</p>
             </div>
-            <div style={{ flex: '1 1 220px', background: '#C8CEC6', borderRadius: 8, padding: '24px 20px', maxWidth: 400 }}>
+            <div className="builder-tile builder-tile--filled">
               <Link href="/builders/kids-comfort" className="doc-link"><strong>Kids Comfort</strong></Link>
-              <p style={{ margin: '8px 0 0' }}>{`Available on request`}</p>
+              <p className="builder-tile__meta">{`Available on request`}</p>
             </div>
           </div>
         </section>
@@ -223,11 +222,11 @@ export default function AboutHeirloomPage() {
           <p>
             <Link href="/contact" className="doc-link">Get Personal Assistance</Link>
           </p>
-          <p style={{ margin: 0 }}>
+          <p className="builder-contact-line">
             {`Phone: `}
             <a href="tel:+14842931840" className="doc-link">(484) 293-1840</a>
           </p>
-          <p style={{ margin: '4px 0 0' }}>
+          <p className="builder-contact-line">
             {`Email: `}
             <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
               heirloomcribs.care<wbr />@heirloomcribsandmore.com

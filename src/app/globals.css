@@ -4346,6 +4346,185 @@ a.product-inline-link:focus-visible {
 /* ===========================================================================
    Builder / About / Woods split header (text left, image or quote panel right)
    The media box is 600x500 CSS px on desktop; images are 1200x1000 (6:5) and
+   800x1000 crops served downscaled, never upscaled. Built on the layer-2
+   tokens like everything else: tinted surface instead of a new colour,
+   hairline rules instead of boxes, square corners.
+   =========================================================================== */
+.builder-header {
+  padding-top: var(--spacing-lg);
+}
+.builder-header h1 {
+  margin: var(--spacing-base) 0 0;
+}
+.builder-header .builder-header__sub {
+  margin: 20px 0 var(--spacing-md);
+  color: var(--on-surface-variant);
+}
+.builder-header .button-primary {
+  margin-top: var(--spacing-xs);
+}
+.builder-header__text,
+.builder-header__contact {
+  min-width: 0;
+}
+.builder-header__contact {
+  margin: 16px 0 0;
+  color: var(--on-surface-variant);
+}
+.builder-header__contact,
+.builder-header__contact a {
+  overflow-wrap: anywhere;
+}
+.builder-header__contact a {
+  color: inherit;
+}
+.builder-header__media {
+  margin: 0;
+}
+.builder-header__media picture,
+.builder-header__media img {
+  display: block;
+}
+.builder-header__media img {
+  width: 100%;
+  height: auto;
+  max-width: 600px;
+  border-radius: var(--radius);
+}
+.builder-header__media figcaption {
+  margin-top: var(--spacing-base);
+}
+
+/* Quote / contact panel on the right of the header. */
+.builder-panel {
+  background: var(--surface-container);
+  border-radius: var(--radius);
+  padding: 2rem 1.75rem;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.builder-panel blockquote {
+  margin: 0;
+}
+.builder-panel cite {
+  display: block;
+  margin-top: var(--spacing-sm);
+}
+/* About contact card: top-aligned, height follows its content. */
+.builder-panel--card {
+  align-items: flex-start;
+}
+.builder-contact-card {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.builder-contact-card p {
+  margin: 0 0 var(--spacing-base);
+}
+.builder-contact-card p:last-child {
+  margin-bottom: 0;
+}
+.builder-contact-card .label-caps {
+  margin: 0 0 var(--spacing-sm);
+}
+.builder-contact-card a {
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 900px) {
+  .builder-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 600px;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  .builder-panel {
+    min-height: 500px;
+    max-width: 600px;
+  }
+  .builder-panel--card {
+    min-height: 0;
+  }
+}
+@media (max-width: 899px) {
+  /* Keep the 'Talk to us' card off the email line when the header stacks. */
+  .builder-header__text + .builder-panel--card {
+    margin-top: 16px;
+  }
+}
+
+/* Body quotes: the global reset zeroes blockquote margins, so the attribution
+   sat flush against the next paragraph. Restore normal spacing. */
+.doc-page blockquote {
+  margin: 0 0 16px;
+}
+.doc-page cite {
+  display: block;
+  margin-top: var(--spacing-base);
+}
+
+/* Callout for the terms that matter (cancellation, customization limits). */
+.builder-note {
+  background: var(--surface-container);
+  padding: 16px 20px;
+}
+.builder-note p {
+  margin: 0;
+}
+
+/* Side-by-side cards (delivery services, designer / Babylist) and the
+   builder tiles on About. Wrap to one column on phones. */
+.builder-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.builder-cards--tiles {
+  margin-top: 16px;
+}
+.builder-card {
+  flex: 1 1 260px;
+  border: 1px solid var(--rule);
+  padding: 16px 20px;
+}
+.builder-card p:last-child {
+  margin-bottom: 0;
+}
+.builder-tile {
+  flex: 1 1 220px;
+  max-width: 400px;
+}
+.builder-tile--image {
+  text-decoration: none;
+}
+.builder-tile--image img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 400px;
+  border-radius: var(--radius);
+}
+.builder-tile--filled {
+  background: var(--surface-container);
+  padding: var(--spacing-md) 20px;
+}
+.builder-tile__meta {
+  margin: var(--spacing-base) 0 0;
+}
+.builder-contact-line {
+  margin: 0;
+}
+.builder-contact-line + .builder-contact-line {
+  margin-top: var(--spacing-xs);
+}
+.builder-contact-row {
+  margin-top: var(--spacing-md);
+}
+
+   Builder / About / Woods split header (text left, image or quote panel right)
+   The media box is 600x500 CSS px on desktop; images are 1200x1000 (6:5) and
    800x1000 crops served downscaled, never upscaled.
    =========================================================================== */
 .builder-header {
@@ -4472,4 +4651,29 @@ a.product-inline-link:focus-visible {
   .builder-header__text + .builder-panel--card {
     margin-top: 16px;
   }
+=======
+/* Merchant Center checkout deep link: the product the link resolved to. */
+.deeplink-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.5rem;
+}
+
+.deeplink-summary-image {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+}
+
+.deeplink-summary-name {
+  margin: 0;
+  font-weight: 600;
+}
+
+.deeplink-summary-price {
+  margin: 0.25rem 0 0;
+  color: var(--on-surface-muted);
 }
