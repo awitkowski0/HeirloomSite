@@ -63,12 +63,20 @@ export interface CheckoutDeeplinkProduct {
   slug: string | null;
 }
 
-/** The same 136-item set the Google feed emits, keyed by feed id (SKU). */
+let byId: Map<string, InventoryItem> | null = null;
+
+/**
+ * The same item set the Google feed emits, keyed by feed id (SKU). Built once:
+ * the catalogue is fixed for the life of a deployment and the page that reads
+ * this renders per request.
+ */
 function feedInventoryById(): Map<string, InventoryItem> {
+  if (byId) return byId;
   const map = new Map<string, InventoryItem>();
   for (const item of feedItems(browsableInventory())) {
     if (item.sku) map.set(item.sku, item);
   }
+  byId = map;
   return map;
 }
 
@@ -95,7 +103,7 @@ export function checkoutProductForFeedId(id: string): CheckoutDeeplinkProduct | 
   };
 }
 
-/** Every feed id, for prerendering the exact `{id}:1` URLs Google tests. */
+/** Every feed id that resolves to a deep link (the feed's own id set). */
 export function allFeedIds(): string[] {
   return [...feedInventoryById().keys()];
 }
