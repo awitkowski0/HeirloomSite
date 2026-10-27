@@ -52,6 +52,28 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+          {/*
+            About + builder pages are in the sitemap, so they get a footer link
+            for the same reason as the guides above: a sitemap page with no
+            internal link is crawled once and then treated as an orphan.
+          */}
+          <div>
+            <h2 className="label-caps text-primary footer-heading">Our builders</h2>
+            <ul className="footer-links">
+              <li>
+                <Link href="/about-heirloom">About Heirloom</Link>
+              </li>
+              <li>
+                <Link href="/builders/old-town-oak">Old Town Oak</Link>
+              </li>
+              <li>
+                <Link href="/builders/fishers-quality-products">Fisher&rsquo;s Quality Products</Link>
+              </li>
+              <li>
+                <Link href="/builders/kids-comfort">Kid&rsquo;s Comfort</Link>
+              </li>
+            </ul>
+          </div>
           <div className="footer-support">
             <h2 className="label-caps text-primary footer-heading">Support</h2>
             <ul className="footer-links">
