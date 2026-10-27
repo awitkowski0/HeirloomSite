@@ -84,9 +84,18 @@ const nextConfig: NextConfig = {
        * route out of static prerendering, which is the one thing this site
        * cannot trade away.
        *
-       * TEMPORARY (307), unlike the permanent redirects below. A 308 is cached
-       * by every browser that sees it, and if the brand domain were ever
-       * detached from this project that cache would be unrecoverable.
+       * PERMANENT (308): Phil approved making this permanent so Google treats
+       * the deployment hosts as moved to the brand domain and consolidates
+       * indexing there, rather than re-crawling the *.vercel.app host as a live
+       * alternate. The redirect still only exists on the production build, so a
+       * preview host never bounces itself (see the VERCEL_ENV gate above).
+       *
+       * Known risk we accept: a 308 is cached by the browser that sees it, so if
+       * the brand domain were ever detached from this project, clients that had
+       * already hit a *.vercel.app URL would keep being sent to a domain this
+       * project no longer serves, and that cache cannot be forced to clear. That
+       * is the reason this was a 307 before; it is acceptable now because the
+       * brand domain is the permanent home of this project.
        */
       ...(process.env.VERCEL_ENV === 'production'
         ? [
@@ -94,7 +103,7 @@ const nextConfig: NextConfig = {
               source: '/:path*',
               has: [{ type: 'host' as const, value: '.*\\.vercel\\.app' }],
               destination: 'https://heirloomcribsandmore.com/:path*',
-              permanent: false,
+              permanent: true,
             },
           ]
         : []),
