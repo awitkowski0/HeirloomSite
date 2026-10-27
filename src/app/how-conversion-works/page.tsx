@@ -191,7 +191,7 @@ export default function ConversionPage() {
           </li>
           <li>
             <strong>03 Built and Finishing by Hand</strong> — Amish and independent US craftspeople
-            make your piece to order (typically six to eight weeks). Balance is invoiced once staining
+            make your piece to order (we confirm your lead time when you order). Balance is invoiced once staining
             is complete — not before.
           </li>
           <li>

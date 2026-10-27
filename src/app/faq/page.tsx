@@ -86,7 +86,9 @@ const SECTIONS: Section[] = [
         question: 'Are the finishes safe for a nursery?',
         answer: (
           <p>
-            We describe our finishes on each product page and our {SafetyLink}. Do not assume any
+            Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
+            us the model and finish you&rsquo;re considering and we&rsquo;ll point you to that
+            builder&rsquo;s own documentation; see also our {SafetyLink}. Do not assume any
             particular third-party certification applies to a given piece — confirm it on that
             product page before you order. For what GREENGUARD Gold does and does not cover, see{' '}
             <Link href="/finishes" className="doc-link">
@@ -379,7 +381,7 @@ const SECTIONS: Section[] = [
             </p>
             <p>
               We source nursery case goods crafted by Amish and independent US craftspeople from
-              brown maple—never veneer over particle board. Details live on our {SafetyLink} and
+              solid brown maple—never veneer over particle board. Details live on our {SafetyLink} and
               each product page. One crib converts to a toddler bed, a
               daybed, and a full bed when the kits for your style are in place; that’s what we mean
               by Built to Grow Up. When you’re ready to order, you choose Curbside delivery to the

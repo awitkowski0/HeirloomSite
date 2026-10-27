@@ -33,8 +33,8 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
   },
   {
     icon: 'schedule',
-    title: 'Made to order. We confirm your lead time when you order.',
-    body: 'Built after you order in the wood and finish you picked, rather than pulled from a warehouse.',
+    title: 'Made to order',
+    body: 'Built after you order in the wood and finish you picked, rather than pulled from a warehouse. We confirm your lead time when you order.',
     href: '/timeline',
   },
   {

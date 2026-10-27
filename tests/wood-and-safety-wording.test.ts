@@ -106,12 +106,13 @@ test('no "Sustainably sourced" claim on the four pages or home components', () =
   }
 });
 
-test('no "six to eight weeks" lead-time claim in the two spots it was removed from', () => {
+test('no blanket "six to eight weeks" lead-time claim (lead time varies by builder)', () => {
   const spots = [
     'src/components/product/PurchaseAssurances.tsx',
     'src/app/page.tsx',
+    'src/app/how-conversion-works/page.tsx',
   ];
   for (const p of spots) {
-    assert.ok(!/six to eight weeks/i.test(readFileSync(p, 'utf8')), `${p} still has "six to eight weeks"`);
+    assert.ok(!/six to eight weeks/i.test(rendered(p)), `${p} still has "six to eight weeks"`);
   }
 });

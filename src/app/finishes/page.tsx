@@ -92,8 +92,9 @@ export default function FinishesPage() {
         <h2 className="headline-md">Practical questions</h2>
         <h3>Are the finishes safe for a nursery?</h3>
         <p>
-          See our Care and Safety pages for how we describe each finish. If
-          your child has a sensitivity, tell us the model you&rsquo;re considering before you order.
+          Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
+          us the model and finish you&rsquo;re considering and we&rsquo;ll point you to that
+          builder&rsquo;s own documentation — especially if your child has a sensitivity.
         </p>
         <h3>Can I choose wood species and stain?</h3>
         <p>

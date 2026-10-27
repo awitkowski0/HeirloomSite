@@ -118,7 +118,7 @@ export default function HomePage() {
         <JourneyStep
           n="03"
           title="Built and Finishing by Hand"
-          lead={<>Your piece is cut, joined and finished to order in solid American hardwood. <Link href="/timeline">Made to order</Link>. We confirm your lead time when you order.</>}
+          lead={<>Your piece is cut, joined and finished to order in solid American hardwood. <Link href="/timeline">We confirm your lead time</Link> when you order.</>}
         >
           <JourneyPoints
             points={[
