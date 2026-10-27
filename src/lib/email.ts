@@ -251,7 +251,7 @@ export function sendQuoteConfirmation(
   /* Sentences rather than paragraphs, so the deposit path can continue the
      first one instead of opening a second block to add one clause to it. */
   const invoiceIsComing = `To get production started, we&rsquo;ll email you a secure Stripe
-    invoice, usually within one business day.`;
+    invoice within 48 hours of the order.`;
 
   /* Identical in all three paths: Affirm decides the terms, we never do, and
      neither this email nor the checkout may imply otherwise. */
