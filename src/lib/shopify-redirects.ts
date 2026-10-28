@@ -15,9 +15,9 @@
  * PR body.
  *
  * Status choice:
- *   - permanent (308) where the destination is a confirmed TRUE equivalent;
- *   - temporary (307) where the target is only the closest live page, not a
- *     true equivalent, so it is not cached and can change later;
+ *   - permanent (308) for EVERY redirect in this table. The last three 307s
+ *     (about-us, my-journey, box-tops) were promoted on Oct 28, so a test now
+ *     asserts that nothing here is temporary;
  *   - 410 Gone for the withdrawn area-rug product (SHOPIFY_GONE_PATHS);
  *   - URLs with no equivalent at all are NOT listed here and keep returning 404
  *     on purpose (see the PR body): the two "weak" FQP conversion-kit handles
@@ -109,7 +109,8 @@ export const SHOPIFY_PRODUCT_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
  * Topic 2: old Shopify pages/policies/collections/cart that have a TRUE
  * equivalent on the new site -> permanent 308. Targets verified to return 200:
  * /safety /contact /faq /care /privacy /returns /shipping /terms /products
- * /products/cribs /collections/newport /checkout. (/care is the furniture-care
+ * /products/cribs /collections/newport /checkout /about-heirloom
+ * /products/dressers-changing-tables. (/care is the furniture-care
  * page; /collections/newport is the Newport range page; /checkout is the Vercel
  * cart. The Merchant map's newport-collection -> /collections/newport is here;
  * the app's own -style-collection logic in collections.ts handles the rest.)
@@ -131,28 +132,30 @@ export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   // so the old opt-out address is promoted from 307 to 308.
   { source: '/pages/data-sharing-opt-out', destination: '/privacy', permanent: true },
   { source: '/cart', destination: '/checkout', permanent: true },
+  /*
+   * Promoted from 307 to 308 on Oct 28 (Phil, via the MKT Director). These
+   * used to land on the closest live page because there was no About page;
+   * /about-heirloom now exists (verified 200 on dev and live), so:
+   *   - /pages/my-journey -> /about-heirloom : the old founder-story page;
+   *   - /pages/about-us -> /about-heirloom : the old About page. Its true
+   *     equivalent is now /about-heirloom rather than the homepage, and it had
+   *     to become permanent so no redirect here is temporary;
+   *   - /collections/box-tops -> /products/dressers-changing-tables : box tops
+   *     are the changing-table tops that sit on a dresser; that category is
+   *     where they are listed, though no standalone box top is sold.
+   */
+  { source: '/pages/about-us', destination: '/about-heirloom', permanent: true },
+  { source: '/pages/my-journey', destination: '/about-heirloom', permanent: true },
+  { source: '/collections/box-tops', destination: '/products/dressers-changing-tables', permanent: true },
 ];
 
 /*
- * Topic 2, 307 (closest live page, not a true equivalent, so NOT cached and
- * reversible):
- *   - /pages/about-us -> / : there is no /about page, so per Phil it goes to
- *     the homepage;
- *   - /pages/my-journey -> / : the old founder-story page; like about-us there
- *     is no about page on the site yet, so the homepage is the closest (decision c1);
- *   - /collections/box-tops -> /products/dressers-changing-tables : box tops
- *     are the changing-table tops that sit on a dresser; that category is the
- *     nearest live listing, though no standalone box top is sold (decision c1).
  * Left as 404 on purpose (see the PR body): the two weak FQP kit handles and the
  * old-store system URLs (/password, /v1/produce, /services/login_with_shop/*,
  * /customer_authentication/login, /account*, /blogs*). The withdrawn rug is a
- * 410, see SHOPIFY_GONE_PATHS below.
+ * 410, see SHOPIFY_GONE_PATHS below. There is no temporary (307) group any
+ * more: every redirect in this file is permanent (308).
  */
-export const SHOPIFY_PAGE_REDIRECTS_TEMPORARY: ShopifyRedirect[] = [
-  { source: '/pages/about-us', destination: '/', permanent: false },
-  { source: '/pages/my-journey', destination: '/', permanent: false },
-  { source: '/collections/box-tops', destination: '/products/dressers-changing-tables', permanent: false },
-];
 
 /*
  * Old URLs for products that are withdrawn for good: they answer 410 Gone (with
@@ -173,5 +176,4 @@ export const GONE_ROUTE = '/gone';
 export const SHOPIFY_REDIRECTS: ShopifyRedirect[] = [
   ...SHOPIFY_PRODUCT_REDIRECTS_PERMANENT,
   ...SHOPIFY_PAGE_REDIRECTS_PERMANENT,
-  ...SHOPIFY_PAGE_REDIRECTS_TEMPORARY,
 ];
