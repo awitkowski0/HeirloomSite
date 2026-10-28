@@ -111,8 +111,8 @@ export function organizationJsonLd(): JsonLd {
     url: SITE_URL,
     logo: absoluteUrl('/logo-wide.png'),
     description:
-      'Heirloom builds solid hardwood nursery furniture, forest to family, with white-glove ' +
-      'delivery and finishes built to grow with your child.',
+      'Heirloom builds solid hardwood nursery furniture, forest to family, with Curbside or ' +
+      'White Glove delivery and finishes built to grow with your child.',
   };
 }
 
