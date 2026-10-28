@@ -1,5 +1,5 @@
 /*
- * The "Curbside from $175 or white-glove from $299 delivery" assurance block on
+ * The "Curbside from $175 or White Glove from $299 delivery" assurance block on
  * product pages (src/lib/delivery-line.ts, used by ProductConfigurator). The
  * amounts are the opening band; checkout charges the band for the cart.
  * Run with `npm test`.
@@ -14,7 +14,7 @@ const inventory = JSON.parse(readFileSync(new URL('../public/data/inventory.json
 const byName = new Map(inventory.map(r => [r.productName, r]));
 
 test('delivery line wording and opening-band amounts come from order-terms ($175 / $299)', () => {
-  assert.equal(deliveryLineTitle(), 'Curbside from $175 or white-glove from $299 delivery');
+  assert.equal(deliveryLineTitle(), 'Curbside from $175 or White Glove from $299 delivery');
 });
 
 test('every crib and mini crib shows the delivery line, whatever its variant type', () => {

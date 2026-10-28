@@ -30,5 +30,5 @@ export function showsPurchaseAssurances(category: string | null | undefined): bo
 export function deliveryLineTitle(): string {
   const curbside = formatPriceApprox(deliveryChargeFor(0, 'threshold') / 100);
   const whiteGlove = formatPriceApprox(deliveryChargeFor(0, 'white_glove') / 100);
-  return `Curbside from ${curbside} or white-glove from ${whiteGlove} delivery`;
+  return `Curbside from ${curbside} or White Glove from ${whiteGlove} delivery`;
 }
