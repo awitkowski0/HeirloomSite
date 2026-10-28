@@ -127,6 +127,9 @@ export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
   { source: '/collections/frontpage', destination: '/products', permanent: true },
   { source: '/collections/baby-cribs', destination: '/products/cribs', permanent: true },
   { source: '/collections/newport-collection', destination: '/collections/newport', permanent: true },
+  // Confirmed by Phil (Oct 28): the privacy page carries the opt-out section,
+  // so the old opt-out address is promoted from 307 to 308.
+  { source: '/pages/data-sharing-opt-out', destination: '/privacy', permanent: true },
   { source: '/cart', destination: '/checkout', permanent: true },
 ];
 
@@ -135,8 +138,6 @@ export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
  * reversible):
  *   - /pages/about-us -> / : there is no /about page, so per Phil it goes to
  *     the homepage;
- *   - /pages/data-sharing-opt-out -> /privacy : Merchant medium-confidence match
- *     (the privacy page does carry the opt-out section);
  *   - /pages/my-journey -> / : the old founder-story page; like about-us there
  *     is no about page on the site yet, so the homepage is the closest (decision c1);
  *   - /collections/box-tops -> /products/dressers-changing-tables : box tops
@@ -149,7 +150,6 @@ export const SHOPIFY_PAGE_REDIRECTS_PERMANENT: ShopifyRedirect[] = [
  */
 export const SHOPIFY_PAGE_REDIRECTS_TEMPORARY: ShopifyRedirect[] = [
   { source: '/pages/about-us', destination: '/', permanent: false },
-  { source: '/pages/data-sharing-opt-out', destination: '/privacy', permanent: false },
   { source: '/pages/my-journey', destination: '/', permanent: false },
   { source: '/collections/box-tops', destination: '/products/dressers-changing-tables', permanent: false },
 ];

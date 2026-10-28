@@ -14,11 +14,11 @@ import { getAllProductSlugs } from '@/lib/content';
 
 test('redirect table has the expected group sizes', () => {
   assert.equal(SHOPIFY_PRODUCT_REDIRECTS_PERMANENT.length, 60);
-  assert.equal(SHOPIFY_PAGE_REDIRECTS_PERMANENT.length, 13);
-  assert.equal(SHOPIFY_PAGE_REDIRECTS_TEMPORARY.length, 4);
+  assert.equal(SHOPIFY_PAGE_REDIRECTS_PERMANENT.length, 14);
+  assert.equal(SHOPIFY_PAGE_REDIRECTS_TEMPORARY.length, 3);
   assert.equal(SHOPIFY_REDIRECTS.length, 77);
-  assert.equal(SHOPIFY_REDIRECTS.filter(r => r.permanent).length, 73);
-  assert.equal(SHOPIFY_REDIRECTS.filter(r => !r.permanent).length, 4);
+  assert.equal(SHOPIFY_REDIRECTS.filter(r => r.permanent).length, 74);
+  assert.equal(SHOPIFY_REDIRECTS.filter(r => !r.permanent).length, 3);
   assert.equal(SHOPIFY_GONE_PATHS.length, 1);
 });
 
@@ -145,7 +145,7 @@ test('spot-check specific mappings and statuses', () => {
   expect('/products/oto-490-guard-rail', '/product/guard-rail', true);
   expect('/products/oto-401a-toddler-rail', '/product/toddler-conversion-rail', true);
   expect('/pages/caring-for-your-custom-wood-furniture', '/care', true);
-  expect('/pages/data-sharing-opt-out', '/privacy', false);
+  expect('/pages/data-sharing-opt-out', '/privacy', true);
   expect('/policies/refund-policy', '/returns', true);
   expect('/policies/terms-of-service', '/terms', true);
   expect('/collections/all', '/products', true);
