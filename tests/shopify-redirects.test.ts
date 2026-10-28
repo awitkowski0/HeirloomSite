@@ -1,10 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   SHOPIFY_REDIRECTS,
   SHOPIFY_PRODUCT_REDIRECTS_PERMANENT,
   SHOPIFY_PAGE_REDIRECTS_PERMANENT,
-  SHOPIFY_PAGE_REDIRECTS_TEMPORARY,
   SHOPIFY_GONE_PATHS,
   GONE_ROUTE,
 } from '@/lib/shopify-redirects';
@@ -14,11 +15,10 @@ import { getAllProductSlugs } from '@/lib/content';
 
 test('redirect table has the expected group sizes', () => {
   assert.equal(SHOPIFY_PRODUCT_REDIRECTS_PERMANENT.length, 60);
-  assert.equal(SHOPIFY_PAGE_REDIRECTS_PERMANENT.length, 13);
-  assert.equal(SHOPIFY_PAGE_REDIRECTS_TEMPORARY.length, 4);
+  assert.equal(SHOPIFY_PAGE_REDIRECTS_PERMANENT.length, 17);
   assert.equal(SHOPIFY_REDIRECTS.length, 77);
-  assert.equal(SHOPIFY_REDIRECTS.filter(r => r.permanent).length, 73);
-  assert.equal(SHOPIFY_REDIRECTS.filter(r => !r.permanent).length, 4);
+  assert.equal(SHOPIFY_REDIRECTS.filter(r => r.permanent).length, 77);
+  assert.equal(SHOPIFY_REDIRECTS.filter(r => !r.permanent).length, 0);
   assert.equal(SHOPIFY_GONE_PATHS.length, 1);
 });
 
@@ -88,17 +88,32 @@ test('a1: /products/three-quarter-guard-rail -> /product/34-guard-rail is 308', 
   assert.equal(r.permanent, true);
 });
 
-// Decision c1: closest live page, not a true equivalent, so temporary (307).
-test('c1: /pages/my-journey -> / is 307', () => {
+// Oct 28: the last three 307s are promoted to 308.
+test('/pages/my-journey -> /about-heirloom is 308', () => {
   const r = ruleFor('/pages/my-journey');
-  assert.equal(r.destination, '/');
-  assert.equal(r.permanent, false);
+  assert.equal(r.destination, '/about-heirloom');
+  assert.equal(r.permanent, true);
 });
 
-test('c1: /collections/box-tops -> /products/dressers-changing-tables is 307', () => {
+test('/pages/about-us -> /about-heirloom is 308', () => {
+  const r = ruleFor('/pages/about-us');
+  assert.equal(r.destination, '/about-heirloom');
+  assert.equal(r.permanent, true);
+});
+
+test('/collections/box-tops -> /products/dressers-changing-tables is 308', () => {
   const r = ruleFor('/collections/box-tops');
   assert.equal(r.destination, '/products/dressers-changing-tables');
-  assert.equal(r.permanent, false);
+  assert.equal(r.permanent, true);
+});
+
+test('NO redirect in the old-store table is temporary (every mapping is a 308)', () => {
+  const temporary = SHOPIFY_REDIRECTS.filter(r => r.permanent !== true).map(r => r.source);
+  assert.deepEqual(temporary, [], `temporary redirects found: ${temporary.join(', ')}`);
+});
+
+test('/about-heirloom (the new target for about-us and my-journey) is a real page', () => {
+  assert.ok(existsSync(join(process.cwd(), 'src/app/about-heirloom/page.tsx')));
 });
 
 // Decision b1: the withdrawn Tundra rug answers 410 Gone.
@@ -145,14 +160,16 @@ test('spot-check specific mappings and statuses', () => {
   expect('/products/oto-490-guard-rail', '/product/guard-rail', true);
   expect('/products/oto-401a-toddler-rail', '/product/toddler-conversion-rail', true);
   expect('/pages/caring-for-your-custom-wood-furniture', '/care', true);
-  expect('/pages/data-sharing-opt-out', '/privacy', false);
+  expect('/pages/data-sharing-opt-out', '/privacy', true);
   expect('/policies/refund-policy', '/returns', true);
   expect('/policies/terms-of-service', '/terms', true);
   expect('/collections/all', '/products', true);
   expect('/collections/baby-cribs', '/products/cribs', true);
   expect('/collections/newport-collection', '/collections/newport', true);
   expect('/cart', '/checkout', true);
-  expect('/pages/about-us', '/', false);
+  expect('/pages/about-us', '/about-heirloom', true);
+  expect('/pages/my-journey', '/about-heirloom', true);
+  expect('/collections/box-tops', '/products/dressers-changing-tables', true);
 });
 
 test('URLs with no equivalent are deliberately absent from the redirects (404, or 410 for the rug)', () => {

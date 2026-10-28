@@ -262,7 +262,7 @@ const SECTIONS: Section[] = [
         ),
       },
       {
-        question: 'Is white-glove delivery available?',
+        question: 'Is White Glove delivery available?',
         answer: (
           <p>
             Yes. You choose Curbside or White Glove when you order, inside the areas we deliver to.

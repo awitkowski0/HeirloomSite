@@ -57,7 +57,7 @@ export const SHIPPING_METHODS: readonly ShippingMethod[] = [
     id: 'white_glove',
     name: 'White Glove',
     invoiceLabel: 'White Glove delivery',
-    description: 'White-glove delivery and assembly in your home.',
+    description: 'White Glove delivery and assembly in your home.',
   },
 ];
 
