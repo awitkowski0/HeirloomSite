@@ -187,7 +187,8 @@ const nextConfig: NextConfig = {
        * beforeFiles so the /products/[category] dynamic route never sees them.
        */
       beforeFiles: SHOPIFY_GONE_PATHS.map(source => ({ source, destination: GONE_ROUTE })),
-      afterFiles: [],
+      // PREVIEW ONLY (Pricing App #44): serve the static mock's index.html at its folder URL.
+      afterFiles: [{ source: '/preview/product-page-mock', destination: '/preview/product-page-mock/index.html' }],
       fallback: [],
     };
   },
