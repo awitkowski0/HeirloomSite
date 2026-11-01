@@ -119,8 +119,8 @@ for (const c of CRIBS) {
       const initial = inv.basePrice + (inv.bundle ?? []).filter(b => !b.startsUnchecked).reduce((sum, b) => sum + b.price, 0);
       assert.equal(initial, c.pkg + r34.price + MATTRESS_PRICE, `${c.name} initial picker total`);
       const img = (n: string) => (inv.bundle ?? []).find(b => b.productName === n)?.image ?? '';
-      assert.match(img(r34.name), /3_4_guard_rail_0\.jpg$|34_guard_rail_0\.jpg$/, `${r34.name} uses the 3/4 guard rail photo`);
-      assert.match(img(rFull.name), /full_guard_rail_0\.jpg$|guard_rail_0\.jpg$/, `${rFull.name} uses the full guard rail photo`);
+      assert.match(img(r34.name), /3_4_guard_rail_0(_v2)?\.jpg$|34_guard_rail_0(_v2)?\.jpg$/, `${r34.name} uses the 3/4 guard rail photo`);
+      assert.match(img(rFull.name), /full_guard_rail_0(_v2)?\.jpg$|guard_rail_0(_v2)?\.jpg$/, `${rFull.name} uses the full guard rail photo`);
     }
     // Each rail is the builder's SKU for this crib, and its own price is as stated.
     for (const r of c.rails) {
