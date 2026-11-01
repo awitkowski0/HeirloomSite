@@ -52,6 +52,8 @@ const PRODUCT_PHRASES: [RegExp, string][] = [
   [/\b(complete|full-length|secure) protection\b/i, 'protection claim'],
   [/prevent accidents/i, 'prevent accidents'],
   [/federal safety standards/i, 'federal safety standards'],
+  // Assembly comes only with White Glove; product copy must not promise or describe assembly.
+  [/\bassembl\w*/i, 'assembly wording'],
 ];
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -98,24 +100,110 @@ test('no Heirloom-voice safety claim in any product.json copy field', () => {
   }
 });
 
-test('builder safety lines on builder pages stay verbatim and attributed', () => {
-  const oto = readFileSync(resolve(root, 'src/app/builders/old-town-oak/page.tsx'), 'utf8');
-  assert.ok(
-    oto.includes(
-      'Old Town Oak states: "All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs."',
-    ),
-  );
+/*
+ * Builder pages: the only place safety wording may appear, and only as the
+ * builders' own words. Six builder lines are allowed, word for word, each with
+ * its credit (checked against OTO 2026 catalog PDF pp.3-4 and Kids Comfort
+ * January 2023 catalog PDF pp.5-6). Any other rendered text on these pages
+ * that uses safety/standards wording fails unless it is one of the short
+ * framing lines below (headings and "no safety claims of its own" notes).
+ */
+const BUILDER_QUOTES: { page: string; credit: string; quote: string }[] = [
+  {
+    page: 'src/app/builders/old-town-oak/page.tsx',
+    credit: 'Old Town Oak states: ',
+    quote:
+      'All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs.',
+  },
+  {
+    page: 'src/app/builders/old-town-oak/page.tsx',
+    credit: 'Old Town Oak states: ',
+    quote:
+      'For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species.',
+  },
+  {
+    page: 'src/app/builders/kids-comfort/page.tsx',
+    credit: 'Kids Comfort states: ',
+    quote:
+      'As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards.',
+  },
+  {
+    page: 'src/app/builders/kids-comfort/page.tsx',
+    credit: 'Kids Comfort states: ',
+    quote: 'All furniture pieces come with a wall anchor to prevent tipping hazards in your nursery.',
+  },
+  {
+    page: 'src/app/builders/kids-comfort/page.tsx',
+    credit: 'Kids Comfort states: ',
+    quote:
+      'All our standard products are created with child safe varnishes and meet ASTM standards and consumer safety product standards.',
+  },
+  {
+    // Organic finish, shown as a blockquote under the catalog credit line, always with the glue disclosure.
+    page: 'src/app/builders/kids-comfort/page.tsx',
+    credit: "Kids Comfort's January 2023 catalog describes the finish this way:",
+    quote:
+      'Our Organic finish is a linseed oil derived from natural flaxseed. This product is non toxic, 100% VOC free, has no chemical driers, is non flammable, compostable, and environmentally & food safe. Two applications of this organic finish is hand rubbed onto raw wood, preserving the natural beauty and appearance of your furniture.',
+  },
+];
+// Shown with the organic finish quote (Brand: always together). Not a safety claim on its own.
+const KC_GLUE =
+  "The glue used in assembling Kid's Comfort Organic products is not totally chemical free but it is water-based with a very low chemical content. The only reason we use this glue is lack of any organic wood glues. We are committed to upgrading as organic glues are developed.";
+
+const BUILDER_FRAMING = [
+  "Safety and compliance, in Old Town Oak's words",
+  "Safety and compliance, in Kids Comfort's words",
+  'Heirloom Cribs & More does not build furniture and makes no safety claims of its own.',
+  'Read its own words on construction and safety',
+  // KC owner letter (catalog p.6), quoted and attributed; mentions safety as a value, not a standard.
+  'we realize the importance of quality, safety, endurance, and service',
+  // KC stain-line name from its catalog, not a certification claim.
+  'Ohio Certified Stains',
+  // KC catalog customization limit (quoted, attributed to "The catalog").
+  '*Due to federal standards, customization on cribs is not available',
+];
+
+const SAFETY_WORDS =
+  /\b(safe|safety|safely|standards|(safety|astm|cpsc|federal|crib) standard|cpsc|astm|cpsia|jpma|certif\w*|tested|conform\w*|complian\w*|compliant|toxic|voc|hazards?|tipping|tip-over|greenguard|lead[- ]free|lead paint|regulations?|lab|labs)\b/i;
+
+function builderRenderedText(src: string): string {
+  // Rendered strings only: template literals, quoted string props, and JSX text.
+  const body = stripComments(src).replace(/^import .*$/gm, '');
+  const parts: string[] = [];
+  for (const m of body.matchAll(/`([^`]*)`/g)) parts.push(m[1]);
+  for (const m of body.matchAll(/'([^'\n]{12,})'/g)) parts.push(m[1]);
+  for (const m of body.matchAll(/>([^<>{}`]+)</g)) parts.push(m[1]);
+  return parts.join('\n').replace(/\$\{[^}]*\}/g, ' ');
+}
+
+test('builder pages: the six builder safety lines are verbatim and credited', () => {
+  assert.equal(BUILDER_QUOTES.length, 6);
+  for (const { page, credit, quote } of BUILDER_QUOTES) {
+    const src = readFileSync(resolve(root, page), 'utf8');
+    if (credit.endsWith('states: ')) {
+      assert.ok(src.includes(`${credit}"${quote}"`), `${page}: missing or changed: ${credit}"${quote.slice(0, 60)}…"`);
+    } else {
+      assert.ok(src.includes(credit), `${page}: missing credit line "${credit}"`);
+      assert.ok(src.includes(`"${quote}"`), `${page}: missing or changed quote "${quote.slice(0, 60)}…"`);
+      assert.ok(src.indexOf(credit) < src.indexOf(`"${quote}"`), `${page}: credit must come before the quote`);
+    }
+  }
   const kc = readFileSync(resolve(root, 'src/app/builders/kids-comfort/page.tsx'), 'utf8');
-  assert.ok(
-    kc.includes(
-      'Kids Comfort states: "As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards."',
-    ),
-  );
-  // Every rendered "tested"/"certified"/"conform" line on a builder page is a "<Builder> states:" quote or inside a quoted block.
-  for (const [src, name] of [[oto, 'Old Town Oak'], [kc, 'Kids Comfort']] as const) {
-    for (const line of stripComments(src).split('\n')) {
-      if (/\b(tested|conform)\b/i.test(line)) {
-        assert.ok(line.includes(`${name} states: "`) || /^\s*\{`"/.test(line), `unattributed builder safety line: ${line.trim()}`);
+  assert.ok(kc.includes(`"${KC_GLUE}"`), 'KC glue disclosure must stay with the organic finish quote');
+});
+
+test('builder pages: no other safety/standards wording besides the allowlist', () => {
+  for (const page of new Set(BUILDER_QUOTES.map(q => q.page))) {
+    let text = builderRenderedText(readFileSync(resolve(root, page), 'utf8'));
+    const allowed = [
+      ...BUILDER_QUOTES.filter(q => q.page === page).flatMap(q => [`${q.credit}"${q.quote}"`, `"${q.quote}"`, q.credit]),
+      `"${KC_GLUE}"`,
+      ...BUILDER_FRAMING,
+    ].sort((a, b) => b.length - a.length);
+    for (const a of allowed) text = text.split(a).join(' ');
+    for (const line of text.split('\n')) {
+      for (const sentence of line.split(/(?<=[.!?])\s+/)) {
+        assert.ok(!SAFETY_WORDS.test(sentence), `${page}: safety wording outside the builder allowlist: "${sentence.trim()}"`);
       }
     }
   }
