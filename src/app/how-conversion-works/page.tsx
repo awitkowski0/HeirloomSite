@@ -196,7 +196,7 @@ export default function ConversionPage() {
           </li>
           <li>
             <strong>04 Delivered to Your Nursery</strong> — Curbside or White Glove. We deliver in
-            Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark, NJ is quoted
+            Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted
             individually. Other areas may be available on request, so contact us for a quote.
           </li>
         </ol>

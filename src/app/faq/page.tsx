@@ -248,7 +248,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             We deliver in <strong>Pennsylvania, New Jersey and Maryland</strong>. Delivery to some
-            ZIP codes in Newark, NJ is quoted individually. Other areas may be available on request,
+            Newark, NJ ZIP codes is quoted individually. Other areas may be available on request,
             so{' '}
             <Link href="/contact" className="doc-link">
               contact us

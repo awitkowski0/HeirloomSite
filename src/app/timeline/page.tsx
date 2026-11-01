@@ -67,8 +67,8 @@ export default function TimelinePage() {
             <strong>04 Delivered to Your Nursery.</strong> You choose Curbside (to the curb) or
             White Glove (into your home, with unpacking, assembly and placement). White Glove
             includes up to 3 flights of stairs. We deliver in{' '}
-            <strong>Pennsylvania, New Jersey and Maryland</strong>. Delivery to some ZIP codes in
-            Newark, NJ is quoted individually. Other areas may be available on request, so contact us
+            <strong>Pennsylvania, New Jersey and Maryland</strong>. Delivery to some Newark, NJ ZIP
+            codes is quoted individually. Other areas may be available on request, so contact us
             for a quote. See{' '}
             <Link href="/shipping" className="doc-link">Delivery</Link>.
           </li>
