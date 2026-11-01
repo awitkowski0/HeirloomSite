@@ -1,8 +1,9 @@
 /*
  * Invoice / order-confirmation timing copy (Phil, Oct 26): every line that says
- * when the invoice arrives must say "within 48 hours of your order" (copy v2,
- * Brand + proof pass, 2026-11-01; was "of the order"), never "one
- * business day" or similar. The 48-hour CANCELLATION window and the legal
+ * when the invoice arrives must say "within 48 hours", never "one business
+ * day" or similar. Marketing and checkout copy says "of your order" (copy v2,
+ * 2026-11-01). The legal pages (Terms, the checkout Terms block, Returns) keep
+ * dev's "of the order" wording unchanged (Director, 2026-11-01). The 48-hour CANCELLATION window and the legal
  * pages' other day counts (e.g. "within 5 business days" for damage reports)
  * are separate rules and are not checked here.
  */
@@ -13,17 +14,22 @@ import { join } from 'node:path';
 
 const read = (rel: string) => readFileSync(join(process.cwd(), rel), 'utf8');
 
-// Every customer-facing file that states when the invoice is sent.
-const INVOICE_TIMING_FILES = [
+// Marketing / checkout files: "within 48 hours of your order".
+const YOUR_ORDER_FILES = [
   'src/app/page.tsx',
   'src/app/faq/page.tsx',
   'src/app/timeline/page.tsx',
-  'src/app/returns/page.tsx',
-  'src/app/terms/page.tsx',
   'src/components/checkout/CheckoutClient.tsx',
-  'src/components/checkout/TermsBlock.tsx',
   'src/lib/email.ts',
 ];
+// Legal files: unchanged from dev, "within 48 hours of the order".
+const LEGAL_FILES = [
+  'src/app/returns/page.tsx',
+  'src/app/terms/page.tsx',
+  'src/components/checkout/TermsBlock.tsx',
+];
+// Every customer-facing file that states when the invoice is sent.
+const INVOICE_TIMING_FILES = [...YOUR_ORDER_FILES, ...LEGAL_FILES];
 
 const OLD_TIMING =
   '(one|1|next|same)\\s+business\\s+day|within\\s+(a|one)\\s+day|within\\s+24\\s+hours|by\\s+the\\s+next';
@@ -39,11 +45,18 @@ test('no invoice-timing sentence still says "one business day" (or a 24-hour / n
   }
 });
 
-test('every invoice-timing file says "within 48 hours of your order"', () => {
-  for (const f of INVOICE_TIMING_FILES) {
+test('marketing and checkout files say "within 48 hours of your order"', () => {
+  for (const f of YOUR_ORDER_FILES) {
     const text = read(f).replace(/\s+/g, ' ');
     assert.match(text, /within 48 hours of your order/, `${f} lacks the 48-hour wording`);
     assert.doesNotMatch(text, /within 48 hours of the order/, `${f} still says "of the order"`);
+  }
+});
+
+test('legal pages keep "within 48 hours of the order" (unchanged from dev)', () => {
+  for (const f of LEGAL_FILES) {
+    const text = read(f).replace(/\s+/g, ' ');
+    assert.match(text, /within 48 hours of the order/, `${f} lacks the legal 48-hour wording`);
   }
 });
 
