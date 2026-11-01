@@ -48,8 +48,8 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    'Solid hardwood nursery furniture, forest to family, built to grow with your child. ' +
-    'Curbside or White Glove delivery available.',
+    'Solid hardwood nursery furniture, from forest to family, made to grow with your child. ' +
+    'Choose Curbside or White Glove delivery.',
   applicationName: SITE_NAME,
   openGraph: {
     type: 'website',
