@@ -40,9 +40,9 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Standards</h2>
         <p>
-          Cribs sold in the United States are covered by CPSC and ASTM standards. Heirloom Cribs
-          &amp; More resells; each builder makes its own compliance statements. Questions about a
-          specific piece? Ask us.
+          Cribs sold in the United States are covered by CPSC and ASTM standards. We resell our
+          builders&rsquo; cribs, and each builder speaks for its own. If you have a question about a
+          specific piece, ask us and we&rsquo;ll find the builder&rsquo;s own words.
         </p>
         {CERTIFICATIONS.length > 0 && (
           <ul className="doc-list">
@@ -60,10 +60,9 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Materials and construction</h2>
         <p>
-          Our cribs are made from solid American hardwood — brown maple — not
-          veneer over particle board. Drawers in the matching case pieces are dovetailed rather
-          than stapled. Solid wood matters here for a specific reason: a crib is repeatedly
-          disassembled and rebuilt as it converts, and joinery that holds up to that is the
+          Our cribs are made from solid hardwood, not veneer over particle board. Drawers in the
+          matching case pieces are dovetailed. Solid wood matters here for a specific reason: a
+          crib is repeatedly disassembled and rebuilt as it converts, and joinery that holds up to that is the
           difference between a piece that lasts one child and one that lasts several.
         </p>
       </section>

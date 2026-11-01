@@ -94,10 +94,18 @@ test('no Cherry or Red Oak in sold-wood copy', () => {
   }
 });
 
-test('Brown Maple is still named as a wood on the home/safety/why-hardwood/finishes copy', () => {
-  for (const f of FOUR_PAGES) {
+// /safety no longer names one species for every builder (Brand verdict on #120, E2, Nov 1:
+// one species for OTO, FQP and KC is not verified; species belongs on each product page).
+test('Brown Maple is still named as a wood on the home/why-hardwood/finishes copy', () => {
+  for (const f of FOUR_PAGES.filter(p => !p.includes('safety'))) {
     assert.match(rendered(f), /brown maple/i, `${f} should still name brown maple`);
   }
+});
+
+test('/safety does not pin one wood species (or "American") on every crib', () => {
+  const src = rendered(FOUR_PAGES.find(p => p.includes('safety')) as string);
+  assert.ok(!/American hardwood/i.test(src), '/safety still says "American hardwood"');
+  assert.ok(!/stapled/i.test(src), '/safety still has the unsourced "rather than stapled" line');
 });
 
 test('no "Sustainably sourced" claim on the four pages or home components', () => {

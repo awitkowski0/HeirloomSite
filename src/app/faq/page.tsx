@@ -297,9 +297,9 @@ const SECTIONS: Section[] = [
         answer: (
           <>
             <p>
-              Cribs sold in the United States are covered by CPSC and ASTM standards. Heirloom Cribs
-              &amp; More resells; each builder makes its own compliance statements. Questions about a
-              specific piece? Ask us.
+              Cribs sold in the United States are covered by CPSC and ASTM standards. We resell our
+              builders&rsquo; cribs, and each builder speaks for its own. If you have a question
+              about a specific piece, ask us and we&rsquo;ll find the builder&rsquo;s own words.
             </p>
             <p>
               Authoritative detail always lives on the {SafetyLink}. We do not replace safe-sleep
