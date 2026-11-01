@@ -1,6 +1,6 @@
 /*
- * Arched Top Mx gallery image must be the caption-free original
- * (arched_top_5.jpg had a burned-in "sample" caption). Run with `npm test`.
+ * Arched Top Mx gallery image must be the caption-free crop of
+ * arched_top_5.jpg (which had a burned-in "sample" caption). Run with `npm test`.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -28,6 +28,8 @@ test('Arched Top Mx uses caption-free arched_top_5_v2.jpg', () => {
   assert.deepEqual(media['Mx||Mx'], ['arched_top_5_v2.jpg']);
   const file = join(DIR, 'arched_top_5_v2.jpg');
   assert.ok(existsSync(file));
-  const { w, h } = jpegSize(readFileSync(file));
-  assert.ok(Math.min(w, h) >= 1200, `short side ${Math.min(w, h)} < 1200`);
+  const bytes = readFileSync(file);
+  const { w } = jpegSize(bytes);
+  assert.equal(w, 1104);
+  assert.ok(!bytes.equals(readFileSync(join(DIR, 'arched_top_5.jpg'))), 'v2 must differ from arched_top_5.jpg');
 });
