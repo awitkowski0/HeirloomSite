@@ -611,7 +611,7 @@ export function sendInquiryAck(inquiry: InquiryDetails): Promise<boolean> {
   const html = `
     <p>Hi ${esc(first)},</p>
 
-    <p>Thank you for contacting Heirloom Cribs and More. We received your message
+    <p>Thank you for contacting Heirloom Cribs &amp; More. We received your message
     and a real person on our team will follow up.</p>
 
     <p>To help us reply with exact options and timing, you can answer any of these
@@ -641,7 +641,7 @@ export function sendInquiryAck(inquiry: InquiryDetails): Promise<boolean> {
     first line and your phone number.</p>
 
     <p>
-      &mdash; Heirloom Cribs and More<br>
+      &mdash; Heirloom Cribs &amp; More<br>
       Nazareth / Lehigh Valley, Pennsylvania<br>
       Women-owned &middot; Solid hardwood &middot; Made in the USA
     </p>

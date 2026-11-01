@@ -24,7 +24,7 @@ export default function TimelinePage() {
         <h2 className="headline-md">Made to order vs. in stock</h2>
         <p>
           Each hardwood crib we offer is made to order by Amish and independent US craftspeople —
-          Heirloom Cribs and More is the reseller, not the factory. Nothing is pulled from a
+          Heirloom Cribs &amp; More is the reseller, not the factory. Nothing is pulled from a
           finished-goods warehouse for your configuration.
         </p>
         <p>

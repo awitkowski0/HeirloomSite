@@ -98,7 +98,7 @@ export default function ReturnsPage() {
       <section>
         <h2 className="headline-md">Contact</h2>
         <p>
-          Heirloom Cribs and More ·{' '}
+          Heirloom Cribs &amp; More ·{' '}
           <a href="tel:+14842931840" className="doc-link">
             (484) 293-1840
           </a>{' '}
