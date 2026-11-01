@@ -28,7 +28,7 @@ export default function SafeSleepPage() {
         instructions, and check for recalls.
       </p>
       <p>
-        Heirloom Cribs and More sells compliant nursery hardwood case goods as a reseller; Amish and
+        Heirloom Cribs &amp; More sells compliant nursery hardwood case goods as a reseller; Amish and
         independent US craftspeople make the case goods. Safe-sleep guidance on this page comes from
         the official sources linked below, not from Heirloom as a clinical expert. Guidelines can
         change, so verify the live primary pages.

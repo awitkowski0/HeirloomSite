@@ -13,9 +13,6 @@ import { SITE_NAME, stripSiteSuffix } from '../src/lib/seo';
 
 const root = process.cwd();
 const OLD_NAME = /Heirloom\s+Cribs\s+and\s+More/i;
-// One line on dev that open PR #120 rewrites (it already uses the new name
-// there); allowed here so this PR and #120 can merge in either order.
-const PENDING_ELSEWHERE = ['Heirloom Cribs and More sells compliant nursery hardwood case goods'];
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const n of readdirSync(dir)) {
@@ -40,8 +37,7 @@ test('SITE_NAME is exactly "Heirloom Cribs & More"', () => {
 test('no "Heirloom Cribs and More" in customer-visible src text', () => {
   const hits: string[] = [];
   for (const f of walk(join(root, 'src'))) {
-    let text = withoutComments(readFileSync(f, 'utf8')).replace(/\s+/g, ' ');
-    for (const p of PENDING_ELSEWHERE) text = text.split(p).join('');
+    const text = withoutComments(readFileSync(f, 'utf8')).replace(/\s+/g, ' ');
     const m = text.match(OLD_NAME);
     if (m) hits.push(relative(root, f));
   }
