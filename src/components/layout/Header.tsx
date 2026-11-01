@@ -28,7 +28,7 @@ export default function Header() {
   return (
     <header className="app-header">
       <div className="header-inner">
-        <Link href="/" className="wordmark" aria-label="Heirloom Cribs and More, home">
+        <Link href="/" className="wordmark" aria-label="Heirloom Cribs & More, home">
           Heirloom
         </Link>
 

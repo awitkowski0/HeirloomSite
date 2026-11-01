@@ -142,7 +142,7 @@ export async function generateMetadata({
   const primary = product.configurations[0];
 
   // Stored titles already end in "— Heirloom Cribs and More" (all 73 of them),
-  // so the layout's "%s | Heirloom Cribs and More" template would double it.
+  // so the layout's "%s | Heirloom Cribs & More" template would double it.
   const baseTitle = stripSiteSuffix(primary.title || product.productName);
   // Each variant gets its own title and description. Without that, 800 pages
   // would carry 73 distinct titles and read as duplicates.
@@ -166,7 +166,7 @@ export async function generateMetadata({
     : galleryImagesFor(product.configurations).slice(0, 4);
 
   return {
-    title: { absolute: `${title} | Heirloom Cribs and More` },
+    title: { absolute: `${title} | Heirloom Cribs & More` },
     description,
     alternates: { canonical },
     openGraph: {

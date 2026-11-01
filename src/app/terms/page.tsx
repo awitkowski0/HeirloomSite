@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Terms of Sale',
   description:
-    'Terms of Sale for custom made-to-order furniture from Heirloom Cribs and More, including deposits, cancellation, delivery and warranty.',
+    'Terms of Sale for custom made-to-order furniture from Heirloom Cribs & More, including deposits, cancellation, delivery and warranty.',
   alternates: { canonical: '/terms' },
   openGraph: { url: '/terms' },
 };
@@ -87,7 +87,7 @@ export default function TermsPage() {
       <section>
         <h2 className="headline-md">Contact</h2>
         <p>
-          Heirloom Cribs and More · 421 Manor Dr, Nazareth, PA 18064 (mail only, no showroom) ·{' '}
+          Heirloom Cribs &amp; More · 421 Manor Dr, Nazareth, PA 18064 (mail only, no showroom) ·{' '}
           <a href="tel:+14842931840" className="doc-link">
             (484) 293-1840
           </a>{' '}
