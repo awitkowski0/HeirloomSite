@@ -3,23 +3,23 @@
  * Each is checked against the catalogue - none of these are new claims, all
  * four already appear elsewhere on the site.
  *
- * Forest to Family Provenance -> the species list is maple, cherry and red
- * oak. The brief's copy said "maple, cherry, walnut & oak", but there is no
- * walnut anywhere in the catalogue - zero occurrences across 273
- * configurations - so advertising it would send buyers looking for a wood
- * they cannot order. Add it here when there is a walnut product to sell.
- * "Solid American hardwoods" is kept rather than a "Made in USA" claim:
+ * Forest to Family Provenance -> the species is brown maple: the base wood
+ * column in every builder's price book (OTO "Brown Maple (unfinished)", FQP
+ * "Maple/Oak", KC "Oak, B.Maple, Sap Cherry") and the only wood the shop
+ * sells (Cherry Wood and Red Oak variants are hidden in build-data). The
+ * brief's copy said "maple, cherry, walnut & oak"; advertising a wood the
+ * catalogue does not sell sends buyers looking for something they cannot
+ * order. Add a species here when there is a product in it to sell.
+ * "Solid brown maple" is kept rather than a "Made in USA" claim:
  * the species claim is about the material, which the catalogue supports,
  * whereas country-of-origin manufacturing is an FTC-regulated claim that
  * nothing in the repo substantiates.
  *
- * Certified Nursery Safety -> the kit's own phrasing ("Certified Safe:
- * Exceeds all safety standards") is looser than what this codebase will
- * ship. Reusing the exact wording already used on /safety instead - see
- * src/app/safety/page.tsx, which restates a claim the catalogue already
- * makes in 180 product descriptions and requires the seller to hold the
- * test reports backing it. Do not strengthen this wording without
- * confirming those reports exist.
+ * Solid hardwood, made to order -> replaces the previous "CPSC & ASTM tested /
+ * meets or exceeds safety standards" column. Per brand rule, Heirloom does not
+ * make its own safety-standard claims; that wording belongs to the builders'
+ * own sourced words. This column restates the material claim (solid hardwood,
+ * no veneer / particle board) already made elsewhere on the site.
  *
  * Effortless White-Glove Care -> unchanged from the original delivery
  * claim; substantiated by the same tiers charged at checkout.
@@ -33,13 +33,13 @@
 const COLUMNS = [
   {
     icon: 'forest',
-    label: 'Solid American hardwoods',
-    lines: ['Sustainably sourced maple,', 'cherry and red oak.'],
+    label: 'Solid brown maple',
+    lines: ['Solid brown maple hardwood,', 'never veneer over particle board.'],
   },
   {
-    icon: 'verified',
-    label: 'CPSC & ASTM tested',
-    lines: ['Every crib meets or exceeds', 'CPSC and ASTM safety standards.'],
+    icon: 'handyman',
+    label: 'Solid hardwood, made to order',
+    lines: ['Built new for your nursery.', 'No veneer, no particle board.'],
   },
   {
     icon: 'local_shipping',

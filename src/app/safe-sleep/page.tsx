@@ -84,8 +84,7 @@ export default function SafeSleepPage() {
         </ul>
         <p>
           Product standards and setup for cribs we sell are on our <Link href="/safety" className="doc-link">Safety</Link>{' '}
-          page (meet or exceed CPSC and ASTM; non-toxic, baby-safe finishes; mattress fit, hardware,
-          and placement notes). That page is product information — <strong>not medical advice</strong>.
+          page (mattress fit, hardware, and placement notes). That page is product information — <strong>not medical advice</strong>.
         </p>
       </section>
 
@@ -126,7 +125,7 @@ export default function SafeSleepPage() {
         <h3>When is it time to stop using the crib?</h3>
         <p>When the child begins climbing out or reaches approximately 35 inches tall — confirm with your pediatrician. (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>)</p>
         <h3>Do Heirloom cribs meet current safety standards?</h3>
-        <p>Every crib we sell is described on our <Link href="/safety" className="doc-link">Safety</Link> page as meeting or exceeding CPSC and ASTM standards, with non-toxic, baby-safe finishes. Always assemble and maintain the crib per the included instructions.</p>
+        <p>Standards and setup for a specific piece are on our <Link href="/safety" className="doc-link">Safety</Link> page and its product page. Always assemble and maintain the crib per the included instructions.</p>
       </section>
 
       <section>

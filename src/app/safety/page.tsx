@@ -43,11 +43,9 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Standards</h2>
         <p>
-          Every crib we sell is built to meet or exceed the CPSC and ASTM safety standards that
-          govern cribs sold in the United States, and is finished with non-toxic, baby-safe
-          materials. Cribs are among the most tightly regulated pieces of furniture sold in the
-          US: fixed sides, slat strength and spacing, mattress support and hardware durability are
-          all covered.
+          Cribs sold in the United States are covered by CPSC and ASTM standards. Heirloom Cribs
+          &amp; More resells; each builder makes its own compliance statements. Questions about a
+          specific piece? Ask us.
         </p>
         {CERTIFICATIONS.length > 0 && (
           <ul className="doc-list">
@@ -65,15 +63,11 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Materials and construction</h2>
         <p>
-          Our cribs are made from solid American hardwood — brown maple, cherry and red oak — not
+          Our cribs are made from solid American hardwood — brown maple — not
           veneer over particle board. Drawers in the matching case pieces are dovetailed rather
           than stapled. Solid wood matters here for a specific reason: a crib is repeatedly
           disassembled and rebuilt as it converts, and joinery that holds up to that is the
           difference between a piece that lasts one child and one that lasts several.
-        </p>
-        <p>
-          Finishes are non-toxic and baby-safe throughout, including on the top rails, which is
-          where a teething child will inevitably put their mouth.
         </p>
       </section>
 

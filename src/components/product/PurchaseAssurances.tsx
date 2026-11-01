@@ -27,15 +27,15 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
     body: 'The charge depends on your order total. Delivered by our trusted partners, one charge per order, chosen at checkout. No surprise freight bill on arrival.',
   },
   {
-    icon: 'verified_user',
-    title: 'Built to CPSC and ASTM standards',
-    body: 'Solid hardwood, non-toxic baby-safe finishes, and hardware made to be taken apart and rebuilt as it converts.',
-    href: '/safety',
+    icon: 'handyman',
+    title: 'Built to convert as they grow',
+    body: 'Solid hardwood and hardware made to be taken apart and rebuilt as it converts.',
   },
   {
     icon: 'schedule',
-    title: 'Made to order, six to eight weeks',
-    body: 'Built after you order in the wood and finish you picked, rather than pulled from a warehouse.',
+    title: 'Made to order',
+    body: 'Built after you order in the wood and finish you picked, rather than pulled from a warehouse. We confirm your lead time when you order.',
+    href: '/timeline',
   },
   {
     icon: 'chat_bubble',

@@ -64,17 +64,9 @@ export default function FinishesPage() {
             <Link href="/care" className="doc-link">
               Care &amp; Finishes
             </Link>
-            : every finish we offer is <strong>non-toxic and baby-safe</strong>. Finishes are applied
-            to solid wood (not printed on a laminate), so the grain shows through and no two pieces
-            are identical — the same stain can read differently on brown maple than on red oak.
-          </li>
-          <li>
-            <Link href="/safety" className="doc-link">
-              Safety
-            </Link>
-            : finishes are non-toxic and baby-safe throughout, including on the top rails (where a
-            teething child may put their mouth). Every crib we sell meets or exceeds CPSC and ASTM
-            standards.
+            : finishes are applied to solid wood (not printed on a laminate), so the grain shows
+            through and no two pieces are identical — the same stain can read differently from one
+            piece of brown maple to the next.
           </li>
         </ul>
         <p>
@@ -87,8 +79,8 @@ export default function FinishesPage() {
       <section>
         <h2 className="headline-md">Solid hardwood and finish: the complete system</h2>
         <p>
-          Material and finish work together. Solid American hardwood (brown maple, cherry, red oak)
-          plus a nursery-appropriate finish is the system parents are evaluating — not the wood alone.
+          Material and finish work together. Solid American hardwood (brown maple)
+          plus a finish is the system parents are evaluating — not the wood alone.
           See{' '}
           <Link href="/why-hardwood" className="doc-link">
             Why Solid Hardwood Matters
@@ -100,8 +92,9 @@ export default function FinishesPage() {
         <h2 className="headline-md">Practical questions</h2>
         <h3>Are the finishes safe for a nursery?</h3>
         <p>
-          Yes — every finish we offer is non-toxic and baby-safe per our Care and Safety pages. If
-          your child has a sensitivity, tell us the model you&rsquo;re considering before you order.
+          Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
+          us the model and finish you&rsquo;re considering and we&rsquo;ll point you to that
+          builder&rsquo;s own documentation — especially if your child has a sensitivity.
         </p>
         <h3>Can I choose wood species and stain?</h3>
         <p>
@@ -113,8 +106,8 @@ export default function FinishesPage() {
         <h3>Is every crib GREENGUARD Gold certified?</h3>
         <p>
           Do not assume that. Confirm any GREENGUARD or other certification on the specific product
-          page and Safety page for the model you want. Our live Care/Safety pages today emphasize
-          non-toxic, baby-safe finishes and CPSC/ASTM — not a blanket GREENGUARD claim.
+          page and Safety page for the model you want. Our live Care and Safety pages do not make a
+          blanket GREENGUARD claim.
         </p>
         <h3>Does GREENGUARD Gold mean zero chemicals?</h3>
         <p>

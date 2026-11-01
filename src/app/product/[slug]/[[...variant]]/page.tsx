@@ -224,6 +224,39 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
    * columns at this width and a second row of near-misses is not a
    * recommendation.
    */
+  /*
+   * The one Offer in this page's Product JSON-LD: the configuration the page
+   * renders, at the price ProductConfigurator shows on first paint (the
+   * resolved wood, the resolved finish when it is in stock, otherwise the
+   * first in-stock finish - the same fallback the configurator applies), at
+   * this page's own canonical URL. A colour page names its colour and carries
+   * that colour's SKU, which is the feed's g:id for the same URL.
+   */
+  const offer = (() => {
+    const config = data.config;
+    const stain =
+      (resolved.stain && config.stains.find(s => s.name === resolved.stain && s.inStock !== false)) ||
+      config.stains.find(s => s.inStock !== false) ||
+      config.stains[0];
+    const variantName = resolved.wood
+      ? variantLabel(resolved.wood, resolved.stain ?? '').replace(' • ', ', ')
+      : '';
+    const ownImages = resolved.wood
+      ? [
+          ...(stain?.image ? [stain.image] : []),
+          ...(stain?.gallery ?? []).map(g => g.url).filter(u => u && u !== stain?.image),
+        ]
+      : [];
+    return {
+      name: variantName ? `${product.productName} in ${variantName}` : product.productName,
+      path: variantHref(slug, resolved.wood, resolved.stain),
+      sku: config.sku ?? primary.sku,
+      priceDollars: (Number(config.basePrice) || 0) + (Number(stain?.priceAddition) || 0),
+      inStock: config.stains.some(s => s.inStock !== false),
+      images: (ownImages.length > 0 ? ownImages : images).slice(0, 6),
+    };
+  })();
+
   const relatedProducts = (primary.related ?? []).slice(0, 4).map(r => ({
     slug: r.slug,
     productName: r.productName,
@@ -239,12 +272,13 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         dangerouslySetInnerHTML={{
           __html: jsonLdScript(
             productJsonLd({
-              productName: product.productName,
-              slug,
+              name: offer.name,
+              path: offer.path,
               description: truncate(primary.description || primary.metaDescription, 300),
-              images: images.slice(0, 6),
-              sku: primary.sku,
-              configurations: product.configurations,
+              images: offer.images,
+              sku: offer.sku,
+              priceDollars: offer.priceDollars,
+              inStock: offer.inStock,
             })
           ),
         }}

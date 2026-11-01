@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   },
   description:
     'Solid hardwood nursery furniture, forest to family, delivered white-glove and built to ' +
-    'grow with your child. Meets or exceeds CPSC and ASTM safety standards.',
+    'grow with your child.',
   applicationName: SITE_NAME,
   openGraph: {
     type: 'website',
