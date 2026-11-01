@@ -36,8 +36,8 @@ export default function ReturnsPage() {
         <ol className="doc-list">
           <li>You place your order. Nothing is charged at this point.</li>
           <li>
-            We review it with you. We go over the details with you, confirm the estimated lead
-            time, and send your invoice within 48 hours of your order.
+            We review it with you. We go over the details, confirm the estimated lead time, and
+            send your invoice within 48 hours of your order.
           </li>
           <li>
             You pay the deposit. Custom orders require a 50% deposit, and you must agree to our{' '}
