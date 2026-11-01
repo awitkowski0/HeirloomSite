@@ -75,7 +75,7 @@ export default function SafeSleepPage() {
       </section>
 
       <section>
-        <h2 className="headline-md">What the public crib-safety guidance says</h2>
+        <h2 className="headline-md">What to look for in a crib</h2>
         <p>Public CPSC crib-safety guidance addresses features such as:</p>
         <ul className="doc-list">
           <li>Fixed sides (no drop-side rails). (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>)</li>

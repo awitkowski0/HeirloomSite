@@ -86,13 +86,13 @@ const SECTIONS: Section[] = [
         question: 'Are the finishes safe for a nursery?',
         answer: (
           <p>
-            Finishes vary by builder, so we don&rsquo;t make one claim for all of them. Tell us the
-            model and finish you&rsquo;re looking at, and we&rsquo;ll find that builder&rsquo;s own
+            Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
+            us the model and finish you&rsquo;re looking at, and we&rsquo;ll find that builder&rsquo;s own
             documentation for you. You can also read our {SafetyLink}, or see{' '}
             <Link href="/finishes" className="doc-link">
               Finishes &amp; Nursery Air Quality
             </Link>{' '}
-            for how finish wording shows up on the cribs we carry. For a sensitivity or chemical
+            for how we describe the finishes on the cribs we carry. For a sensitivity or chemical
             concern, contact us with the model name so we can point you to the documented details
             rather than guess.
           </p>
@@ -297,9 +297,9 @@ const SECTIONS: Section[] = [
         answer: (
           <>
             <p>
-              Cribs sold in the United States are covered by CPSC and ASTM standards. We resell our
-              builders&rsquo; cribs, and each builder speaks for its own. If you have a question
-              about a specific piece, ask us and we&rsquo;ll find the builder&rsquo;s own words.
+              Cribs sold in the United States are covered by CPSC and ASTM standards. We resell cribs
+              made by independent builders, and each builder speaks for its own cribs. If you have a
+              question about a specific piece, ask us and we&rsquo;ll share what its builder says.
             </p>
             <p>
               Authoritative detail always lives on the {SafetyLink}. We do not replace safe-sleep

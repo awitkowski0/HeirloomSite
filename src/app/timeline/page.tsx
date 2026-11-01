@@ -114,7 +114,7 @@ export default function TimelinePage() {
         </ol>
         <p>
           For finish and long-term ownership guidance, see our <Link href="/care" className="doc-link">Care
-          guide</Link>. For standards and setup details, see <Link href="/safety" className="doc-link">Safety</Link>.
+          guide</Link>. For standards and setup details, see our <Link href="/safety" className="doc-link">Safety page</Link>.
         </p>
       </section>
 

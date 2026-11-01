@@ -40,9 +40,9 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Standards</h2>
         <p>
-          Cribs sold in the United States are covered by CPSC and ASTM standards. We resell our
-          builders&rsquo; cribs, and each builder speaks for its own. If you have a question about a
-          specific piece, ask us and we&rsquo;ll find the builder&rsquo;s own words.
+          Cribs sold in the United States are covered by CPSC and ASTM standards. We resell cribs
+          made by independent builders, and each builder speaks for its own cribs. If you have a
+          question about a specific piece, ask us and we&rsquo;ll share what its builder says.
         </p>
         {CERTIFICATIONS.length > 0 && (
           <ul className="doc-list">

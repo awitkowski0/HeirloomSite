@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Finishes & Nursery Air Quality',
   description:
-    'How finish wording shows up on the cribs we carry, why emissions matter in a nursery, and how to make sense of finish claims without reading too much into them.',
+    'How we describe the finishes on the cribs we carry, why emissions matter in a nursery, and how to make sense of finish claims without reading too much into them.',
   alternates: { canonical: '/finishes' },
   openGraph: { url: '/finishes' },
 };
@@ -16,11 +16,11 @@ export default function FinishesPage() {
       <h1 className="headline-xl">Finishes &amp; Nursery Air Quality</h1>
       <p className="body-lg doc-lede">
         The finish and emissions profile of a crib matter alongside the wood itself. This guide
-        explains how finish wording shows up on the cribs we carry and how to make sense of finish
+        explains how we describe the finishes on the cribs we carry and how to make sense of finish
         claims without reading too much into them.
       </p>
       <p>
-        Heirloom Cribs and More is the <strong>reseller</strong>; Amish and independent US
+        Heirloom Cribs &amp; More is the <strong>reseller</strong>; Amish and independent US
         craftspeople make the hardwood case goods. We do not claim Heirloom applies the finish in our
         own factory.
       </p>
@@ -90,7 +90,7 @@ export default function FinishesPage() {
         <h2 className="headline-md">How to evaluate finish and emissions claims</h2>
         <ol className="doc-list">
           <li>
-            Look for a builder&rsquo;s own named finish details rather than a vague
+            Look for specific finish details from the builder rather than a vague
             &ldquo;eco-friendly&rdquo; label.
           </li>
           <li>Read the Safety and Care pages alongside the product page.</li>
