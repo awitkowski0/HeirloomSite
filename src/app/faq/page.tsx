@@ -86,15 +86,15 @@ const SECTIONS: Section[] = [
         question: 'Are the finishes safe for a nursery?',
         answer: (
           <p>
-            Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
-            us the model and finish you&rsquo;re considering and we&rsquo;ll point you to that
-            builder&rsquo;s own documentation; see also our {SafetyLink}. For how finish language
-            appears on the cribs we offer, see{' '}
+            Finishes vary by builder, so we don&rsquo;t make one claim for all of them. Tell us the
+            model and finish you&rsquo;re looking at, and we&rsquo;ll find that builder&rsquo;s own
+            documentation for you. You can also read our {SafetyLink}, or see{' '}
             <Link href="/finishes" className="doc-link">
               Finishes &amp; Nursery Air Quality
-            </Link>
-            . For a sensitivity or chemical concern, contact us with the model name so we can point
-            you to the documented details rather than guess.
+            </Link>{' '}
+            for how finish wording shows up on the cribs we carry. For a sensitivity or chemical
+            concern, contact us with the model name so we can point you to the documented details
+            rather than guess.
           </p>
         ),
       },
@@ -293,7 +293,7 @@ const SECTIONS: Section[] = [
     heading: 'Safety standards',
     entries: [
       {
-        question: 'Which safety standards cover cribs?',
+        question: 'What safety standards apply to cribs?',
         answer: (
           <>
             <p>
@@ -316,9 +316,9 @@ const SECTIONS: Section[] = [
         question: 'What about conversion kits?',
         answer: (
           <p>
-            Each builder makes its own statements about its conversion kits; see the {SafetyLink} and
-            the product page. Use only the kits intended for your model and follow the instructions
-            for each configuration. Questions about a specific kit? Ask us.
+            Each builder speaks for its own conversion kits. You&rsquo;ll find more on the{' '}
+            {SafetyLink} and the product page, and we&rsquo;re glad to help with a specific kit. Use
+            only the kits made for your crib model, and follow the instructions for each setup.
           </p>
         ),
       },

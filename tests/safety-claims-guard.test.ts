@@ -54,6 +54,10 @@ const PRODUCT_PHRASES: [RegExp, string][] = [
   [/federal safety standards/i, 'federal safety standards'],
   // Assembly comes only with White Glove; product copy must not promise or describe assembly.
   [/\bassembl\w*/i, 'assembly wording'],
+  // Unsourced fit / install claims removed in copy v2 (no builder source on file).
+  [/tool[- ]free/i, 'tool-free'],
+  [/\bno gaps\b/i, 'no gaps'],
+  [/fits? all convertible cribs/i, 'fits all convertible cribs'],
 ];
 
 function walk(dir: string, out: string[] = []): string[] {

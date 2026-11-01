@@ -21,7 +21,7 @@ const CERTIFICATIONS: { name: string; detail: string }[] = [];
 export const metadata: Metadata = {
   title: 'Safety',
   description:
-    'How our cribs are built, the standards that cover cribs, the finishes we use, and safe-sleep guidance for setting up the nursery.',
+    'What our cribs are made of, which standards cover cribs, the finishes we offer, and safe-sleep guidance for setting up your nursery.',
   alternates: { canonical: '/safety' },
   openGraph: { url: '/safety' },
 };
@@ -33,8 +33,8 @@ export default function SafetyPage() {
       <h1 className="headline-xl">Safety</h1>
       <p className="body-lg doc-lede">
         A crib is the one piece of furniture your child is left alone in. Here is what ours are
-        built from, which standards cover them, and how to set one up so it stays safe as your
-        child grows.
+        made of, which standards cover cribs, and how to set one up for safe sleep as your child
+        grows.
       </p>
 
       <section>

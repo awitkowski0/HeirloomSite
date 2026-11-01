@@ -28,7 +28,7 @@ export default function SafeSleepPage() {
         instructions, and check for recalls.
       </p>
       <p>
-        Heirloom Cribs and More sells nursery hardwood case goods as a reseller; Amish and
+        Heirloom Cribs &amp; More is a reseller of hardwood nursery furniture. Amish and
         independent US craftspeople make the case goods. Safe-sleep guidance on this page comes from
         the official sources linked below, not from Heirloom as a clinical expert. Guidelines can
         change, so verify the live primary pages.
@@ -75,7 +75,7 @@ export default function SafeSleepPage() {
       </section>
 
       <section>
-        <h2 className="headline-md">What public crib-safety guidance covers</h2>
+        <h2 className="headline-md">What the public crib-safety guidance says</h2>
         <p>Public CPSC crib-safety guidance addresses features such as:</p>
         <ul className="doc-list">
           <li>Fixed sides (no drop-side rails). (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>)</li>
@@ -124,7 +124,7 @@ export default function SafeSleepPage() {
         <p>No. Sleep surfaces with an incline greater than 10 degrees are not safe for infant sleep. Transfer the baby to a firm, flat surface as soon as practical. (<a href={AAP} className="doc-link">AAP / HealthyChildren.org</a>)</p>
         <h3>When is it time to stop using the crib?</h3>
         <p>When the child begins climbing out or reaches approximately 35 inches tall — confirm with your pediatrician. (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>)</p>
-        <h3>Where do I find standards and setup for a specific crib?</h3>
+        <h3>Where can I find the standards and setup steps for my crib?</h3>
         <p>Standards and setup for a specific piece are on our <Link href="/safety" className="doc-link">Safety</Link> page and its product page. Always assemble and maintain the crib per the included instructions.</p>
       </section>
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Finishes & Nursery Air Quality',
   description:
-    'How finish language appears on the cribs Heirloom offers, why emissions matter in a nursery, and how to read finish claims without overstating them.',
+    'How finish wording shows up on the cribs we carry, why emissions matter in a nursery, and how to make sense of finish claims without reading too much into them.',
   alternates: { canonical: '/finishes' },
   openGraph: { url: '/finishes' },
 };
@@ -16,8 +16,8 @@ export default function FinishesPage() {
       <h1 className="headline-xl">Finishes &amp; Nursery Air Quality</h1>
       <p className="body-lg doc-lede">
         The finish and emissions profile of a crib matter alongside the wood itself. This guide
-        explains how finish language appears on the cribs we offer and how to read claims without
-        overstating them.
+        explains how finish wording shows up on the cribs we carry and how to make sense of finish
+        claims without reading too much into them.
       </p>
       <p>
         Heirloom Cribs and More is the <strong>reseller</strong>; Amish and independent US
@@ -52,9 +52,9 @@ export default function FinishesPage() {
           </li>
         </ul>
         <p>
-          Finish details come from each builder. Always confirm the finish on the <strong>specific
-          product page</strong> before you order, and ask us for that builder&rsquo;s own
-          documentation.
+          Each builder supplies its own finish details. Please confirm the finish on the{' '}
+          <strong>product page</strong> before you order, and ask us if you&rsquo;d like that
+          builder&rsquo;s own documentation.
         </p>
       </section>
       <hr className="doc-rule" />
@@ -90,8 +90,8 @@ export default function FinishesPage() {
         <h2 className="headline-md">How to evaluate finish and emissions claims</h2>
         <ol className="doc-list">
           <li>
-            Prefer a builder&rsquo;s own, named finish details over vague &ldquo;eco-friendly&rdquo;
-            alone.
+            Look for a builder&rsquo;s own named finish details rather than a vague
+            &ldquo;eco-friendly&rdquo; label.
           </li>
           <li>Read the Safety and Care pages alongside the product page.</li>
           <li>Ask us before deposit if a sensitivity or matching project needs a precise answer.</li>

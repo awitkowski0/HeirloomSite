@@ -123,7 +123,14 @@ export default function HardwoodPage() {
         <ol className="doc-list">
           <li>Look for clear solid-hardwood language (species named) rather than vague &ldquo;wood&rdquo; alone.</li>
           <li>Check whether the brand discloses particle board, MDF, or veneer use.</li>
-          <li>Review the Safety page for the CPSC and ASTM standards that cover cribs, and ask us about the specific model.</li>
+          <li>
+            Check our{' '}
+            <Link href="/safety" className="doc-link">
+              Safety page
+            </Link>{' '}
+            for the CPSC and ASTM standards that cover cribs. If you have a question about a specific
+            model, just ask us.
+          </li>
           <li>Ask how conversion works and what&rsquo;s included vs sold separately.</li>
         </ol>
         <p>
