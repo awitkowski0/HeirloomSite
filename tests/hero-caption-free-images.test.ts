@@ -1,5 +1,5 @@
 /*
- * OTO guard rails, toddler beds and the Mackenzie full bed rail kit: the hero
+ * OTO guard rails, toddler beds and full bed rail kits: the hero
  * images had a burned-in caption ("3/4 Guardrail Option: 1275", "Toddler Bed
  * Add On: 401A", ...). Each hero is now the same live pixels cropped above the
  * caption (clean white gap, nothing of the product cut) and re-centred on the
@@ -32,6 +32,11 @@ const SWAPPED: Record<string, [string, string]> = {
   'newport-toddler-bed': ['Newport Toddler Bed', 'newport_toddler_bed_0_v2.jpg'],
   'toddler-conversion-rail': ['Toddler Conversion Rail', 'toddler_conversion_rail_0_v2.jpg'],
   'west-lake-toddler-bed': ['West Lake Toddler Bed', 'west_lake_toddler_bed_0_v2.jpg'],
+  'addison-toddler-bed': ['Addison Toddler Bed', 'addison_toddler_bed_0_v2.jpg'],
+  'addison-full-bed-rail-kit': ['Addison Full Bed Rail Kit', 'addison_full_bed_rail_kit_0_v2.jpg'],
+  'full-bed-rail-kit': ['Full Bed Rail Kit', 'full_bed_rail_kit_0_v2.jpg'],
+  'newport-full-bed-rail-kit': ['Newport Full Bed Rail Kit', 'newport_full_bed_rail_kit_0_v2.jpg'],
+  'west-lake-full-bed-rail-kit': ['West Lake Full Bed Rail Kit', 'west_lake_full_bed_rail_kit_0_v2.jpg'],
 };
 
 const PRODUCTS = join(process.cwd(), 'public/data/products');
