@@ -1,10 +1,9 @@
 /*
- * OTO-1301 Newport crib: six stains use the Brand-passed caption-free crops,
- * padded to the old 1120x928 canvas and saved under new `_v2` names (the
+ * OTO-1301 Newport crib: all ten stains use caption-free main images: the
+ * existing live pixels cropped above the burned-in caption, padded at the
+ * bottom to the old 1120x928 canvas and saved under new `_v2` names (the
  * /data/products images are served immutable, so nothing is overwritten).
- * Earthtone, Manchester, Carbon and Natural failed Brand's colour check and
- * keep their old images until Phil decides. The product page and the feed
- * must use the same file for each stain.
+ * The product page and the feed must use the same file for each stain.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -18,18 +17,16 @@ const DIR = join(process.cwd(), 'public/data/products/Newport Crib');
 const BASE = '/data/products/Newport%20Crib/';
 
 const SWAPPED: Record<string, string> = {
+  'OTO-1301-BrownMaple_OCS_100_Natural': 'newport_crib_0_v2.jpg',
   'OTO-1301-BrownMaple_OCS_100_Almond': 'newport_crib_1_v2.jpg',
   'OTO-1301-BrownMaple_OCS_100_Asbury-Brown': 'newport_crib_2_v2.jpg',
+  'OTO-1301-BrownMaple_OCS_100_Carbon': 'newport_crib_3_v2.jpg',
+  'OTO-1301-BrownMaple_OCS_100_Earthtone': 'newport_crib_4_v2.jpg',
   'OTO-1301-BrownMaple_OCS_100_Ebony': 'newport_crib_5_v2.jpg',
   'OTO-1301-BrownMaple_OCS_100_Harvest': 'newport_crib_6_v2.jpg',
+  'OTO-1301-BrownMaple_OCS_100_Manchester': 'newport_crib_7_v2.jpg',
   'OTO-1301-BrownMaple_OCS_100_Michaels-Cherry': 'newport_crib_8_v2.jpg',
   'OTO-1301-BrownMaple_OCS_100_Sandstone': 'newport_crib_9_v2.jpg',
-};
-const UNCHANGED: Record<string, string> = {
-  'OTO-1301-BrownMaple_OCS_100_Natural': 'newport_crib_0.jpg',
-  'OTO-1301-BrownMaple_OCS_100_Carbon': 'newport_crib_3.jpg',
-  'OTO-1301-BrownMaple_OCS_100_Earthtone': 'newport_crib_4.jpg',
-  'OTO-1301-BrownMaple_OCS_100_Manchester': 'newport_crib_7.jpg',
 };
 
 function newportBySku() {
@@ -51,22 +48,14 @@ function jpegSize(file: string): [number, number] {
   throw new Error(`no SOF in ${file}`);
 }
 
-test('the six Brand-passed stains use the new _v2 images (page hero = feed image_link)', () => {
+test('all ten stains use the caption-free _v2 images (page hero = feed image_link)', () => {
   const inv = newportBySku();
+  assert.equal(inv.size, 10, 'ten Newport stains');
   const xml = merchantFeedXml(getInventory());
   for (const [sku, file] of Object.entries(SWAPPED)) {
     const item = inv.get(sku);
     assert.ok(item, `missing ${sku}`);
     assert.equal(pickDefaultImage(item!.stains), BASE + file, `${sku} hero`);
-    assert.ok(xml.includes(`<g:image_link>https://heirloomcribsandmore.com${BASE}${file}</g:image_link>`), `${sku} feed`);
-  }
-});
-
-test('the four Brand colour FAIL stains still use their old images', () => {
-  const inv = newportBySku();
-  const xml = merchantFeedXml(getInventory());
-  for (const [sku, file] of Object.entries(UNCHANGED)) {
-    assert.equal(pickDefaultImage(inv.get(sku)!.stains), BASE + file, `${sku} hero`);
     assert.ok(xml.includes(`<g:image_link>https://heirloomcribsandmore.com${BASE}${file}</g:image_link>`), `${sku} feed`);
   }
 });
