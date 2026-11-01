@@ -24,7 +24,7 @@ export default function TermsPage() {
         <ol className="doc-list">
           <li>
             <strong>Order review and invoice.</strong> After you place an order, we review it with
-            you and send an invoice within 48 hours of the order. Nothing is charged until you pay
+            you and send an invoice within 48 hours of your order. Nothing is charged until you pay
             that invoice.
           </li>
           <li>

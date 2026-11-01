@@ -1,6 +1,7 @@
 /*
  * Invoice / order-confirmation timing copy (Phil, Oct 26): every line that says
- * when the invoice arrives must say "within 48 hours of the order", never "one
+ * when the invoice arrives must say "within 48 hours of your order" (copy v2,
+ * Brand + proof pass, 2026-11-01; was "of the order"), never "one
  * business day" or similar. The 48-hour CANCELLATION window and the legal
  * pages' other day counts (e.g. "within 5 business days" for damage reports)
  * are separate rules and are not checked here.
@@ -38,16 +39,18 @@ test('no invoice-timing sentence still says "one business day" (or a 24-hour / n
   }
 });
 
-test('every invoice-timing file says "within 48 hours of the order"', () => {
+test('every invoice-timing file says "within 48 hours of your order"', () => {
   for (const f of INVOICE_TIMING_FILES) {
-    assert.match(read(f).replace(/\s+/g, ' '), /within 48 hours of the order/, `${f} lacks the 48-hour wording`);
+    const text = read(f).replace(/\s+/g, ' ');
+    assert.match(text, /within 48 hours of your order/, `${f} lacks the 48-hour wording`);
+    assert.doesNotMatch(text, /within 48 hours of the order/, `${f} still says "of the order"`);
   }
 });
 
 test('home page Confirm Order step uses the 48-hour invoice line', () => {
   assert.ok(
     read('src/app/page.tsx').includes(
-      'A secure Stripe invoice follows within 48 hours of the order. A minimum 50% deposit begins production.',
+      'A secure Stripe invoice follows within 48 hours of your order. A minimum 50% deposit begins production.',
     ),
   );
 });

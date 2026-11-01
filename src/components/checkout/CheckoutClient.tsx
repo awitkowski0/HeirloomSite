@@ -386,8 +386,8 @@ export default function CheckoutClient({ recommendations }: Props) {
           they have been charged unless told otherwise.
         */}
         <p className="body-md">
-          <strong>Nothing has been charged.</strong> We&rsquo;re reviewing your order now and
-          will email an invoice from Stripe within 48 hours of the order.
+          <strong>Nothing has been charged.</strong> We&rsquo;re looking over the details now.
+          You&rsquo;ll get an invoice from Stripe by email within 48 hours of your order.
           {quote.dueLaterCents > 0 ? (
             <>
               {' '}

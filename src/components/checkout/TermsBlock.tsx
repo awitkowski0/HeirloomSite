@@ -6,7 +6,7 @@ import Link from 'next/link';
 const TERMS: { heading: string; body: ReactNode }[] = [
   {
     heading: '1. Order review and invoice',
-    body: 'After you place an order, we review it with you and send an invoice within 48 hours of the order. Nothing is charged until you pay that invoice.',
+    body: 'After you place an order, we review it with you and send an invoice within 48 hours of your order. Nothing is charged until you pay that invoice.',
   },
   {
     heading: '2. Payment',
