@@ -14,7 +14,7 @@ test('layout metadata has no "forest to family" wording', () => {
 });
 
 test('meta and og descriptions use Brand\'s text; twitter uses the short form', () => {
-  const full = 'Solid hardwood nursery furniture, made to order and designed to grow with your child. Delivery costs extra, with Curbside and White Glove options.';
+  const full = 'Solid hardwood nursery furniture, made to order and designed to grow with your child. Delivery is charged separately, with Curbside and White Glove options.';
   assert.equal(src.split(full).length - 1, 2, 'meta description and og:description');
   assert.ok(src.includes("description: 'Solid hardwood nursery furniture, made to order and designed to grow with your child.',"), 'twitter:description');
 });

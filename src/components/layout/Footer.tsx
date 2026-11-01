@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <span className="footer-brand">Heirloom</span>
             <p className="body-md text-on-surface-variant footer-tagline">
-              Solid hardwood nursery furniture, from our builders to your family, with Curbside or White Glove delivery.
+              Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.
             </p>
           </div>
           <div>

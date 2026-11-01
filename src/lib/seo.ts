@@ -112,7 +112,7 @@ export function organizationJsonLd(): JsonLd {
     logo: absoluteUrl('/logo-wide.png'),
     description:
       'Heirloom Cribs & More sells solid hardwood nursery furniture made to order by our ' +
-      'builders and designed to grow with your child. Delivery costs extra, with Curbside ' +
+      'builders and designed to grow with your child. Delivery is charged separately, with Curbside ' +
       'and White Glove options.',
   };
 }

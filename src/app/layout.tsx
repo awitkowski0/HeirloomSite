@@ -49,7 +49,7 @@ export const metadata: Metadata = {
   },
   description:
     'Solid hardwood nursery furniture, made to order and designed to grow with your child. ' +
-    'Delivery costs extra, with Curbside and White Glove options.',
+    'Delivery is charged separately, with Curbside and White Glove options.',
   applicationName: SITE_NAME,
   openGraph: {
     type: 'website',
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
     title: 'Heirloom Cribs — Built to Grow Up.',
     description:
       'Solid hardwood nursery furniture, made to order and designed to grow with your child. ' +
-      'Delivery costs extra, with Curbside and White Glove options.',
+      'Delivery is charged separately, with Curbside and White Glove options.',
     images: [{ url: '/logo-wide.png', width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
