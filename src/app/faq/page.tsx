@@ -293,7 +293,7 @@ const SECTIONS: Section[] = [
     heading: 'Safety standards',
     entries: [
       {
-        question: 'What safety standards do you follow?',
+        question: 'Which safety standards cover cribs?',
         answer: (
           <>
             <p>
