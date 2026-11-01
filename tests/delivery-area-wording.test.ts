@@ -21,12 +21,13 @@ function pageText(rel: string): string {
 }
 
 // Copy v2 (Brand writer pass + proof pass, 2026-11-01): same facts, plainer wording.
+// Round 2: Brand #114 D13; D12 'Newark, NJ' (order-terms.ts EXCLUDED_METRO_ZIPS); D14 'contact us'.
 const EXPECTED: Array<[string, string]> = [
-  ['shipping', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark is quoted individually. Other areas may be available on request, so contact us for details and a quote.'],
-  ['faq', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark is quoted individually. Other areas may be available on request, so contact us for details and a quote. Once you enter your state and ZIP at checkout, you\u2019ll see your delivery options and the charge. If your ZIP needs a quote, checkout will point you to us. See Delivery.'],
-  ['timeline', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark is quoted individually. Other areas may be available on request, and we\u2019ll quote those for you.'],
-  ['timeline', 'Delivery ZIP code: we deliver in Pennsylvania, New Jersey and Maryland, and some Newark ZIP codes are quoted individually.'],
-  ['how-conversion-works', '\u2014 Curbside or White Glove. We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark is quoted individually. Other areas may be available on request, and we\u2019ll quote those for you.'],
+  ['shipping', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark, NJ is quoted individually. Other areas may be available on request, so contact us for details and a quote.'],
+  ['faq', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark, NJ is quoted individually. Other areas may be available on request, so contact us for details and a quote. Once you enter your state and ZIP at checkout, you\u2019ll see your delivery options and the charge. If your ZIP needs a quote, checkout will ask you to contact us. See Delivery.'],
+  ['timeline', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark, NJ is quoted individually. Other areas may be available on request, so contact us for a quote.'],
+  ['timeline', 'Delivery ZIP code: we deliver in Pennsylvania, New Jersey and Maryland, and some Newark, NJ ZIP codes are quoted individually.'],
+  ['how-conversion-works', '\u2014 Curbside or White Glove. We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark, NJ is quoted individually. Other areas may be available on request, so contact us for a quote.'],
 ];
 
 const PAGES = ['shipping', 'faq', 'timeline', 'how-conversion-works'];

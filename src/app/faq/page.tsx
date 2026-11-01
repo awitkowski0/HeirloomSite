@@ -248,13 +248,14 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             We deliver in <strong>Pennsylvania, New Jersey and Maryland</strong>. Delivery to some
-            ZIP codes in Newark is quoted individually. Other areas may be available on request, so{' '}
+            ZIP codes in Newark, NJ is quoted individually. Other areas may be available on request,
+            so{' '}
             <Link href="/contact" className="doc-link">
               contact us
             </Link>{' '}
             for details and a quote. Once you enter your state and ZIP at checkout, you&rsquo;ll see
-            your delivery options and the charge. If your ZIP needs a quote, checkout will point you
-            to us. See{' '}
+            your delivery options and the charge. If your ZIP needs a quote, checkout will ask you to
+            contact us. See{' '}
             <Link href="/shipping" className="doc-link">
               Delivery
             </Link>
