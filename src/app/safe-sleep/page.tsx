@@ -125,7 +125,7 @@ export default function SafeSleepPage() {
         <h3>When is it time to stop using the crib?</h3>
         <p>When the child begins climbing out or reaches approximately 35 inches tall — confirm with your pediatrician. (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>)</p>
         <h3>Where can I find the standards and setup steps for my crib?</h3>
-        <p>Standards and setup for a specific piece are on our <Link href="/safety" className="doc-link">Safety</Link> page and its product page. Always assemble and maintain the crib per the included instructions.</p>
+        <p>Our <Link href="/safety" className="doc-link">Safety page</Link> explains which standards cover cribs. For a specific piece, check its product page or ask us. Always set up and maintain the crib following the instructions that come with it.</p>
       </section>
 
       <section>
