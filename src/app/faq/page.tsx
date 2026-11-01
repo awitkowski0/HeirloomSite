@@ -88,9 +88,8 @@ const SECTIONS: Section[] = [
           <p>
             Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
             us the model and finish you&rsquo;re considering and we&rsquo;ll point you to that
-            builder&rsquo;s own documentation; see also our {SafetyLink}. Do not assume any
-            particular third-party certification applies to a given piece — confirm it on that
-            product page before you order. For what GREENGUARD Gold does and does not cover, see{' '}
+            builder&rsquo;s own documentation; see also our {SafetyLink}. For how finish language
+            appears on the cribs we offer, see{' '}
             <Link href="/finishes" className="doc-link">
               Finishes &amp; Nursery Air Quality
             </Link>
@@ -314,12 +313,12 @@ const SECTIONS: Section[] = [
         ),
       },
       {
-        question: 'Are conversion kits safety-certified too?',
+        question: 'What about conversion kits?',
         answer: (
           <p>
-            Conversion kits sold for our cribs are part of the same safety-minded product system and
-            are addressed on the {SafetyLink} and product documentation. Use only the kits intended
-            for your model and follow the instructions for each configuration.
+            Each builder makes its own statements about its conversion kits; see the {SafetyLink} and
+            the product page. Use only the kits intended for your model and follow the instructions
+            for each configuration. Questions about a specific kit? Ask us.
           </p>
         ),
       },

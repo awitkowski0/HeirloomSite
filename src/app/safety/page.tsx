@@ -5,15 +5,12 @@ import Link from 'next/link';
  * IMPORTANT, for whoever maintains this page:
  *
  * Crib safety claims are regulated. In the US, full-size and non-full-size
- * cribs are covered by 16 CFR 1219 and 1220, and "meets or exceeds CPSC and
- * ASTM standards" is a substantiable claim, not marketing colour.
+ * cribs are covered by 16 CFR 1219 and 1220.
  *
- * This page does not introduce that claim - it restates one the catalogue
- * already makes. 180 of the product descriptions in inventory.json contain
- * sentences like "rigorously tested to exceed CPSC and ASTM standards", so
- * the exposure already exists across every product page. Confirm you hold
- * the test reports from the manufacturer that back it. If you do not, the
- * wording to change is in the product data, not only here.
+ * Brand rule: Heirloom makes no safety, testing or certification claim of
+ * its own. Only a builder's verbatim words, attributed to the builder and
+ * sourced (see the builder pages), may say what a piece is tested to.
+ * tests/safety-claims-guard.test.ts fails if Heirloom-voice claims return.
  *
  * CERTIFICATIONS is empty on purpose. Add entries only for programmes you
  * can evidence; the section renders nothing while the list is empty rather
@@ -24,7 +21,7 @@ const CERTIFICATIONS: { name: string; detail: string }[] = [];
 export const metadata: Metadata = {
   title: 'Safety',
   description:
-    'How our cribs are built, the standards they are tested to, the finishes we use, and safe-sleep guidance for setting up the nursery.',
+    'How our cribs are built, the standards that cover cribs, the finishes we use, and safe-sleep guidance for setting up the nursery.',
   alternates: { canonical: '/safety' },
   openGraph: { url: '/safety' },
 };
@@ -36,7 +33,7 @@ export default function SafetyPage() {
       <h1 className="headline-xl">Safety</h1>
       <p className="body-lg doc-lede">
         A crib is the one piece of furniture your child is left alone in. Here is what ours are
-        built from, what they are tested against, and how to set one up so it stays safe as your
+        built from, which standards cover them, and how to set one up so it stays safe as your
         child grows.
       </p>
 

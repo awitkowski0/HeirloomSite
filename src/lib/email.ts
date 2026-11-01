@@ -634,7 +634,7 @@ export function sendInquiryAck(inquiry: InquiryDetails): Promise<boolean> {
 
     <p>
       Browse cribs: <a href="https://heirloomcribsandmore.com/products/cribs">https://heirloomcribsandmore.com/products/cribs</a><br>
-      Safety &amp; certifications: <a href="https://heirloomcribsandmore.com/safety">https://heirloomcribsandmore.com/safety</a>
+      Safety: <a href="https://heirloomcribsandmore.com/safety">https://heirloomcribsandmore.com/safety</a>
     </p>
 
     <p>If your question is urgent, reply to this email with &ldquo;URGENT&rdquo; in the
