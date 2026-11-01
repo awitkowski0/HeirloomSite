@@ -246,14 +246,14 @@ const SECTIONS: Section[] = [
         question: 'Where do you deliver?',
         answer: (
           <p>
-            We deliver in <strong>Pennsylvania, New Jersey and Maryland</strong>; delivery to some
-            ZIP codes in Newark is quoted individually. Additional delivery areas may be available;
-            contact us through{' '}
+            We deliver in <strong>Pennsylvania, New Jersey and Maryland</strong>. Delivery to some
+            ZIP codes in Newark is quoted individually. Other areas may be available on request, so{' '}
             <Link href="/contact" className="doc-link">
-              Get Personal Assistance
+              contact us
             </Link>{' '}
-            for details and a quote. Checkout shows your delivery options and charge once you enter
-            your state and ZIP; if your ZIP needs a quote, it points you to us. See{' '}
+            for details and a quote. Once you enter your state and ZIP at checkout, you&rsquo;ll see
+            your delivery options and the charge. If your ZIP needs a quote, checkout will point you
+            to us. See{' '}
             <Link href="/shipping" className="doc-link">
               Delivery
             </Link>

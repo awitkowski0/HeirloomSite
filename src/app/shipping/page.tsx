@@ -29,11 +29,10 @@ export default function ShippingPage() {
       <section>
         <h2 className="headline-md">Where we deliver</h2>
         <p>
-          We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark
-          is quoted individually. Additional delivery areas may be available; contact us
-          through{' '}
+          We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some ZIP codes in Newark
+          is quoted individually. Other areas may be available on request, so{' '}
           <Link href="/contact" className="doc-link">
-            Get Personal Assistance
+            contact us
           </Link>{' '}
           for details and a quote.
         </p>
