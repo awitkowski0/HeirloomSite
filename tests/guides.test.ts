@@ -83,7 +83,9 @@ const BANNED: [RegExp, string][] = [
   [/\bWBE\b/, 'WBE'],
   [/wom[ae]n-owned/i, 'woman-owned (About page only)'],
   [/free shipping|delivery included|free delivery/i, 'free/included delivery'],
-  [/\bcherry\b|red oak/i, 'Cherry / Red Oak (Brown Maple only)'],
+  // The OTO stain name "Michael's Cherry" (or "Michaels Cherry") is a finish, not a wood, so it is allowed;
+  // "cherry wood" and any other bare "cherry" still fail.
+  [/(?<!\bmichael['\u2019]?s\s+)\bcherry\b|\bcherry[- ]?wood\b|red oak/i, 'Cherry / Red Oak (Brown Maple only)'],
   [/Heirloom\s+Cribs\s+and\s+More/i, 'old company name'],
   [/vercel\.app/i, 'vercel.app host'],
   // Held origin lines (Pricing App #25 Q10): not in guides until ruled on.
@@ -317,6 +319,9 @@ test('checks catch broken guides (each mutation is reported)', () => {
     ['bad date', g => { g.dateModified = '2026-11-02'; }, /dateModified .* not ISO/],
     ['modified before published', g => { g.dateModified = '2026-11-01T09:00:00-05:00'; }, /before datePublished/],
     ['banned claim', g => { g.sections[0].paragraphs[0] = 'Our cribs are non-toxic.'; }, /non-toxic/],
+    ['cherry wood', g => { g.sections[0].paragraphs[0] = 'This crib comes in cherry wood.'; }, /Cherry \/ Red Oak/],
+    ['cherry wood after the stain name', g => { g.sections[0].paragraphs[0] = "Michael's Cherry wood is not sold."; }, /Cherry \/ Red Oak/],
+    ['bare cherry', g => { g.sections[0].paragraphs[0] = 'A cherry finish.'; }, /Cherry \/ Red Oak/],
     ['held origin line', g => { g.answerFirst[0] = 'Every piece is handcrafted. A second sentence.'; }, /held origin line/],
     ['woman-owned line', g => { g.faq[0].a = 'We are a woman-owned shop.'; }, /woman-owned/],
     ['repeated sentence', g => { g.sections[1].paragraphs.push(g.sections[0].paragraphs[1]); }, /sentence repeated/],
@@ -332,6 +337,20 @@ test('checks catch broken guides (each mutation is reported)', () => {
     mutate(g);
     const problems = checkGuide(g, { publicDir: FIXTURE_PUBLIC, routes });
     assert.ok(problems.some(x => expected.test(x)), `${name}: expected ${expected}, got ${JSON.stringify(problems)}`);
+  }
+});
+
+test('wording guard allows the OTO stain name "Michael\'s Cherry" / "Michaels Cherry"', () => {
+  const routes = fixtureRoutes();
+  for (const text of [
+    'The Newport crib comes in the Michaels Cherry stain.',
+    "The Newport crib comes in the Michael's Cherry stain.",
+    'The Newport crib comes in the Michael\u2019s Cherry stain.',
+    'The Newport crib comes in the MICHAELS CHERRY stain.',
+  ]) {
+    const g = structuredClone(fixture) as Guide;
+    g.sections[0].paragraphs[0] = `${text} See [a product page](/product/newport-crib).`;
+    assert.deepEqual(checkGuide(g, { publicDir: FIXTURE_PUBLIC, routes }), [], text);
   }
 });
 
