@@ -646,5 +646,5 @@ export function sendInquiryAck(inquiry: InquiryDetails): Promise<boolean> {
       Women-owned &middot; Made to order by independent builders
     </p>
   `;
-  return send(inquiry.email, 'Thanks for reaching out, next step for your crib', html, replyToAddress());
+  return send(inquiry.email, 'Thanks for reaching out: your next step', html, replyToAddress());
 }
