@@ -29,8 +29,8 @@ export async function generateMetadata({
   if (!collection) return { title: 'Collection not found', robots: { index: false } };
 
   const description =
-    `The ${collection.name} collection: ${collection.count} handcrafted pieces built in ` +
-    'solid American hardwood, designed to furnish a nursery as one range.';
+    `The ${collection.name} collection: ${collection.count} pieces made to order by independent builders, ` +
+    'designed to furnish a nursery as one range.';
 
   return {
     title: `${collection.name} Collection`,
