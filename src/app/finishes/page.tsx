@@ -45,9 +45,8 @@ export default function FinishesPage() {
             <Link href="/care" className="doc-link">
               Care &amp; Finishes
             </Link>
-            : finishes are applied to solid wood (not printed on a laminate), so the grain shows
-            through and no two pieces are identical — the same stain can read differently from one
-            piece of brown maple to the next.
+            : the grain shows through the stain, so no two pieces look exactly alike, and the same
+            stain can read differently from one piece to the next.
           </li>
         </ul>
         <p>
