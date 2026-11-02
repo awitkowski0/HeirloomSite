@@ -95,7 +95,10 @@ test('no Cherry or Red Oak in sold-wood copy', () => {
 });
 
 test('Brown Maple is still named as a wood on the home/safety/why-hardwood/finishes copy', () => {
-  for (const f of FOUR_PAGES) {
+  // Signed homepage strings (#52) drop brown maple from page.tsx and HomeHero; the ProvenanceBand line still carries it, so the home files are checked together.
+  const HOME = ['src/app/page.tsx', 'src/components/home/HomeHero.tsx', 'src/components/home/ProvenanceBand.tsx'];
+  assert.match(HOME.map(rendered).join('\n'), /brown maple/i, 'home (page + HomeHero + ProvenanceBand) should still name brown maple');
+  for (const f of FOUR_PAGES.filter(f => !HOME.includes(f))) {
     assert.match(rendered(f), /brown maple/i, `${f} should still name brown maple`);
   }
 });
