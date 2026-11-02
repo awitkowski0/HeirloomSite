@@ -61,8 +61,8 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             It means the crib is designed to be used and kept—not replaced every season. Solid
-            hardwood, careful finishing, and a clean conversion path (crib → toddler → daybed →
-            full, depending on model and kits) allow one investment to serve multiple stages of
+            hardwood, careful finishing, and a clean conversion path (crib, then toddler bed, then
+            full-size bed, depending on model and kits) allow one investment to serve multiple stages of
             childhood.
           </p>
         ),
@@ -118,10 +118,13 @@ const SECTIONS: Section[] = [
         question: 'What does 4-in-1 convertible mean?',
         answer: (
           <p>
-            Depending on the model and included or available kits, the crib is designed to convert
-            through childhood stages—typically crib, toddler bed, daybed, and full-size bed. Always
-            check the specific product page for which stages and kits apply. Some styles include
-            conversion kits; others list kits separately. See{' '}
+            It is the common name for a crib that converts to a toddler bed, a day bed and a
+            full-size bed. Old Town Oak describes three stages (crib, toddler bed and double bed) and
+            notes that its toddler bed can be used as a day bed: &ldquo;Use as a day bed for toddlers
+            to preschoolers.&rdquo; Fisher&rsquo;s conversion kit makes a toddler bed or a day bed,
+            described in its catalog as a &ldquo;Toddler Bed/Day Bed Conversion Kit: Includes day bed
+            frame, toddler bed rail, and hardware.&rdquo; Check the product page for the stages and
+            kits that apply to your model. See{' '}
             <Link href="/how-conversion-works" className="doc-link">
               How Our 4-in-1 Conversion Works
             </Link>
@@ -178,11 +181,10 @@ const SECTIONS: Section[] = [
                 a 50% deposit. You can pay by credit card or Affirm.
               </li>
               <li>
-                <strong>Built and Finishing by Hand.</strong> Amish and independent US
-                craftspeople cut, join, and finish your piece to order in solid American hardwood.
-                Lead times are estimates we confirm at order time, per builder: Old Town Oak about
-                6–8 weeks, Kids Comfort about 8 weeks, Fisher&rsquo;s 10–14 weeks. The remaining
-                balance must be paid before we schedule final delivery.
+                <strong>Made to Order.</strong> Every piece is made to order. Lead times are
+                estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort
+                about 8 weeks and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance
+                before we schedule final delivery.
               </li>
               <li>
                 <strong>Delivered to Your Nursery.</strong> You choose Curbside or White Glove when
@@ -375,17 +377,15 @@ const SECTIONS: Section[] = [
         answer: (
           <>
             <p>
-              You’re paying for a solid American hardwood crib made to order for your nursery—and
-              for the years it stays with your family as it grows with your child.
+              You’re paying for a solid hardwood crib made to order for your nursery, and for the
+              years it stays with your family as it grows with your child.
             </p>
             <p>
-              We source nursery case goods crafted by Amish and independent US craftspeople from
-              solid brown maple—never veneer over particle board. Details live on our {SafetyLink} and
-              each product page. One crib converts to a toddler bed, a
-              daybed, and a full bed when the kits for your style are in place; that’s what we mean
-              by Built to Grow Up. When you’re ready to order, you choose Curbside delivery to the
-              curb or White Glove with in-home assembly. White Glove includes up to 3 flights of
-              stairs. We confirm what fits your address before production starts.
+              Safety details live on our {SafetyLink} and each product page. One crib converts to a
+              toddler bed and a full-size bed when the kits for your model are in place. That’s what
+              we mean by Built to Grow Up. When you’re ready to order, you choose Curbside delivery or
+              White Glove with in-home assembly. White Glove includes up to 3 flights of stairs. We
+              confirm what fits your address before production starts.
             </p>
             <p>
               If you’re weighing two styles for your nursery and budget, ask us on Confirm Order

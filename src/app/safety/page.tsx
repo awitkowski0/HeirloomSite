@@ -104,9 +104,9 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Converting the crib</h2>
         <p>
-          Our convertible cribs move through four stages — crib, toddler bed, daybed, and full-size
-          bed. The conversion parts are sold separately, so you buy them when you reach that stage
-          rather than storing them for two years.
+          Our convertible cribs are designed to move through three stages, depending on the model
+          and kits: crib, toddler bed and full-size bed. The conversion parts are sold separately, so
+          you buy them when you reach that stage.
         </p>
         <p>
           Convert on the child&rsquo;s readiness, not their age: most families move to the toddler

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 /*
- * The four conversion stages, drawn rather than photographed.
+ * The three conversion stages, drawn rather than photographed.
  *
  * There is no photography of a converted bed anywhere in the catalogue - all
  * 531 product images are the same 3/4 studio shot of an assembled crib - so
@@ -67,21 +67,6 @@ const STAGES: Stage[] = [
   },
   {
     n: '03',
-    label: 'Daybed',
-    art: (
-      <>
-        {/* Back rail retained, front fully open. */}
-        <line x1="10" y1="14" x2="10" y2={FLOOR} />
-        <line x1="54" y1="26" x2="54" y2={FLOOR} />
-        <line x1="10" y1="14" x2="54" y2="14" />
-        <line x1="10" y1="30" x2="54" y2="30" />
-        {slats(10, 54, 14, 30, 5)}
-        <line x1="10" y1={FLOOR} x2="54" y2={FLOOR} />
-      </>
-    ),
-  },
-  {
-    n: '04',
     label: 'Full bed',
     art: (
       <>
@@ -103,7 +88,7 @@ const STAGES: Stage[] = [
 export default function ConversionDiagram() {
   return (
     <div className="home-conversions">
-      <p className="label-caps home-conversions-title">One crib, four beds</p>
+      <p className="label-caps home-conversions-title">One crib, three stages</p>
 
       <ol className="home-conversion-list">
         {STAGES.map(stage => (

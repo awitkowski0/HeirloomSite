@@ -56,10 +56,10 @@ export default function HardwoodPage() {
       <section>
         <h2 className="headline-md">Longevity and the convertible path</h2>
         <p>
-          One solid hardwood frame can move through crib → toddler bed → daybed → full-size bed when
-          the kits for your style are in place. That&rsquo;s what we mean by Built to Grow Up. Rails
-          and separately sold conversion parts are confirmed on the product page and on the Confirm
-          Order call — see{' '}
+          One solid hardwood frame can move from a crib to a toddler bed and then to a full-size bed
+          when the kits for your model are in place. That&rsquo;s what we mean by Built to Grow Up.
+          Rails and separately sold conversion parts are confirmed on the product page and on the
+          Confirm Order call. See{' '}
           <Link href="/how-conversion-works" className="doc-link">
             How Our 4-in-1 Conversion Works
           </Link>

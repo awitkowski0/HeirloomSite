@@ -100,11 +100,11 @@ export default function SafeSleepPage() {
       <section>
         <h2 className="headline-md">Making the transition with a 4-in-1 convertible crib</h2>
         <p>
-          Convertible cribs we offer move through crib → toddler bed → daybed → full-size bed. Use
-          only the parts made for your model and follow the manufacturer&rsquo;s instructions. Rails
-          and separately sold conversion parts are listed on product pages and our <Link href="/safety" className="doc-link">Safety</Link>{' '}
-          page. Heirloom Cribs &amp; More is the reseller; Amish and independent US craftspeople make
-          the hardwood case goods.
+          Our convertible cribs are designed to move from a crib to a toddler bed and then a
+          full-size bed, depending on the model and kits. Use only the parts made for your model and
+          follow the manufacturer&rsquo;s instructions. Rails and separately sold conversion parts are
+          listed on product pages and our <Link href="/safety" className="doc-link">Safety page</Link>.
+          Heirloom Cribs &amp; More is the reseller, and our builders make the cribs.
         </p>
         <p>When you and your pediatrician agree it is time:</p>
         <ol className="doc-list">

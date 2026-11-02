@@ -43,8 +43,8 @@ export default function TimelinePage() {
         <ol className="doc-list">
           <li>
             <strong>01 Choose and Customize.</strong> Pick the silhouette first; hardwood and
-            finish follow. Every crib converts through four stages and arrives with the rails to do
-            it. Most styles offer wood and stain options on the product page. If you&rsquo;re unsure
+            finish follow. Conversion kits for the toddler bed and full-size bed are listed on each
+            product page. Most styles offer wood and stain options on the product page. If you&rsquo;re unsure
             which finish will match your room, ask us before you place an order — share inspiration
             photos through <Link href="/contact" className="doc-link">Get Personal Assistance</Link>.
           </li>
@@ -57,10 +57,9 @@ export default function TimelinePage() {
             <strong>50% deposit</strong>. You can pay by credit card or Affirm.
           </li>
           <li>
-            <strong>03 Built and Finishing by Hand.</strong> Your piece is cut, joined, and
-            finished to order in solid American hardwood by Amish and independent US craftspeople.
-            Lead times are estimates confirmed at order time: Old Town Oak about 6–8 weeks, Kids
-            Comfort about 8 weeks, Fisher&rsquo;s 10–14 weeks. The remaining balance must be paid{' '}
+            <strong>03 Made to Order.</strong> Every piece is made to order. Lead times are
+            estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort
+            about 8 weeks and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance{' '}
             <strong>before we schedule final delivery</strong>.
           </li>
           <li>
@@ -127,9 +126,9 @@ export default function TimelinePage() {
         <p>Tell us the target month before you order. We&rsquo;ll tell you if it&rsquo;s realistic for the
           style and finish you want.</p>
         <h3>Are conversion kits included?</h3>
-        <p>Homepage: every crib arrives with the rails for the four-stage path. Safety page: some
-          conversion parts are sold separately so you can buy them when you reach that stage. Check
-          your product page; we&rsquo;ll confirm the kit list on Confirm Order.</p>
+        <p>Conversion kits are listed on each product page, and some are sold separately so you can
+          buy them when you reach that stage. Check your product page, and we&rsquo;ll confirm the kit
+          list on your Confirm Order call.</p>
       </section>
     </div>
   );
