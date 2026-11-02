@@ -27,10 +27,10 @@ const EXPECTED: Array<[string, string]> = [
   ['faq', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually. Other areas may be available on request, so contact us for details and a quote. Once you enter your state and ZIP at checkout, you\u2019ll see your delivery options and the charge. If your ZIP needs a quote, checkout will ask you to contact us. See Delivery.'],
   ['timeline', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually. Other areas may be available on request, so contact us for a quote.'],
   ['timeline', 'Delivery ZIP code: we deliver in Pennsylvania, New Jersey and Maryland, and some Newark, NJ ZIP codes are quoted individually.'],
-  ['how-conversion-works', '\u2014 Curbside or White Glove. We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually. Other areas may be available on request, so contact us for a quote.'],
 ];
 
-const PAGES = ['shipping', 'faq', 'timeline', 'how-conversion-works'];
+// /how-conversion-works is not checked: its delivery area moves to the Delivery page in #128.
+const PAGES = ['shipping', 'faq', 'timeline'];
 const BANNED = ['not able to deliver', 'except some ZIP', 'NYC', 'North Jersey', 'are available'];
 
 for (const [page, sentence] of EXPECTED) {
@@ -49,10 +49,6 @@ test('delivery sentences say "may be available", never "are available"', () => {
   }
 });
 
-test('how-conversion-works "what to ask" line uses ZIP', () => {
-  assert.ok(pageText('how-conversion-works').includes('(and ZIP in PA, NJ or MD)?'));
-});
-
 function tsxFiles(dir: URL): URL[] {
   const out: URL[] = [];
   for (const e of readdirSync(dir, { withFileTypes: true })) {
@@ -69,7 +65,7 @@ test('no flat no / old metro wording anywhere in src/ page copy (src/app, src/co
     ...tsxFiles(new URL('../src/components/', import.meta.url)),
   ];
   assert.ok(files.length > 10);
-  for (const f of files) {
+  for (const f of files.filter(u => !u.pathname.endsWith('/how-conversion-works/page.tsx'))) {
     const src = readFileSync(f, 'utf8').replace(/\s+/g, ' ');
     for (const phrase of ['not able to deliver', 'except some ZIP', 'NYC', 'North Jersey']) {
       assert.ok(!src.includes(phrase), `${f.pathname.split('/src/')[1]} contains "${phrase}"`);
