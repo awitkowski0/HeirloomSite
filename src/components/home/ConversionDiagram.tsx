@@ -112,8 +112,6 @@ export default function ConversionDiagram() {
       </ol>
 
       {/*
-        Points at the cribs, not at a kit category.
-        
         Points at the cribs. Each crib's page lists its conversion kits.
       */}
       <Link href="/products/cribs" className="home-conversions-link">
