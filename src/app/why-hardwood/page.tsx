@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Why Solid Hardwood Matters',
   description:
-    'What solid hardwood means for crib strength, longevity through conversion, finish behavior, and evaluating materials—US-made Heirloom cribs from Amish and independent craftspeople.',
+    'What solid hardwood means for crib strength, longevity through conversion, finish behavior, and how to evaluate materials in the cribs we offer.',
   alternates: { canonical: '/why-hardwood' },
   openGraph: { url: '/why-hardwood' },
 };
@@ -20,9 +20,7 @@ export default function HardwoodPage() {
         generation.
       </p>
       <p>
-        The hardwood cribs we offer are solid American hardwood — brown maple —
-        not veneer over particle board. Heirloom Cribs &amp; More is the <strong>reseller</strong>; Amish
-        and independent US craftspeople make the case goods.
+        The cribs we offer are made to order by independent builders, and each builder describes its own materials. Old Town Oak states: “solid, American handcrafted baby furniture.” Kids Comfort states: “All cribs are completely solid wood including the mattress support.” Heirloom Cribs &amp; More is the <strong>reseller</strong>, not the factory.
       </p>
 
       <section>
@@ -87,11 +85,9 @@ export default function HardwoodPage() {
         </p>
       </section>
       <section>
-        <h2 className="headline-md">Made in the USA — reseller, not factory</h2>
+        <h2 className="headline-md">Reseller, not factory</h2>
         <p>
-          The cribs we sell are made in the USA by Amish and independent US craftspeople. Heirloom
-          Cribs &amp; More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley) —
-          we offer and support these pieces; we are not the factory.
+          The cribs we sell are made to order by independent builders. Fisher&rsquo;s pieces are made in Pennsylvania, and Old Town Oak describes its furniture as “American handcrafted.” Heirloom Cribs &amp; More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley). We offer and support these pieces; we are not the factory.
         </p>
       </section>
       <hr className="doc-rule" />

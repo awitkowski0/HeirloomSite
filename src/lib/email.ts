@@ -643,8 +643,8 @@ export function sendInquiryAck(inquiry: InquiryDetails): Promise<boolean> {
     <p>
       &mdash; Heirloom Cribs &amp; More<br>
       Nazareth / Lehigh Valley, Pennsylvania<br>
-      Women-owned &middot; Solid hardwood &middot; Made in the USA
+      Women-owned &middot; Made to order by independent builders
     </p>
   `;
-  return send(inquiry.email, 'Thanks for reaching out ΓÇö next step for your crib', html, replyToAddress());
+  return send(inquiry.email, 'Thanks for reaching out, next step for your crib', html, replyToAddress());
 }

@@ -23,9 +23,7 @@ export default function TimelinePage() {
       <section>
         <h2 className="headline-md">Made to order vs. in stock</h2>
         <p>
-          Each hardwood crib we offer is made to order by Amish and independent US craftspeople —
-          Heirloom Cribs &amp; More is the reseller, not the factory. Nothing is pulled from a
-          finished-goods warehouse for your configuration.
+          Each crib we offer is made to order by independent builders. Heirloom Cribs &amp; More is the reseller, not the factory. Nothing is pulled from a finished-goods warehouse for your configuration.
         </p>
         <p>
           Because each piece is built after Confirm Order and deposit, timing depends on the
@@ -120,8 +118,7 @@ export default function TimelinePage() {
       <section>
         <h2 className="headline-md">Common questions</h2>
         <h3>Is the crib really made after I order?</h3>
-        <p>Yes. Makers build it to order in solid American hardwood after Confirm Order and deposit
-          — not pulled from stock.</p>
+        <p>Yes. The builder makes it to order after Confirm Order and deposit, not pulled from stock.</p>
         <h3>Can I hit a specific month?</h3>
         <p>Tell us the target month before you order. We&rsquo;ll tell you if it&rsquo;s realistic for the
           style and finish you want.</p>

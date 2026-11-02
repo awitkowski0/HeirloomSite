@@ -50,9 +50,7 @@ const SECTIONS: Section[] = [
         question: 'Are your cribs solid hardwood?',
         answer: (
           <p>
-            Yes. The cribs we offer are solid American hardwood, crafted by Amish and independent
-            US craftspeople. Where a product page states “no particle board / no MDF / no veneer,”
-            that language is intentional and specific to that piece.
+            Each builder describes its own materials. Old Town Oak states: “solid, American handcrafted baby furniture.” Kids Comfort states: “All cribs are completely solid wood including the mattress support.” Where a product page states “no particle board / no MDF / no veneer,” that language is intentional and specific to that piece.
           </p>
         ),
       },
@@ -71,9 +69,7 @@ const SECTIONS: Section[] = [
         question: 'Where are the cribs made?',
         answer: (
           <p>
-            The cribs we sell are made in the USA by Amish and independent US craftspeople. You buy
-            through us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley,
-            Pennsylvania area — we are the reseller, not the factory.
+            Every piece is made to order by an independent builder. Old Town Oak describes its furniture as “American handcrafted,” and Fisher&rsquo;s pieces are made in Pennsylvania. You buy through us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley, Pennsylvania area. We are the reseller, not the factory.
           </p>
         ),
       },
