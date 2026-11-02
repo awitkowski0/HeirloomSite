@@ -23,8 +23,8 @@ export const GUIDES_INDEX = {
   heading: 'Guides',
   metaTitle: 'Guides',
   metaDescription:
-    'Plain answers for parents choosing, using and caring for solid hardwood nursery furniture: cribs, conversion, finishes and more.',
-  lede: 'Plain answers for parents choosing, using and caring for nursery furniture.',
+    'Plain answers for parents choosing, using, and caring for solid hardwood nursery furniture: cribs, conversion, finishes, and more.',
+  lede: 'Plain answers for parents choosing, using, and caring for nursery furniture.',
 } as const;
 
 /** Every guide, most recently updated first. */
