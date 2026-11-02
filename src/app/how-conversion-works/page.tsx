@@ -16,7 +16,7 @@ export default function ConversionPage() {
       <p className="label-caps text-on-surface-variant">Owner&rsquo;s guide</p>
       <h1 className="headline-xl">How Our 4-in-1 Conversion Works</h1>
       <p className="body-lg doc-lede">
-        A 4-in-1 convertible crib is a crib that converts to a toddler bed, a day bed and a
+        A 4-in-1 convertible crib is a crib that converts to a toddler bed, a day bed, and a
         full-size bed. Our builders describe the stages a little differently, so this page uses
         their own words.
       </p>
@@ -41,7 +41,7 @@ export default function ConversionPage() {
       <section>
         <h2 className="headline-md">What &ldquo;4-in-1&rdquo; means</h2>
         <p>
-          4-in-1 is the common name for a crib that converts to a toddler bed, a day bed and a
+          4-in-1 is the common name for a crib that converts to a toddler bed, a day bed, and a
           full-size bed. Our builders describe it in their own ways:
         </p>
         <ul className="doc-list">
@@ -79,7 +79,7 @@ export default function ConversionPage() {
         <div className="doc-sketches">
           <BrandSketch
             src="/images/brand/assembly.jpg"
-            alt="Sketch of a hex key, a bolt and a washer beside wood shavings on paper"
+            alt="Sketch of a hex key, a bolt, and a washer beside wood shavings on paper"
             width={1408}
             height={1408}
             sizes="(max-width: 1199px) 100vw, 1140px"

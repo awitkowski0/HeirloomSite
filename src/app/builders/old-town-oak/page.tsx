@@ -26,7 +26,7 @@ export default function OldTownOakPage() {
           <p className="label-caps text-on-surface-variant">Our builders</p>
           <h1 className="headline-xl">Old Town Oak</h1>
           <p className="body-lg builder-header__sub">
-            {`A furniture business in Topeka, Indiana, that specializes in baby furniture. Its 2026 catalog says it has been in business for 21 years. You order through Heirloom Cribs & More, and we handle the call, the invoice and the delivery.`}
+            {`A furniture business in Topeka, Indiana, that specializes in baby furniture. Its 2026 catalog says it has been in business for 21 years. You order through Heirloom Cribs & More, and we handle the call, the invoice, and the delivery.`}
           </p>
           <Link href="/contact" className="button-primary">Get Personal Assistance</Link>
           <p className="builder-header__contact">
@@ -122,7 +122,7 @@ export default function OldTownOakPage() {
 
         <section>
           <h2 className="headline-md">Old Town Oak on our site</h2>
-          <p>{`Five collections, each with a crib, a dresser and a nightstand:`}</p>
+          <p>{`Five collections, each with a crib, a dresser, and a nightstand:`}</p>
           <ul>
             <li><Link href="/collections/addison" className="doc-link">Addison</Link></li>
             <li><Link href="/collections/french-country" className="doc-link">French Country</Link></li>

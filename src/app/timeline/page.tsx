@@ -118,7 +118,7 @@ export default function TimelinePage() {
       <section>
         <h2 className="headline-md">Common questions</h2>
         <h3>Is the crib really made after I order?</h3>
-        <p>Yes. The builder makes it to order after Confirm Order and deposit, not pulled from stock.</p>
+        <p>Yes. The builder makes it to order after Confirm Order and deposit; it is not pulled from stock.</p>
         <h3>Can I hit a specific month?</h3>
         <p>Tell us the target month before you order. We&rsquo;ll tell you if it&rsquo;s realistic for the
           style and finish you want.</p>

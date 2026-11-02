@@ -114,7 +114,7 @@ const SECTIONS: Section[] = [
         question: 'What does 4-in-1 convertible mean?',
         answer: (
           <p>
-            It is the common name for a crib that converts to a toddler bed, a day bed and a
+            It is the common name for a crib that converts to a toddler bed, a day bed, and a
             full-size bed. Old Town Oak describes three stages (crib, toddler bed, and double bed) and
             notes that its toddler bed can be used as a day bed: &ldquo;Use as a day bed for toddlers
             to preschoolers.&rdquo; Fisher&rsquo;s conversion kit makes a toddler bed or a day bed,

@@ -12,12 +12,12 @@ const [SUPPORT_EMAIL_USER, SUPPORT_EMAIL_HOST] = SUPPORT_EMAIL.split('@');
 // Q3 is ON by default (MKT Director/Brand). To strike it, set q3WomanOwned to '' or delete the key.
 // Self-description only: never add a certification word to this line.
 const Q: Record<string, string> = {
-  q1: `Heirloom Cribs & More brings handcrafted, made-to-order nursery furniture from three builders to families in Pennsylvania, New Jersey and Maryland.`,
+  q1: `Heirloom Cribs & More brings made-to-order nursery furniture from three independent builders to families in Pennsylvania, New Jersey, and Maryland.`,
   q3WomanOwned: `Heirloom Cribs & More is a woman-owned business.`,
   q4: `Each builder is introduced in its own words on its own page.`,
   q5: `our warehouse in Bethlehem, Pennsylvania`,
   q7Babylist: `If you're building a baby registry, pieces on our site can be added to a Babylist registry, and we can also create a custom order that can be added to your personal Babylist registry.`,
-  q8Sub: `three builders`,
+  q8Sub: `three independent builders`,
   q8KidsComfort: `Kids Comfort pieces aren't listed on our site yet; they are available on request.`,
 };
 
@@ -33,7 +33,7 @@ const OUR_STORY = [
 export const metadata: Metadata = {
   title: { absolute: 'About Heirloom Cribs & More | How We Work' },
   description:
-    'Heirloom Cribs & More brings handcrafted, made-to-order nursery furniture from three builders to families in PA, NJ and MD. See how ordering works.',
+    'Heirloom Cribs & More brings made-to-order nursery furniture from three independent builders to families in PA, NJ, and MD. See how ordering works.',
   alternates: { canonical: '/about-heirloom' },
   openGraph: { title: 'About Heirloom Cribs & More | How We Work', url: '/about-heirloom' },
   twitter: { title: 'About Heirloom Cribs & More | How We Work' },
@@ -47,7 +47,7 @@ export default function AboutHeirloomPage() {
           <p className="label-caps text-on-surface-variant">About Heirloom Cribs &amp; More</p>
           <h1 className="headline-xl">One team from your first question to delivery day</h1>
           <p className="body-lg builder-header__sub">
-            {`Heirloom Cribs & More sells handcrafted cribs and nursery furniture, made to order by ${Q.q8Sub}. We take your order, answer your calls, send your invoice, schedule your delivery and sort out any damage with the builder and the carrier.`}
+            {`Heirloom Cribs & More sells cribs and nursery furniture made to order by ${Q.q8Sub}. We take your order, answer your calls, send your invoice, schedule your delivery, and sort out any damage with the builder and the carrier.`}
           </p>
           <Link href="/contact" className="button-primary">Get Personal Assistance</Link>
           <p className="builder-header__contact">
@@ -211,7 +211,7 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">Help before you order</h2>
           <p>
-            {`Use Get Personal Assistance if you're between two cribs or unsure which stain suits the room. Tell us the style you like, your finish ideas, your ZIP code and your timing, and send inspiration photos if you have them. A real person follows up with options. We reply the same or next business day.`}
+            {`Use Get Personal Assistance if you're between two cribs or unsure which stain suits the room. Tell us the style you like, your finish ideas, your ZIP code, and your timing, and send inspiration photos if you have them. A real person follows up with options. We reply the same or next business day.`}
           </p>
           <p>{`Gift orders are arranged by hand. Call or email us and we'll set it up.`}</p>
           <p>{Q.q7Babylist}</p>

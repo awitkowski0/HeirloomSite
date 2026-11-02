@@ -4,7 +4,7 @@ import Link from 'next/link';
 // Q#-dependent copy, one place each (Woods: Q7 x3 blocks, Q8 KC range).
 const Q = {
   q7Lists: `For a wood or finish from these lists that isn't on our product pages, contact us with what you have in mind.`,
-  q7Designer: `Interior designers, and families working with one, can contact us with the full vision for a custom order: the pieces, the wood, the finish and the room it's going into. A real person follows up with options.`,
+  q7Designer: `Interior designers, and families working with one, can contact us with the full vision for a custom order: the pieces, the wood, the finish, and the room it's going into. A real person follows up with options.`,
   q7Babylist: `Pieces on our site can be added to a Babylist registry, and we can also create a custom order that can be added to your personal Babylist registry.`,
   q8Kc: `Kids Comfort pieces aren't listed on our site yet; they are available on request.`,
 };
@@ -140,7 +140,7 @@ export default function WoodsAndFinishesPage() {
         <section>
           <h2 className="headline-md">Matching a room you've already planned</h2>
           <p>
-            {`If you have a nursery in your head or on a mood board, tell us about it. Use Get Personal Assistance to share inspiration photos, the style you like, your finish ideas, your ZIP code and your timing. A real person follows up with options. We reply the same or next business day.`}
+            {`If you have a nursery in your head or on a mood board, tell us about it. Use Get Personal Assistance to share inspiration photos, the style you like, your finish ideas, your ZIP code, and your timing. A real person follows up with options. We reply the same or next business day.`}
           </p>
         </section>
 
