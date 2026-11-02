@@ -195,9 +195,8 @@ export default function ConversionPage() {
             is complete — not before.
           </li>
           <li>
-            <strong>04 Delivered to Your Nursery</strong> — Curbside or White Glove. We deliver in
-            Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted
-            individually. Other areas may be available on request, so contact us for a quote.
+            <strong>04 Delivered to Your Nursery</strong> — Curbside or White Glove; we deliver in
+            PA, NJ (excluding the New York City / North Jersey metro area) and MD. Confirm your zip with us.
           </li>
         </ol>
         <p>
@@ -213,7 +212,7 @@ export default function ConversionPage() {
           <li>What mattress sizes does each stage require?</li>
           <li>What is the current lead time for my style, wood, and stain?</li>
           <li>
-            Curbside or White Glove — which fits my address (and ZIP in PA, NJ or MD)?
+            Curbside or White Glove — which fits my address (and zip in PA, NJ or MD)?
           </li>
         </ul>
       </section>
