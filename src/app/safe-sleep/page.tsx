@@ -28,8 +28,7 @@ export default function SafeSleepPage() {
         instructions, and check for recalls.
       </p>
       <p>
-        Heirloom Cribs and More sells compliant nursery hardwood case goods as a reseller; Amish and
-        independent US craftspeople make the case goods. Safe-sleep guidance on this page comes from
+        Heirloom Cribs &amp; More is a reseller of hardwood nursery furniture. Independent builders make the case goods to order. Safe-sleep guidance on this page comes from
         the official sources linked below, not from Heirloom as a clinical expert. Guidelines can
         change, so verify the live primary pages.
       </p>
@@ -75,7 +74,7 @@ export default function SafeSleepPage() {
       </section>
 
       <section>
-        <h2 className="headline-md">How a compliant full-size crib supports safe sleep</h2>
+        <h2 className="headline-md">What to look for in a crib</h2>
         <p>Public CPSC crib-safety guidance addresses features such as:</p>
         <ul className="doc-list">
           <li>Fixed sides (no drop-side rails). (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>)</li>
@@ -100,11 +99,11 @@ export default function SafeSleepPage() {
       <section>
         <h2 className="headline-md">Making the transition with a 4-in-1 convertible crib</h2>
         <p>
-          Convertible cribs we offer move through crib → toddler bed → daybed → full-size bed. Use
-          only the parts made for your model and follow the manufacturer&rsquo;s instructions. Rails
-          and separately sold conversion parts are listed on product pages and our <Link href="/safety" className="doc-link">Safety</Link>{' '}
-          page. Heirloom Cribs and More is the reseller; Amish and independent US craftspeople make
-          the hardwood case goods.
+          Our convertible cribs are designed to move from a crib to a toddler bed and then a
+          full-size bed, depending on the model and kits. Use only the parts made for your model and
+          follow the manufacturer&rsquo;s instructions. Rails and separately sold conversion parts are
+          listed on product pages and our <Link href="/safety" className="doc-link">Safety page</Link>.
+          Heirloom Cribs &amp; More is the reseller, and our builders make the cribs.
         </p>
         <p>When you and your pediatrician agree it is time:</p>
         <ol className="doc-list">
@@ -124,8 +123,8 @@ export default function SafeSleepPage() {
         <p>No. Sleep surfaces with an incline greater than 10 degrees are not safe for infant sleep. Transfer the baby to a firm, flat surface as soon as practical. (<a href={AAP} className="doc-link">AAP / HealthyChildren.org</a>)</p>
         <h3>When is it time to stop using the crib?</h3>
         <p>When the child begins climbing out or reaches approximately 35 inches tall — confirm with your pediatrician. (<a href={CPSC_CRIB} className="doc-link">CPSC Crib Safety Tips</a>)</p>
-        <h3>Do Heirloom cribs meet current safety standards?</h3>
-        <p>Standards and setup for a specific piece are on our <Link href="/safety" className="doc-link">Safety</Link> page and its product page. Always assemble and maintain the crib per the included instructions.</p>
+        <h3>Where can I find the standards and setup steps for my crib?</h3>
+        <p>Our <Link href="/safety" className="doc-link">Safety page</Link> explains which standards cover cribs. For a specific piece, check its product page or ask us. Always set up and maintain the crib following the instructions that come with it.</p>
       </section>
 
       <section>

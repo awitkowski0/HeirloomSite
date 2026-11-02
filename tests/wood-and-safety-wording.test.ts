@@ -95,9 +95,21 @@ test('no Cherry or Red Oak in sold-wood copy', () => {
 });
 
 test('Brown Maple is still named as a wood on the home/safety/why-hardwood/finishes copy', () => {
-  for (const f of FOUR_PAGES) {
+  // Signed homepage strings (#52) drop brown maple from page.tsx and HomeHero; the ProvenanceBand line still carries it, so the home files are checked together.
+  const HOME = ['src/app/page.tsx', 'src/components/home/HomeHero.tsx', 'src/components/home/ProvenanceBand.tsx'];
+  assert.match(HOME.map(rendered).join('\n'), /brown maple/i, 'home (page + HomeHero + ProvenanceBand) should still name brown maple');
+  // Held-origin strings (#52 6576700054/6576722581, Director 6576727700) name no species on /safety and /why-hardwood; only /finishes is still checked.
+  const NO_SPECIES = ['src/app/safety/page.tsx', 'src/app/why-hardwood/page.tsx'];
+  for (const f of FOUR_PAGES.filter(f => !HOME.includes(f) && !NO_SPECIES.includes(f))) {
     assert.match(rendered(f), /brown maple/i, `${f} should still name brown maple`);
   }
+});
+
+// /safety: the unsourced "rather than stapled" clause stays out (Brand, #120, Nov 1); the held
+// materials sentence was replaced per #52 6576727700 (Q10 ruling).
+test('/safety drops the unsourced "rather than stapled" line', () => {
+  const src = rendered(FOUR_PAGES.find(p => p.includes('safety')) as string);
+  assert.ok(!/stapled/i.test(src), '/safety still has the unsourced "rather than stapled" line');
 });
 
 test('no "Sustainably sourced" claim on the four pages or home components', () => {

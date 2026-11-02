@@ -9,7 +9,7 @@ import { nodeTextCompact } from '@/lib/node-text';
 export const metadata: Metadata = {
   title: 'FAQ',
   description:
-    'Answers on solid hardwood cribs, finishes, 4-in-1 conversion, ordering, shipping, and safety standards from Heirloom Cribs and More (Nazareth / Lehigh Valley, PA).',
+    'Answers on solid hardwood cribs, finishes, 4-in-1 conversion, ordering, shipping, and safety standards from Heirloom Cribs & More (Nazareth / Lehigh Valley, PA).',
   alternates: { canonical: '/faq' },
   openGraph: { url: '/faq' },
 };
@@ -50,9 +50,7 @@ const SECTIONS: Section[] = [
         question: 'Are your cribs solid hardwood?',
         answer: (
           <p>
-            Yes. The cribs we offer are solid American hardwood, crafted by Amish and independent
-            US craftspeople. Where a product page states “no particle board / no MDF / no veneer,”
-            that language is intentional and specific to that piece.
+            Each builder describes its own materials. Old Town Oak states: “solid, American handcrafted baby furniture.” Kids Comfort states: “All cribs are completely solid wood including the mattress support.” Where a product page states “no particle board / no MDF / no veneer,” that language is intentional and specific to that piece.
           </p>
         ),
       },
@@ -61,8 +59,8 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             It means the crib is designed to be used and kept—not replaced every season. Solid
-            hardwood, careful finishing, and a clean conversion path (crib → toddler → daybed →
-            full, depending on model and kits) allow one investment to serve multiple stages of
+            hardwood, careful finishing, and a clean conversion path (crib, then toddler bed, then
+            full-size bed, depending on model and kits) allow one investment to serve multiple stages of
             childhood.
           </p>
         ),
@@ -71,9 +69,7 @@ const SECTIONS: Section[] = [
         question: 'Where are the cribs made?',
         answer: (
           <p>
-            The cribs we sell are made in the USA by Amish and independent US craftspeople. You buy
-            through us. Heirloom Cribs and More is a women-owned shop in the Nazareth / Lehigh Valley,
-            Pennsylvania area — we are the reseller, not the factory.
+            Every piece is made to order by an independent builder. Old Town Oak describes its furniture as “American handcrafted,” and Fisher&rsquo;s pieces are made in Pennsylvania. You buy through us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley, Pennsylvania area. We are the reseller, not the factory.
           </p>
         ),
       },
@@ -87,15 +83,14 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
-            us the model and finish you&rsquo;re considering and we&rsquo;ll point you to that
-            builder&rsquo;s own documentation; see also our {SafetyLink}. Do not assume any
-            particular third-party certification applies to a given piece — confirm it on that
-            product page before you order. For what GREENGUARD Gold does and does not cover, see{' '}
+            us the model and finish you&rsquo;re looking at, and we&rsquo;ll find that builder&rsquo;s own
+            documentation for you. You can also read our {SafetyLink}, or see{' '}
             <Link href="/finishes" className="doc-link">
               Finishes &amp; Nursery Air Quality
-            </Link>
-            . For a sensitivity or chemical concern, contact us with the model name so we can point
-            you to the documented details rather than guess.
+            </Link>{' '}
+            for how we describe the finishes on the cribs we carry. For a sensitivity or chemical
+            concern, contact us with the model name so we can point you to the documented details
+            rather than guess.
           </p>
         ),
       },
@@ -119,10 +114,13 @@ const SECTIONS: Section[] = [
         question: 'What does 4-in-1 convertible mean?',
         answer: (
           <p>
-            Depending on the model and included or available kits, the crib is designed to convert
-            through childhood stages—typically crib, toddler bed, daybed, and full-size bed. Always
-            check the specific product page for which stages and kits apply. Some styles include
-            conversion kits; others list kits separately. See{' '}
+            It is the common name for a crib that converts to a toddler bed, a day bed and a
+            full-size bed. Old Town Oak describes three stages (crib, toddler bed, and double bed) and
+            notes that its toddler bed can be used as a day bed: &ldquo;Use as a day bed for toddlers
+            to preschoolers.&rdquo; Fisher&rsquo;s conversion kit makes a toddler bed or a day bed,
+            described in its catalog as a &ldquo;Toddler Bed/Day Bed Conversion Kit: Includes day bed
+            frame, toddler bed rail, and hardware.&rdquo; Check the product page for the stages and
+            kits that apply to your model. See{' '}
             <Link href="/how-conversion-works" className="doc-link">
               How Our 4-in-1 Conversion Works
             </Link>
@@ -179,11 +177,10 @@ const SECTIONS: Section[] = [
                 a 50% deposit. You can pay by credit card or Affirm.
               </li>
               <li>
-                <strong>Built and Finishing by Hand.</strong> Amish and independent US
-                craftspeople cut, join, and finish your piece to order in solid American hardwood.
-                Lead times are estimates we confirm at order time, per builder: Old Town Oak about
-                6–8 weeks, Kids Comfort about 8 weeks, Fisher&rsquo;s 10–14 weeks. The remaining
-                balance must be paid before we schedule final delivery.
+                <strong>Made to Order.</strong> Every piece is made to order. Lead times are
+                estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort
+                about 8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance
+                before we schedule final delivery.
               </li>
               <li>
                 <strong>Delivered to Your Nursery.</strong> You choose Curbside or White Glove when
@@ -294,13 +291,13 @@ const SECTIONS: Section[] = [
     heading: 'Safety standards',
     entries: [
       {
-        question: 'What safety standards do you follow?',
+        question: 'What safety standards apply to cribs?',
         answer: (
           <>
             <p>
-              Cribs sold in the United States are covered by CPSC and ASTM standards. Heirloom Cribs
-              &amp; More resells; each builder makes its own compliance statements. Questions about a
-              specific piece? Ask us.
+              Cribs sold in the United States are covered by CPSC and ASTM standards. We resell cribs
+              made by independent builders, and each builder speaks for its own cribs. If you have a
+              question about a specific piece, ask us and we&rsquo;ll share what its builder says.
             </p>
             <p>
               Authoritative detail always lives on the {SafetyLink}. We do not replace safe-sleep
@@ -314,12 +311,12 @@ const SECTIONS: Section[] = [
         ),
       },
       {
-        question: 'Are conversion kits safety-certified too?',
+        question: 'What about conversion kits?',
         answer: (
           <p>
-            Conversion kits sold for our cribs are part of the same safety-minded product system and
-            are addressed on the {SafetyLink} and product documentation. Use only the kits intended
-            for your model and follow the instructions for each configuration.
+            Each builder speaks for its own conversion kits. You&rsquo;ll find more on the{' '}
+            {SafetyLink} and the product page, and we&rsquo;re glad to help with a specific kit. Use
+            only the kits made for your crib model, and follow the instructions for each setup.
           </p>
         ),
       },
@@ -376,17 +373,15 @@ const SECTIONS: Section[] = [
         answer: (
           <>
             <p>
-              You’re paying for a solid American hardwood crib made to order for your nursery—and
-              for the years it stays with your family as it grows with your child.
+              You’re paying for a solid hardwood crib made to order for your nursery, and for the
+              years it stays with your family as it grows with your child.
             </p>
             <p>
-              We source nursery case goods crafted by Amish and independent US craftspeople from
-              solid brown maple—never veneer over particle board. Details live on our {SafetyLink} and
-              each product page. One crib converts to a toddler bed, a
-              daybed, and a full bed when the kits for your style are in place; that’s what we mean
-              by Built to Grow Up. When you’re ready to order, you choose Curbside delivery to the
-              curb or White Glove with in-home assembly. White Glove includes up to 3 flights of
-              stairs. We confirm what fits your address before production starts.
+              Safety details live on our {SafetyLink} and each product page. One crib converts to a
+              toddler bed and a full-size bed when the kits for your model are in place. That’s what
+              we mean by Built to Grow Up. When you’re ready to order, you choose Curbside delivery or
+              White Glove with in-home assembly. White Glove includes up to 3 flights of stairs. We
+              confirm what fits your address before production starts.
             </p>
             <p>
               If you’re weighing two styles for your nursery and budget, ask us on Confirm Order

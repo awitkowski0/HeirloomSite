@@ -27,7 +27,7 @@
  * Grows As They Grow -> replaces the previous "16 crib styles" claim, which
  * was a weaker fit for this pillar than the crib's actual convertibility.
  * Substantiated by HomeHero's own subcopy and ConversionDiagram's 4-stage
- * crib -> toddler bed -> daybed -> full bed sequence.
+ * crib -> toddler bed -> full bed sequence.
  */
 
 const COLUMNS = [
@@ -49,7 +49,7 @@ const COLUMNS = [
   {
     icon: 'sync_alt',
     label: 'Grows with your child',
-    lines: ['One crib converts to a toddler', 'bed, a daybed and a full bed.'],
+    lines: ['One crib converts to', 'a toddler bed and a full-size bed.'],
   },
 ];
 

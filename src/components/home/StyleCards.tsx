@@ -46,8 +46,8 @@ export default function StyleCards({ inventory }: { inventory: InventoryItem[] }
           the decision that matters. Pick the silhouette first; the wood and the stain follow.
         </p>
         <p className="home-styles-copy">
-          All of them convert through the same four stages, and all of them take the same guard
-          rails.
+          Convertible styles move from a crib to a toddler bed and then a full-size bed, with the
+          kits listed on each product page.
         </p>
         <Link href="/products/cribs" className="home-styles-link">
           Explore all styles &rarr;

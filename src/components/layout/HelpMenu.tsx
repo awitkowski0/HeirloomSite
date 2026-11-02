@@ -22,7 +22,7 @@ import Link from 'next/link';
 const LINKS = [
   { href: '/contact', label: 'Contact us' },
   { href: '/faq', label: 'FAQ' },
-  { href: '/safety', label: 'Safety & certifications' },
+  { href: '/safety', label: 'Safety' },
   { href: '/care', label: 'Care & finishes' },
 ];
 

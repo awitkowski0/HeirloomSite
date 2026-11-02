@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 /*
- * The four conversion stages, drawn rather than photographed.
+ * The three conversion stages, drawn rather than photographed.
  *
  * There is no photography of a converted bed anywhere in the catalogue - all
  * 531 product images are the same 3/4 studio shot of an assembled crib - so
@@ -49,7 +49,7 @@ const STAGES: Stage[] = [
   },
   {
     n: '02',
-    label: 'Toddler',
+    label: 'Toddler bed',
     art: (
       <>
         {/* One long side removed and replaced by a low guard rail. */}
@@ -67,22 +67,7 @@ const STAGES: Stage[] = [
   },
   {
     n: '03',
-    label: 'Daybed',
-    art: (
-      <>
-        {/* Back rail retained, front fully open. */}
-        <line x1="10" y1="14" x2="10" y2={FLOOR} />
-        <line x1="54" y1="26" x2="54" y2={FLOOR} />
-        <line x1="10" y1="14" x2="54" y2="14" />
-        <line x1="10" y1="30" x2="54" y2="30" />
-        {slats(10, 54, 14, 30, 5)}
-        <line x1="10" y1={FLOOR} x2="54" y2={FLOOR} />
-      </>
-    ),
-  },
-  {
-    n: '04',
-    label: 'Full bed',
+    label: 'Full-size bed',
     art: (
       <>
         {/* Headboard and footboard only, on a full-length frame. */}
@@ -103,7 +88,7 @@ const STAGES: Stage[] = [
 export default function ConversionDiagram() {
   return (
     <div className="home-conversions">
-      <p className="label-caps home-conversions-title">One crib, four beds</p>
+      <p className="label-caps home-conversions-title">One crib, three stages</p>
 
       <ol className="home-conversion-list">
         {STAGES.map(stage => (
@@ -129,15 +114,10 @@ export default function ConversionDiagram() {
       {/*
         Points at the cribs, not at a kit category.
         
-        This linked to /products/guard-rails-and-conversions until the kits
-        became bundle-only; that URL now redirects to the full grid, which does
-        not list them - so the one place on the homepage that talks about rails
-        led somewhere they cannot be seen. The kits ship WITH the crib and are
-        shown on its page, so that is where this belongs, and the label now says
-        so rather than implying they are sold separately.
+        Points at the cribs. Each crib's page lists its conversion kits.
       */}
       <Link href="/products/cribs" className="home-conversions-link">
-        Every crib includes its rails &rarr;
+        See the conversion kits on each crib &rarr;
       </Link>
     </div>
   );

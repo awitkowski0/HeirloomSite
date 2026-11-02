@@ -103,7 +103,7 @@ export default function Footer() {
               </li>
             </ul>
             <p className="body-md text-on-surface-variant footer-copyright">
-              © {new Date().getFullYear()} Heirloom Cribs and More. All Rights Reserved.
+              © {new Date().getFullYear()} Heirloom Cribs &amp; More. All Rights Reserved.
             </p>
           </div>
         </div>
