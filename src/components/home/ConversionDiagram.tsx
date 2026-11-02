@@ -49,7 +49,7 @@ const STAGES: Stage[] = [
   },
   {
     n: '02',
-    label: 'Toddler',
+    label: 'Toddler bed',
     art: (
       <>
         {/* One long side removed and replaced by a low guard rail. */}
@@ -67,7 +67,7 @@ const STAGES: Stage[] = [
   },
   {
     n: '03',
-    label: 'Full bed',
+    label: 'Full-size bed',
     art: (
       <>
         {/* Headboard and footboard only, on a full-length frame. */}
@@ -114,15 +114,10 @@ export default function ConversionDiagram() {
       {/*
         Points at the cribs, not at a kit category.
         
-        This linked to /products/guard-rails-and-conversions until the kits
-        became bundle-only; that URL now redirects to the full grid, which does
-        not list them - so the one place on the homepage that talks about rails
-        led somewhere they cannot be seen. The kits ship WITH the crib and are
-        shown on its page, so that is where this belongs, and the label now says
-        so rather than implying they are sold separately.
+        Points at the cribs. Each crib's page lists its conversion kits.
       */}
       <Link href="/products/cribs" className="home-conversions-link">
-        Every crib includes its rails &rarr;
+        See the conversion kits on each crib &rarr;
       </Link>
     </div>
   );

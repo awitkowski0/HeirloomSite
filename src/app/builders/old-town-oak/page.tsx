@@ -140,7 +140,7 @@ export default function OldTownOakPage() {
         <section>
           <h2 className="headline-md">What we handle on an Old Town Oak order</h2>
           <ul>
-            <li>{`Before anything is built, we call to confirm your stain, the kit list and your delivery.`}</li>
+            <li>{`Before anything is built, we call to confirm your stain, the kit list, and your delivery.`}</li>
             <li>{`We send a Stripe invoice for the 50% deposit. The build starts when the deposit is in.`}</li>
             <li>
               {`When the furniture is ready, we contact you to schedule delivery, Curbside or White Glove. Shipping is charged by cart subtotal; see `}

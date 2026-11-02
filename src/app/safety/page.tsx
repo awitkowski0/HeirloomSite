@@ -105,7 +105,7 @@ export default function SafetyPage() {
         <h2 className="headline-md">Converting the crib</h2>
         <p>
           Our convertible cribs are designed to move through three stages, depending on the model
-          and kits: crib, toddler bed and full-size bed. The conversion parts are sold separately, so
+          and kits: crib, toddler bed, and full-size bed. The conversion parts are sold separately, so
           you buy them when you reach that stage.
         </p>
         <p>

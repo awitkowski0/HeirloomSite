@@ -113,7 +113,7 @@ export default function FishersQualityProductsPage() {
         <section>
           <h2 className="headline-md">What we handle on a Fisher's order</h2>
           <ul>
-            <li>{`We read your order and call to confirm the stain, the kit list and the delivery. Nothing is charged until you pay the deposit invoice.`}</li>
+            <li>{`We read your order and call to confirm the stain, the kit list, and the delivery. Nothing is charged until you pay the deposit invoice.`}</li>
             <li>{`We send a Stripe invoice for the 50% deposit. Once it's paid, we place the order with Fisher's and the build starts.`}</li>
             <li>
               {`When your furniture is ready, we contact you to schedule delivery. Curbside brings it to the curb; White Glove brings it in and assembles it. Shipping is charged by cart subtotal; see `}

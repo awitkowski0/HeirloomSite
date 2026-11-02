@@ -105,7 +105,7 @@ export default function AboutHeirloomPage() {
               <strong>You choose.</strong>{` Pick the piece, then the wood and stain where the product page offers them, and place the order. No card is taken at checkout.`}
             </li>
             <li>
-              <strong>We call you.</strong>{` We read the order and call to confirm the stain, the kit list and the delivery before anything is built.`}
+              <strong>We call you.</strong>{` We read the order and call to confirm the stain, the kit list, and the delivery before anything is built.`}
             </li>
             <li>
               <strong>You pay a 50% deposit.</strong>{` We send a secure Stripe invoice. You can pay by credit card or Affirm.`}

@@ -29,7 +29,7 @@ export default function ConversionPage() {
       <div className="doc-sketches">
         <BrandSketch
           src="/images/brand/crib-room-placement.jpg"
-          alt="Sketch of a hardwood crib in a nursery, the first stage of conversion"
+          alt="Sketch of a crib in a nursery, the first stage of conversion"
           width={1728}
           height={1152}
           sizes="(max-width: 1199px) 100vw, 1140px"
@@ -46,7 +46,7 @@ export default function ConversionPage() {
         </p>
         <ul className="doc-list">
           <li>
-            Old Town Oak describes three stages: crib, toddler bed and double bed. Its catalog notes
+            Old Town Oak describes three stages: crib, toddler bed, and double bed. Its catalog notes
             that the toddler bed can be used as a day bed: &ldquo;Use as a day bed for toddlers to
             preschoolers.&rdquo;
           </li>
@@ -79,7 +79,7 @@ export default function ConversionPage() {
         <div className="doc-sketches">
           <BrandSketch
             src="/images/brand/assembly.jpg"
-            alt="Sketch of converting and assembling crib rails for the next stage"
+            alt="Sketch of a hex key, a bolt and a washer beside wood shavings on paper"
             width={1408}
             height={1408}
             sizes="(max-width: 1199px) 100vw, 1140px"
@@ -127,15 +127,6 @@ export default function ConversionPage() {
       <hr className="doc-rule" />
       <section>
         <h2 className="headline-md">How ordering works</h2>
-        <div className="doc-sketches">
-          <BrandSketch
-            src="/images/brand/delivery.jpg"
-            alt="Sketch of delivery arriving once your made-to-order crib is ready"
-            width={1728}
-            height={1152}
-            sizes="(max-width: 1199px) 100vw, 1140px"
-          />
-        </div>
         <p>Nothing is charged when you place an order. Here&rsquo;s the path from order to delivery:</p>
         <ol className="doc-list">
           <li>
@@ -143,19 +134,19 @@ export default function ConversionPage() {
             page shows which stages and kits apply.
           </li>
           <li>
-            <strong>Confirm Order.</strong> We call to confirm your finish, the kit list and your
+            <strong>Confirm Order.</strong> We call to confirm your finish, the kit list, and your
             delivery before anything is built. Then we send a Stripe invoice, and a 50% deposit
             begins production.
           </li>
           <li>
-            <strong>03 Made to Order</strong> Every piece is made to order. Lead times are estimates
-            that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort about 8 weeks
+            <strong>Made to Order.</strong> Every piece is made to order. Lead times are estimates
+            that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort about 8 weeks,
             and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance before we
             schedule final delivery.
           </li>
           <li>
             <strong>Delivered to Your Nursery.</strong> You choose Curbside or White Glove. Shipping
-            is charged separately, and White Glove includes assembly. See our{' '}
+            is charged separately, and assembly comes only with White Glove. See our{' '}
             <Link href="/shipping" className="doc-link">
               Delivery page
             </Link>{' '}

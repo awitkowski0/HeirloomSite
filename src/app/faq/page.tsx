@@ -119,7 +119,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             It is the common name for a crib that converts to a toddler bed, a day bed and a
-            full-size bed. Old Town Oak describes three stages (crib, toddler bed and double bed) and
+            full-size bed. Old Town Oak describes three stages (crib, toddler bed, and double bed) and
             notes that its toddler bed can be used as a day bed: &ldquo;Use as a day bed for toddlers
             to preschoolers.&rdquo; Fisher&rsquo;s conversion kit makes a toddler bed or a day bed,
             described in its catalog as a &ldquo;Toddler Bed/Day Bed Conversion Kit: Includes day bed
@@ -183,7 +183,7 @@ const SECTIONS: Section[] = [
               <li>
                 <strong>Made to Order.</strong> Every piece is made to order. Lead times are
                 estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort
-                about 8 weeks and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance
+                about 8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance
                 before we schedule final delivery.
               </li>
               <li>

@@ -59,7 +59,7 @@ export default function TimelinePage() {
           <li>
             <strong>03 Made to Order.</strong> Every piece is made to order. Lead times are
             estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort
-            about 8 weeks and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance{' '}
+            about 8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance{' '}
             <strong>before we schedule final delivery</strong>.
           </li>
           <li>
