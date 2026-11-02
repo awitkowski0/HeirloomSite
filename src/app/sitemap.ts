@@ -3,6 +3,8 @@ import { getBrowsableProducts, getTaxonomyNodes, getInventory } from '@/lib/cont
 import { variantPathsFor } from '@/lib/variants';
 import { getCollections } from '@/lib/collections';
 import { SITE_URL } from '@/lib/seo';
+import { getGuides } from '@/content/guides';
+import { guideSitemapEntries } from '@/lib/guides';
 
 /**
  * Every indexable URL. Deliberately excludes /checkout and /search, which are
@@ -76,5 +78,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...collectionRoutes, ...productRoutes];
+  /*
+   * Guides: nothing while the registry is empty, otherwise /guides plus one
+   * entry per article, each with its own dateModified as lastModified.
+   */
+  const guideRoutes = guideSitemapEntries(getGuides());
+
+  return [...staticRoutes, ...categoryRoutes, ...collectionRoutes, ...productRoutes, ...guideRoutes];
 }
