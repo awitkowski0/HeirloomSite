@@ -106,6 +106,22 @@ const nextConfig: NextConfig = {
               destination: 'https://heirloomcribsandmore.com/:path*',
               permanent: true,
             },
+            /*
+             * www -> apex. The canonical tags already name the apex, but
+             * www.heirloomcribsandmore.com answered 200 on every URL (checked
+             * Oct 28), so it was a second indexable copy of the site. Same
+             * production-only gate as above. Exact host match (dots escaped),
+             * so it can never match the apex itself (no loop), a preview
+             * host, or localhost. If the www -> apex redirect is later set in
+             * the Vercel domain settings instead, Vercel answers before this
+             * rule runs and it simply stops being reached.
+             */
+            {
+              source: '/:path*',
+              has: [{ type: 'host' as const, value: 'www\\.heirloomcribsandmore\\.com' }],
+              destination: 'https://heirloomcribsandmore.com/:path*',
+              permanent: true,
+            },
           ]
         : []),
       {
