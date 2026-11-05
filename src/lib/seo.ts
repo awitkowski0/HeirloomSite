@@ -372,3 +372,38 @@ export function faqPageJsonLd(entries: { question: string; answerText: string }[
     })),
   };
 }
+
+/**
+ * Article structured data for one guide page (/guides/<slug>).
+ *
+ * Author and publisher are always the business, never a person: the site
+ * publishes as SITE_NAME and invents no bylines. Every URL goes through
+ * absoluteUrl, so it is on the brand host (SITE_URL refuses *.vercel.app).
+ */
+export function articleJsonLd(opts: {
+  headline: string;
+  description: string;
+  /** Canonical path of the article page. */
+  path: string;
+  images: string[];
+  datePublished: string;
+  dateModified: string;
+}): JsonLd {
+  const organization = { '@type': 'Organization', name: SITE_NAME, url: SITE_URL };
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: opts.headline,
+    description: opts.description,
+    image: opts.images.map(absoluteUrl),
+    datePublished: opts.datePublished,
+    dateModified: opts.dateModified,
+    author: organization,
+    publisher: {
+      ...organization,
+      logo: { '@type': 'ImageObject', url: absoluteUrl('/logo-wide.png') },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': absoluteUrl(opts.path) },
+    url: absoluteUrl(opts.path),
+  };
+}
