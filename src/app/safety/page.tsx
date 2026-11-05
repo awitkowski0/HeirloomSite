@@ -60,11 +60,7 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Materials and construction</h2>
         <p>
-          Our cribs are made from solid American hardwood — brown maple — not
-          veneer over particle board. Drawers in the matching case pieces are dovetailed. Solid
-          wood matters here for a specific reason: a crib is repeatedly disassembled and rebuilt as
-          it converts, and joinery that holds up to that is the
-          difference between a piece that lasts one child and one that lasts several.
+          Independent builders make our cribs to order, and each builder describes its own materials. Old Town Oak states: “solid, American handcrafted baby furniture.” Kids Comfort states: “All cribs are completely solid wood including the mattress support.” Old Town Oak lists 5/8-inch dovetail drawers on its case pieces, and Kids Comfort lists solid wood, dovetailed drawer boxes. Solid wood matters here for a specific reason: a crib is repeatedly disassembled and rebuilt as it converts, and joinery that holds up to that is the difference between a piece that lasts one child and one that lasts several.
         </p>
       </section>
 
@@ -104,9 +100,9 @@ export default function SafetyPage() {
       <section>
         <h2 className="headline-md">Converting the crib</h2>
         <p>
-          Our convertible cribs move through four stages — crib, toddler bed, daybed, and full-size
-          bed. The conversion parts are sold separately, so you buy them when you reach that stage
-          rather than storing them for two years.
+          Our convertible cribs are designed to move through three stages, depending on the model
+          and kits: crib, toddler bed, and full-size bed. The conversion parts are sold separately, so
+          you buy them when you reach that stage.
         </p>
         <p>
           Convert on the child&rsquo;s readiness, not their age: most families move to the toddler

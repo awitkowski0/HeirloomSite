@@ -20,9 +20,8 @@ export default function FinishesPage() {
         claims without reading too much into them.
       </p>
       <p>
-        Heirloom Cribs &amp; More is the <strong>reseller</strong>; Amish and independent US
-        craftspeople make the hardwood case goods. We do not claim Heirloom applies the finish in our
-        own factory.
+        Heirloom Cribs &amp; More is the <strong>reseller</strong>; independent builders make the
+        hardwood case goods to order. We do not claim Heirloom applies the finish in our own factory.
       </p>
 
       <section>
@@ -46,9 +45,8 @@ export default function FinishesPage() {
             <Link href="/care" className="doc-link">
               Care &amp; Finishes
             </Link>
-            : finishes are applied to solid wood (not printed on a laminate), so the grain shows
-            through and no two pieces are identical — the same stain can read differently from one
-            piece of brown maple to the next.
+            : the grain shows through the stain, so no two pieces look exactly alike, and the same
+            stain can read differently from one piece to the next.
           </li>
         </ul>
         <p>
@@ -59,10 +57,10 @@ export default function FinishesPage() {
       </section>
       <hr className="doc-rule" />
       <section>
-        <h2 className="headline-md">Solid hardwood and finish: the complete system</h2>
+        <h2 className="headline-md">Hardwood and finish: the complete system</h2>
         <p>
-          Material and finish work together. Solid American hardwood (brown maple)
-          plus a finish is the system parents are evaluating — not the wood alone.
+          Material and finish work together. Hardwood plus a finish is the system parents are
+          evaluating, not the wood alone.
           See{' '}
           <Link href="/why-hardwood" className="doc-link">
             Why Solid Hardwood Matters

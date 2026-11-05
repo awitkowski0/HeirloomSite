@@ -86,14 +86,14 @@ export default function HomePage() {
         <JourneyStep
           n="01"
           title="Choose and Customize"
-          lead="Pick the silhouette first; the hardwood and the finish follow. Every crib converts through four stages and arrives with the rails to do it."
+          lead="Pick the silhouette first; the hardwood and the finish follow. Conversion kits for the toddler bed and full-size bed are listed on each product page."
         >
           <FeaturedProducts />
           <StyleCards inventory={inventory} />
           <div className="journey-sketches">
             <BrandSketch
               src="/images/brand/crib-room-placement.jpg"
-              alt="Sketch of a solid hardwood crib placed in a nursery"
+              alt="Sketch of a crib in a nursery"
               width={1728}
               height={1152}
               sizes="(max-width: 1199px) 100vw, 1140px"
@@ -109,7 +109,7 @@ export default function HomePage() {
           <JourneyPoints
             points={[
               'No card is taken at checkout — the order is a commitment, not a charge.',
-              'We call to confirm the stain, the kit list and the delivery before anything is built.',
+              'We call to confirm the stain, the kit list, and the delivery before anything is built.',
               'A secure Stripe invoice follows, usually within one business day. A minimum 50% deposit begins production.',
             ]}
           />
@@ -117,30 +117,20 @@ export default function HomePage() {
 
         <JourneyStep
           n="03"
-          title="Built and Finishing by Hand"
-          lead={<>Your piece is cut, joined and finished to order in solid American hardwood. <Link href="/timeline">We confirm your lead time</Link> when you order.</>}
+          title="Made to Order"
+          lead={<>Every piece is made to order. <Link href="/timeline">Lead times</Link> are estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort about 8 weeks, and Fisher&rsquo;s 10–14 weeks.</>}
         >
           <JourneyPoints
             points={[
-              'Solid brown maple hardwood. Never veneer over particle board.',
-              'The remaining balance is invoiced once the staining is complete — not before.',
+              'We’ll collect the remaining balance before we schedule final delivery.',
             ]}
           />
-          <div className="journey-sketches">
-            <BrandSketch
-              src="/images/brand/wood-crafting.jpg"
-              alt="Sketch of hands shaping solid hardwood for nursery furniture"
-              width={1728}
-              height={1152}
-              sizes="(max-width: 1199px) 100vw, 1140px"
-            />
-          </div>
         </JourneyStep>
 
         <JourneyStep
           n="04"
           title="Delivered to Your Nursery"
-          lead="You choose how it arrives when you order. Both tiers are handled by our trusted partners, not a freight terminal."
+          lead={<>You choose Curbside or White Glove when you order. Shipping is charged separately, and assembly comes only with White Glove. See our <Link href="/shipping">Delivery page</Link> for the areas we serve.</>}
         >
           {/*
             Named from SHIPPING_METHODS but deliberately UNPRICED: delivery is
@@ -154,15 +144,6 @@ export default function HomePage() {
               SHIPPING_LIMIT_NOTE,
             ]}
           />
-          <div className="journey-sketches">
-            <BrandSketch
-              src="/images/brand/delivery.jpg"
-              alt="Sketch of furniture delivery arriving at a family home"
-              width={1728}
-              height={1152}
-              sizes="(max-width: 1199px) 100vw, 1140px"
-            />
-          </div>
         </JourneyStep>
       </div>
     </>

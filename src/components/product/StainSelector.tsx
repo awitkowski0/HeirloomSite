@@ -125,13 +125,6 @@ export default function StainSelector({
                   )}
                   {!stain.inStock && <span className="stain-oos">[Out of Stock]</span>}
                 </span>
-                {color !== null && (
-                  <span className="label-caps stain-desc">
-                    {display.toLowerCase().includes('natural')
-                      ? "Enhances the wood's inherent character"
-                      : 'Sophisticated artisan pigment'}
-                  </span>
-                )}
               </span>
 
               {isSelected && (
