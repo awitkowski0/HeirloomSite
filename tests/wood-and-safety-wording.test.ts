@@ -100,6 +100,13 @@ test('Brown Maple is still named as a wood on the home/safety/why-hardwood/finis
   }
 });
 
+// /safety keeps dev's held "solid American hardwood — brown maple —" sentence (Pricing App
+// #25 Q10); only the unsourced "rather than stapled" clause is removed (Brand, #120, Nov 1).
+test('/safety drops the unsourced "rather than stapled" line', () => {
+  const src = rendered(FOUR_PAGES.find(p => p.includes('safety')) as string);
+  assert.ok(!/stapled/i.test(src), '/safety still has the unsourced "rather than stapled" line');
+});
+
 test('no "Sustainably sourced" claim on the four pages or home components', () => {
   for (const f of FOUR_PAGES) {
     assert.ok(!/sustainably sourced/i.test(rendered(f)), `${f} still says "Sustainably sourced"`);

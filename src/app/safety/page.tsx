@@ -5,15 +5,12 @@ import Link from 'next/link';
  * IMPORTANT, for whoever maintains this page:
  *
  * Crib safety claims are regulated. In the US, full-size and non-full-size
- * cribs are covered by 16 CFR 1219 and 1220, and "meets or exceeds CPSC and
- * ASTM standards" is a substantiable claim, not marketing colour.
+ * cribs are covered by 16 CFR 1219 and 1220.
  *
- * This page does not introduce that claim - it restates one the catalogue
- * already makes. 180 of the product descriptions in inventory.json contain
- * sentences like "rigorously tested to exceed CPSC and ASTM standards", so
- * the exposure already exists across every product page. Confirm you hold
- * the test reports from the manufacturer that back it. If you do not, the
- * wording to change is in the product data, not only here.
+ * Brand rule: Heirloom makes no safety, testing or certification claim of
+ * its own. Only a builder's verbatim words, attributed to the builder and
+ * sourced (see the builder pages), may say what a piece is tested to.
+ * tests/safety-claims-guard.test.ts fails if Heirloom-voice claims return.
  *
  * CERTIFICATIONS is empty on purpose. Add entries only for programmes you
  * can evidence; the section renders nothing while the list is empty rather
@@ -24,7 +21,7 @@ const CERTIFICATIONS: { name: string; detail: string }[] = [];
 export const metadata: Metadata = {
   title: 'Safety',
   description:
-    'How our cribs are built, the standards they are tested to, the finishes we use, and safe-sleep guidance for setting up the nursery.',
+    'What our cribs are made of, which standards cover cribs, the finishes we offer, and safe-sleep guidance for setting up your nursery.',
   alternates: { canonical: '/safety' },
   openGraph: { url: '/safety' },
 };
@@ -36,16 +33,16 @@ export default function SafetyPage() {
       <h1 className="headline-xl">Safety</h1>
       <p className="body-lg doc-lede">
         A crib is the one piece of furniture your child is left alone in. Here is what ours are
-        built from, what they are tested against, and how to set one up so it stays safe as your
-        child grows.
+        made of, which standards cover cribs, and how to set one up for safe sleep as your child
+        grows.
       </p>
 
       <section>
         <h2 className="headline-md">Standards</h2>
         <p>
-          Cribs sold in the United States are covered by CPSC and ASTM standards. Heirloom Cribs
-          &amp; More resells; each builder makes its own compliance statements. Questions about a
-          specific piece? Ask us.
+          Cribs sold in the United States are covered by CPSC and ASTM standards. We resell cribs
+          made by independent builders, and each builder speaks for its own cribs. If you have a
+          question about a specific piece, ask us and we&rsquo;ll share what its builder says.
         </p>
         {CERTIFICATIONS.length > 0 && (
           <ul className="doc-list">
@@ -64,9 +61,9 @@ export default function SafetyPage() {
         <h2 className="headline-md">Materials and construction</h2>
         <p>
           Our cribs are made from solid American hardwood — brown maple — not
-          veneer over particle board. Drawers in the matching case pieces are dovetailed rather
-          than stapled. Solid wood matters here for a specific reason: a crib is repeatedly
-          disassembled and rebuilt as it converts, and joinery that holds up to that is the
+          veneer over particle board. Drawers in the matching case pieces are dovetailed. Solid
+          wood matters here for a specific reason: a crib is repeatedly disassembled and rebuilt as
+          it converts, and joinery that holds up to that is the
           difference between a piece that lasts one child and one that lasts several.
         </p>
       </section>

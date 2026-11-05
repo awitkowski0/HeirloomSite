@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Finishes & Nursery Air Quality',
   description:
-    'What GREENGUARD Gold measures, how Heirloom describes finishes and emissions on live Care/Safety pages, and how to read claims without overstating certification.',
+    'How we describe the finishes on the cribs we carry, why emissions matter in a nursery, and how to make sense of finish claims without reading too much into them.',
   alternates: { canonical: '/finishes' },
   openGraph: { url: '/finishes' },
 };
@@ -16,8 +16,8 @@ export default function FinishesPage() {
       <h1 className="headline-xl">Finishes &amp; Nursery Air Quality</h1>
       <p className="body-lg doc-lede">
         The finish and emissions profile of a crib matter alongside the wood itself. This guide
-        explains what GREENGUARD Gold means in general, how finish language appears on the cribs we
-        offer, and how to read claims without overstating them.
+        explains how we describe the finishes on the cribs we carry and how to make sense of finish
+        claims without reading too much into them.
       </p>
       <p>
         Heirloom Cribs &amp; More is the <strong>reseller</strong>; Amish and independent US
@@ -25,24 +25,6 @@ export default function FinishesPage() {
         own factory.
       </p>
 
-      <section>
-        <h2 className="headline-md">What GREENGUARD Gold measures</h2>
-        <p>
-          GREENGUARD Gold is an independent, third-party certification issued by UL Solutions. It
-          tests finished products for chemical emissions into indoor air, with a focus on volatile
-          organic compounds (VOCs). The Gold level is the stricter of the two main GREENGUARD tiers
-          and is designed for sensitive environments such as schools, healthcare settings, and
-          nurseries.
-        </p>
-        <p>
-          In practical terms, a GREENGUARD Gold–certified product has been tested in controlled
-          chambers and shown to meet low emission limits (including a very low formaldehyde
-          threshold). The certification addresses <strong>emissions</strong> — what is released into
-          the air — rather than a full chemical-content inventory of every component. It does not
-          replace structural safety standards such as CPSC crib requirements.
-        </p>
-      </section>
-      <hr className="doc-rule" />
       <section>
         <h2 className="headline-md">Why emissions matter in a nursery</h2>
         <p>
@@ -70,9 +52,9 @@ export default function FinishesPage() {
           </li>
         </ul>
         <p>
-          Always confirm finish and any certification language on the <strong>specific product
-          page</strong> before you order. We do not claim &ldquo;zero-VOC&rdquo; as an absolute for
-          every finish.
+          Each builder supplies its own finish details. Please confirm the finish on the{' '}
+          <strong>product page</strong> before you order, and ask us if you&rsquo;d like that
+          builder&rsquo;s own documentation.
         </p>
       </section>
       <hr className="doc-rule" />
@@ -103,24 +85,13 @@ export default function FinishesPage() {
           actual finish on the actual wood. If you&rsquo;re matching an existing piece, ask us before
           ordering.
         </p>
-        <h3>Is every crib GREENGUARD Gold certified?</h3>
-        <p>
-          Do not assume that. Confirm any GREENGUARD or other certification on the specific product
-          page and Safety page for the model you want. Our live Care and Safety pages do not make a
-          blanket GREENGUARD claim.
-        </p>
-        <h3>Does GREENGUARD Gold mean zero chemicals?</h3>
-        <p>
-          No. It is a low-emission standard for what is released into indoor air, not a promise that a
-          product is &ldquo;chemical-free.&rdquo;
-        </p>
       </section>
       <section>
         <h2 className="headline-md">How to evaluate finish and emissions claims</h2>
         <ol className="doc-list">
           <li>
-            Prefer specific certification names (when present on the product page) over vague
-            &ldquo;eco-friendly&rdquo; alone.
+            Look for specific finish details from the builder rather than a vague
+            &ldquo;eco-friendly&rdquo; label.
           </li>
           <li>Read the Safety and Care pages alongside the product page.</li>
           <li>Ask us before deposit if a sensitivity or matching project needs a precise answer.</li>
