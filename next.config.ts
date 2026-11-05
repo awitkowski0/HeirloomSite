@@ -172,7 +172,7 @@ const nextConfig: NextConfig = {
        * Redirects for URLs left behind by the retired Shopify storefront
        * (old /products/<handle>, /pages/*, /policies/*, /collections/all etc.).
        * Kept in src/lib/shopify-redirects.ts as plain data so the table can be
-       * unit-tested; see that file for the status (308 vs 307) rationale and the
+       * unit-tested; see that file for the status rationale (every one is a 308) and the
        * URLs deliberately left as 404.
        */
       ...SHOPIFY_REDIRECTS,
