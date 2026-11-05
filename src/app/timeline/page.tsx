@@ -51,7 +51,7 @@ export default function TimelinePage() {
             you place an order. We read it, check the details with you, and only then ask for
             anything. No card is taken at checkout — the order is a commitment, not a charge. We
             call to confirm the stain, the kit list, and the delivery before anything is built. A
-            secure Stripe invoice follows within 48 hours of the order. Custom orders require a{' '}
+            secure Stripe invoice follows within 48 hours of your order. Custom orders require a{' '}
             <strong>50% deposit</strong>. You can pay by credit card or Affirm.
           </li>
           <li>
