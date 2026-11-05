@@ -9,7 +9,7 @@ import { nodeTextCompact } from '@/lib/node-text';
 export const metadata: Metadata = {
   title: 'FAQ',
   description:
-    'Answers on solid hardwood cribs, finishes, 4-in-1 conversion, ordering, shipping, and safety standards from Heirloom Cribs and More (Nazareth / Lehigh Valley, PA).',
+    'Answers on solid hardwood cribs, finishes, 4-in-1 conversion, ordering, shipping, and safety standards from Heirloom Cribs & More (Nazareth / Lehigh Valley, PA).',
   alternates: { canonical: '/faq' },
   openGraph: { url: '/faq' },
 };
@@ -72,7 +72,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             The cribs we sell are made in the USA by Amish and independent US craftspeople. You buy
-            through us. Heirloom Cribs and More is a women-owned shop in the Nazareth / Lehigh Valley,
+            through us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley,
             Pennsylvania area — we are the reseller, not the factory.
           </p>
         ),

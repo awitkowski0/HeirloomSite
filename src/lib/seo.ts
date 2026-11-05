@@ -43,7 +43,7 @@ export const SITE_URL =
   usablePublicOrigin(process.env.NEXT_PUBLIC_SITE_URL) ||
   (isLocalDevelopment() ? 'http://localhost:3000' : BRAND_SITE_URL);
 
-export const SITE_NAME = 'Heirloom Cribs and More';
+export const SITE_NAME = 'Heirloom Cribs & More';
 
 export function absoluteUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
@@ -67,7 +67,7 @@ export function truncate(text: string | null | undefined, max = 155): string {
 
 /** Strips a trailing site-name suffix already baked into product.json titles. */
 export function stripSiteSuffix(title: string): string {
-  return title.replace(/\s*[—–-]\s*Heirloom Cribs( and More)?\s*$/i, '').trim();
+  return title.replace(/\s*[—–-]\s*Heirloom Cribs( (and|&) More)?\s*$/i, '').trim();
 }
 
 export function priceRange(configurations: InventoryItem[]): { low: number; high: number } {

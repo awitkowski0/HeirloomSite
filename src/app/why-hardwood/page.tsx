@@ -21,7 +21,7 @@ export default function HardwoodPage() {
       </p>
       <p>
         The hardwood cribs we offer are solid American hardwood — brown maple —
-        not veneer over particle board. Heirloom Cribs and More is the <strong>reseller</strong>; Amish
+        not veneer over particle board. Heirloom Cribs &amp; More is the <strong>reseller</strong>; Amish
         and independent US craftspeople make the case goods.
       </p>
 
@@ -90,7 +90,7 @@ export default function HardwoodPage() {
         <h2 className="headline-md">Made in the USA — reseller, not factory</h2>
         <p>
           The cribs we sell are made in the USA by Amish and independent US craftspeople. Heirloom
-          Cribs and More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley) —
+          Cribs &amp; More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley) —
           we offer and support these pieces; we are not the factory.
         </p>
       </section>

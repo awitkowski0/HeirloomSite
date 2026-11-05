@@ -20,7 +20,7 @@ export default function FinishesPage() {
         offer, and how to read claims without overstating them.
       </p>
       <p>
-        Heirloom Cribs and More is the <strong>reseller</strong>; Amish and independent US
+        Heirloom Cribs &amp; More is the <strong>reseller</strong>; Amish and independent US
         craftspeople make the hardwood case goods. We do not claim Heirloom applies the finish in our
         own factory.
       </p>

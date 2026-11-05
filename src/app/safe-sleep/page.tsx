@@ -28,7 +28,7 @@ export default function SafeSleepPage() {
         instructions, and check for recalls.
       </p>
       <p>
-        Heirloom Cribs and More sells compliant nursery hardwood case goods as a reseller; Amish and
+        Heirloom Cribs &amp; More sells compliant nursery hardwood case goods as a reseller; Amish and
         independent US craftspeople make the case goods. Safe-sleep guidance on this page comes from
         the official sources linked below, not from Heirloom as a clinical expert. Guidelines can
         change, so verify the live primary pages.
@@ -103,7 +103,7 @@ export default function SafeSleepPage() {
           Convertible cribs we offer move through crib → toddler bed → daybed → full-size bed. Use
           only the parts made for your model and follow the manufacturer&rsquo;s instructions. Rails
           and separately sold conversion parts are listed on product pages and our <Link href="/safety" className="doc-link">Safety</Link>{' '}
-          page. Heirloom Cribs and More is the reseller; Amish and independent US craftspeople make
+          page. Heirloom Cribs &amp; More is the reseller; Amish and independent US craftspeople make
           the hardwood case goods.
         </p>
         <p>When you and your pediatrician agree it is time:</p>
