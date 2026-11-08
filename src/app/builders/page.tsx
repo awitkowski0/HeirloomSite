@@ -101,7 +101,7 @@ export default function BuildersPage() {
         <div className="builder-statements">
           {BUILDERS.map(b => (
             <article key={b.id} className="builder-statement-group">
-              <h3 className="headline-sm">{b.name}</h3>
+              <h3 className="builder-entry__name">{b.name}</h3>
               <Statement heading="Cribs" quote={b.safety.crib} name={b.name} />
               <Statement heading="Dressers and chests" quote={b.safety.caseGoods} name={b.name} />
             </article>

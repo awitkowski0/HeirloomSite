@@ -4626,6 +4626,10 @@ a.product-inline-link:focus-visible {
   width: 100%;
   min-width: 720px;
   border-collapse: collapse;
+  table-layout: fixed;
+}
+.builder-compare a {
+  color: inherit;
 }
 .builder-compare th,
 .builder-compare td {
@@ -4657,7 +4661,7 @@ a.product-inline-link:focus-visible {
   margin: 0 0 8px;
 }
 .builder-origin {
-  margin-top: 24px;
+  margin-bottom: 24px;
   padding: 20px;
   border: 1px solid var(--rule);
 }

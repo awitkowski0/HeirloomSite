@@ -330,12 +330,12 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         }
         description={
           <>
+            {builder ? <BuilderPanel builder={builder} category={indexEntry?.category ?? null} /> : null}
             {primary.description ? (
               <div className="product-description">
                 {renderProductDescription(primary.description)}
               </div>
             ) : null}
-            {builder ? <BuilderPanel builder={builder} category={indexEntry?.category ?? null} /> : null}
           </>
         }
         initialWood={resolved.wood ?? data.config.wood}
