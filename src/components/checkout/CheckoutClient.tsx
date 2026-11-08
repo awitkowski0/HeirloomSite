@@ -11,15 +11,19 @@ import {
 } from '@/lib/api-client';
 import { formatPrice, fromCents, toCents } from '@/lib/format';
 import { MAX_QUANTITY_PER_LINE } from '@/lib/cart-limits';
+import { chargedUnitPrices } from '@/lib/cart-pricing';
+import { hasBundlePrice } from '@/lib/bundle-prices';
 import {
   DEFAULT_SHIPPING_METHOD,
   SHIPPING_METHODS,
   SHIPPING_LIMIT_NOTE,
   TAXED_STATE,
   affirmEligible,
-  shippingCentsFor,
+  deliveryChargeFor,
+  deliveryAreaStatus,
   splitPayment,
   taxCentsFor,
+  type DeliveryAreaStatus,
   type PaymentOption,
   type ShippingMethodId,
 } from '@/lib/order-terms';
@@ -29,6 +33,7 @@ import {
   checkoutEmailEntered,
   checkoutFailed,
   checkoutStarted,
+  deliveryAreaRejected,
   quoteSubmitted,
 } from '@/lib/analytics';
 import ShippingForm, { EMAIL_RE, validateShipping, type ShippingValues } from './ShippingForm';
@@ -179,10 +184,47 @@ export default function CheckoutClient({ recommendations }: Props) {
    * overriding this is for.
    */
   const estSubtotalCents = toCents(subtotal);
+  // Per line, by the same rule the server bills by (src/lib/cart-pricing.ts).
+  const chargedUnit = chargedUnitPrices(cart, hasBundlePrice);
   const estDiscountCents = appliedCoupon
     ? Math.min(estSubtotalCents, appliedCoupon.amountOffCents)
     : 0;
-  const estShippingCents = cart.length > 0 ? shippingCentsFor(shippingMethod) : 0;
+  /*
+   * No delivery price until the address says where it is going: a delivery
+   * state AND a valid ZIP. Before that the tier is withheld rather than
+   * estimated, so nobody is quoted a number for an address we may not serve.
+   */
+  const deliveryStatus = deliveryAreaStatus(shipping.state, shipping.zip);
+  const deliveryQuoted = deliveryStatus === 'ok';
+  /*
+   * Record the demand we turn away: a state we do not serve, a Newark ZIP, or a
+   * ZIP that is not a ZIP, along with what is in the cart. Debounced so a ZIP
+   * is reported once it has stopped changing rather than per keystroke, and
+   * de-duplicated so re-renders and the submit path cannot report it twice.
+   * An empty ZIP is just "not typed yet" and is never reported.
+   */
+  const reportedAreaRef = useRef('');
+  useEffect(() => {
+    if (!hydrated || cart.length === 0) return;
+    if (deliveryStatus === 'ok' || deliveryStatus === 'zip_missing') return;
+    const key = `${deliveryStatus}|${shipping.state}|${shipping.zip.trim()}`;
+    if (reportedAreaRef.current === key) return;
+    const timer = setTimeout(() => {
+      reportedAreaRef.current = key;
+      deliveryAreaRejected({
+        reason: deliveryStatus,
+        state: shipping.state.trim().toUpperCase(),
+        zip: shipping.zip.trim().slice(0, 10),
+        item_count: cart.reduce((n, i) => n + i.quantity, 0),
+        cart_value: subtotal,
+        items: cart.slice(0, 20).map(i => ({ product: i.productName, quantity: i.quantity })),
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [hydrated, cart, subtotal, deliveryStatus, shipping.state, shipping.zip]);
+
+  const estShippingCents =
+    cart.length > 0 && deliveryQuoted ? deliveryChargeFor(estSubtotalCents, shippingMethod) : 0;
   const estTaxCents = taxCentsFor(
     shipping.state,
     estSubtotalCents - estDiscountCents + estShippingCents
@@ -226,6 +268,10 @@ export default function CheckoutClient({ recommendations }: Props) {
     stainName: item.stainName,
     quantity: item.quantity,
     addons: item.addons?.map(a => ({ name: a.name })),
+    // No price: the server looks the bundle price up from this parent itself.
+    ...(item.bundledWith
+      ? { bundledWith: { productName: item.bundledWith.productName, wood: item.bundledWith.wood } }
+      : {}),
   }));
 
   /**
@@ -340,8 +386,8 @@ export default function CheckoutClient({ recommendations }: Props) {
           they have been charged unless told otherwise.
         */}
         <p className="body-md">
-          <strong>Nothing has been charged.</strong> We&rsquo;re reviewing your order now and
-          will email an invoice from Stripe, usually within one business day.
+          <strong>Nothing has been charged.</strong> We&rsquo;re looking over the details now.
+          You&rsquo;ll get an invoice from Stripe by email within 48 hours of your order.
           {quote.dueLaterCents > 0 ? (
             <>
               {' '}
@@ -483,34 +529,45 @@ export default function CheckoutClient({ recommendations }: Props) {
             */}
             <fieldset className="checkout-fieldset deposit-choice" disabled={submitting}>
               <legend className="headline-md">Shipping method</legend>
-              {SHIPPING_METHODS.map(method => (
-                <label
-                  key={method.id}
-                  className="deposit-option"
-                  data-selected={shippingMethod === method.id}
-                >
-                  <input
-                    type="radio"
-                    name="shippingMethod"
-                    value={method.id}
-                    checked={shippingMethod === method.id}
-                    onChange={() => setShippingMethod(method.id)}
-                  />
-                  <span className="deposit-option-body">
-                    <span className="body-lg">
-                      {method.name} — {formatPrice(fromCents(method.cents))}
-                    </span>
-                    <span className="body-md text-on-surface-variant">{method.description}</span>
-                  </span>
-                </label>
-              ))}
-              {/* Applies to both tiers, so it sits under the pair. */}
-              <p className="body-md text-on-surface-variant fieldset-note">
-                {SHIPPING_LIMIT_NOTE}
-              </p>
+              {deliveryQuoted ? (
+                <>
+                  {SHIPPING_METHODS.map(method => (
+                    <label
+                      key={method.id}
+                      className="deposit-option"
+                      data-selected={shippingMethod === method.id}
+                    >
+                      <input
+                        type="radio"
+                        name="shippingMethod"
+                        value={method.id}
+                        checked={shippingMethod === method.id}
+                        onChange={() => setShippingMethod(method.id)}
+                      />
+                      <span className="deposit-option-body">
+                        <span className="body-lg">
+                          {method.name} —{' '}
+                          {formatPrice(fromCents(deliveryChargeFor(estSubtotalCents, method.id)))}
+                        </span>
+                        <span className="body-md text-on-surface-variant">{method.description}</span>
+                      </span>
+                    </label>
+                  ))}
+                  {/* Applies to both tiers, so it sits under the pair. */}
+                  <p className="body-md text-on-surface-variant fieldset-note">
+                    {SHIPPING_LIMIT_NOTE}
+                  </p>
+                  <p className="checkout-hint">
+                    Delivery charge is based on your order total; see{' '}
+                    <Link href="/shipping">Delivery</Link>.
+                  </p>
+                </>
+              ) : (
+                <DeliveryNote status={deliveryStatus} />
+              )}
             </fieldset>
 
-            <fieldset className="checkout-fieldset deposit-choice" disabled={submitting}>
+            <fieldset className="checkout-fieldset deposit-choice" disabled={submitting || !deliveryQuoted}>
               <legend className="headline-md">How you&rsquo;d like to pay</legend>
               {(
                 [
@@ -615,6 +672,7 @@ export default function CheckoutClient({ recommendations }: Props) {
               disabled={
                 submitting ||
                 !agreedToTerms ||
+                !deliveryQuoted ||
                 turnstileStatus === 'pending' ||
                 turnstileStatus === 'error'
               }
@@ -634,7 +692,7 @@ export default function CheckoutClient({ recommendations }: Props) {
           <div className="order-summary">
             <h2 className="headline-md">Order Summary</h2>
             <ul className="order-summary-items">
-              {cart.map(item => (
+              {cart.map((item, idx) => (
                 <li key={item.id}>
                   <div className="order-summary-thumb">
                     {/* eslint-disable-next-line @next/next/no-img-element -- 80px
@@ -648,7 +706,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                         {variantLabel(item.wood, item.stainName)}
                       </p>
                     )}
-                    <p className="body-md">{formatPrice(item.price)}</p>
+                    <p className="body-md">{formatPrice(chargedUnit[idx])}</p>
                     {/*
                       What arrives with this line, already inside its price.
                       
@@ -738,7 +796,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                 <dt>
                   {SHIPPING_METHODS.find(m => m.id === shippingMethod)?.name ?? 'Delivery'}
                 </dt>
-                <dd>{formatPrice(fromCents(totals.shippingCents))}</dd>
+                <dd>{deliveryQuoted ? formatPrice(fromCents(totals.shippingCents)) : '—'}</dd>
               </div>
               {/*
                 The label carries the reason. Sales tax is charged only where
@@ -779,6 +837,14 @@ export default function CheckoutClient({ recommendations }: Props) {
               )}
             </dl>
 
+            {deliveryQuoted ? (
+              <p className="checkout-hint">
+                Delivery charge is based on your order total; see <Link href="/shipping">Delivery</Link>.
+              </p>
+            ) : (
+              <DeliveryNote status={deliveryStatus} />
+            )}
+
             {!serverTotals && (
               <p className="checkout-hint">
                 Totals are confirmed on the invoice we send you.
@@ -797,5 +863,28 @@ export default function CheckoutClient({ recommendations }: Props) {
         </div>
       </div>
     </div>
+  );
+}
+
+function DeliveryNote({ status }: { status: DeliveryAreaStatus }) {
+  if (status === 'zip_missing') {
+    return (
+      <p className="checkout-hint" role="status">
+        Enter your state and ZIP code to see delivery options and pricing.
+      </p>
+    );
+  }
+  if (status === 'zip_invalid') {
+    return (
+      <p className="checkout-hint" role="status">
+        Enter a valid 5-digit ZIP code to see delivery pricing.
+      </p>
+    );
+  }
+  return (
+    <p className="checkout-hint" role="status">
+      We don&rsquo;t publish delivery pricing for this area. Please{' '}
+      <Link href="/contact">contact us</Link> for delivery options.
+    </p>
   );
 }

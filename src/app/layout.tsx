@@ -48,8 +48,8 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description:
-    'Solid hardwood nursery furniture, forest to family, delivered white-glove and built to ' +
-    'grow with your child. Meets or exceeds CPSC and ASTM safety standards.',
+    'Solid hardwood nursery furniture, made to order and designed to grow with your child. ' +
+    'Delivery is charged separately, with Curbside and White Glove options.',
   applicationName: SITE_NAME,
   openGraph: {
     type: 'website',
@@ -57,13 +57,15 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: '/',
     title: 'Heirloom Cribs — Built to Grow Up.',
-    description: 'Forest-to-family hardwood nursery furniture, built to grow with your child.',
+    description:
+      'Solid hardwood nursery furniture, made to order and designed to grow with your child. ' +
+      'Delivery is charged separately, with Curbside and White Glove options.',
     images: [{ url: '/logo-wide.png', width: 1200, height: 630, alt: SITE_NAME }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Heirloom Cribs — Built to Grow Up.',
-    description: 'Forest-to-family hardwood nursery furniture, built to grow with your child.',
+    description: 'Solid hardwood nursery furniture, made to order and designed to grow with your child.',
     images: ['/logo-wide.png'],
   },
   icons: {

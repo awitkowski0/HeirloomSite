@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { getShowroom, getInventory } from '@/lib/content';
 import { variantHref } from '@/lib/variants';
 import { organizationJsonLd, webSiteJsonLd,
@@ -11,6 +12,7 @@ import StyleCards from '@/components/home/StyleCards';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
+import BrandSketch from '@/components/marketing/BrandSketch';
 import { SHIPPING_METHODS, SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
 import '@/styles/home.css';
 
@@ -84,10 +86,19 @@ export default function HomePage() {
         <JourneyStep
           n="01"
           title="Choose and Customize"
-          lead="Pick the silhouette first; the hardwood and the finish follow. Every crib converts through four stages and arrives with the rails to do it."
+          lead="Pick the silhouette first; the hardwood and the finish follow. Conversion kits for the toddler bed and full-size bed are listed on each product page."
         >
           <FeaturedProducts />
           <StyleCards inventory={inventory} />
+          <div className="journey-sketches">
+            <BrandSketch
+              src="/images/brand/crib-room-placement.jpg"
+              alt="Sketch of a crib in a nursery"
+              width={1728}
+              height={1152}
+              sizes="(max-width: 1199px) 100vw, 1140px"
+            />
+          </div>
         </JourneyStep>
 
         <JourneyStep
@@ -98,22 +109,20 @@ export default function HomePage() {
           <JourneyPoints
             points={[
               'No card is taken at checkout — the order is a commitment, not a charge.',
-              'We call to confirm the stain, the kit list and the delivery before anything is built.',
-              'A secure Stripe invoice follows, usually within one business day. A minimum 50% deposit begins production.',
+              'We call to confirm the stain, the kit list, and the delivery before anything is built.',
+              'A secure Stripe invoice follows within 48 hours of your order. A minimum 50% deposit begins production.',
             ]}
           />
         </JourneyStep>
 
         <JourneyStep
           n="03"
-          title="Built and Finishing by Hand"
-          lead="Your piece is cut, joined and finished to order in solid American hardwood — six to eight weeks, because nothing is waiting in a warehouse."
+          title="Made to Order"
+          lead={<>Every piece is made to order. <Link href="/timeline">Lead times</Link> are estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort about 8 weeks, and Fisher&rsquo;s 10–14 weeks.</>}
         >
           <JourneyPoints
             points={[
-              'Sustainably sourced maple, cherry and red oak. Never veneer over particle board.',
-              'Non-toxic, baby-safe finishes, hand-applied.',
-              'The remaining balance is invoiced once the staining is complete — not before.',
+              'We’ll collect the remaining balance before we schedule final delivery.',
             ]}
           />
         </JourneyStep>
@@ -121,7 +130,7 @@ export default function HomePage() {
         <JourneyStep
           n="04"
           title="Delivered to Your Nursery"
-          lead="You choose how it arrives when you order. Both tiers are handled by our trusted partners, not a freight terminal."
+          lead={<>You choose Curbside or White Glove when you order. Shipping is charged separately, and assembly comes only with White Glove. See our <Link href="/shipping">Delivery page</Link> for the areas we serve.</>}
         >
           {/*
             Named from SHIPPING_METHODS but deliberately UNPRICED: delivery is

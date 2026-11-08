@@ -11,7 +11,7 @@ import { consentStatus, subscribeConsent } from '@/lib/consent';
  */
 analytics.init({
   projectKey: 'hck_pk_FqSXYC0fGyqx-Lr0snlmzNnt2LwV0Vfo',
-  install: { framework: 'nextjs', frameworkVersion: '16.3.0', agent: 'claude-code' },
+  install: { framework: 'nextjs', frameworkVersion: '16.4.1', agent: 'claude-code' },
   site: 'landing',
   optOutCapturingByDefault: true,
 });

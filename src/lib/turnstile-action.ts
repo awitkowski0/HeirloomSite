@@ -22,6 +22,8 @@ export const TURNSTILE_ACTIONS = {
   subscribe: 'subscribe',
   /** POST /api/coupon/validate - an anonymous oracle that calls Stripe. */
   coupon: 'coupon',
+  /** POST /api/inquiry - mails a stranger-typed address and the shop inbox. */
+  contact: 'contact',
 } as const;
 
 export type TurnstileAction = (typeof TURNSTILE_ACTIONS)[keyof typeof TURNSTILE_ACTIONS];

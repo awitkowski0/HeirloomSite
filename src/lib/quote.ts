@@ -179,7 +179,7 @@ function buildLines(
   if (priced.shippingCents > 0) {
     const method = shippingMethodById(priced.shippingMethod);
     lines.push({
-      description: method.name,
+      description: method.invoiceLabel,
       amount: priced.shippingCents,
       metadata: { kind: 'shipping', method: method.id },
     });
@@ -344,9 +344,9 @@ export async function createQuote(
       custom_fields: [{ name: 'Order', value: orderRef.slice(0, MAX_CUSTOM_FIELD_VALUE) }],
       footer:
         split.dueLaterCents > 0
-          ? `${shippingMethodById(priced.shippingMethod).name} is included in this total. ` +
+          ? `${shippingMethodById(priced.shippingMethod).invoiceLabel} is included in this total. ` +
             'The remaining balance is invoiced once staining is complete.'
-          : `${shippingMethodById(priced.shippingMethod).name} is included in this total. Paid in full.`,
+          : `${shippingMethodById(priced.shippingMethod).invoiceLabel} is included in this total. Paid in full.`,
       shipping_details: {
         name: `${shipping.firstName} ${shipping.lastName}`,
         phone: shipping.phone,

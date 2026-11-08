@@ -310,6 +310,9 @@ for (const dirName of productDirs) {
     includes: meta.includes || [],
     bundle: meta.bundle || [],
     related: meta.related || [],
+    bundlePriceOverrides: meta.bundlePriceOverrides || null,
+    bundleOptional: meta.bundleOptional || [],
+    bundleUnchecked: meta.bundleUnchecked || [],
   });
 
   // Build the image index in this same pass. Previously this was a second loop
@@ -394,7 +397,7 @@ function soleConfig(slug) {
   return { wood: rows[0].wood, stainName: stains[0].name };
 }
 
-function resolveRelation(dirName, field, slugs, ownSlug) {
+function resolveRelation(dirName, field, slugs, ownSlug, priceOverrides, optionalSlugs, uncheckedSlugs) {
   if (!Array.isArray(slugs)) {
     relationProblems.push(`${dirName}: ${field} must be an array of product slugs`);
     return [];
@@ -441,10 +444,23 @@ function resolveRelation(dirName, field, slugs, ownSlug) {
       continue;
     }
     seen.add(slug);
+    const override =
+      priceOverrides && priceOverrides[target.slug] != null ? Number(priceOverrides[target.slug]) : null;
+    const hasOverride = override != null && !Number.isNaN(override);
     out.push({
       slug: target.slug,
       productName: target.productName,
-      price: target.minPrice,
+      price: hasOverride ? override : target.minPrice,
+      // A per-parent bundle price (product.json bundlePriceOverrides). The cart
+      // line carries bundledWith so src/lib/pricing.ts can charge this price
+      // only alongside this parent; listPrice is what the item costs alone.
+      ...(hasOverride ? { bundleOverride: true, listPrice: target.minPrice } : {}),
+      // product.json bundleOptional: an extra that is not part of the package
+      // (the guard rails). It never enters the package total.
+      ...(optionalSlugs && optionalSlugs.includes(target.slug) ? { optional: true } : {}),
+      // product.json bundleUnchecked: the row's checkbox starts unticked on the
+      // product page (OTO: the full guard rail). Every other row starts ticked.
+      ...(uncheckedSlugs && uncheckedSlugs.includes(target.slug) ? { startsUnchecked: true } : {}),
       image: target.defaultImage,
       category: target.category,
       // Null for a `related` target with real choices; those are links, not
@@ -459,7 +475,37 @@ function resolveRelation(dirName, field, slugs, ownSlug) {
 let bundleCount = 0;
 for (const declared of declaredRelations) {
   const includes = resolveRelation(declared.dirName, 'includes', declared.includes, declared.slug);
-  const bundle = resolveRelation(declared.dirName, 'bundle', declared.bundle, declared.slug);
+  const bundle = resolveRelation(
+    declared.dirName,
+    'bundle',
+    declared.bundle,
+    declared.slug,
+    declared.bundlePriceOverrides || null,
+    declared.bundleOptional,
+    declared.bundleUnchecked
+  );
+  /*
+   * bundleOptional and bundleUnchecked name rows of this product's own bundle. One that is not in
+   * the bundle is a typo that would otherwise do nothing, so it fails the build.
+   */
+  for (const slug of [...(declared.bundleOptional || []), ...(declared.bundleUnchecked || [])]) {
+    if (!(declared.bundle || []).includes(slug)) {
+      relationProblems.push(`${declared.dirName}: bundleOptional/bundleUnchecked names "${slug}", which is not in its bundle`);
+    }
+  }
+  /*
+   * bundlePriceOverrides is keyed by bundle slug. A key that is not in the bundle matches no row and
+   * silently charges list price; a non-numeric or non-positive value would reach pricing.json as a
+   * nonsense (or negative) bundled line. Both fail the build like the two lists above.
+   */
+  for (const [slug, price] of Object.entries(declared.bundlePriceOverrides || {})) {
+    if (!(declared.bundle || []).includes(slug)) {
+      relationProblems.push(`${declared.dirName}: bundlePriceOverrides names "${slug}", which is not in its bundle`);
+    }
+    if (typeof price !== 'number' || !Number.isFinite(price) || price <= 0) {
+      relationProblems.push(`${declared.dirName}: bundlePriceOverrides["${slug}"] must be a positive number, got ${JSON.stringify(price)}`);
+    }
+  }
   const related = resolveRelation(declared.dirName, 'related', declared.related, declared.slug);
   if (bundle.length > 0) bundleCount++;
   // Every inventory row for this product carries the same relations: they are
@@ -586,7 +632,10 @@ for (const item of inventory) {
   const recs = (item.bundle || []).map(r => ({
     slug: r.slug,
     productName: r.productName,
+    // For a parent with bundlePriceOverrides this is the parent's bundle price;
+    // AlsoLike then adds the line with bundledWith so pricing.ts charges it.
     price: r.price,
+    ...(r.bundleOverride ? { bundleOverride: true, listPrice: r.listPrice } : {}),
     image: r.image,
     wood: r.wood,
     stainName: r.stainName,
@@ -598,6 +647,19 @@ writeFileSync(
   JSON.stringify(recommendations) + "\n"
 );
 
+/*
+ * Which kits a parent has a bundle price for, by productName. The cart cannot
+ * import the catalogue, but it must apply the server's rule (pricing.ts: the
+ * parent's row lists an override for this kit) or its summary shows a bundle
+ * price the invoice will not charge. Small enough for the global cart provider.
+ */
+const bundlePrices = {};
+for (const [parent, recs] of Object.entries(recommendations)) {
+  const kits = recs.filter(r => r.bundleOverride).map(r => r.productName);
+  if (kits.length > 0) bundlePrices[parent] = kits;
+}
+writeFileSync(join(root, "src", "data", "bundle-prices.json"), JSON.stringify(bundlePrices) + "\n");
+
 // Pricing table: the only catalogue data /api/quotes needs. Imported
 // statically by src/lib/pricing.ts so it is always in the function bundle -- public/ is
 // uploaded to the CDN, not traced into the lambda, so a runtime readFileSync
@@ -607,6 +669,12 @@ const pricing = inventory.map(item => ({
   wood: item.wood,
   basePrice: item.basePrice,
   addons: (item.addons || []).map(a => ({ name: a.name, price: a.price ?? 0 })),
+  // Bundle prices this product (the parent) grants its add-ons. pricing.ts
+  // applies one only to a line that names this parent in bundledWith AND only
+  // while this parent is in the same cart.
+  bundleOverrides: (item.bundle || [])
+    .filter(r => r.bundleOverride && r.wood && r.stainName)
+    .map(r => ({ productName: r.productName, wood: r.wood, stainName: r.stainName, price: r.price })),
   stains: item.stains.map(s => ({
     name: s.name,
     priceAddition: s.priceAddition || 0,
@@ -646,5 +714,6 @@ console.log(`  public/data/inventory.json:  ${inventory.length} items, ${stainRo
 console.log(`  public/data/products.json:   ${productIndex.length} products`);
 console.log(`  public/data/images.json:     ${allImages.length} images`);
 console.log(`  src/data/search-docs.json:   ${searchDocs.length} docs`);
+console.log(`  src/data/bundle-prices.json: ${Object.keys(bundlePrices).length} parents`);
 console.log(`  src/data/recommendations.json: ${Object.keys(recommendations).length} products`);
 console.log(`  data/pricing.json:           ${pricing.length} rows`);

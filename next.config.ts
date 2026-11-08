@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import { GONE_ROUTE, SHOPIFY_GONE_PATHS, SHOPIFY_REDIRECTS } from './src/lib/shopify-redirects';
 
 /*
  * The origins PostHog is reached on, for the CSP below.
@@ -52,6 +53,7 @@ const nextConfig: NextConfig = {
   // ever becomes dynamic, the JSON must be traced into the lambda bundle.
   outputFileTracingIncludes: {
     '/api/**/*': ['./public/data/*.json'],
+    '/feed.xml': ['./public/data/*.json'],
   },
 
   images: {
@@ -65,6 +67,67 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      /*
+       * On the PRODUCTION deployment only, everything served on a *.vercel.app
+       * host goes to the brand domain.
+       *
+       * src/lib/seo.ts already refuses to put a deployment host in a canonical
+       * tag, og:url, robots.txt or the sitemap - but that only stops us from
+       * ADVERTISING the wrong origin. heirloom-site-zeta.vercel.app still
+       * answers 200 on every URL, so a crawler that reached it from anywhere
+       * else keeps fetching it and Search Console can still treat it as a
+       * separate site. This is the half that makes the host stop serving
+       * indexable content.
+       *
+       * Gated on VERCEL_ENV, and that gate is the whole point: the rule matches
+       * by host pattern, so on a preview it would match the preview's OWN host
+       * and bounce every preview URL to production - making the deployments
+       * that most need testing unreachable. redirects() runs at build time, so
+       * the preview build simply never emits the rule.
+       *
+       * A `has` host rule rather than middleware: middleware would opt every
+       * route out of static prerendering, which is the one thing this site
+       * cannot trade away.
+       *
+       * PERMANENT (308): Phil approved making this permanent so Google treats
+       * the deployment hosts as moved to the brand domain and consolidates
+       * indexing there, rather than re-crawling the *.vercel.app host as a live
+       * alternate. The redirect still only exists on the production build, so a
+       * preview host never bounces itself (see the VERCEL_ENV gate above).
+       *
+       * Known risk we accept: a 308 is cached by the browser that sees it, so if
+       * the brand domain were ever detached from this project, clients that had
+       * already hit a *.vercel.app URL would keep being sent to a domain this
+       * project no longer serves, and that cache cannot be forced to clear. That
+       * is the reason this was a 307 before; it is acceptable now because the
+       * brand domain is the permanent home of this project.
+       */
+      ...(process.env.VERCEL_ENV === 'production'
+        ? [
+            {
+              source: '/:path*',
+              has: [{ type: 'host' as const, value: '.*\\.vercel\\.app' }],
+              destination: 'https://heirloomcribsandmore.com/:path*',
+              permanent: true,
+            },
+            /*
+             * www -> apex. The canonical tags already name the apex, but
+             * www.heirloomcribsandmore.com answered 200 on every URL (checked
+             * Oct 28), so it was a second indexable copy of the site. Same
+             * production-only gate as above. Exact host match (dots escaped),
+             * so it can never match the apex itself (no loop), a preview
+             * host, or localhost. If the www -> apex redirect is later set in
+             * the Vercel domain settings instead, Vercel answers before this
+             * rule runs and it simply stops being reached.
+             */
+            {
+              source: '/:path*',
+              has: [{ type: 'host' as const, value: 'www\\.heirloomcribsandmore\\.com' }],
+              destination: 'https://heirloomcribsandmore.com/:path*',
+              permanent: true,
+            },
+          ]
+        : []),
       // HeyCatch short links: /a-/z and /0-/9 are reserved for campaign URLs.
       {
         source: '/:l([a-z0-9])',
@@ -131,7 +194,28 @@ const nextConfig: NextConfig = {
         destination: '/search?q=:q',
         permanent: false,
       },
+      /*
+       * Redirects for URLs left behind by the retired Shopify storefront
+       * (old /products/<handle>, /pages/*, /policies/*, /collections/all etc.).
+       * Kept in src/lib/shopify-redirects.ts as plain data so the table can be
+       * unit-tested; see that file for the status rationale (every one is a 308) and the
+       * URLs deliberately left as 404.
+       */
+      ...SHOPIFY_REDIRECTS,
     ];
+  },
+
+  async rewrites() {
+    return {
+      /*
+       * Old-store URLs for withdrawn products answer 410 Gone (redirects()
+       * cannot), via the static route handler at src/app/gone/route.ts.
+       * beforeFiles so the /products/[category] dynamic route never sees them.
+       */
+      beforeFiles: SHOPIFY_GONE_PATHS.map(source => ({ source, destination: GONE_ROUTE })),
+      afterFiles: [],
+      fallback: [],
+    };
   },
 
   async headers() {

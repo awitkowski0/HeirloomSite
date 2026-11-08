@@ -3,9 +3,11 @@ import pricingTable from '../../data/pricing.json';
 import { MAX_CART_LINES, MAX_QUANTITY_PER_LINE } from './cart-limits';
 import {
   DEFAULT_SHIPPING_METHOD,
-  isShippableState,
+  UNPUBLISHED_DELIVERY_MESSAGE,
+  deliveryChargeFor,
+  isPublishedDeliveryArea,
+  isValidUsZip,
   isShippingMethodId,
-  shippingCentsFor,
   taxCentsFor,
   type ShippingMethodId,
 } from './order-terms';
@@ -25,15 +27,12 @@ import {
  */
 
 /*
- * Delivery is included in the product price.
+ * Delivery is charged separately, by tier, on the merchandise subtotal.
  *
- * This was 15_000 - $150 added on top of the item total, server-side, in the
- * amount actually charged to the card. With delivery built into the price
- * that overcharged every order by $150.
- *
- * The constant itself now lives in ./order-terms, which the client checkout
- * imports too - it was declared separately in both places, as was the tax
- * rate. Re-exported here so existing server-side import sites do not care.
+ * It is not included in the product price. priceCart recomputes the charge
+ * from that subtotal via deliveryChargeFor in ./order-terms. The request
+ * does not carry an amount, and a client-sent one would be ignored: the
+ * invoice line is this number.
  */
 export { MAX_CART_LINES, MAX_QUANTITY_PER_LINE };
 
@@ -42,11 +41,22 @@ interface PricingStain {
   priceAddition: number;
   inStock: boolean;
 }
+/*
+ * A bundle price this row (a parent, e.g. a Fisher crib) grants one of its
+ * add-on products, from product.json bundlePriceOverrides via build-data.
+ */
+interface PricingBundleOverride {
+  productName: string;
+  wood: string;
+  stainName: string;
+  price: number;
+}
 interface PricingRow {
   productName: string;
   wood: string;
   basePrice: number;
   addons: Array<{ name: string; price: number }>;
+  bundleOverrides?: PricingBundleOverride[];
   stains: PricingStain[];
 }
 
@@ -84,6 +94,8 @@ export interface IncomingCartLine {
   stainName: unknown;
   quantity?: unknown;
   addons?: unknown;
+  /** { productName, wood } of the parent line this add-on was bundled with. */
+  bundledWith?: unknown;
 }
 
 export interface PricedLine {
@@ -94,6 +106,8 @@ export interface PricedLine {
   quantity: number;
   lineCents: number;
   addons: Array<{ name: string; priceCents: number }>;
+  /** Set when the line was charged its parent's bundle price rather than its own. */
+  bundlePricedWith?: { productName: string; wood: string };
 }
 
 /** A validated, fixed-amount-off coupon, resolved against Stripe by src/lib/coupon.ts. */
@@ -138,6 +152,29 @@ function priceLines(cart: unknown): { lines: PricedLine[]; subtotalCents: number
   }
 
   const lines: PricedLine[] = [];
+
+  /*
+   * Bundle prices are resolved here, from the catalogue, never from the request.
+   *
+   * A line may name the parent it was bundled with (bundledWith). It gets the
+   * parent's bundlePriceOverrides price only if (a) that parent's own pricing
+   * row lists an override for exactly this product/wood/stain, and (b) the
+   * parent is a plain line in this same cart, with at most one bundle-priced
+   * unit per parent unit. Anything else - a rail bought alone, a rail named
+   * with a crib that has no override, or whose crib is not in the cart - is
+   * charged its own catalogue price, exactly as before.
+   */
+  const parentUnits = new Map<string, number>();
+  for (const raw of cart as IncomingCartLine[]) {
+    if (typeof raw !== 'object' || raw === null || raw.bundledWith !== undefined) continue;
+    if (typeof raw.productName !== 'string' || typeof raw.wood !== 'string') continue;
+    const qty = typeof raw.quantity === 'number' && Number.isInteger(raw.quantity) && raw.quantity > 0
+      ? raw.quantity
+      : 1;
+    const key = `${raw.productName}${KEY_SEP}${raw.wood}`;
+    parentUnits.set(key, (parentUnits.get(key) ?? 0) + qty);
+  }
+  const bundleUnitsUsed = new Map<string, number>();
 
   for (const raw of cart as IncomingCartLine[]) {
     if (typeof raw !== 'object' || raw === null) throw new PricingError('Invalid cart line');
@@ -202,8 +239,31 @@ function priceLines(cart: unknown): { lines: PricedLine[]; subtotalCents: number
       }
     }
 
+    let bundlePricedWith: PricedLine['bundlePricedWith'];
+    let bundleCents: number | null = null;
+    if (raw.bundledWith !== undefined) {
+      const ref = raw.bundledWith as { productName?: unknown; wood?: unknown } | null;
+      if (typeof ref !== 'object' || ref === null) throw new PricingError('Invalid bundledWith');
+      const parentName = asString(ref.productName, 'bundledWith productName');
+      const parentWood = asString(ref.wood, 'bundledWith wood');
+      const parentKey = `${parentName}${KEY_SEP}${parentWood}`;
+      const override = byKey
+        .get(parentKey)
+        ?.bundleOverrides?.find(
+          o => o.productName === productName && o.wood === wood && o.stainName === stainName
+        );
+      const usedKey = `${parentKey}${KEY_SEP}${productName}`;
+      const used = bundleUnitsUsed.get(usedKey) ?? 0;
+      if (override && used + quantity <= (parentUnits.get(parentKey) ?? 0)) {
+        bundleUnitsUsed.set(usedKey, used + quantity);
+        bundleCents = Math.round(override.price * 100);
+        bundlePricedWith = { productName: parentName, wood: parentWood };
+      }
+    }
+
     const addonCents = addons.reduce((sum, a) => sum + a.priceCents, 0);
-    const unitCents = Math.round((row.basePrice + (stain.priceAddition || 0)) * 100) + addonCents;
+    const unitCents =
+      (bundleCents ?? Math.round((row.basePrice + (stain.priceAddition || 0)) * 100)) + addonCents;
     lines.push({
       productName,
       wood,
@@ -212,6 +272,7 @@ function priceLines(cart: unknown): { lines: PricedLine[]; subtotalCents: number
       quantity,
       lineCents: unitCents * quantity,
       addons,
+      ...(bundlePricedWith ? { bundlePricedWith } : {}),
     });
   }
 
@@ -251,12 +312,13 @@ export function priceCart(
   // pre-tax, pre-shipping portion of the order negative.
   const discountCents = coupon ? Math.min(coupon.amountOffCents, subtotalCents) : 0;
 
-  const shippingCents = shippingCentsFor(shippingMethod);
+  // Merchandise subtotal, before the coupon. The client does not send this charge.
+  const shippingCents = deliveryChargeFor(subtotalCents, shippingMethod);
   /*
    * Tax is on (subtotal - discount) PLUS delivery. A coupon is a seller-funded
    * discount, so the customer is taxed on what they actually pay, same as PA
-   * taxes the delivery charge on a taxable item (a $685 delivery adds $41.10 of
-   * tax on a PA order).
+   * taxes the delivery charge on a taxable item (a $175 curbside delivery adds
+   * $10.50 of tax on a PA order).
    */
   const taxCents = taxCentsFor(state, subtotalCents - discountCents + shippingCents);
 
@@ -351,8 +413,10 @@ export function validateShipping(body: Record<string, unknown>): ShippingDetails
   }
 
   const zip = field('zip');
-  if (!/^[A-Za-z0-9][A-Za-z0-9\- ]{2,11}$/.test(zip)) {
-    throw new PricingError('Invalid postal code');
+  // Strict: delivery is priced and gated from this, and every area we serve is
+  // US. Anything looser would let '0710' or 'O7102' slip past the Newark ZIP list.
+  if (!isValidUsZip(zip)) {
+    throw new PricingError('Enter a valid 5-digit ZIP code');
   }
 
   /*
@@ -387,8 +451,13 @@ export function validateShipping(body: Record<string, unknown>): ShippingDetails
    * checks above.
    */
   const state = field('state').toUpperCase();
-  if (!isShippableState(state)) {
-    throw new PricingError('We do not deliver to that state yet. Please contact us.');
+  /*
+   * PA, NJ, and MD only, and not an NJ ZIP in the excluded metro. No price is
+   * computed for anything else — this throws before priceCart runs, so a
+   * hand-made request cannot buy a published rate for an unpublished address.
+   */
+  if (!isPublishedDeliveryArea(state, zip)) {
+    throw new PricingError(UNPUBLISHED_DELIVERY_MESSAGE);
   }
 
   return {

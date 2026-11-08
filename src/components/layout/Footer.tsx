@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <span className="footer-brand">Heirloom</span>
             <p className="body-md text-on-surface-variant footer-tagline">
-              Solid hardwood nursery furniture, crafted forest-to-family with white-glove care.
+              Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.
             </p>
           </div>
           <div>
@@ -23,6 +23,57 @@ export default function Footer() {
               </li>
             </ul>
           </div>
+          {/*
+            The owner's guides. These pages are in the sitemap, so without a
+            link from the shared chrome they would be submitted to Google with
+            no internal link pointing at them from anywhere on the site - which
+            is how a page gets crawled once and then treated as an orphan.
+          */}
+          <div>
+            <h2 className="label-caps text-primary footer-heading">Guides</h2>
+            <ul className="footer-links">
+              <li>
+                <Link href="/faq">FAQ</Link>
+              </li>
+              <li>
+                <Link href="/how-conversion-works">How 4-in-1 Conversion Works</Link>
+              </li>
+              <li>
+                <Link href="/why-hardwood">Why Solid Hardwood</Link>
+              </li>
+              <li>
+                <Link href="/finishes">Finishes &amp; Air Quality</Link>
+              </li>
+              <li>
+                <Link href="/safe-sleep">Safe Sleep</Link>
+              </li>
+              <li>
+                <Link href="/timeline">Timeline</Link>
+              </li>
+            </ul>
+          </div>
+          {/*
+            About + builder pages are in the sitemap, so they get a footer link
+            for the same reason as the guides above: a sitemap page with no
+            internal link is crawled once and then treated as an orphan.
+          */}
+          <div>
+            <h2 className="label-caps text-primary footer-heading">Our builders</h2>
+            <ul className="footer-links">
+              <li>
+                <Link href="/about-heirloom">About Heirloom</Link>
+              </li>
+              <li>
+                <Link href="/builders/old-town-oak">Old Town Oak</Link>
+              </li>
+              <li>
+                <Link href="/builders/fishers-quality-products">Fisher&rsquo;s Quality Products</Link>
+              </li>
+              <li>
+                <Link href="/builders/kids-comfort">Kid&rsquo;s Comfort</Link>
+              </li>
+            </ul>
+          </div>
           <div className="footer-support">
             <h2 className="label-caps text-primary footer-heading">Support</h2>
             <ul className="footer-links">
@@ -31,6 +82,15 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/care">Care &amp; Finishes</Link>
+              </li>
+              <li>
+                <Link href="/shipping">Delivery</Link>
+              </li>
+              <li>
+                <Link href="/returns">Returns &amp; Cancellations</Link>
+              </li>
+              <li>
+                <Link href="/terms">Terms</Link>
               </li>
               <li>
                 <Link href="/contact">Contact Us</Link>
@@ -43,7 +103,7 @@ export default function Footer() {
               </li>
             </ul>
             <p className="body-md text-on-surface-variant footer-copyright">
-              © {new Date().getFullYear()} Heirloom Cribs and More. All Rights Reserved.
+              © {new Date().getFullYear()} Heirloom Cribs &amp; More. All Rights Reserved.
             </p>
           </div>
         </div>

@@ -10,7 +10,7 @@ import ListingAnalytics from '@/components/products/ListingAnalytics';
 export const metadata: Metadata = {
   title: 'All Products',
   description:
-    'Browse the full collection of handcrafted cribs, dressers, nightstands and nursery furniture, built from solid American hardwoods.',
+    'Browse the full collection of cribs, dressers, nightstands, and nursery furniture, made to order by independent builders.',
   alternates: { canonical: '/products' },
 };
 
@@ -38,7 +38,7 @@ export default function ProductsPage() {
             /gallery instead - so the one word named two different pages. */}
         <h1 className="headline-lg text-primary">Shop All</h1>
         <p className="body-lg text-on-surface-variant">
-          {products.length} handcrafted pieces across {categories.length} categories.
+          {products.length} pieces across {categories.length} categories.
         </p>
       </header>
 

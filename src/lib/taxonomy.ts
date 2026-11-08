@@ -69,21 +69,21 @@ export const TAXONOMY: readonly TaxonomyNode[] = [
     name: 'Cribs',
     slug: 'cribs',
     description:
-      'Solid hardwood convertible cribs, handcrafted to grow with your child from newborn to full bed.',
+      'Convertible cribs made to order by independent builders, designed to grow with your child from newborn to full bed.',
     sources: [],
     children: [
       {
         name: 'All Cribs',
         slug: 'all-cribs',
         description:
-          'Complete range of solid hardwood convertible cribs, each sold with bundled conversion rail kit and mattress.',
+          'Complete range of convertible cribs made to order by independent builders.',
         sources: ['Cribs'],
       },
       {
         name: 'Mini Cribs',
         slug: 'mini-cribs',
         description:
-          'Space-saving solid hardwood mini cribs ideal for smaller rooms or secondary sleep spaces.',
+          'Space-saving hardwood mini cribs, ideal for smaller rooms or secondary sleep spaces.',
         sources: ['Mini Cribs'],
       },
     ],
@@ -100,14 +100,14 @@ export const TAXONOMY: readonly TaxonomyNode[] = [
     name: 'Dressers & Changing Tables',
     slug: 'dressers-changing-tables',
     description:
-      'Solid hardwood dressers and changing pieces designed to perfectly match your crib collection.',
+      'Hardwood dressers and changing pieces designed to match your crib collection.',
     sources: ['Dressers', 'Changing Tables'],
   },
   {
     name: 'Nightstands & Storage',
     slug: 'nightstands-storage',
     description:
-      'Solid hardwood nightstands and chests designed to match your crib collection.',
+      'Hardwood nightstands and chests designed to match your crib collection.',
     sources: ['Nightstands', 'Chests'],
   },
   {

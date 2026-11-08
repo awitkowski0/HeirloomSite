@@ -1,22 +1,49 @@
 import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
-import { SHIPPABLE_STATE_CODES, cheapestShippingCents } from './order-terms';
-import { fromCents } from './format';
+import { SHIPPABLE_STATE_CODES, deliveryChargeFor } from './order-terms';
+import { fromCents, toCents } from './format';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
  * every generateMetadata call run on the server.
  *
- * VERCEL_PROJECT_PRODUCTION_URL is a bare host with no scheme.
+ * Public SEO must always use the brand host. NEXT_PUBLIC_SITE_URL may override
+ * only when it is a real custom domain — never a *.vercel.app deployment host
+ * (Vercel project env has historically pointed at heirloom-site-zeta.vercel.app,
+ * which leaked into canonical / og:url / robots / sitemap). Local development
+ * still uses localhost when no usable override is set.
  */
-export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : 'http://localhost:3000')
-).replace(/\/+$/, '');
+export const BRAND_SITE_URL = 'https://heirloomcribsandmore.com';
 
-export const SITE_NAME = 'Heirloom Cribs and More';
+function isLocalDevelopment(): boolean {
+  return (
+    process.env.NODE_ENV === 'development' ||
+    (process.env.NODE_ENV !== 'production' &&
+      !process.env.VERCEL &&
+      !process.env.VERCEL_ENV &&
+      !process.env.VERCEL_PROJECT_PRODUCTION_URL)
+  );
+}
+
+function usablePublicOrigin(raw: string | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+    if (url.hostname.endsWith('.vercel.app')) return null;
+    // Origin only: any path, query or hash in the variable is dropped, because
+    // every caller appends its own absolute path to this value.
+    return `${url.protocol}//${url.host}`;
+  } catch {
+    return null;
+  }
+}
+
+export const SITE_URL =
+  usablePublicOrigin(process.env.NEXT_PUBLIC_SITE_URL) ||
+  (isLocalDevelopment() ? 'http://localhost:3000' : BRAND_SITE_URL);
+
+export const SITE_NAME = 'Heirloom Cribs & More';
 
 export function absoluteUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
@@ -40,7 +67,7 @@ export function truncate(text: string | null | undefined, max = 155): string {
 
 /** Strips a trailing site-name suffix already baked into product.json titles. */
 export function stripSiteSuffix(title: string): string {
-  return title.replace(/\s*[—–-]\s*Heirloom Cribs( and More)?\s*$/i, '').trim();
+  return title.replace(/\s*[—–-]\s*Heirloom Cribs( (and|&) More)?\s*$/i, '').trim();
 }
 
 export function priceRange(configurations: InventoryItem[]): { low: number; high: number } {
@@ -84,9 +111,9 @@ export function organizationJsonLd(): JsonLd {
     url: SITE_URL,
     logo: absoluteUrl('/logo-wide.png'),
     description:
-      'Heirloom builds solid hardwood nursery furniture that meets or exceeds CPSC and ASTM ' +
-      'safety standards, forest to family, with white-glove delivery and finishes built to ' +
-      'grow with your child.',
+      'Heirloom Cribs & More sells solid hardwood nursery furniture made to order by our ' +
+      'builders and designed to grow with your child. Delivery is charged separately, with Curbside ' +
+      'and White Glove options.',
   };
 }
 
@@ -104,40 +131,149 @@ export function webSiteJsonLd(): JsonLd {
   };
 }
 
+/**
+ * Furniture builders, keyed by the SKU prefix (OTO-1201, FQP-301, KC-10).
+ *
+ * Handling windows (JSON-LD and the Merchant Center feed) and the feed's
+ * `g:brand` both read this table, so a new builder is one row. Kids Comfort
+ * is already here for when those pieces land in the catalogue. The store
+ * name is never a brand — Google Shopping would treat every builder as one
+ * manufacturer.
+ */
+export const BUILDERS = {
+  OTO: { name: 'Old Town Oak', handling: { minValue: 30, maxValue: 40 } },
+  FQP: { name: 'Fisher', handling: { minValue: 50, maxValue: 70 } },
+  KC: { name: 'Kids Comfort', handling: { minValue: 40, maxValue: 40 } },
+} as const;
+
+export type BuilderCode = keyof typeof BUILDERS;
+
+/** First token of a SKU (`OTO`, `FQP`, `KC`), or null when it is not a builder. */
+export function skuBuilderCode(sku: string | null | undefined): BuilderCode | null {
+  const prefix = (sku ?? '').trim().split(/[\s-]/, 1)[0]?.toUpperCase() ?? '';
+  return prefix in BUILDERS ? (prefix as BuilderCode) : null;
+}
+
+/** Builder display name for a SKU, or null. Never the store name. */
+export function builderBrand(sku: string | null | undefined): string | null {
+  const code = skuBuilderCode(sku);
+  return code ? BUILDERS[code].name : null;
+}
+
+/**
+ * Handling time in business days, from the builder prefix on the SKU.
+ *
+ * A SKU with no furniture-builder prefix (rugs, lamps) keeps the previous
+ * six-to-eight week window. Google reads unitCode DAY as business days.
+ */
+export function handlingBusinessDays(
+  sku: string | null | undefined
+): { minValue: number; maxValue: number } {
+  const code = skuBuilderCode(sku);
+  return code ? BUILDERS[code].handling : { minValue: 42, maxValue: 56 };
+}
+
+/**
+ * Curbside charge for a product's price, in cents. Falls back to the $175
+ * floor when the price is missing.
+ */
+export function productShippingCents(priceDollars: number): number {
+  if (!Number.isFinite(priceDollars) || priceDollars < 0) return deliveryChargeFor(0, 'threshold');
+  return deliveryChargeFor(toCents(priceDollars), 'threshold');
+}
+
+/** The returns page `hasMerchantReturnPolicy` points at. */
+export const RETURNS_PATH = '/returns';
+
+/**
+ * The /returns wording the return policy markup quotes, verbatim.
+ *
+ * Returns: the "Made-to-order furniture: no returns" section. Cancellation:
+ * the "Cancelling" paragraph. Keep these in step with src/app/returns/page.tsx
+ * (tests/product-jsonld.test.ts reads that file and fails if they drift).
+ * Nothing here is paraphrased and no period or number is added: the
+ * cancellation window is "before your deposit is paid", an event rather than
+ * a fixed number of days, so it has no schema.org property and is carried as
+ * text only.
+ */
+export const RETURNS_POLICY_TEXT =
+  'Made-to-order case goods cannot be returned, exchanged or refunded.';
+export const CANCELLATION_POLICY_TEXT =
+  'You can cancel at no cost at any point before your deposit is paid. Just tell us in ' +
+  'writing. After the deposit is received, the order cannot be cancelled.';
+
+/**
+ * schema.org MerchantReturnPolicy for the made-to-order furniture.
+ *
+ * MerchantReturnNotPermitted: custom-built pieces cannot be returned. Delivery
+ * is US only, hence applicableCountry US. schema.org has no cancellation
+ * property, so the /returns cancellation wording rides in `description`
+ * (a Thing property every MerchantReturnPolicy has), quoted exactly, and
+ * merchantReturnLink points at /returns, where both texts live.
+ */
+export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
+  return {
+    '@type': 'MerchantReturnPolicy',
+    applicableCountry: 'US',
+    returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+    merchantReturnLink: absoluteUrl(RETURNS_PATH),
+    description: `${RETURNS_POLICY_TEXT} Cancelling: ${CANCELLATION_POLICY_TEXT}`,
+  };
+}
+
+/**
+ * Product JSON-LD for one product page: the base page or one wood/finish page.
+ *
+ * Exactly one Offer, for the configuration the page renders and at the price
+ * the page shows (`price-current`), so the markup describes what this URL
+ * sells rather than the whole product family. A colour page is its own
+ * product: its name carries the colour, `sku` is that colour's SKU (the same
+ * value the Merchant Center feed sends as `g:id`) and `url` / `offers.url`
+ * are the page's own canonical URL.
+ *
+ * `brand` is the furniture builder, from the same BUILDERS table the feed's
+ * `g:brand` reads; Heirloom is the seller, not the manufacturer. A SKU with no
+ * builder prefix (rugs, lamps) keeps the store name, as before.
+ *
+ * Deliberately absent: aggregateRating / review (there are none), gtin (the
+ * builders publish none), mpn (the SKU is the store's code, not a confirmed
+ * manufacturer part number), priceValidUntil (prices have no end date) and
+ * transitTime (the site quotes a handling window only).
+ */
 export function productJsonLd(opts: {
-  productName: string;
-  slug: string;
+  /** Display name for this page: "Newport Crib", or "Newport Crib in Carbon" on a colour page. */
+  name: string;
+  /** Canonical path of THIS page (`/product/newport-crib/carbon`). */
+  path: string;
   description: string;
   images: string[];
+  /** SKU of the configuration this page renders. */
   sku: string | null;
-  configurations: InventoryItem[];
+  /** The price this page displays, in dollars. */
+  priceDollars: number;
+  inStock: boolean;
 }): JsonLd {
-  const { low, high } = priceRange(opts.configurations);
-  const anyInStock = opts.configurations.some(c => c.stains.some(s => s.inStock !== false));
+  const sku = opts.sku || null;
+  const handling = handlingBusinessDays(sku);
+  const url = absoluteUrl(opts.path);
+  const brand = builderBrand(sku) ?? SITE_NAME;
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: opts.productName,
+    name: opts.name,
     description: opts.description,
     image: opts.images.map(absoluteUrl),
-    ...(opts.sku ? { sku: opts.sku } : {}),
-    brand: { '@type': 'Brand', name: SITE_NAME },
-    url: absoluteUrl(`/product/${opts.slug}`),
-    // Most products have several wood variants at different prices, so a single
-    // Offer would misreport the price. AggregateOffer is the honest shape.
+    ...(sku ? { sku } : {}),
+    brand: { '@type': 'Brand', name: brand },
+    url,
     offers: {
-      '@type': 'AggregateOffer',
+      '@type': 'Offer',
+      url,
+      price: opts.priceDollars,
       priceCurrency: 'USD',
-      lowPrice: low,
-      highPrice: high,
-      offerCount: opts.configurations.length,
-      availability: anyInStock
-        ? 'https://schema.org/InStock'
-        : 'https://schema.org/OutOfStock',
       /*
-       * The furniture is made to order with a six-to-eight week lead time, and
-       * until now nothing in the markup said so - the page promised one thing
-       * and the structured data implied stock on a shelf.
+       * The furniture is made to order. Handling time is the builder's window
+       * in business days, so the markup does not imply the piece is on a shelf.
        *
        * schema.org/MadeToOrder would be the literal term, but Google does not
        * support it in the `availability` enum (BackOrder, Discontinued,
@@ -145,22 +281,26 @@ export function productJsonLd(opts: {
        * PreOrder, PreSale, SoldOut). InStock remains correct - the item IS
        * orderable - so the lead time is expressed where Google actually reads
        * it, as handling time.
-       *
-       * shippingRate is the CHEAPER of the two delivery tiers, not 0. It said
-       * 0 while the site believed delivery was included; advertising free
-       * shipping in structured data and then charging $685 at checkout is the
-       * kind of mismatch Google issues merchant listing penalties for, and it
-       * is a promise to a customer we would not keep. See SHIPPING_METHODS in
-       * src/lib/order-terms.ts.
+       */
+      availability: opts.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
+      seller: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+      /*
+       * shippingRate is the Curbside charge for this page's price, not a flat
+       * figure and not 0. Advertising free shipping and then charging for
+       * delivery is a promise we would not keep. A multi-item cart can land in
+       * a higher band at checkout, where the charge is recomputed from the
+       * cart. A missing price falls back to the $175 Curbside floor. See
+       * deliveryChargeFor in src/lib/order-terms.ts. Same rate the feed sends.
        */
       shippingDetails: {
         '@type': 'OfferShippingDetails',
         shippingRate: {
           '@type': 'MonetaryAmount',
-          value: fromCents(cheapestShippingCents()),
+          value: fromCents(productShippingCents(opts.priceDollars)),
           currency: 'USD',
         },
-        // The regional route, not the whole country - see SHIPPABLE_STATE_CODES.
+        // US regions PA, NJ, MD — the same list checkout delivers to.
         shippingDestination: {
           '@type': 'DefinedRegion',
           addressCountry: 'US',
@@ -170,13 +310,14 @@ export function productJsonLd(opts: {
           '@type': 'ShippingDeliveryTime',
           handlingTime: {
             '@type': 'QuantitativeValue',
-            minValue: 42,
-            maxValue: 56,
+            minValue: handling.minValue,
+            maxValue: handling.maxValue,
             unitCode: 'DAY',
+            unitText: 'business days',
           },
         },
       },
-      url: absoluteUrl(`/product/${opts.slug}`),
+      hasMerchantReturnPolicy: merchantReturnPolicyJsonLd(),
     },
   };
 }
@@ -207,5 +348,27 @@ export function itemListJsonLd(products: ProductIndexItem[], basePath: string): 
       url: absoluteUrl(`/product/${p.slug}`),
     })),
     url: absoluteUrl(basePath),
+  };
+}
+
+/**
+ * FAQPage structured data.
+ *
+ * Answers arrive as already-rendered React nodes rather than as a second copy
+ * of the prose: schema.org wants plain text and the page wants markup, and a
+ * hand-maintained plain-text twin of twenty answers drifts from the visible
+ * copy the first time someone edits one and not the other. Google penalises
+ * FAQ markup that disagrees with the page, so the two must come from one
+ * source - see nodeTextCompact in src/lib/node-text.ts.
+ */
+export function faqPageJsonLd(entries: { question: string; answerText: string }[]): JsonLd {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: entries.map(e => ({
+      '@type': 'Question',
+      name: e.question,
+      acceptedAnswer: { '@type': 'Answer', text: e.answerText },
+    })),
   };
 }

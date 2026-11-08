@@ -28,6 +28,14 @@ export interface RelatedProduct {
    */
   wood: string | null;
   stainName: string | null;
+  /** True when `price` is this parent's bundlePriceOverrides price, not the item's own. */
+  bundleOverride?: boolean;
+  /** The item's own price when `price` is a bundle override. */
+  listPrice?: number;
+  /** Not part of the package (product.json bundleOptional - the OTO guard rails). */
+  optional?: boolean;
+  /** The pick-list checkbox starts unticked (product.json bundleUnchecked - the OTO full guard rail). */
+  startsUnchecked?: boolean;
 }
 
 export interface Addon {
@@ -164,4 +172,21 @@ export interface CartItem {
   addons?: CartAddon[];
   /** What comes with this line, already paid for. Never sent to the server. */
   includes?: CartInclude[];
+  /**
+   * The parent line whose bundle price this add-on line was added at. Sent to
+   * the server, which looks the price up itself (the client price is ignored)
+   * and only while that parent is in the same cart.
+   */
+  bundledWith?: CartParentRef;
+  /**
+   * The item's own catalogue price, stored with a bundle-priced line so the
+   * cart can show what the server will charge if the parent leaves the cart
+   * (see src/lib/cart-pricing.ts). Display only; the server never reads it.
+   */
+  listPrice?: number;
+}
+
+export interface CartParentRef {
+  productName: string;
+  wood: string;
 }

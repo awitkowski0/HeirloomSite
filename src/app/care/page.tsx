@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 
+
 export const metadata: Metadata = {
   title: 'Care & Finishes',
   description:
     'How to clean and care for solid hardwood nursery furniture, what to expect from the finishes, delivery and lead times, and what to do if something arrives damaged.',
   alternates: { canonical: '/care' },
+  openGraph: { url: '/care' },
 };
 
 export default function CarePage() {
@@ -48,9 +50,9 @@ export default function CarePage() {
           the room roughly between 35% and 55% relative humidity keeps that movement small.
         </p>
         <p>
-          Colour also shifts. Cherry in particular darkens and warms noticeably in its first year
-          in daylight; maple and oak move less. If a piece is partly covered by something for
-          months, expect a visible line when you move it — rotating what sits on top evens this out.
+          Colour also shifts a little over time, more in direct daylight. If a piece is partly
+          covered by something for months, expect a visible line when you move it — rotating what
+          sits on top evens this out.
         </p>
       </section>
 
@@ -70,18 +72,29 @@ export default function CarePage() {
       <section>
         <h2 className="headline-md">Delivery and lead time</h2>
         <p>
-          Pieces are built after you order rather than pulled from a warehouse, so expect roughly
-          six to eight weeks before delivery. Delivery is included in the price — there is no
-          separate shipping charge at checkout, and no surprise freight bill on arrival.
+          Pieces are built after you order rather than pulled from a warehouse. Lead times depend
+          on the builder and are estimates we confirm when you order: about 6–8 weeks for Old Town
+          Oak, about 8 weeks for Kids Comfort, and 10–14 weeks for Fisher&rsquo;s. Delivery is
+          charged separately at checkout (Curbside or White Glove, based on your cart total). White
+          Glove includes up to 3 flights of stairs. See{' '}
+          <Link href="/shipping" className="doc-link">
+            Delivery
+          </Link>{' '}
+          for areas and prices.
         </p>
         <p>
-          Inspect the piece before you assemble it. If anything is damaged in transit, photograph
-          it and{' '}
+          Inspect your furniture before the driver leaves, and note any visible damage on the
+          delivery receipt when you sign it. If you find concealed damage or a defect later,
+          photograph it and{' '}
           <Link href="/contact" className="doc-link">
             contact us
           </Link>{' '}
-          before assembly — it is far easier to resolve at that point than after the piece is
-          built.
+          in writing within 5 business days, before assembly if you can. We coordinate the repair
+          or replacement with the builder and handle the claim with the carrier. See{' '}
+          <Link href="/returns" className="doc-link">
+            Returns, Cancellations &amp; Refunds
+          </Link>
+          .
         </p>
       </section>
 
@@ -90,9 +103,9 @@ export default function CarePage() {
       <section>
         <h2 className="headline-md">Finishes</h2>
         <p>
-          Every finish we offer is non-toxic and baby-safe. Because they are applied to solid wood
-          rather than printed on a laminate, the grain shows through and no two pieces are
-          identical — the same stain reads differently on brown maple than on red oak.
+          Because our finishes are applied to solid wood rather than printed on a laminate, the
+          grain shows through and no two pieces are identical — the same stain reads differently
+          from one piece of brown maple to the next.
         </p>
         <p>
           Stain samples on the product pages are photographs of the actual finish on the actual

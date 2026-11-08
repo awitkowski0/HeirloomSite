@@ -2,7 +2,7 @@
 
 import { capture, identifyPerson } from "./posthog-client";
 import { metaTrack } from "./meta-pixel";
-import type { PaymentOption } from "./order-terms";
+import type { DeliveryAreaStatus, PaymentOption } from "./order-terms";
 
 /**
  * The PostHog event vocabulary, in one place.
@@ -174,6 +174,26 @@ export function checkoutStarted(props: { item_count: number; cart_value: number 
     value: props.cart_value,
     currency: CURRENCY,
   });
+}
+
+/**
+ * A visitor entered a state or ZIP we will not quote delivery for.
+ *
+ * This is demand we are turning away, so it records WHAT they were buying as
+ * well as where: a Connecticut crib buyer and a Virginia nightstand buyer are
+ * different expansion cases. The ZIP is coarse location, not an identity, and
+ * capture() is consent-gated like every other event. Never put the email or
+ * street address here.
+ */
+export function deliveryAreaRejected(props: {
+  reason: Exclude<DeliveryAreaStatus, "ok" | "zip_missing">;
+  state: string;
+  zip: string;
+  item_count: number;
+  cart_value: number;
+  items: { product: string; quantity: number }[];
+}) {
+  capture("delivery_area_rejected", props);
 }
 
 export function quoteSubmitted(props: {

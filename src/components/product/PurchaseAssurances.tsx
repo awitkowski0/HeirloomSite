@@ -1,4 +1,7 @@
 import Link from 'next/link';
+/* The delivery title reads from order-terms (via delivery-line) so it can never
+   quote a different number from the checkout that charges it. */
+import { deliveryLineTitle } from '@/lib/delivery-line';
 
 /*
  * The four questions a first-time buyer of a $2,500 crib from an unknown brand
@@ -12,7 +15,7 @@ import Link from 'next/link';
  * Every line is checked against what the site can back. Delivery is a PRICED
  * choice at checkout, so this names the tiers instead of promising they are
  * free - it said "no shipping charge at checkout" while the checkout was about
- * to add $685. The lead time is the one the catalogue quotes; the standards
+ * to add a delivery charge. The lead time is the one the catalogue quotes; the standards
  * claim is the one already made in 180 product descriptions and consolidated
  * on /safety.
  */
@@ -20,19 +23,19 @@ import Link from 'next/link';
 const ASSURANCES: { icon: string; title: string; body: string; href?: string }[] = [
   {
     icon: 'local_shipping',
-    title: 'Threshold or white-glove delivery',
-    body: 'Delivered by our trusted partners, priced at checkout. No surprise freight bill on arrival.',
+    title: deliveryLineTitle(),
+    body: 'The charge depends on your order total. Delivered by our trusted partners, one charge per order, chosen at checkout. No surprise freight bill on arrival.',
   },
   {
-    icon: 'verified_user',
-    title: 'Built to CPSC and ASTM standards',
-    body: 'Solid hardwood, non-toxic baby-safe finishes, and hardware made to be taken apart and rebuilt as it converts.',
-    href: '/safety',
+    icon: 'handyman',
+    title: 'Built to convert as they grow',
+    body: 'Solid hardwood and hardware made to be taken apart and rebuilt as it converts.',
   },
   {
     icon: 'schedule',
-    title: 'Made to order, six to eight weeks',
-    body: 'Built after you order in the wood and finish you picked, rather than pulled from a warehouse.',
+    title: 'Made to order',
+    body: 'Built after you order in the wood and finish you picked, rather than pulled from a warehouse. We confirm your lead time when you order.',
+    href: '/timeline',
   },
   {
     icon: 'chat_bubble',

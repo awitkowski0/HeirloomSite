@@ -1,14 +1,17 @@
 import type { Metadata } from 'next';
 import ContactPageForm from '@/components/contact/ContactPageForm';
+import { SUPPORT_INBOX } from '@/lib/email';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
   description:
-    'Reach Heirloom Cribs and More by email or phone about an order, a repair, or a question about our furniture.',
+    'Reach Heirloom Cribs & More by email or phone about an order, a repair, or a question about our furniture.',
   alternates: { canonical: '/contact' },
+  openGraph: { url: '/contact' },
 };
 
-const EMAIL = 'HeirloomCribs.Care@HeirloomCribsandMore.com';
+/* The same address /api/inquiry delivers to - one literal, two readers. */
+const EMAIL = SUPPORT_INBOX;
 const PHONE = '(484) 293-1840';
 
 export default function ContactPage() {
