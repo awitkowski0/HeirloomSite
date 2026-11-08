@@ -34,9 +34,9 @@ export default function HomeHero({ detail, heroImage }: Props) {
     <section className="home-hero">
       <div className="home-hero-copy">
         <h1 className="home-hero-headline">
-          Built from Solid Wood.
+          Find the Workshop
           <br />
-          Built to Grow Up.
+          Behind the Crib.
         </h1>
 
         <div className="home-ornament" aria-hidden="true">
@@ -46,12 +46,13 @@ export default function HomeHero({ detail, heroImage }: Props) {
         </div>
 
         <p className="home-hero-sub">
-          Hardwood cribs that can convert to a toddler bed and a full-size bed.
-          Made to order in solid hardwood.
+          We don&rsquo;t build furniture. We find independent American workshops
+          that do, and show you who made each piece, how it&rsquo;s built, and what
+          the builder says about its safety.
         </p>
 
-        <Link href="/products/cribs" className="button-primary home-hero-cta">
-          View all cribs
+        <Link href="/builders" className="button-primary home-hero-cta">
+          Meet the builders
         </Link>
       </div>
 

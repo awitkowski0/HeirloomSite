@@ -32,24 +32,24 @@
 
 const COLUMNS = [
   {
-    icon: 'forest',
-    label: 'Solid brown maple',
-    lines: ['Solid brown maple hardwood,', 'never veneer over particle board.'],
+    icon: 'handyman',
+    label: 'A named builder',
+    lines: ['Every crib and dresser names', 'the shop that makes it.'],
   },
   {
-    icon: 'handyman',
-    label: 'Solid hardwood, made to order',
+    icon: 'forest',
+    label: 'Solid brown maple, made to order',
     lines: ['Built new for your nursery.', 'No veneer, no particle board.'],
   },
   {
-    icon: 'local_shipping',
-    label: 'Personal delivery guidance',
-    lines: ['Curbside or White Glove delivery', 'by our trusted partners.'],
+    icon: 'chat_bubble',
+    label: 'Safety in the builder\u2019s words',
+    lines: ['Quoted from each builder,', 'piece by piece. Never our own claim.'],
   },
   {
-    icon: 'sync_alt',
-    label: 'Grows with your child',
-    lines: ['One crib converts to', 'a toddler bed and a full-size bed.'],
+    icon: 'local_shipping',
+    label: 'One team to delivery',
+    lines: ['We handle the order, the calls,', 'the invoice, and the delivery.'],
   },
 ];
 
@@ -57,7 +57,7 @@ export default function ProvenanceBand() {
   return (
     <section className="home-band">
       <p className="label-caps home-band-line">
-        Not vintage. Newly crafted to current standards.
+        Not a manufacturer. A guide to the people who are.
       </p>
 
       <ul className="home-band-cols">

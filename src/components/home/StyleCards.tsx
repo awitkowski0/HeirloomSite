@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { formatPriceApprox } from '@/lib/format';
 import { PRODUCT_IMAGE_SIZES } from '@/lib/images';
 import { resolveFeature, indexByProductName } from '@/lib/showroom';
+import { getBuilder, type BuilderId } from '@/lib/builders';
 import type { InventoryItem } from '@/types';
 
 /*
@@ -21,10 +22,10 @@ import type { InventoryItem } from '@/types';
  * "Darlington", so every card resolved to null and this whole section rendered
  * nothing at all. resolveFeature now warns at build time when a name misses.
  */
-const STYLES: { productName: string; descriptor: string }[] = [
-  { productName: 'Mission', descriptor: 'Straight slats, square posts, no ornament.' },
-  { productName: 'Hudson', descriptor: 'A low arched headboard with a flat top rail.' },
-  { productName: 'Darlington', descriptor: 'Panelled ends and a gently curved crest.' },
+const STYLES: { productName: string; descriptor: string; builderId: BuilderId }[] = [
+  { productName: 'Mission', descriptor: 'Straight slats, square posts, no ornament.', builderId: 'fishers-quality-products' },
+  { productName: 'West Lake Crib', descriptor: 'Arched headboard panels and a rope-carved rail.', builderId: 'old-town-oak' },
+  { productName: 'French Country Crib (Slat Style Front)', descriptor: 'A panelled headboard, scalloped base, and curved legs.', builderId: 'old-town-oak' },
 ];
 
 export default function StyleCards({ inventory }: { inventory: InventoryItem[] }) {
@@ -32,7 +33,7 @@ export default function StyleCards({ inventory }: { inventory: InventoryItem[] }
 
   const cards = STYLES.map(s => {
     const resolved = resolveFeature({ productName: s.productName }, byName);
-    return resolved ? { ...resolved, descriptor: s.descriptor } : null;
+    return resolved ? { ...resolved, descriptor: s.descriptor, builder: getBuilder(s.builderId).name } : null;
   }).filter((c): c is NonNullable<typeof c> => c !== null);
 
   if (cards.length === 0) return null;
@@ -40,10 +41,10 @@ export default function StyleCards({ inventory }: { inventory: InventoryItem[] }
   return (
     <section className="home-styles">
       <div className="home-styles-intro">
-        <h2 className="home-styles-heading">Start with the style</h2>
+        <h2 className="home-styles-heading">Shop by look</h2>
         <p className="home-styles-copy">
-          Every style is offered in three hardwoods and up to eleven finishes, so the shape is
-          the decision that matters. Pick the silhouette first; the wood and the stain follow.
+          Different shops have different hands. Find the shape you love, see who builds it, then
+          choose from that builder&rsquo;s finishes.
         </p>
         <p className="home-styles-copy">
           Convertible styles move from a crib to a toddler bed and then a full-size bed, with the
@@ -71,6 +72,7 @@ export default function StyleCards({ inventory }: { inventory: InventoryItem[] }
               </span>
               <span className="label-caps home-style-name">{card.productName}</span>
               <span className="home-style-desc">{card.descriptor}</span>
+              <span className="home-style-desc">By {card.builder}</span>
               <span className="home-style-price">
                 <span className="label-caps home-style-from">Starting at</span>
                 <span className="home-style-figure">{formatPriceApprox(card.price)}</span>

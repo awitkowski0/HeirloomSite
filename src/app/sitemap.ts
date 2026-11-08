@@ -35,6 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/safe-sleep`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/about-heirloom`, changeFrequency: 'yearly', priority: 0.5 },
+    { url: `${SITE_URL}/builders`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/builders/old-town-oak`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${SITE_URL}/builders/fishers-quality-products`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${SITE_URL}/builders/kids-comfort`, changeFrequency: 'yearly', priority: 0.4 },

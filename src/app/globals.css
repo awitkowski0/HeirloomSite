@@ -4548,3 +4548,147 @@ a.product-inline-link:focus-visible {
   margin: 0.25rem 0 0;
   color: var(--on-surface-muted);
 }
+
+/* ---------------------------------------------------------------------------
+   Builder-led shopping: directory, comparison, product-page origin panel.
+   --------------------------------------------------------------------------- */
+.home-builders {
+  padding-block: 64px;
+}
+.home-builders > p {
+  max-width: 62ch;
+}
+.builder-directory {
+  list-style: none;
+  margin: 32px 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.builder-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 24px;
+  border: 1px solid var(--rule);
+}
+.builder-entry__place {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.builder-entry__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.5rem;
+}
+.builder-entry__name a {
+  color: inherit;
+  text-decoration: none;
+}
+.builder-entry__quote {
+  margin: 0;
+  flex: 1;
+}
+.builder-entry__quote p {
+  margin: 0 0 8px;
+}
+.builder-entry__quote cite,
+.builder-origin cite,
+.builder-statement cite {
+  font-size: 0.8125rem;
+  font-style: normal;
+  color: var(--ink-muted);
+}
+.builder-entry__meta {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--ink-muted);
+}
+.builder-pieces {
+  margin-block: 40px;
+}
+.builders-index {
+  padding-block: 48px;
+}
+.builders-index section {
+  margin-block: 48px;
+}
+.builders-index__intro {
+  max-width: 62ch;
+}
+.builder-compare {
+  overflow-x: auto;
+}
+.builder-compare table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+.builder-compare th,
+.builder-compare td {
+  padding: 14px 16px 14px 0;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: top;
+  font-size: 0.9375rem;
+}
+.builder-compare__gap {
+  color: var(--ink-muted);
+}
+.builder-statements {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+.builder-statement-group {
+  padding: 24px;
+  border: 1px solid var(--rule);
+}
+.builder-statement h4 {
+  margin: 20px 0 8px;
+}
+.builder-statement blockquote {
+  margin: 0;
+}
+.builder-statement blockquote p {
+  margin: 0 0 8px;
+}
+.builder-origin {
+  margin-top: 24px;
+  padding: 20px;
+  border: 1px solid var(--rule);
+}
+.builder-origin p {
+  margin: 0 0 8px;
+}
+.builder-origin__label {
+  color: var(--ink-muted);
+}
+.builder-origin__name {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+}
+.builder-origin__name a {
+  color: inherit;
+}
+.builder-origin__meta,
+.builder-origin__note {
+  font-size: 0.9375rem;
+}
+.builder-origin__safety {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+.builder-origin blockquote {
+  margin: 0;
+}
+@media (min-width: 900px) {
+  .builder-directory,
+  .builder-statements {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

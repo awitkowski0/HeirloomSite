@@ -38,6 +38,12 @@ export default function CategoryBar() {
           </NavLink>
         </li>
 
+        <li className="category-bar-item">
+          <NavLink href="/builders" className="category-bar-link">
+            Shop by Builder
+          </NavLink>
+        </li>
+
         {categories.map(category => (
           <li key={category.slug} className="category-bar-item">
             <NavLink href={`/products/${category.slug}`} className="category-bar-link">

@@ -9,7 +9,7 @@ export default function Footer() {
           <div>
             <span className="footer-brand">Heirloom</span>
             <p className="body-md text-on-surface-variant footer-tagline">
-              Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.
+              Solid hardwood nursery furniture from independent builders, made to order. Choose Curbside or White Glove delivery.
             </p>
           </div>
           <div>
@@ -62,6 +62,9 @@ export default function Footer() {
             <ul className="footer-links">
               <li>
                 <Link href="/about-heirloom">About Heirloom</Link>
+              </li>
+              <li>
+                <Link href="/builders">Compare the Builders</Link>
               </li>
               <li>
                 <Link href="/builders/old-town-oak">Old Town Oak</Link>

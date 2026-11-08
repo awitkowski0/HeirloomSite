@@ -9,6 +9,7 @@ import { resolveFeature, indexByProductName } from '@/lib/showroom';
 import HomeHero from '@/components/home/HomeHero';
 import ProvenanceBand from '@/components/home/ProvenanceBand';
 import StyleCards from '@/components/home/StyleCards';
+import BuilderDirectory from '@/components/builders/BuilderDirectory';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
@@ -72,6 +73,16 @@ export default function HomePage() {
       <HomeHero detail={detail} heroImage={heroImage} />
       <ProvenanceBand />
 
+      <section className="container home-builders" aria-labelledby="home-builders-heading">
+        <h2 id="home-builders-heading" className="headline-lg">Shop by the people who build it</h2>
+        <p className="body-lg">
+          Three independent workshops, each introduced in its own words. Compare how they build,
+          what they say about safety, and how long each one takes.
+        </p>
+        <BuilderDirectory />
+        <Link href="/builders" className="doc-link">Compare the builders side by side &rarr;</Link>
+      </section>
+
       {/*
         Everything below the banner is the buying journey, in order.
         
@@ -85,8 +96,8 @@ export default function HomePage() {
       <div className="home-journey">
         <JourneyStep
           n="01"
-          title="Choose and Customize"
-          lead="Pick the silhouette first; the hardwood and the finish follow. Conversion kits for the toddler bed and full-size bed are listed on each product page."
+          title="Choose a Builder and a Look"
+          lead="Start with who makes it or how it looks; the finish follows. Conversion kits for the toddler bed and full-size bed are listed on each product page."
         >
           <FeaturedProducts />
           <StyleCards inventory={inventory} />

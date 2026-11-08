@@ -1,7 +1,9 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getProductBySlug, getAllProductSlugs, getInventory } from '@/lib/content';
+import { getProductBySlug, getAllProductSlugs, getInventory, getProductIndex } from '@/lib/content';
+import { builderForProduct } from '@/lib/builders';
+import BuilderPanel from '@/components/product/BuilderPanel';
 import { categoryToSlug } from '@/lib/categories';
 import {
   truncate,
@@ -265,6 +267,9 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
     defaultImage: r.image,
   }));
 
+  const indexEntry = getProductIndex().find(p => p.slug === slug);
+  const builder = indexEntry ? builderForProduct(indexEntry) : null;
+
   return (
     <div className="container product-page">
       <script
@@ -324,11 +329,14 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           <h1 className="product-title">{product.productName}</h1>
         }
         description={
-          primary.description ? (
-            <div className="product-description">
-              {renderProductDescription(primary.description)}
-            </div>
-          ) : null
+          <>
+            {primary.description ? (
+              <div className="product-description">
+                {renderProductDescription(primary.description)}
+              </div>
+            ) : null}
+            {builder ? <BuilderPanel builder={builder} category={indexEntry?.category ?? null} /> : null}
+          </>
         }
         initialWood={resolved.wood ?? data.config.wood}
         initialStain={resolved.stain}

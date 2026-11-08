@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import BuilderProducts from '@/components/builders/BuilderProducts';
 
 // Q#-dependent copy, one place each (FQP: Q4, Q7).
 const Q = {
@@ -41,6 +42,8 @@ export default function FishersQualityProductsPage() {
           </blockquote>
         </div>
       </header>
+
+      <BuilderProducts builderId="fishers-quality-products" />
 
       <div className="doc-page">
         <hr className="doc-rule" />

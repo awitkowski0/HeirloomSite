@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import BuilderProducts from '@/components/builders/BuilderProducts';
 
 // Q#-dependent copy, one place each (OTO: Q4, Q7).
 const Q = {
@@ -50,6 +51,8 @@ export default function OldTownOakPage() {
           </figcaption>
         </figure>
       </header>
+
+      <BuilderProducts builderId="old-town-oak" />
 
       <div className="doc-page">
         <hr className="doc-rule" />

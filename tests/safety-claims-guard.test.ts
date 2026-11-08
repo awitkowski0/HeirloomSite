@@ -21,6 +21,8 @@ const stripComments = (s: string) =>
 const ALLOW = new Set([
   'src/app/builders/old-town-oak/page.tsx',
   'src/app/builders/kids-comfort/page.tsx',
+  // Verbatim builder statements only; tests/builders.test.ts checks each against the pages above.
+  'src/lib/builders.ts',
 ]);
 
 const SITE_PHRASES: [RegExp, string][] = [
