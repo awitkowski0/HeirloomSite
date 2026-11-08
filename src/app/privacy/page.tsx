@@ -31,7 +31,7 @@ export default function PrivacyPage() {
     <div className="container doc-page">
       <p className="label-caps text-on-surface-variant">Legal</p>
       <h1 className="headline-xl">Privacy</h1>
-      <p className="body-md text-on-surface-variant">Last updated: September 1, 2026</p>
+      <p className="body-md text-on-surface-variant">Last updated: November 8, 2026</p>
       <p className="body-lg doc-lede">
         What we collect, who processes it on our behalf, and how to change your mind. We sell
         furniture; we do not sell data.
@@ -70,6 +70,11 @@ export default function PrivacyPage() {
             <strong>PostHog</strong> — product analytics and session recording, configured as
             above. Sent through our own domain rather than PostHog&rsquo;s, so it survives tracker
             blocklists; the data goes to the same place either way.
+          </li>
+          <li>
+            <strong>HeyCatch</strong> — product analytics: pages viewed, clicks and form
+            submissions, and which campaign link brought you here. It does not record sessions or
+            read what you type into form fields.
           </li>
           <li>
             <strong>Meta (Facebook) Pixel</strong> — tells us which of our ads led to a quote, and

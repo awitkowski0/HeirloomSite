@@ -43,7 +43,7 @@ const GEO_KEY = 'hc_geo';
  * for the disclosure they were shown. Adding a third-party script that is not
  * in the /privacy list they read means the old answer no longer covers it.
  */
-const CONSENT_VERSION = 1;
+const CONSENT_VERSION = 2;
 
 interface StoredConsent {
   v: number;
