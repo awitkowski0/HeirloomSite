@@ -275,6 +275,8 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: [
           { key: 'Content-Security-Policy-Report-Only', value: csp },
+          // PREVIEW ONLY: revert this commit before this experience goes live.
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'X-Frame-Options', value: 'DENY' },
