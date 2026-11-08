@@ -132,7 +132,8 @@ export default function AddressAutocomplete({
             aria-selected={highlighted === i}
             // ph-mask: these are the visitor's real street address, as text,
             // which session recording would otherwise capture in the clear.
-            className={`address-suggestion ph-mask${highlighted === i ? ' is-highlighted' : ''}`}
+            // ph-no-capture: HeyCatch autocaptures clicks, including element text.
+            className={`address-suggestion ph-mask ph-no-capture${highlighted === i ? ' is-highlighted' : ''}`}
             // onMouseDown, not onClick: mousedown fires before the input's blur,
             // so the pick lands even though blur is closing the list.
             onMouseDown={e => {

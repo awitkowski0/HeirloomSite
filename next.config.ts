@@ -42,6 +42,10 @@ const posthogOrigins = [
 const META_SCRIPT_ORIGIN = 'https://connect.facebook.net';
 const META_CONNECT_ORIGINS = 'https://www.facebook.com https://connect.facebook.net';
 
+// HeyCatch sends events to this host and loads a helper script from it, so it
+// needs both script-src and connect-src.
+const HEYCATCH_ORIGIN = 'https://in.heycatch.ai';
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
@@ -124,6 +128,12 @@ const nextConfig: NextConfig = {
             },
           ]
         : []),
+      // HeyCatch short links: /a-/z and /0-/9 are reserved for campaign URLs.
+      {
+        source: '/:l([a-z0-9])',
+        destination: '/?utm_source=heycatch&utm_campaign=:l',
+        statusCode: 302,
+      },
       {
         /*
          * /gallery is retired: it showed six of the sixteen cribs - the ones
@@ -229,7 +239,7 @@ const nextConfig: NextConfig = {
       // 'unsafe-inline' is required by the JSON-LD blocks and Next's inline
       // bootstrap. A nonce would need middleware, which would opt every route
       // out of static prerendering - the one thing this site cannot trade away.
-      `script-src 'self' 'unsafe-inline' https://babylist.com ${posthogOrigins} https://challenges.cloudflare.com ${META_SCRIPT_ORIGIN}`,
+      `script-src 'self' 'unsafe-inline' https://babylist.com ${posthogOrigins} https://challenges.cloudflare.com ${META_SCRIPT_ORIGIN} ${HEYCATCH_ORIGIN}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https:",
@@ -248,7 +258,7 @@ const nextConfig: NextConfig = {
       // SDK never reaches that path - but turning it on there is a dashboard
       // click with no diff, and the replays would break silently. Add
       // `worker-src blob:` at the same time, not afterwards.
-      `connect-src 'self' ${posthogOrigins} https://api.radar.io ${META_CONNECT_ORIGINS}`,
+      `connect-src 'self' ${posthogOrigins} https://api.radar.io ${META_CONNECT_ORIGINS} ${HEYCATCH_ORIGIN}`,
       // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
       // any more, and payment happens on Stripe's own hosted invoice page.
       "frame-src https://challenges.cloudflare.com",
