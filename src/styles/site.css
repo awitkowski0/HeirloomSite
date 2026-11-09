@@ -447,7 +447,7 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--ink); }
 .field select { padding-right: 24px; }
 
 /* Checkout summary sits on the page like everything else. */
-.order-summary { padding: 0; background: none; border-radius: 0; }
+.order-summary { padding: 0; background: var(--paper); border-radius: 0; }
 .order-summary-thumb, .also-like-thumb { background: none; border-radius: 0; }
 .order-summary-thumb img, .also-like-thumb img { object-fit: contain; mix-blend-mode: multiply; filter: brightness(1.06); }
 .also-like { border: 0; border-top: 1px solid var(--line); }
