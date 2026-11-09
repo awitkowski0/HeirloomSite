@@ -140,7 +140,7 @@ test('feed lists every sellable crib and case-good variant, and nothing else', (
     'hidden rugs/lamps must not appear'
   );
   for (const brand of tags(xml, 'g:brand')) {
-    assert.ok(['Old Town Oak', 'Fisher', 'Kids Comfort'].includes(brand), brand);
+    assert.ok(Object.values(BUILDERS).some(b => b.name === brand), `${brand} is not a builder on file`);
   }
 });
 
@@ -247,7 +247,7 @@ test('color only for single-finish items; material from the builder price book b
   // FQP "Maple/Oak" (sold as Brown Maple), KC "Oak, B.Maple, Sap Cherry".
   assert.deepEqual(tags(itemWithId(xml, 'OTO-410'), 'g:material'), ['Brown Maple']);
   assert.deepEqual(tags(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), 'g:material'), ['Brown Maple']);
-  assert.deepEqual(BUILDER_BASE_MATERIAL, { OTO: 'Brown Maple', FQP: 'Brown Maple', KC: 'Brown Maple' });
+  for (const code of ['OTO', 'FQP', 'KC']) assert.equal(BUILDER_BASE_MATERIAL[code], 'Brown Maple', code);
   assert.equal(itemMaterial(configuration({ description: 'Solid hardwood.', sku: 'KC-10' })), 'Brown Maple');
   assert.equal(itemMaterial(configuration({ sku: 'OTO-1201-CherryWood_OCS_100_Natural' })), 'Cherry');
   assert.equal(itemMaterial(configuration({ sku: 'rdir-1' })), null);

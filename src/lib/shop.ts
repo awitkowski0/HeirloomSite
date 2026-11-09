@@ -28,35 +28,13 @@ export interface ShopItem {
   safetyOnFile: boolean;
 }
 
-type Look = readonly [NonNullable<ShopItem['top']>, NonNullable<ShopItem['front']>];
-
-/* Read off each crib's catalogue photograph. tests/builders.test.ts requires every crib here. */
-export const CRIB_LOOKS: Readonly<Record<string, Look>> = {
-  'addison-crib': ['Arched', 'Slatted'],
-  'addison-crib-with-raised-panel-headboard': ['Arched', 'Panel'],
-  'arched-top': ['Arched', 'Slatted'],
-  bloomington: ['Flat', 'Panel'],
-  darlington: ['Flat', 'Panel'],
-  'french-country-crib-panel-style-front': ['Arched', 'Panel'],
-  'french-country-crib-slat-style-front': ['Arched', 'Slatted'],
-  hudson: ['Flat', 'Slatted'],
-  'mackenzie-crib-panel-back': ['Flat', 'Panel'],
-  'mackenzie-crib-slat-back': ['Flat', 'Slatted'],
-  'mini-newport-with-mattress': ['Flat', 'Slatted'],
-  mission: ['Flat', 'Slatted'],
-  moyerton: ['Arched', 'Panel'],
-  'newport-crib': ['Flat', 'Slatted'],
-  princeton: ['Flat', 'Slatted'],
-  'west-lake-crib': ['Flat', 'Slatted'],
-};
-
 export function toShopItems(products: ProductIndexItem[]): ShopItem[] {
   const inventory = getInventory();
   return products.map(p => {
     const rows = inventory.filter(i => i.slug === p.slug);
     const builder = builderForProduct(p);
     const features = builder ? featuresFor(builder, p.category) : { safety: [], build: [] };
-    const look = CRIB_LOOKS[p.slug];
+    const style = CRIB_STYLES.find(s => s.id === p.style);
     return {
       slug: p.slug,
       name: p.productName,
@@ -69,9 +47,9 @@ export function toShopItems(products: ProductIndexItem[]): ShopItem[] {
       builderHref: builder?.href ?? null,
       leadTime: builder?.leadTime ?? null,
       leadWeeksMax: builder?.leadWeeksMax ?? null,
-      top: look?.[0] ?? null,
-      front: look?.[1] ?? null,
-      style: CRIB_STYLES.find(s => s.top === look?.[0] && s.front === look?.[1])?.id ?? null,
+      top: style?.top ?? null,
+      front: style?.front ?? null,
+      style: style?.id ?? null,
       // A finish-variant product has one row per finish; a wood-variant one lists stains on the row.
       finishes: Math.max(rows[0]?.variantType === 'finish' ? rows.length : 0, ...rows.map(r => r.stains?.length ?? 0)),
       dimensions: rows.find(r => r.dimensions)?.dimensions ?? null,

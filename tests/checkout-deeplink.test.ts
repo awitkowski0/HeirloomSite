@@ -13,6 +13,8 @@ import {
   checkoutProductForFeedId,
   allFeedIds,
 } from '@/lib/checkout-deeplink';
+import { getBrowsableProducts, getInventory } from '@/lib/content';
+import { feedItems } from '@/lib/merchant-feed';
 
 test('parseCheckoutDeeplink: id:qty, missing qty, ids with spaces, bad qty', () => {
   assert.deepEqual(parseCheckoutDeeplink('OTO-1301-BrownMaple_OCS_100_Carbon:1'), {
@@ -67,6 +69,10 @@ test('checkoutProductForFeedId: unknown id resolves to null (-> 404)', () => {
 
 test('allFeedIds: the full feed set, unique', () => {
   const ids = allFeedIds();
-  assert.equal(ids.length, 136);
-  assert.equal(new Set(ids).size, 136);
+  // Exact against the data, with a floor so a shrinking feed still fails. Adding a
+  // product raises the count on its own (see npm run catalog:add-product).
+  const browsable = new Set(getBrowsableProducts().map(p => p.slug));
+  assert.equal(ids.length, feedItems(getInventory().filter(i => i.slug && browsable.has(i.slug))).length);
+  assert.ok(ids.length >= 136, `feed shrank to ${ids.length} items`);
+  assert.equal(new Set(ids).size, ids.length);
 });

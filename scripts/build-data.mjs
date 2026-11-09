@@ -1,6 +1,12 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import {
+  loadCatalog,
+  normaliseBuilders,
+  validateCatalog,
+  variantTypeProblem,
+} from "./lib/catalog-rules.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -57,19 +63,9 @@ function collapseRepeatedWords(text, where) {
  * not anticipate, and hid the finish selector entirely on the seven products
  * whose variants were flattened to "BrownMaple / Antique Slate".
  *
- * Declaring it is only half the fix; a declaration that can drift from the data
- * is worth little, so it is checked here against the actual variant names.
+ * The rule itself lives in scripts/lib/catalog-rules.mjs, so `npm run
+ * catalog:check` and this build agree on it.
  */
-const WOOD_SPECIES = new Set(["brownmaple", "cherrywood", "redoak"]);
-const VARIANT_TYPES = new Set(["wood", "size", "finish", "none"]);
-
-function inferVariantType(names) {
-  if (names.length === 1 && names[0] === "Default Title") return "none";
-  if (names.every(n => WOOD_SPECIES.has(n.toLowerCase().replace(/\s/g, "")))) return "wood";
-  if (names.every(n => n.includes('"') || /\d'/.test(n))) return "size";
-  return "finish";
-}
-
 const variantTypeProblems = [];
 const availabilityProblems = [];
 const hiddenProblems = [];
@@ -78,29 +74,8 @@ const hiddenProducts = [];
 const relationProblems = [];
 const relationNotices = [];
 function checkVariantType(dirName, declared, names) {
-  if (!declared) {
-    variantTypeProblems.push(`${dirName}: product.json has no variantType`);
-    return;
-  }
-  if (!VARIANT_TYPES.has(declared)) {
-    variantTypeProblems.push(`${dirName}: variantType "${declared}" is not one of ${[...VARIANT_TYPES].join(", ")}`);
-    return;
-  }
-  // A composite "BrownMaple / Antique Slate" is the specific corruption this
-  // guard exists to keep out: it reads as a finish but hides a wood.
-  const composite = names.filter(n => n.includes(" / "));
-  if (composite.length > 0) {
-    variantTypeProblems.push(
-      `${dirName}: variant names still encode wood AND finish (${composite[0]}); split them`
-    );
-    return;
-  }
-  const inferred = inferVariantType(names);
-  if (inferred !== declared) {
-    variantTypeProblems.push(
-      `${dirName}: variantType is "${declared}" but the variant names look like "${inferred}" (${names.slice(0, 2).join(", ")})`
-    );
-  }
+  const problem = variantTypeProblem(declared, names);
+  if (problem) variantTypeProblems.push(`${dirName}: ${problem.message}`);
 }
 
 const MIN_EXPECTED_PRODUCTS = 67;
@@ -135,6 +110,20 @@ function getProductDirs() {
 const productDirs = getProductDirs();
 if (productDirs.length === 0) {
   fail(`no product directories found under ${PRODUCTS}`);
+}
+
+/*
+ * The catalog rules: builder on file, crib style, sourced statements, claims
+ * in the copy, cent-safe prices, live slugs. Images are read only by
+ * `npm run catalog:check`, not on every build.
+ */
+const catalogForRules = loadCatalog(root, { images: false });
+const ruleErrors = validateCatalog(catalogForRules).filter(f => f.level === "error");
+if (ruleErrors.length > 0) {
+  fail(
+    `catalog rules failed (run npm run catalog:check for the fixes):\n` +
+      ruleErrors.map(f => `    - [${f.code}] ${f.where}: ${f.message}`).join("\n")
+  );
 }
 
 const inventory = [];
@@ -294,6 +283,10 @@ for (const dirName of productDirs) {
     slug: meta.slug || null,
     category: meta.category || null,
     collection: meta.collection || null,
+    // Validated by catalog-rules: an id in data/builders/, or null where nothing
+    // on file names a builder. `style` is set on cribs only.
+    builder: meta.builder ?? null,
+    style: meta.style ?? null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,
   });
@@ -576,6 +569,12 @@ if (duplicates.length > 0) {
   );
 }
 
+// npm run catalog:check stops here: every guard has run and nothing is written.
+if (process.argv.includes("--check")) {
+  console.log(`Guards passed for ${parsedProducts} products (minimum ${MIN_EXPECTED_PRODUCTS}); nothing written.`);
+  process.exit(0);
+}
+
 // ---------------------------------------------------------------------------
 // Artifacts
 // ---------------------------------------------------------------------------
@@ -660,6 +659,10 @@ for (const [parent, recs] of Object.entries(recommendations)) {
 }
 writeFileSync(join(root, "src", "data", "bundle-prices.json"), JSON.stringify(bundlePrices) + "\n");
 
+// One record per builder, from data/builders/<id>.json. Imported by src/lib/builders.ts.
+const builders = normaliseBuilders(catalogForRules.builders);
+writeFileSync(join(root, "src", "data", "builders.json"), JSON.stringify(builders, null, 2) + "\n");
+
 // Pricing table: the only catalogue data /api/quotes needs. Imported
 // statically by src/lib/pricing.ts so it is always in the function bundle -- public/ is
 // uploaded to the CDN, not traced into the lambda, so a runtime readFileSync
@@ -715,5 +718,6 @@ console.log(`  public/data/products.json:   ${productIndex.length} products`);
 console.log(`  public/data/images.json:     ${allImages.length} images`);
 console.log(`  src/data/search-docs.json:   ${searchDocs.length} docs`);
 console.log(`  src/data/bundle-prices.json: ${Object.keys(bundlePrices).length} parents`);
+console.log(`  src/data/builders.json:      ${builders.length} builders`);
 console.log(`  src/data/recommendations.json: ${Object.keys(recommendations).length} products`);
 console.log(`  data/pricing.json:           ${pricing.length} rows`);

@@ -11,6 +11,10 @@
     "typecheck": "tsc --noEmit",
     "test": "node scripts/build-data.mjs && node --conditions=react-server --import ./tests/register.mjs --test \"tests/**/*.test.ts\"",
     "data:build": "node scripts/build-data.mjs",
+    "catalog:check": "node scripts/catalog.mjs check",
+    "catalog:add-product": "node scripts/catalog.mjs add-product",
+    "catalog:add-builder": "node scripts/catalog.mjs add-builder",
+    "catalog:template": "node scripts/catalog.mjs template",
     "db:start": "node scripts/db-local.mjs start",
     "db:stop": "node scripts/db-local.mjs stop",
     "db:migrate": "node --conditions=react-server --import ./tests/register.mjs scripts/db-migrate.ts"

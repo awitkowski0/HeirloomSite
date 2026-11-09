@@ -14,6 +14,7 @@ import {
   stripSiteSuffix,
 } from './seo';
 import { variantHref } from './variants';
+import { BUILDERS as BUILDER_RECORDS } from './builders';
 
 /**
  * Google Merchant Center product feed.
@@ -168,11 +169,9 @@ export function itemColor(item: InventoryItem): string | null {
  *   KC   KC_2026_Pricelist_0426-1.xlsx, "Kids Comfort" sheet, base column
  *        "Oak, B.Maple, Sap Cherry, Unfinished": B.Maple = Brown Maple.
  */
-export const BUILDER_BASE_MATERIAL: Readonly<Record<BuilderCode, string>> = {
-  OTO: 'Brown Maple',
-  FQP: 'Brown Maple',
-  KC: 'Brown Maple',
-};
+export const BUILDER_BASE_MATERIAL: Readonly<Record<BuilderCode, string>> = Object.fromEntries(
+  BUILDER_RECORDS.flatMap(b => (b.sku.baseMaterial ? [[b.sku.prefix, b.sku.baseMaterial]] : []))
+);
 
 /** Wood segment of a variant SKU (`OTO-1201-BrownMaple_OCS_100_Natural` -> BrownMaple). */
 const SKU_WOOD = /-(BrownMaple|CherryWood|RedOak)_/i;

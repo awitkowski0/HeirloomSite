@@ -3,6 +3,7 @@ import { getBrowsableProducts, getTaxonomyNodes, getInventory } from '@/lib/cont
 import { variantPathsFor } from '@/lib/variants';
 import { getCollections } from '@/lib/collections';
 import { SITE_URL } from '@/lib/seo';
+import { BUILDERS } from '@/lib/builders';
 
 /**
  * Every indexable URL. Deliberately excludes /checkout and /search, which are
@@ -36,9 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/about-heirloom`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/builders`, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/builders/old-town-oak`, changeFrequency: 'yearly', priority: 0.4 },
-    { url: `${SITE_URL}/builders/fishers-quality-products`, changeFrequency: 'yearly', priority: 0.4 },
-    { url: `${SITE_URL}/builders/kids-comfort`, changeFrequency: 'yearly', priority: 0.4 },
+    ...BUILDERS.map(b => ({ url: `${SITE_URL}${b.href}`, changeFrequency: 'yearly' as const, priority: 0.4 })),
     { url: `${SITE_URL}/woods-and-finishes`, changeFrequency: 'yearly', priority: 0.4 },
   ];
 

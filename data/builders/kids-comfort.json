@@ -1,0 +1,51 @@
+{
+  "id": "kids-comfort",
+  "name": "Kids Comfort",
+  "order": 30,
+  "based": "Sugarcreek, Ohio",
+  "background": "Joe Troyer's shop",
+  "intro": {
+    "text": "We are real people that answer our phone and personally work with you to accomplish your goals.",
+    "source": "Joe Troyer, Kids Comfort catalog, January 2023"
+  },
+  "leadTime": "About 8 weeks",
+  "leadWeeksMax": 8,
+  "buildFeatures": {
+    "crib": [
+      "Completely solid wood including the mattress support"
+    ],
+    "caseGoods": []
+  },
+  "listed": false,
+  "bespokePage": true,
+  "sku": {
+    "prefix": "KC",
+    "brand": "Kids Comfort",
+    "handlingDays": {
+      "min": 40,
+      "max": 40
+    },
+    "baseMaterial": "Brown Maple"
+  },
+  "construction": {
+    "text": "All cribs are completely solid wood including the mattress support.",
+    "source": "Kids Comfort"
+  },
+  "setup": null,
+  "safety": {
+    "crib": {
+      "text": "As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards.",
+      "source": "Kids Comfort catalog, January 2023",
+      "features": [
+        "Tested and certified to CPSIA and ASTM"
+      ]
+    },
+    "caseGoods": {
+      "text": "All furniture pieces come with a wall anchor to prevent tipping hazards in your nursery.",
+      "source": "Kids Comfort catalog, January 2023",
+      "features": [
+        "Wall anchor"
+      ]
+    }
+  }
+}

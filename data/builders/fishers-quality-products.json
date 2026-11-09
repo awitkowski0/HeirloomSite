@@ -1,0 +1,34 @@
+{
+  "id": "fishers-quality-products",
+  "name": "Fisher's Quality Products",
+  "order": 20,
+  "based": "Quarryville, Pennsylvania",
+  "background": "Describes itself as family-owned; began with one line of cribs in 2010",
+  "intro": {
+    "text": "We started very small out of our home shop, manufacturing just one line of cribs in 2010.",
+    "source": "Fisher's Quality Products, from its profile on All American Wholesalers"
+  },
+  "leadTime": "10 to 14 weeks",
+  "leadWeeksMax": 14,
+  "buildFeatures": {
+    "crib": [],
+    "caseGoods": []
+  },
+  "listed": true,
+  "bespokePage": true,
+  "sku": {
+    "prefix": "FQP",
+    "brand": "Fisher",
+    "handlingDays": {
+      "min": 50,
+      "max": 70
+    },
+    "baseMaterial": "Brown Maple"
+  },
+  "construction": null,
+  "setup": null,
+  "safety": {
+    "crib": null,
+    "caseGoods": null
+  }
+}

@@ -1,0 +1,283 @@
+{
+  "legacySlugs": [
+    "34-guard-rail",
+    "addison-3-drawer-nightstand",
+    "addison-6-drawer-dresser",
+    "addison-7-drawer-dresser",
+    "addison-chest-dresser",
+    "addison-crib",
+    "addison-crib-with-raised-panel-headboard",
+    "addison-full-bed-rail-kit",
+    "addison-toddler-bed",
+    "arched-top",
+    "bloomington",
+    "changing-table-6-drawer",
+    "crib-mattress",
+    "darlington",
+    "french-country-3-drawer-dresser-with-door",
+    "french-country-3-drawer-dresser-with-door-and-changing-table",
+    "french-country-3-drawer-nightstand",
+    "french-country-34-guard-rail",
+    "french-country-4-drawer-dresser",
+    "french-country-4-drawer-dresser-with-changing-table",
+    "french-country-6-drawer-dresser",
+    "french-country-6-drawer-dresser-with-changing-table",
+    "french-country-6-drawer-dresser-with-hutch-top",
+    "french-country-7-drawer-dresser-with-changing-table",
+    "french-country-7-drawer-dresser-with-top-mirror",
+    "french-country-chest",
+    "french-country-crib-panel-style-front",
+    "french-country-crib-slat-style-front",
+    "full-bed-rail-kit",
+    "full-guard-rail",
+    "guard-rail",
+    "hudson",
+    "livabliss-lillian-31352-ivory-orange-blue-lll-2313-machine-washable-area-rug",
+    "livabliss-lillian-31354-ivory-grey-lll-2315-machine-washable-area-rug",
+    "lorena-canals-woolable-africa-enkang-washable-area-rug",
+    "lorena-canals-woolable-free-your-soul-autumn-breeze-washable-area-rug",
+    "lorena-canals-woolable-sheep-of-the-world-dunes-washable-area-rug",
+    "lorena-canals-woolable-sheep-of-the-world-tundra-washable-area-rug",
+    "lorena-canals-woolable-silhouette-washable-area-rug",
+    "mackenzie-34-guard-rail",
+    "mackenzie-6-drawer-dresser",
+    "mackenzie-7-drawer-dresser",
+    "mackenzie-chest",
+    "mackenzie-crib-panel-back",
+    "mackenzie-crib-slat-back",
+    "mackenzie-full-bed-rail-kit",
+    "mackenzie-full-guard-rail",
+    "mackenzie-nightstand",
+    "mackenzie-toddler-bed",
+    "mini-newport-with-mattress",
+    "mission",
+    "moyerton",
+    "newport-34-guard-rail",
+    "newport-4-drawer-chest",
+    "newport-7-drawer-dresser",
+    "newport-crib",
+    "newport-full-bed-rail-kit",
+    "newport-full-guard-rail",
+    "newport-nightstand",
+    "newport-toddler-bed",
+    "nightstand-2-drawer",
+    "princeton",
+    "tala-rugged-muse-portable-lamp",
+    "toddler-conversion-rail",
+    "west-lake-3-drawer-nightstand",
+    "west-lake-34-guard-rail",
+    "west-lake-4-drawer-dresser",
+    "west-lake-6-drawer-dresser",
+    "west-lake-7-drawer-dresser",
+    "west-lake-chest",
+    "west-lake-crib",
+    "west-lake-full-bed-rail-kit",
+    "west-lake-full-guard-rail",
+    "west-lake-toddler-bed"
+  ],
+  "copy": {
+    "34-guard-rail": {
+      "description": "5633302f36109bce57680fd5293beb4071b63a2fc188204b7df08c9658dc96a9"
+    },
+    "addison-3-drawer-nightstand": {
+      "description": "e2b59576f08308b587d287c3e900659e70381e74e38d1a2f1ecd175b0d023578"
+    },
+    "addison-6-drawer-dresser": {
+      "description": "9e4330e23310491660950dcd857516ee845033af0676425fc2ae99d09fc1d9fd"
+    },
+    "addison-7-drawer-dresser": {
+      "description": "955e4aa44a977d2459cee491e25297d88e1e1638f5d72d0b761fad5d002939cd"
+    },
+    "addison-chest-dresser": {
+      "description": "420ec703fcc1bd1e3415614638004e8402582fa0d6c1d3fa377392f25cf0c186"
+    },
+    "addison-crib": {
+      "metaDescription": "d89bca5fbaa24029edfe90680fff193f1782b045465a1b904aa7f5fcf274eb4d",
+      "description": "582a4c294a72de90d097116c26326950c050f316ba04f159687b142bda35b464"
+    },
+    "addison-crib-with-raised-panel-headboard": {
+      "description": "1c118e9542b9292916b151ca28131784f6644f20dfe97790f7226893f63caf1c"
+    },
+    "addison-full-bed-rail-kit": {
+      "description": "ce549f7fa54244562cea1a97f6a38582fbf7ccd6364f32cfc6ec449f319b5c85"
+    },
+    "addison-toddler-bed": {
+      "description": "4932c892b565ef17c15fbffa8a6abbd678ed0a43bc66561236f1b26441d742ce"
+    },
+    "arched-top": {
+      "description": "a12e6d583843f4b972eaf38ef966f46909ba09086e8c2dfab2f3ce967cb9b03f"
+    },
+    "bloomington": {
+      "description": "b7cdf0567e7dd5d12e00dafbf7f068aec67e1719057969b13972ecb9f947aae1"
+    },
+    "changing-table-6-drawer": {
+      "description": "47c0cff9fbfeaf5e6e6f124bc6696c91392e9bd5423a3fe2773922f14fd2582b"
+    },
+    "crib-mattress": {
+      "description": "facc6c6438e59890643c485d5de2efca09bd593966a3d47889becbd49e14c008"
+    },
+    "darlington": {
+      "description": "ad6aefb272fbdbaf52a44752b63356ae6b0546ff951df8085f516812bf8f7a5e"
+    },
+    "french-country-3-drawer-dresser-with-door": {
+      "description": "43e4b96f8c81ff802abe0629c58c388c4a57f145efa924fe53b83bc96c8422eb"
+    },
+    "french-country-3-drawer-dresser-with-door-and-changing-table": {
+      "description": "68ca07961ce082e026f72effbddc4779e63f18e52cccb5a12b4af274c12091f0"
+    },
+    "french-country-3-drawer-nightstand": {
+      "description": "5240a2c4269f5df41821eb839b6dc16133385ca7e6b0bbf3f3d367ae8baf7084"
+    },
+    "french-country-34-guard-rail": {
+      "description": "a62ad7406bd6580fa9d34209f82a8355a7984c2337c1b5117837fb88e5db5127"
+    },
+    "french-country-4-drawer-dresser": {
+      "description": "a5bbc2969f728ce376f890cf86aec6bac46889fa759bc930e24ca918e2c8489b"
+    },
+    "french-country-4-drawer-dresser-with-changing-table": {
+      "description": "1972fb5bddf7fcf4113cdeb42383cad941434e199117d399184bf7f68954f3c5"
+    },
+    "french-country-6-drawer-dresser": {
+      "description": "fa4b491c4f4f1b31de82b45ae1ea08c5159cbd8707fcb8a1c26b199e5d03ae48"
+    },
+    "french-country-6-drawer-dresser-with-changing-table": {
+      "description": "25876764997f2e490221912bf7e46dde282c66ef596f3ba230c065f9ad2a3a13"
+    },
+    "french-country-6-drawer-dresser-with-hutch-top": {
+      "description": "8201b07922841403c9d56b6fdcce89a04c813893b59ee4fe7dbeb0fabc2ea8cc"
+    },
+    "french-country-7-drawer-dresser-with-changing-table": {
+      "description": "491b74aad3bf9c0221bdd6576ff219db9f8bcfffd4aa9095ccb4e3d877ca6cf3"
+    },
+    "french-country-7-drawer-dresser-with-top-mirror": {
+      "description": "d5e9d52581a26bd402a4e355e78bf1791c7b9b4aef1f97c13764056e7ff6fb21"
+    },
+    "french-country-chest": {
+      "description": "71aff8bcbf9ca2de1820d37289b3f65b8acf6f190bfcad65511ebafbdb2eed5d"
+    },
+    "french-country-crib-panel-style-front": {
+      "metaDescription": "a9650e509eb34d1a339d317b65ea80313e6a1239a62bb45b9761389b8ecf0430",
+      "description": "56a883f5190861e219f428a5ee2c9086ba7eff115fe727b37eb704077d086a9b"
+    },
+    "french-country-crib-slat-style-front": {
+      "description": "2ba01ab9092cbca3a075694919aaed412dda233cbb26e2f5c07d1d2b53b68c93"
+    },
+    "full-bed-rail-kit": {
+      "description": "2f2f548af6df26c4c39cfe133d173c9c624ed5397fa77cc33290ef8fbaa6142a"
+    },
+    "full-guard-rail": {
+      "description": "eda6383fa4911693f7ee3132b13cf444e4836c129fc0b8562692205dfd49b836"
+    },
+    "guard-rail": {
+      "description": "8d3ed9cf77e06ec634f5d1676352856e07b70100a346990a1d68b17123cc47d3"
+    },
+    "hudson": {
+      "description": "4e6f1b85e8671f69def36b23e0a2f38b73169c39d482a48de8fbeb6d9a376141"
+    },
+    "mackenzie-34-guard-rail": {
+      "description": "61735d2b2ff3e58681bbe76c8783d26af82a34c63cbd954b53994522195ee8fa"
+    },
+    "mackenzie-6-drawer-dresser": {
+      "description": "ab6f30b5620b7f1aab1965a2dc5bdf74c6d9d56c3187cd161e119588b48be9ee"
+    },
+    "mackenzie-7-drawer-dresser": {
+      "description": "e9f02ed80bb8a7e2a8e9d1af31e2671b92f6af2620ce53a30a5cc87c245da3e4"
+    },
+    "mackenzie-chest": {
+      "description": "54a38b5225935911617e923fad03369e84c6809933eb8a052f23fef1417ad0f8"
+    },
+    "mackenzie-crib-panel-back": {
+      "description": "6b931c0587ca7ca6bf0d979a8ccf1ff3e106ccc3f0bb75525d703419b8e247bf"
+    },
+    "mackenzie-crib-slat-back": {
+      "description": "d38870d98bd4f1cde833b6c7bd0adc3eb1733f90cdcd5df052bf669814cc58b6"
+    },
+    "mackenzie-full-bed-rail-kit": {
+      "description": "9481fa47ad6f958c2c3a9b1579cf082530c9fdc423b5f759a7b888c3561a77d8"
+    },
+    "mackenzie-full-guard-rail": {
+      "description": "ff1c6cf195fd643e593694434d788965608809434fe802b39ffee289edcbbaae"
+    },
+    "mackenzie-nightstand": {
+      "description": "51db3f6ce13c8c6b4963a316d91c147483547fdfd8188f5c0a645a0a67be0133"
+    },
+    "mackenzie-toddler-bed": {
+      "description": "78f1616007eb40f2c82892207cb3948b4c79270191c39af95d733062de69bcb9"
+    },
+    "mini-newport-with-mattress": {
+      "description": "b17bee832cbc7e329b6167e04fc303b3d2fe29f22cc6c19b0ba3593c2d936cc8"
+    },
+    "mission": {
+      "description": "6b07282ce43342112ed324228fc6dc6d439f596261c07b8c9e2e80cc35a68731"
+    },
+    "moyerton": {
+      "description": "5ab2ba347f51ba729898a4eff18cd72b8230565116d9cbd0533734beb48d339a"
+    },
+    "newport-34-guard-rail": {
+      "description": "e499ba4f8fc4c43e263caade460e75dc199a906cacaccc043730cdc5a1b24d6c"
+    },
+    "newport-4-drawer-chest": {
+      "description": "c4fa0202dee0b043ecc3e66fc74bf04ede1c551f6854ce1b4a6f5194f63a5242"
+    },
+    "newport-7-drawer-dresser": {
+      "description": "68b574919dd172913790fd7d28747daf3295844a32efc0a947c802da1d50c9c1"
+    },
+    "newport-crib": {
+      "metaDescription": "617b77333b228632e8cc6019d970c7f49f0b159ccd0fac2ea992b402f9bfb907",
+      "description": "5350472d379fd83d46e6783a3d12c4acc3c987d967979619e0e0863f1fc8ee13"
+    },
+    "newport-full-bed-rail-kit": {
+      "description": "efcdc6e8d0a27ba5830e3d660fabf9b8784e26ff6e5abf617566d55fb8f662ea"
+    },
+    "newport-full-guard-rail": {
+      "description": "3199a6fd1b79ca3b69fe21e8837eed71a49e101c987592ce66e505a9666b278e"
+    },
+    "newport-nightstand": {
+      "description": "f04875581ceae5d2110ff39d89b685c8751055c981b4b69f5235309f314eb9ec"
+    },
+    "newport-toddler-bed": {
+      "description": "20174c6cbbe20c2c91ca4a26fbe15de9deaf043fa6908a0c5ef1bf7965d412aa"
+    },
+    "nightstand-2-drawer": {
+      "description": "cef598de79ea37e9b2885cb0a1dd526dbb595419ff0c984e83a5eab1c4ae3500"
+    },
+    "princeton": {
+      "metaDescription": "fedeb04c40c4418dce903dc57a6ce94df2fc9f41c043f145c2eec1d8528723e0",
+      "description": "acbbd75f8f75e858075557ae010bc0d406ed220af4ac144e1467f6546fbe4dc3"
+    },
+    "toddler-conversion-rail": {
+      "description": "c26c1e46b7630082c36e17a7dda0c1042ac3163807231d3fe90ef63983e59548"
+    },
+    "west-lake-3-drawer-nightstand": {
+      "metaDescription": "e976bef1a9b8c8643a40b9687f1ed8612e4f70fd51dea5c3f0604b22956a85e4",
+      "description": "1607482a32b4a20c051b5de396c955259d23e9959a8d05886fc34076cee414f2"
+    },
+    "west-lake-34-guard-rail": {
+      "description": "0d1f3233e1f9376265aebde5ed76c9fe687aa165e5571c787d3e61e56928ab56"
+    },
+    "west-lake-4-drawer-dresser": {
+      "description": "5ca20ac097326badccba1e81894e4c54deefad82394c3e2dd78d13d7d5934912"
+    },
+    "west-lake-6-drawer-dresser": {
+      "description": "5974ba7aca346ef1376b9bea2ce97a96ce3866fd1ead8a5c5d7ad3358a6ba5df"
+    },
+    "west-lake-7-drawer-dresser": {
+      "description": "f8baa06c03fbe548ac92c7142efac00005abfa37aaf84f26575a4913b2cac0c3"
+    },
+    "west-lake-chest": {
+      "description": "396b4bae4458ec2982527db3cfd6d6252f87c0c7ae842294f48f65e230a0d9aa"
+    },
+    "west-lake-crib": {
+      "description": "e7ded9d508d6311185edb85fd3d0186ece0f557dfef335d01e9b60a60de68ea7"
+    },
+    "west-lake-full-bed-rail-kit": {
+      "description": "6ba044e0aa3b700bac088ed866dc11d55e7722a3fe4a659f8f58f04524e90247"
+    },
+    "west-lake-full-guard-rail": {
+      "description": "750383113207ba9a9da96e119f1a04227e89f409f79371a5e325d1bacc7351be"
+    },
+    "west-lake-toddler-bed": {
+      "description": "e6f296a7cafdb4ddfb295e1c0ad50e2b5f76ecccb8d333517430362e3ee087d2"
+    }
+  }
+}

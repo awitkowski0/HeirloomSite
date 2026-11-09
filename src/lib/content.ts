@@ -35,6 +35,10 @@ export interface ProductIndexItem {
   category: string | null;
   /** The range this piece belongs to (Addison, West Lake...), or null. */
   collection: string | null;
+  /** Builder id in data/builders/, or null where nothing on file names one. */
+  builder: string | null;
+  /** Crib style id from src/lib/crib-styles.ts; set on cribs only. */
+  style: string | null;
   minPrice: number;
   defaultImage: string | null;
 }

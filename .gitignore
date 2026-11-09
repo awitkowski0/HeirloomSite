@@ -40,6 +40,7 @@ public/data/products.json
 src/data/search-docs.json
 src/data/recommendations.json
 src/data/bundle-prices.json
+src/data/builders.json
 data/pricing.json
 
 # TypeScript incremental build cache

@@ -2,6 +2,7 @@ import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
 import { SHIPPABLE_STATE_CODES, deliveryChargeFor } from './order-terms';
 import { fromCents, toCents } from './format';
+import { BUILDERS as BUILDER_RECORDS } from './builders';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
@@ -135,18 +136,20 @@ export function webSiteJsonLd(): JsonLd {
  * Furniture builders, keyed by the SKU prefix (OTO-1201, FQP-301, KC-10).
  *
  * Handling windows (JSON-LD and the Merchant Center feed) and the feed's
- * `g:brand` both read this table, so a new builder is one row. Kids Comfort
- * is already here for when those pieces land in the catalogue. The store
- * name is never a brand — Google Shopping would treat every builder as one
- * manufacturer.
+ * `g:brand` both read this table, built from the records in data/builders/. The
+ * store name is never a brand -- Google Shopping would treat every builder as
+ * one manufacturer.
  */
-export const BUILDERS = {
-  OTO: { name: 'Old Town Oak', handling: { minValue: 30, maxValue: 40 } },
-  FQP: { name: 'Fisher', handling: { minValue: 50, maxValue: 70 } },
-  KC: { name: 'Kids Comfort', handling: { minValue: 40, maxValue: 40 } },
-} as const;
+export const BUILDERS: Readonly<
+  Record<string, { name: string; handling: { minValue: number; maxValue: number } }>
+> = Object.fromEntries(
+  BUILDER_RECORDS.map(b => [
+    b.sku.prefix,
+    { name: b.sku.brand, handling: { minValue: b.sku.handlingDays.min, maxValue: b.sku.handlingDays.max } },
+  ])
+);
 
-export type BuilderCode = keyof typeof BUILDERS;
+export type BuilderCode = string;
 
 /** First token of a SKU (`OTO`, `FQP`, `KC`), or null when it is not a builder. */
 export function skuBuilderCode(sku: string | null | undefined): BuilderCode | null {

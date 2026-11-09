@@ -16,7 +16,8 @@ Furniture e-commerce site. Next.js App Router + TypeScript, deployed on Vercel.
   gallery, checkout, home, contact, ui)
 - `src/lib/` — content accessors, SEO helpers, pricing, search, formatting
 - `src/context/` — cart (localStorage via useSyncExternalStore)
-- `data/` — source data, plus generated `pricing.json`
+- `data/` — builder records (`data/builders/`), `live-slugs.json`, the frozen
+  `catalog-baseline.json`, and generated `pricing.json`
 - `public/data/` — generated JSON served to clients
 - `scripts/` — build/data processing
 
@@ -27,9 +28,10 @@ Furniture e-commerce site. Next.js App Router + TypeScript, deployed on Vercel.
   `src/lib/content.ts` (server-only)
 - `src/data/search-docs.json` — lazily imported by the client search
 - `data/pricing.json` — statically imported by `src/lib/pricing.ts`
+- `src/data/builders.json` — from `data/builders/*.json`, imported by
+  `src/lib/builders.ts`
 
-Every one of those is generated and gitignored. `data/` holds nothing else;
-the hand-maintained copies of the catalogue that used to sit there
+Every one of those is generated and gitignored. The hand-maintained copies of the catalogue that used to sit there
 (`data/{inventory,images,settings,showroom,stain-types}.json`, plus
 `public/data/{stains,variants,settings,stain-types}.json`) were stale by
 hundreds of rows, read by nothing, and have been removed.
@@ -73,6 +75,17 @@ intentionally remove a product, lower it.
 1. Branch off `dev`: `feature-<kebab-title>-<timestamp>`
 2. Implement, verify (`npm run lint`, `npm run typecheck`, `npm run build`)
 3. Commit, push, then `node scripts/create-pr.mjs "<title>"`
+
+## Adding a product or builder
+
+Use the `add-catalog-item` skill (`.claude/skills/add-catalog-item/SKILL.md`).
+Agents that do not load skills: `npm run catalog:template -- product|builder`,
+then `npm run catalog:add-product -- <input.json> [--dry-run]` or
+`npm run catalog:add-builder -- <input.json> [--dry-run]`, then
+`npm run catalog:check`. Builder attribution and crib style are `builder` and
+`style` in `product.json`, and a builder is one record in `data/builders/<id>.json`
+with a generated page at `/builders/<id>`. `scripts/lib/catalog-rules.mjs` holds
+the rules; the data build enforces them too, so a violation fails the deploy.
 
 ## Hiding a product
 

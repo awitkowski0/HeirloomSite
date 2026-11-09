@@ -1,0 +1,63 @@
+{
+  "id": "old-town-oak",
+  "name": "Old Town Oak",
+  "order": 10,
+  "based": "Topeka, Indiana",
+  "background": "In business for 21 years, according to its 2026 catalog",
+  "intro": {
+    "text": "Having been in business for 21 years, we can offer you the quality cribs and dressers you expect and deserve.",
+    "source": "Old Town Oak, 2026 catalog"
+  },
+  "leadTime": "About 6 to 8 weeks",
+  "leadWeeksMax": 8,
+  "buildFeatures": {
+    "crib": [
+      "Mortise and tenon joints",
+      "Steel inserts and connector bolts"
+    ],
+    "caseGoods": [
+      "Dovetail wood drawer boxes",
+      "Full extension slides"
+    ]
+  },
+  "listed": true,
+  "bespokePage": true,
+  "sku": {
+    "prefix": "OTO",
+    "brand": "Old Town Oak",
+    "handlingDays": {
+      "min": 30,
+      "max": 40
+    },
+    "baseMaterial": "Brown Maple"
+  },
+  "construction": {
+    "text": "Our cribs are sturdy and durable with mortise and tenon joints and a substructure made of steel inserts and connector bolts. Our dressers feature dovetail wood drawer boxes and full extension slides, all features that make sure our baby furniture will stand the test of time.",
+    "source": "Old Town Oak, 2026 catalog"
+  },
+  "setup": {
+    "text": "Tool and hardware kit comes standard attached to every crib spring with easy to read and understand instructions. Panels are specially marked for ease of assembly.",
+    "source": "Old Town Oak, 2026 catalog"
+  },
+  "safety": {
+    "crib": {
+      "text": "All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs.",
+      "source": "Old Town Oak, 2026 catalog",
+      "features": [
+        "CPSC 16CFR1219",
+        "ASTM F1169-19",
+        "Certified third party labs"
+      ]
+    },
+    "caseGoods": {
+      "text": "For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species.",
+      "source": "Old Town Oak, 2026 catalog",
+      "features": [
+        "Rear mount interlock system",
+        "Counterweights as needed",
+        "Warning and extension labels",
+        "General Certificate of Conformity"
+      ]
+    }
+  }
+}
