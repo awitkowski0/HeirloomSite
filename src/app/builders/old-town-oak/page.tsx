@@ -4,7 +4,6 @@ import BuilderProducts from '@/components/builders/BuilderProducts';
 
 // Q#-dependent copy, one place each (OTO: Q4, Q7).
 const Q = {
-  q4: `Old Town Oak is one of three builders Heirloom resells. We introduce it here in its own words.`,
   q7: `For an Old Town Oak wood or finish that isn't on our product pages, contact us with what you have in mind.`,
 };
 
@@ -61,7 +60,6 @@ export default function OldTownOakPage() {
           <p>
             {`Old Town Oak's catalog cover reads "Specializing in Baby Furniture." Its 2026 catalog says: "Having been in business for 21 years, we can offer you the quality cribs and dressers you expect and deserve."`}
           </p>
-          <p>{Q.q4}</p>
         </section>
 
         <section>

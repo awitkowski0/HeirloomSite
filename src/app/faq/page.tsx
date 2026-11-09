@@ -69,7 +69,7 @@ const SECTIONS: Section[] = [
         question: 'Where are the cribs made?',
         answer: (
           <p>
-            Every piece is made to order by an independent builder. Old Town Oak describes its furniture as “American handcrafted,” and Fisher&rsquo;s pieces are made in Pennsylvania. You buy through us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley, Pennsylvania area. We are the reseller, not the factory.
+            Every piece is made to order by an independent builder. Old Town Oak describes its furniture as “American handcrafted,” and Fisher&rsquo;s pieces are made in Pennsylvania. You buy through us. Heirloom Cribs &amp; More is a woman-owned shop in the Nazareth / Lehigh Valley, Pennsylvania area. We are the reseller, not the factory.
           </p>
         ),
       },
@@ -162,7 +162,6 @@ const SECTIONS: Section[] = [
         question: 'How does ordering work?',
         answer: (
           <>
-            <p>Here is the same path you will see on our homepage.</p>
             <ol className="doc-list">
               <li>
                 <strong>Choose and Customize.</strong> Pick the silhouette first; the hardwood and
@@ -171,15 +170,14 @@ const SECTIONS: Section[] = [
               <li>
                 <strong>Confirm Order</strong> (this is the quality check). Nothing is charged when
                 you place an order. We read it, check the details with you, and only then ask for
-                anything. No card is taken at checkout — the order is a commitment, not a charge. We
+                anything. We don’t take payment at checkout. We call you, then send an invoice. We
                 call to confirm the stain, the kit list, and the delivery before anything is built.
                 A secure Stripe invoice follows within 48 hours of your order. Custom orders require
                 a 50% deposit. You can pay by credit card or Affirm.
               </li>
               <li>
                 <strong>Made to Order.</strong> Every piece is made to order. Lead times are
-                estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort
-                about 8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance
+                estimates that we confirm when you order: Old Town Oak about 6–8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance
                 before we schedule final delivery.
               </li>
               <li>
@@ -209,7 +207,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             These are made-to-order pieces. Lead times are estimates, confirmed at order time, per
-            builder: Old Town Oak about 6–8 weeks, Kids Comfort about 8 weeks, Fisher&rsquo;s 10–14
+            builder: Old Town Oak about 6–8 weeks, Fisher&rsquo;s 10–14
             weeks. Share your target month via <strong>Get Personal Assistance</strong> if you have
             a nursery deadline. See{' '}
             <Link href="/timeline" className="doc-link">
@@ -375,13 +373,8 @@ const SECTIONS: Section[] = [
         answer: (
           <>
             <p>
-              You’re paying for a solid hardwood crib made to order for your nursery, and for the
-              years it stays with your family as it grows with your child.
-            </p>
-            <p>
               Safety details live on our {SafetyLink} and each product page. One crib converts to a
-              toddler bed and a full-size bed when the kits for your model are in place. That’s what
-              we mean by Built to Grow Up. When you’re ready to order, you choose Curbside delivery or
+              toddler bed and a full-size bed when the kits for your model are in place.  When you’re ready to order, you choose Curbside delivery or
               White Glove with in-home assembly. White Glove includes up to 3 flights of stairs. We
               confirm what fits your address before production starts.
             </p>

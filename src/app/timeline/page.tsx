@@ -48,15 +48,14 @@ export default function TimelinePage() {
           <li>
             <strong>02 Confirm Order (this is the quality check).</strong> Nothing is charged when
             you place an order. We read it, check the details with you, and only then ask for
-            anything. No card is taken at checkout — the order is a commitment, not a charge. We
+            anything. We don’t take payment at checkout. We call you, then send an invoice. We
             call to confirm the stain, the kit list, and the delivery before anything is built. A
             secure Stripe invoice follows within 48 hours of your order. Custom orders require a{' '}
             <strong>50% deposit</strong>. You can pay by credit card or Affirm.
           </li>
           <li>
             <strong>03 Made to Order.</strong> Every piece is made to order. Lead times are
-            estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort
-            about 8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance{' '}
+            estimates that we confirm when you order: Old Town Oak about 6–8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance{' '}
             <strong>before we schedule final delivery</strong>.
           </li>
           <li>

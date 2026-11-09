@@ -267,8 +267,8 @@ const nextConfig: NextConfig = {
       `connect-src 'self' ${posthogOrigins} https://api.radar.io ${META_CONNECT_ORIGINS} ${HEYCATCH_ORIGIN}`,
       // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
       // any more, and payment happens on Stripe's own hosted invoice page.
-      "frame-src https://challenges.cloudflare.com",
-      "form-action 'self'",
+      "frame-src https://challenges.cloudflare.com https://www.facebook.com",
+      "form-action 'self' https://www.facebook.com",
       "base-uri 'self'",
       "object-src 'none'",
       // Nothing here should ever be framed by anyone.

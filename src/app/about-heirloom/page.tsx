@@ -12,12 +12,11 @@ const [SUPPORT_EMAIL_USER, SUPPORT_EMAIL_HOST] = SUPPORT_EMAIL.split('@');
 // Q3 is ON by default (MKT Director/Brand). To strike it, set q3WomanOwned to '' or delete the key.
 // Self-description only: never add a certification word to this line.
 const Q: Record<string, string> = {
-  q1: `Heirloom Cribs & More brings made-to-order nursery furniture from three independent builders to families in Pennsylvania, New Jersey, and Maryland.`,
+  q1: `Heirloom Cribs & More brings made-to-order nursery furniture from independent builders to families in Pennsylvania, New Jersey, and Maryland.`,
   q3WomanOwned: `Heirloom Cribs & More is a woman-owned business.`,
-  q4: `Each builder is introduced in its own words on its own page.`,
   q5: `our warehouse in Bethlehem, Pennsylvania`,
   q7Babylist: `If you're building a baby registry, pieces on our site can be added to a Babylist registry, and we can also create a custom order that can be added to your personal Babylist registry.`,
-  q8Sub: `three independent builders`,
+  q8Sub: `independent builders`,
   q8KidsComfort: `Kids Comfort pieces aren't listed on our site yet; they are available on request.`,
 };
 
@@ -33,7 +32,7 @@ const OUR_STORY = [
 export const metadata: Metadata = {
   title: { absolute: 'About Heirloom Cribs & More | How We Work' },
   description:
-    'Heirloom Cribs & More brings made-to-order nursery furniture from three independent builders to families in PA, NJ, and MD. See how ordering works.',
+    'Heirloom Cribs & More brings made-to-order nursery furniture from independent builders to families in PA, NJ, and MD. See how ordering works.',
   alternates: { canonical: '/about-heirloom' },
   openGraph: { title: 'About Heirloom Cribs & More | How We Work', url: '/about-heirloom' },
   twitter: { title: 'About Heirloom Cribs & More | How We Work' },
@@ -98,7 +97,7 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md" id="how-an-order-works">How an order works</h2>
           <p>
-            {`Every piece is made to order. Placing an order is a commitment, not a charge: nothing is billed until we've checked the details with you, and nothing is built until the deposit is in.`}
+            {`Every piece is made to order. Placing an order doesn’t charge you. Nothing is billed until we've checked the details with you, and nothing is built until the deposit is in.`}
           </p>
           <ol>
             <li>
@@ -111,7 +110,7 @@ export default function AboutHeirloomPage() {
               <strong>You pay a 50% deposit.</strong>{` We send a secure Stripe invoice. You can pay by credit card or Affirm.`}
             </li>
             <li>
-              <strong>The builder makes it.</strong>{` Once the deposit is in, we place the order with the builder and the build starts. Our current estimates are about 6 to 8 weeks for Old Town Oak, about 8 weeks for Kids Comfort and 10 to 14 weeks for Fisher's. We confirm yours when you order.`}
+              <strong>The builder makes it.</strong>{` Once the deposit is in, we place the order with the builder and the build starts. Our current estimates are about 6 to 8 weeks for Old Town Oak and 10 to 14 weeks for Fisher's. We confirm yours when you order.`}
             </li>
             <li>
               <strong>We schedule delivery.</strong>{` When your furniture is ready, we contact you to set a delivery date. The balance is paid before we schedule final delivery.`}
@@ -182,7 +181,7 @@ export default function AboutHeirloomPage() {
             </li>
           </ul>
           <p>
-            {`${Q.q4} All three describe their cribs as convertible, so a crib can keep working as your child grows. On most cribs, conversion rail kits are sold separately. Wood and stain choices are explained on `}
+            {`They describe their cribs as convertible, so a crib can keep working as your child grows. On most cribs, conversion rail kits are sold separately. Wood and stain choices are explained on `}
             <Link href="/woods-and-finishes" className="doc-link">Woods and finishes</Link>
             {`.`}
           </p>

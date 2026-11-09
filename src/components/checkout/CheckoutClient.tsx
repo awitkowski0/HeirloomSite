@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/useCart';
+import { orphanedKits } from '@/lib/cart-lines';
 import {
   createQuote,
   type CartItemPayload,
@@ -776,6 +777,13 @@ export default function CheckoutClient({ recommendations }: Props) {
                 </li>
               ))}
             </ul>
+
+            {orphanedKits(cart).length > 0 && (
+              <p className="registry-note checkout-orphans">
+                {orphanedKits(cart).length === 1 ? 'A kit' : `${orphanedKits(cart).length} kits`} no longer has its crib in this order, so {orphanedKits(cart).length === 1 ? 'it’s' : 'they’re'} back at list price.{' '}
+                <button type="button" className="link" onClick={() => orphanedKits(cart).forEach(line => removeFromCart(line.id))}>Remove {orphanedKits(cart).length === 1 ? 'it' : 'them'}</button>
+              </p>
+            )}
 
             <CouponInput
               cart={cartPayload}

@@ -4,7 +4,6 @@ import BuilderProducts from '@/components/builders/BuilderProducts';
 
 // Q#-dependent copy, one place each (FQP: Q4, Q7).
 const Q = {
-  q4: `Fisher's is one of three builders Heirloom resells. We introduce it here in its own words.`,
   q7: `For a Fisher's wood, stain or hardware choice that isn't on our product pages, contact us with what you have in mind.`,
 };
 
@@ -60,7 +59,6 @@ export default function FishersQualityProductsPage() {
             <cite>{`Fisher's Quality Products, from its profile on All American Wholesalers`}</cite>
           </blockquote>
           <p>{`Fisher's business address is in Quarryville, Pennsylvania.`}</p>
-          <p>{Q.q4}</p>
         </section>
 
         <section>
@@ -109,7 +107,7 @@ export default function FishersQualityProductsPage() {
             <Link href="/product/nightstand-2-drawer" className="doc-link">2-drawer nightstand</Link>
           </p>
           <p>
-            {`Fisher's lead time is 10 to 14 weeks, the longest of our three builders, and we confirm it when you order. If you're working toward a due date, tell us your target month through Get Personal Assistance before you order.`}
+            {`Fisher's lead time is 10 to 14 weeks, and we confirm it when you order. If you're working toward a due date, tell us your target month through Get Personal Assistance before you order.`}
           </p>
         </section>
 

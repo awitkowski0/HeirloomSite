@@ -133,9 +133,12 @@ test('copy may not name a wood the product is not sold in', () => {
 test('editing grandfathered copy removes its exemption', () => {
   const c = freshCatalog();
   const p = product(c, 'Mission');
-  const baseline = c.legacyCopy[p.meta.slug];
-  assert.equal(baseline.description, sha256(p.meta.description));
-  p.meta.description = `${p.meta.description} `.replace('Mission', 'Mission Crib');
+  const oldCopy = 'A timeless crib for your Mission nursery.';
+  p.meta.description = oldCopy;
+  c.legacyCopy[p.meta.slug] = { ...c.legacyCopy[p.meta.slug], description: sha256(oldCopy) };
+  const exempt = validateCatalog(c).filter((f: { level: string; where: string }) => f.level === 'error' && f.where === 'Mission description');
+  assert.deepEqual(exempt, []);
+  p.meta.description = oldCopy.replace('Mission', 'Mission Crib');
   const errors = validateCatalog(c).filter((f: { level: string; where: string }) => f.level === 'error' && f.where === 'Mission description');
   assert.ok(errors.some((f: { code: string }) => f.code.startsWith('copy-')));
 });

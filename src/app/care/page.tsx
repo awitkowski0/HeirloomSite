@@ -74,7 +74,7 @@ export default function CarePage() {
         <p>
           Pieces are built after you order rather than pulled from a warehouse. Lead times depend
           on the builder and are estimates we confirm when you order: about 6–8 weeks for Old Town
-          Oak, about 8 weeks for Kids Comfort, and 10–14 weeks for Fisher&rsquo;s. Delivery is
+          Oak, and 10–14 weeks for Fisher&rsquo;s. Delivery is
           charged separately at checkout (Curbside or White Glove, based on your cart total). White
           Glove includes up to 3 flights of stairs. See{' '}
           <Link href="/shipping" className="doc-link">

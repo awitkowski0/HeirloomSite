@@ -3,7 +3,6 @@ import Link from 'next/link';
 
 // Q#-dependent copy, one place each (KC: Q4, Q7, Q8 sub-headline, Q8 ordering).
 const Q = {
-  q4: `Kids Comfort is one of three builders Heirloom resells. We introduce it here in its own words.`,
   q7: `To ask about the organic finish on a Kids Comfort piece, contact us.`,
   q8Sub: `Kids Comfort pieces aren't listed on our site yet, so there are no prices here. They are available on request through Heirloom Cribs & More.`,
   q8Order: `Tell us which pieces, wood and finish you're interested in, and a real person on our team follows up with options.`,
@@ -56,7 +55,6 @@ export default function KidsComfortPage() {
             <p>{`"As the owner of Kids Comfort … we realize the importance of quality, safety, endurance, and service. In closing my goal is to serve you."`}</p>
             <cite>{`Joe Troyer, owner, Kids Comfort catalog, January 2023`}</cite>
           </blockquote>
-          <p>{Q.q4}</p>
         </section>
 
         <section>

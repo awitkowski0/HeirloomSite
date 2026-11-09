@@ -73,7 +73,7 @@ export const TAXONOMY: readonly TaxonomyNode[] = [
     sources: [],
     children: [
       {
-        name: 'All Cribs',
+        name: 'Full-size cribs',
         slug: 'all-cribs',
         description:
           'Complete range of convertible cribs made to order by independent builders.',

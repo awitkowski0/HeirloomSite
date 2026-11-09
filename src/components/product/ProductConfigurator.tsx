@@ -201,12 +201,12 @@ export default function ProductConfigurator({
     if (variantType === 'wood') {
       return (currentConfig?.stains ?? [])
         .filter(s => s.inStock && s.image)
-        .map(s => ({ key: s.name, label: stainLabel(s.name), image: s.image! }));
+        .map(s => ({ key: s.name, label: finishDisplayName(stainLabel(s.name)), image: s.image! }));
     }
     if (variantType === 'finish') {
       return configurations.flatMap(c => {
         const stain = c.stains.find(s => s.inStock && s.image);
-        return stain ? [{ key: c.wood, label: humanizeWood(c.wood), image: stain.image! }] : [];
+        return stain ? [{ key: c.wood, label: finishDisplayName(humanizeWood(c.wood)), image: stain.image! }] : [];
       });
     }
     return [];

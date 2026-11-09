@@ -97,7 +97,6 @@ export default function ShippingPage() {
         <p>Every piece is made to order. Lead times are estimates, confirmed at order time:</p>
         <ul className="doc-list">
           <li>Old Town Oak: about 6–8 weeks</li>
-          <li>Kids Comfort: about 8 weeks</li>
           <li>Fisher&rsquo;s: 10–14 weeks</li>
         </ul>
         <p>

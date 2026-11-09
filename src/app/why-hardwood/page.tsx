@@ -47,8 +47,7 @@ export default function HardwoodPage() {
             Safety
           </Link>{' '}
           page notes that solid wood matters specifically because a convertible crib is repeatedly
-          disassembled and rebuilt — joinery that holds up is the difference between a piece that lasts
-          one child and one that lasts several.
+          disassembled and rebuilt.
         </p>
       </section>
       <section>
@@ -87,7 +86,7 @@ export default function HardwoodPage() {
       <section>
         <h2 className="headline-md">Reseller, not factory</h2>
         <p>
-          The cribs we sell are made to order by independent builders. Fisher&rsquo;s pieces are made in Pennsylvania, and Old Town Oak describes its furniture as “American handcrafted.” Heirloom Cribs &amp; More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley). We offer and support these pieces; we are not the factory.
+          The cribs we sell are made to order by independent builders. Old Town Oak describes its furniture as “American handcrafted.” Heirloom Cribs &amp; More is a woman-owned business based in Nazareth, Pennsylvania (Lehigh Valley). We offer and support these pieces; we are not the factory.
         </p>
       </section>
       <hr className="doc-rule" />
