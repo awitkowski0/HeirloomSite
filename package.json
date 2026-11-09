@@ -17,7 +17,8 @@
     "catalog:template": "node scripts/catalog.mjs template",
     "db:start": "node scripts/db-local.mjs start",
     "db:stop": "node scripts/db-local.mjs stop",
-    "db:migrate": "node --conditions=react-server --import ./tests/register.mjs scripts/db-migrate.ts"
+    "db:migrate": "node --conditions=react-server --import ./tests/register.mjs scripts/db-migrate.ts",
+    "interest:report": "node --conditions=react-server --import ./tests/register.mjs scripts/interest-report.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
