@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useSearchAll } from '@/lib/search';
 import { formatPriceApprox } from '@/lib/format';
+import TalkToPerson from '@/components/layout/TalkToPerson';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
@@ -26,7 +27,8 @@ export default function SearchResults() {
 
       {query && !loading && results.length === 0 && (
         <p className="page-note">
-          Nothing matched that search. <Link href="/products">Browse all products</Link> instead.
+          Nothing matched that search. <Link href="/products">Browse all products</Link>, or ask us.
+          {' '}<TalkToPerson />
         </p>
       )}
 

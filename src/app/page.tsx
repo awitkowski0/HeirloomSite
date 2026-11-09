@@ -1,3 +1,4 @@
+import { variantHref } from '@/lib/variants';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -20,8 +21,6 @@ const STARTERS = ['bloomington', 'mini-newport-with-mattress', 'newport-7-drawer
 /* Statically prerendered. The prompt and the four pieces are client islands. */
 export default function HomePage() {
   const items = toShopItems(getBrowsableProducts());
-  const opening = items.find(i => i.slug === OPENING);
-  const natural = opening?.finishImages.find(f => f.name === 'Natural');
 
   return (
     <>
@@ -29,8 +28,8 @@ export default function HomePage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd()) }} />
 
       <section className="opening">
-        <Link href={`/product/${OPENING}`} className="opening-photo" aria-label="Bloomington crib">
-          {natural ? <Image src={natural.image} alt="Bloomington crib in Natural" fill priority sizes="(max-width: 859px) 100vw, 55vw" /> : null}
+        <Link href={variantHref(OPENING, 'BrownMaple', 'Natural')} className="opening-photo" aria-label="Bloomington crib">
+          <Image src="/images/picks/opening-natural.jpg" alt="Bloomington crib in Natural" fill priority sizes="(max-width: 859px) 100vw, 55vw" />
         </Link>
         <IntentBox />
       </section>

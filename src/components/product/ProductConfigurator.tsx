@@ -404,12 +404,7 @@ export default function ProductConfigurator({
       <div className="pdp">
         <div className="pdp-media">
           <ProductGallery images={galleryImages} productName={productName} priority />
-          {feedItems.length > 1 || photoNote ? (
-            <p className="small pdp-caption">
-              {feedItems.length > 1 ? 'Colors are digital previews of one photo. ' : ''}
-              {photoNote ?? ''}
-            </p>
-          ) : null}
+          {photoNote ? <p className="small pdp-caption">{photoNote}</p> : null}
         </div>
 
         <div className="pdp-info">

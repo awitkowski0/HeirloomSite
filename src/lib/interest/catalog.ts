@@ -1,3 +1,5 @@
+import { toneOf, type Tone } from '@/lib/finish-tones';
+
 /*
  * The catalogue facts the profile reasons over. Plain data, built on the server
  * by getInterestCatalog() and handed to the browser as a prop.
@@ -6,7 +8,8 @@
  * is src/lib/pricing.ts and nothing else.
  */
 
-export type FinishFamily = 'light' | 'mid' | 'dark';
+/* One measured table of tones, so the profile and the shop filters always agree. */
+export type FinishFamily = Tone;
 
 export interface InterestCatalogItem {
   slug: string;
@@ -24,40 +27,11 @@ export interface InterestCatalogItem {
   listed: boolean;
 }
 
-/*
- * Classified by hand from the swatch and checked against every finish in the
- * catalogue by tests/interest-profile.test.ts, so a new stain fails a test
- * rather than silently landing in the wrong family. A name not in this table
- * has no family: no evidence is better than a guess.
- */
-const FINISH_FAMILY: Record<string, FinishFamily> = {
-  almond: 'light',
-  frost: 'light',
-  natural: 'light',
-  sandstone: 'light',
-  'antique slate': 'mid',
-  driftwood: 'mid',
-  earthtone: 'mid',
-  fruitwood: 'mid',
-  harvest: 'mid',
-  manchester: 'mid',
-  mx: 'mid',
-  provincial: 'mid',
-  seely: 'mid',
-  washington: 'mid',
-  'asbury brown': 'dark',
-  carbon: 'dark',
-  ebony: 'dark',
-  'michaels cherry': 'dark',
-  smoke: 'dark',
-};
-
 /** A name that is a variant placeholder, not a colour anyone chose. */
 export const NON_FINISH_NAMES: readonly string[] = ['default'];
 
 export function finishFamily(name: string | null | undefined): FinishFamily | null {
-  if (!name) return null;
-  return FINISH_FAMILY[name.trim().toLowerCase()] ?? null;
+  return name ? toneOf(name) : null;
 }
 
 export const FINISH_FAMILY_LABELS: Record<FinishFamily, string> = {

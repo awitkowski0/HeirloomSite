@@ -14,7 +14,7 @@ const STRONG: InterestEvent[] = [
   event('compare', 'arched-b', 5),
   event('this_or_that', 'arched-a', 3, { otherSlug: 'classic-a' }),
   event('save', 'arched-b', 2, { finish: 'Harvest' }),
-  event('add_to_cart', 'arched-a', 1, { finish: 'Provincial' }),
+  event('add_to_cart', 'arched-a', 1, { finish: 'Seely' }),
   event('save', 'dresser-a', 1),
 ];
 

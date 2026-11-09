@@ -138,9 +138,9 @@ a { color: inherit; }
 .dock-link { min-height: 44px; display: inline-flex; align-items: center; padding: 0; border: 0; background: none; color: var(--ink-muted); font: inherit; font-size: 13px; text-decoration: none; cursor: pointer; }
 .dock-link[aria-current='page'], .dock-link[aria-expanded='true'] { color: var(--ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
 .dock-yours { order: 3; margin-left: auto; display: inline-flex; align-items: center; gap: 9px; min-width: 0; min-height: 44px; padding: 0; border: 0; background: none; color: var(--ink); font: inherit; cursor: pointer; }
-.dock-slots { display: flex; gap: 3px; }
-.dock-slot { position: relative; width: 26px; height: 26px; overflow: hidden; background: var(--paper-2); }
-.dock-slot--full { background: var(--plate); box-shadow: inset 0 0 0 1px var(--line); }
+.dock-slots { display: flex; align-items: center; gap: 3px; }
+.dock-slot { position: relative; width: 16px; height: 2px; overflow: hidden; background: var(--line); }
+.dock-slot--full { width: 26px; height: 26px; background: none; }
 .dock-slot img, .line-thumb img, .tray-slot-photo img, .piece-photo img, .look-photo img, .half-photo img, .opening-photo img, .compare-photo img, .uses-photo img, .swatch-photo img, .finish-tile-img img { object-fit: contain; mix-blend-mode: multiply; }
 .dock-total { font-size: 13px; white-space: nowrap; }
 
@@ -163,9 +163,9 @@ a { color: inherit; }
 .tray-taste { font-size: 12.5px; color: var(--ink-muted); }
 .tray-slots { list-style: none; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 0; padding: 12px var(--gut) 8px; }
 .tray-slot { font-size: 11.5px; line-height: 1.2; text-align: center; color: var(--ink-muted); }
-.tray-slot-photo { position: relative; display: block; height: 48px; margin-bottom: 5px; background: var(--paper-2); }
+.tray-slot-photo { position: relative; display: block; height: 48px; margin-bottom: 5px; border-bottom: 1px solid var(--line); }
 .tray-slot--full { color: var(--ink); }
-.tray-slot--full .tray-slot-photo { background: var(--plate); box-shadow: inset 0 0 0 1px var(--line); }
+.tray-slot--full .tray-slot-photo { border-bottom-color: var(--ink); }
 .tray-kits { font-size: 13px; padding-bottom: 6px; }
 .tabs { display: flex; gap: 18px; margin: 6px var(--gut) 0; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
 .tabs button { min-height: 44px; margin-bottom: -1px; padding: 0; border: 0; border-bottom: 1px solid transparent; background: none; color: var(--ink-muted); font: inherit; font-size: 13px; white-space: nowrap; cursor: pointer; }
@@ -256,7 +256,7 @@ a { color: inherit; }
 .uses-photo { position: relative; display: block; height: 58px; margin-bottom: 6px; }
 .use-tags { margin: 12px 0 4px; }
 .use-tags ul { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; padding: 0; }
-.use-tag { position: relative; display: inline-flex; padding: 5px 8px; background: var(--ink); color: var(--paper); font-size: 11px; font-weight: 500; line-height: 1; letter-spacing: 0.02em; text-decoration: none; }
+.use-tag { position: relative; display: inline-flex; padding: 4px 7px; border: 1px solid var(--line); color: var(--ink-muted); font-size: 12px; line-height: 1; text-decoration: none; }
 .use-tag::after { content: ''; position: absolute; inset: 50% 0 auto; height: 44px; transform: translateY(-50%); }
 
 /* The pick run */
@@ -318,7 +318,7 @@ a { color: inherit; }
 /* Piece page */
 .product-page { max-width: 1220px; margin: 0 auto; padding: 0 0 24px; }
 .product-page .breadcrumb { display: none; }
-.pdp-media { min-width: 0; }
+.pdp-media { min-width: 0; background: var(--paper); }
 .pdp-media .product-image { background: none; }
 .pdp-media .product-image img, .pdp-media .stain-scrub-layers img { object-fit: contain; mix-blend-mode: multiply; }
 .pdp-caption { margin: 2px var(--gut) 0; }
@@ -395,14 +395,15 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--ink); }
   .uses-nav ul { overflow: visible; flex-wrap: wrap; gap: 18px; }
   .uses-nav li { flex: 0 0 88px; }
   .uses-photo { height: 68px; }
-  .halves { flex-direction: row; gap: 32px; max-height: 62dvh; margin-block: auto; }
+  .halves { flex-direction: row; gap: 32px; max-height: 50dvh; margin-block: auto; }
   .run h1 { font-size: 24px; }
   .run-teach { font-size: 13px; }
   .look-card { flex: 0 0 280px; }
   .compare-table, .compare-cells { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 0 32px; }
   .compare-photo { height: clamp(220px, 38dvh, 420px); }
   .panel { left: auto; width: 400px; border-left: 1px solid var(--line); }
-  .dock-slot { width: 30px; height: 30px; }
+  .dock-slot { width: 20px; }
+  .dock-slot--full { width: 30px; height: 30px; }
   .dock-total { font-size: 13.5px; }
   .pdp { display: grid; grid-template-columns: 1.25fr 1fr; grid-template-areas: 'media info' 'below below'; align-items: start; }
   .pdp-media { grid-area: media; position: sticky; top: var(--header-row-h); }
@@ -436,3 +437,30 @@ input[type='checkbox'], input[type='radio'] { accent-color: var(--ink); }
   .pdp-caption { margin-left: var(--gut); }
 }
 @media (prefers-reduced-motion: reduce) { .product-image img { animation: none; } }
+
+/* Lifts the off-white of catalog photos so multiply leaves no visible tile on linen. */
+.piece-photo img, .uses-photo img, .builder-header__media img, .product-image img, .compare-photo img, .swatch-photo img, .finish-tile-img img, .look-photo img, .line-thumb img, .tray-slot-photo img, .dock-slot img, .bundle-thumb img, .gallery-thumbs img { filter: brightness(1.06); }
+.builder-header__media img { mix-blend-mode: multiply; }
+
+/* Form fields are a single rule, like the search and intent boxes. */
+.field input, .field textarea, .field select, .contact-form input, .contact-form textarea { padding: 10px 0; border-width: 0 0 1px; border-radius: 0; background-color: transparent; }
+.field select { padding-right: 24px; }
+
+/* Checkout summary sits on the page like everything else. */
+.order-summary { padding: 0; background: none; border-radius: 0; }
+.order-summary-thumb, .also-like-thumb { background: none; border-radius: 0; }
+.order-summary-thumb img, .also-like-thumb img { object-fit: contain; mix-blend-mode: multiply; filter: brightness(1.06); }
+.also-like { border: 0; border-top: 1px solid var(--line); }
+.also-like-head { padding-inline: 0; }
+.also-like-row { padding-inline: 0; }
+.coupon-form input { padding: 10px 0; border-width: 0 0 1px; border-radius: 0; background: none; }
+
+/* Checkout columns, and the order summary first on a phone. */
+.checkout-page .grid-layout > .product-showcase { min-width: 0; }
+@media (min-width: 1024px) {
+  .checkout-page .grid-layout > .product-showcase { grid-column: span 7; }
+  .checkout-page .grid-layout > .configuration-panel { grid-column: span 5; }
+}
+@media (max-width: 1023px) {
+  .checkout-page .grid-layout > .configuration-panel { order: -1; }
+}
