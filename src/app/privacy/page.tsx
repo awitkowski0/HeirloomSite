@@ -52,6 +52,16 @@ export default function PrivacyPage() {
             form, at which point the two are linked.
           </li>
           <li>
+            <strong>Notes on what you look at.</strong> If you accept cookies, this browser keeps
+            a list of the pieces and finishes you view, compare, save or add to your cart, and
+            your This or That picks. We use it to suggest pieces and choose what to show you next.
+            It stays in your browser for 180 days and we can&rsquo;t see it unless you choose to
+            keep it on an account. You can read it, clear it or turn it off on{' '}
+            <a href="/your-taste" className="doc-link">What we&rsquo;ve learned</a>. We don&rsquo;t
+            use it to guess anything about your family or health, and we don&rsquo;t sell it or
+            send it to analytics or advertising companies.
+          </li>
+          <li>
             <strong>Session recordings.</strong> We record how pages are used so we can see where
             the site is confusing. <strong>Checkout is masked:</strong> everything typed into a
             form field, the address suggestions, and the confirmation email address are stripped
@@ -102,7 +112,8 @@ export default function PrivacyPage() {
             which is how we know whether to ask for consent before anything above loads.
           </li>
           <li>
-            <strong>Babylist</strong> — lets our products be added to a Babylist registry.
+            <strong>Babylist</strong> — lets our products be added to a Babylist registry. Its
+            script loads only when you go to use that button.
           </li>
           <li>
             <strong>Google Fonts</strong> — typefaces, served to your browser.
@@ -135,6 +146,11 @@ export default function PrivacyPage() {
           browser&rsquo;s own storage. They never leave your device until you submit an order, and
           they are not analytics.
         </p>
+        <p>
+          If you sign in and choose to keep your notes on your account, we store them with that
+          account until you clear them or delete the account. We may count those notes across many
+          accounts to see which pieces are popular, without looking at any one person.
+        </p>
       </section>
 
       <hr className="doc-rule" />
@@ -143,7 +159,8 @@ export default function PrivacyPage() {
         <h2 className="headline-md">Keeping and deleting</h2>
         <p>
           Order records are kept as long as we need them for the order, our accounts and our tax
-          obligations. Analytics data is kept for as long as it is useful and no longer. You can
+          obligations. Analytics data is kept for as long as it is useful and no longer. Notes on what you look at
+          stay in your browser for 180 days unless you clear them sooner. You can
           unsubscribe from the mailing list using the link in any email we send.
         </p>
       </section>

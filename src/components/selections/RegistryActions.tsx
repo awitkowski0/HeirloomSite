@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { sendToBabylist, type RegistryLine } from '@/lib/babylist';
+import { preloadBabylist, sendToBabylist, type RegistryLine } from '@/lib/babylist';
 
 function Fallback({ line }: { line: RegistryLine }) {
   const [copied, setCopied] = useState(false);
@@ -37,8 +37,9 @@ export default function RegistryActions({ lines }: { lines: RegistryLine[] }) {
     return <p className="tray-empty">Set something aside and you can send it to your Babylist registry from here.</p>;
   }
 
-  const send = (line: RegistryLine) => {
-    const result = sendToBabylist(line);
+  const prepare = () => void preloadBabylist();
+  const send = async (line: RegistryLine) => {
+    const result = await sendToBabylist(line);
     if (result === 'sent') {
       setSent(prev => new Set(prev).add(line.key));
       setBlocked(null);
@@ -58,7 +59,7 @@ export default function RegistryActions({ lines }: { lines: RegistryLine[] }) {
             {sent.has(line.key) ? (
               <span className="registry-sent">Sent to Babylist</span>
             ) : (
-              <button type="button" className="tray-link" onClick={() => send(line)}>Add to Babylist</button>
+              <button type="button" className="tray-link" onPointerEnter={prepare} onFocus={prepare} onClick={() => void send(line)}>Add to Babylist</button>
             )}
             {blocked === line.key && step === null && <Fallback line={line} />}
           </li>
@@ -78,7 +79,7 @@ export default function RegistryActions({ lines }: { lines: RegistryLine[] }) {
             {sent.has(current.key) ? (
               <span className="registry-sent">Sent to Babylist</span>
             ) : (
-              <button type="button" className="button-primary" onClick={() => send(current)}>Add to Babylist</button>
+              <button type="button" className="button-primary" onPointerEnter={prepare} onFocus={prepare} onClick={() => void send(current)}>Add to Babylist</button>
             )}
             <button
               type="button"

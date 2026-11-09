@@ -85,6 +85,8 @@ export function loadMetaPixel(): void {
     script.src = SCRIPT_SRC;
     document.head.appendChild(script);
 
+    // Stops the pixel collecting button text and page metadata on its own.
+    window.fbq('set', 'autoConfig', false, PIXEL_ID);
     window.fbq('init', PIXEL_ID);
     window.fbq('track', 'PageView');
     return;

@@ -13,7 +13,7 @@ import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import BundleBuilder from './BundleBuilder';
 import FinishWall from './FinishWall';
 import SetAsideButton from '@/components/selections/SetAsideButton';
-import { registryTitle, sendToBabylist, type RegistryLine } from '@/lib/babylist';
+import { preloadBabylist, registryTitle, sendToBabylist, type RegistryLine } from '@/lib/babylist';
 import type { ShopItem } from '@/lib/shop';
 import { formatPrice } from '@/lib/format';
 import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
@@ -435,7 +435,12 @@ export default function ProductConfigurator({
                 <button
                   type="button"
                   className="set-aside"
-                  onClick={() => setRegistryState({ key: registryLine.key, result: sendToBabylist(registryLine) })}
+                  onPointerEnter={() => void preloadBabylist()}
+                  onFocus={() => void preloadBabylist()}
+                  onClick={() => {
+                    const key = registryLine.key;
+                    void sendToBabylist(registryLine).then(result => setRegistryState({ key, result }));
+                  }}
                 >
                   Add to Babylist
                 </button>

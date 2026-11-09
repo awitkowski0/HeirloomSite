@@ -61,8 +61,9 @@ export default function ConsentBanner() {
       <div className="consent-banner-inner">
         <p className="consent-banner-text">
           We use analytics and advertising cookies to see how the site is used and to measure our
-          ads. Decline and the site works exactly the same — we just learn nothing about your
-          visit.{' '}
+          ads. If you accept, this browser also keeps notes on what you look at so we can suggest
+          pieces you might like. If you decline, the site works the same and we don&rsquo;t do any
+          of that.{' '}
           <Link href="/privacy" className="consent-banner-link">
             What we collect
           </Link>

@@ -87,9 +87,9 @@ export default function WhatWeLearned({ catalog }: { catalog: readonly InterestC
       <h1 className="headline-lg">What we&rsquo;ve learned</h1>
       <p className="taste-intro">
         A few notes on the furniture you have looked at, used to order suggestions and pick pairs for
-        This or That. It stays in this browser unless you choose to keep it on your account. It is
-        never sent to analytics or advertising companies, and it holds nothing about you beyond the
-        pieces and finishes you chose to look at.
+        This or That. It stays in this browser unless you choose to keep it on your account. We
+        don&rsquo;t send it to analytics or advertising companies, and it holds nothing about you
+        beyond the pieces and finishes you chose to look at.
       </p>
 
       {status === 'waiting' && (
