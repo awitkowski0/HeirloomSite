@@ -52,6 +52,10 @@ const nextConfig: NextConfig = {
   // Belt-and-braces: lib/content.ts reads these at build time, but if a route
   // ever becomes dynamic, the JSON must be traced into the lambda bundle.
   outputFileTracingIncludes: {
+    // These routes read the generated catalogue at request time.
+    '/agent/compare': ['./public/data/inventory.json', './public/data/products.json'],
+    '/agent/mcp': ['./public/data/inventory.json', './public/data/products.json'],
+    '/api/chat': ['./public/data/inventory.json', './public/data/products.json'],
     '/api/**/*': ['./public/data/*.json'],
     '/feed.xml': ['./public/data/*.json'],
   },

@@ -24,6 +24,8 @@ export const TURNSTILE_ACTIONS = {
   coupon: 'coupon',
   /** POST /api/inquiry - mails a stranger-typed address and the shop inbox. */
   contact: 'contact',
+  /** POST /api/chat - each message is a billed model call. */
+  chat: 'chat',
 } as const;
 
 export type TurnstileAction = (typeof TURNSTILE_ACTIONS)[keyof typeof TURNSTILE_ACTIONS];

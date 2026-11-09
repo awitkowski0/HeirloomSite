@@ -13,6 +13,7 @@
     "data:build": "node scripts/build-data.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.6.0",
     "@heycatch/sdk": "^0.8.5",
     "@posthog/react": "^1.10.5",
     "minisearch": "^7.2.0",

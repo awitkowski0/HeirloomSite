@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { CRIB_STYLES } from '@/lib/crib-styles';
 import { formatPriceApprox } from '@/lib/format';
 import type { ShopItem } from '@/lib/shop';
 
@@ -62,7 +63,7 @@ export default function CompareTable({ items }: { items: ShopItem[] }) {
               {i.slug === soonest && <span className="shop-badge">Soonest</span>}
             </>
           ))}
-          {row('Look', i => (i.top ? `${i.top} top, ${i.front?.toLowerCase()} front` : 'Not applicable'))}
+          {row('Style', i => CRIB_STYLES.find(s => s.id === i.style)?.label ?? 'Not applicable')}
           {row('Finishes', i => (i.finishes > 1 ? i.finishes : 'Ask us'))}
           {items.some(i => i.dimensions) && row('Size', i => i.dimensions ?? 'Ask us')}
           {row('How it’s built, per the builder', i => (

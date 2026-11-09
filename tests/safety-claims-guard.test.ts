@@ -23,6 +23,8 @@ const ALLOW = new Set([
   'src/app/builders/kids-comfort/page.tsx',
   // Verbatim builder statements only; tests/builders.test.ts checks each against the pages above.
   'src/lib/builders.ts',
+  // The chat's claim filter and system prompt name these terms in order to forbid them.
+  'src/lib/shop-chat.ts',
 ]);
 
 const SITE_PHRASES: [RegExp, string][] = [

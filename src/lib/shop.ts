@@ -1,5 +1,6 @@
 import { builderForProduct, featuresFor, safetyAnswerFor } from '@/lib/builders';
 import { getInventory, type ProductIndexItem } from '@/lib/content';
+import { CRIB_STYLES, type CribStyleId } from '@/lib/crib-styles';
 
 /*
  * One flat, serialisable row per product for the shop browser, built on the
@@ -19,6 +20,7 @@ export interface ShopItem {
   leadWeeksMax: number | null;
   top: 'Arched' | 'Flat' | null;
   front: 'Slatted' | 'Panel' | null;
+  style: CribStyleId | null;
   finishes: number;
   dimensions: string | null;
   safetyFeatures: string[];
@@ -69,6 +71,7 @@ export function toShopItems(products: ProductIndexItem[]): ShopItem[] {
       leadWeeksMax: builder?.leadWeeksMax ?? null,
       top: look?.[0] ?? null,
       front: look?.[1] ?? null,
+      style: CRIB_STYLES.find(s => s.top === look?.[0] && s.front === look?.[1])?.id ?? null,
       // A finish-variant product has one row per finish; a wood-variant one lists stains on the row.
       finishes: Math.max(rows[0]?.variantType === 'finish' ? rows.length : 0, ...rows.map(r => r.stains?.length ?? 0)),
       dimensions: rows.find(r => r.dimensions)?.dimensions ?? null,

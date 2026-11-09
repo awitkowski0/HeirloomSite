@@ -542,3 +542,112 @@
 #catalog {
   scroll-margin-top: calc(var(--header-h) + 16px);
 }
+
+/* Front-page calls to action, in the brand kit. */
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.home-tiles {
+  max-width: var(--spacing-container-max);
+  margin: 0 auto;
+  padding: 24px 24px 40px;
+}
+.home-tiles-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.home-tiles-grid > li {
+  min-width: 0;
+}
+.home-tile {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--rule);
+  background: var(--plate);
+  color: var(--ink);
+  text-decoration: none;
+}
+.home-tile:hover {
+  border-color: var(--rule-strong);
+}
+.home-tile-img {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 6px;
+}
+.home-tile-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+.home-tile-price,
+.home-tile-copy {
+  color: var(--ink-muted);
+}
+.home-tile-go {
+  margin-top: auto;
+  padding-top: 8px;
+  color: var(--ink);
+}
+.home-tile--help {
+  justify-content: center;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.home-tile--help .home-tile-copy {
+  color: var(--on-ink-muted);
+}
+.home-tile--help .home-tile-go {
+  margin-top: 0;
+  color: var(--paper);
+}
+.home-cta {
+  padding: 64px 24px;
+  background: var(--ink);
+  color: var(--paper);
+  text-align: center;
+}
+.home-cta h2 {
+  margin: 0 0 24px;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: clamp(2rem, 1.3rem + 2.9vw, 3.1rem);
+}
+.home-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+.home-cta-button {
+  padding: 16px 32px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-caps);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.home-cta-link {
+  color: var(--paper);
+}
+@media (min-width: 768px) {
+  .home-tiles-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

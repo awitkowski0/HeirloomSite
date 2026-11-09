@@ -11,6 +11,7 @@ import { organizationJsonLd, webSiteJsonLd,
 import { resolveFeature, indexByProductName } from '@/lib/showroom';
 import HomeHero from '@/components/home/HomeHero';
 import ProvenanceBand from '@/components/home/ProvenanceBand';
+import ShopTiles from '@/components/home/ShopTiles';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
 import BrandSketch from '@/components/marketing/BrandSketch';
@@ -71,6 +72,7 @@ export default function HomePage() {
       />
 
       <HomeHero detail={detail} heroImage={heroImage} />
+      <ShopTiles />
       <ProvenanceBand />
 
       {/*
@@ -87,7 +89,7 @@ export default function HomePage() {
         <JourneyStep
           n="01"
           title="Browse the Catalog"
-          lead="Filter by type, builder, look, budget, and timing, then compare up to three pieces side by side."
+          lead="Filter by type, style, budget, and timing, then compare up to three pieces side by side."
         >
           <div id="catalog">
             <ShopBrowser items={toShopItems(getBrowsableProducts())} initialType="Cribs" />
@@ -149,6 +151,14 @@ export default function HomePage() {
           />
         </JourneyStep>
       </div>
+
+      <section className="home-cta" aria-labelledby="home-cta-heading">
+        <h2 id="home-cta-heading">Ready to Find Yours?</h2>
+        <div className="home-cta-actions">
+          <Link href="#catalog" className="home-cta-button">Shop the catalog</Link>
+          <Link href="/contact" className="home-cta-link">Talk to a real person</Link>
+        </div>
+      </section>
     </>
   );
 }

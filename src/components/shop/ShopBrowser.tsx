@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { CRIB_STYLES } from '@/lib/crib-styles';
 import { formatPriceApprox } from '@/lib/format';
 import { useDelistedProducts } from '@/lib/useDelistedProducts';
 import type { ShopItem } from '@/lib/shop';
@@ -70,10 +71,6 @@ export default function ShopBrowser({
       ),
     [available],
   );
-  const builders = useMemo(
-    () => [...new Set(available.map(i => i.builder).filter((b): b is string => Boolean(b)))],
-    [available],
-  );
 
   const pool = filters.type ? available.filter(i => i.category === filters.type) : available;
   const showLooks = pool.length > 0 && pool.every(i => i.top);
@@ -118,32 +115,32 @@ export default function ShopBrowser({
               label="Type"
               options={types.map(t => ({ value: t, label: t }))}
               value={filters.type}
-              onChange={v => setFilters(f => ({ ...f, type: v, top: null, front: null }))}
-            />
-          )}
-          {builders.length > 1 && (
-            <Chips
-              label="Builder"
-              options={builders.map(b => ({ value: b, label: b }))}
-              value={filters.builder}
-              onChange={v => set('builder', v)}
+              onChange={v => setFilters(f => ({ ...f, type: v, style: null }))}
             />
           )}
           {showLooks && (
-            <>
-              <Chips
-                label="Top"
-                options={[{ value: 'Arched', label: 'Arched' }, { value: 'Flat', label: 'Flat' }]}
-                value={filters.top}
-                onChange={v => set('top', v)}
-              />
-              <Chips
-                label="Front"
-                options={[{ value: 'Slatted', label: 'Slatted' }, { value: 'Panel', label: 'Panel' }]}
-                value={filters.front}
-                onChange={v => set('front', v)}
-              />
-            </>
+            <div className="shop-facet" role="group" aria-label="Style">
+              <span className="shop-facet__label">Style</span>
+              <div className="shop-facet__chips">
+                {CRIB_STYLES.map(style => {
+                  const sample = available.find(i => i.slug === style.sampleSlug)?.image;
+                  return (
+                    <button
+                      key={style.id}
+                      type="button"
+                      className="shop-style"
+                      aria-pressed={filters.style === style.id}
+                      onClick={() => set('style', filters.style === style.id ? null : style.id)}
+                    >
+                      <span className="shop-style__img">
+                        {sample ? <Image src={sample} alt="" fill sizes="96px" style={{ objectFit: 'contain' }} /> : null}
+                      </span>
+                      {style.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           )}
           <Chips
             label="Budget"

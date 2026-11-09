@@ -1,3 +1,4 @@
+import type { CribStyleId } from '@/lib/crib-styles';
 import type { ShopItem } from '@/lib/shop';
 
 export const PRICE_BANDS = [
@@ -10,9 +11,7 @@ export type BandId = (typeof PRICE_BANDS)[number]['id'];
 
 export interface Filters {
   type: string | null;
-  builder: string | null;
-  top: 'Arched' | 'Flat' | null;
-  front: 'Slatted' | 'Panel' | null;
+  style: CribStyleId | null;
   band: BandId | null;
   maxWeeks: number | null;
   safetyOnFile: boolean;
@@ -20,9 +19,7 @@ export interface Filters {
 
 export const EMPTY_FILTERS: Filters = {
   type: null,
-  builder: null,
-  top: null,
-  front: null,
+  style: null,
   band: null,
   maxWeeks: null,
   safetyOnFile: false,
@@ -33,9 +30,7 @@ export function applyFilters(items: ShopItem[], f: Filters): ShopItem[] {
   return items.filter(
     i =>
       (!f.type || i.category === f.type) &&
-      (!f.builder || i.builder === f.builder) &&
-      (!f.top || i.top === f.top) &&
-      (!f.front || i.front === f.front) &&
+      (!f.style || i.style === f.style) &&
       (!band || (i.price >= band.min && i.price < band.max)) &&
       (f.maxWeeks === null || (i.leadWeeksMax !== null && i.leadWeeksMax <= f.maxWeeks)) &&
       (!f.safetyOnFile || i.safetyOnFile),

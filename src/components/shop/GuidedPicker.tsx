@@ -1,14 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import TurnstileWidget, {
+  type TurnstileHandle,
+  type TurnstileStatus,
+} from '@/components/checkout/TurnstileWidget';
+import { CRIB_STYLES } from '@/lib/crib-styles';
 import type { ShopItem } from '@/lib/shop';
+import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
 import { EMPTY_FILTERS, applyFilters, type Filters } from './filters';
 
 /*
- * A guided conversation over the real catalogue. It is scripted, not a language
- * model, and is labelled that way: every answer is a filter and every result is
- * a real row, so it cannot invent a product, a price or a safety claim.
+ * Two ways to narrow the catalog in one panel: tap-through questions that set
+ * real filters, and a typed question answered by /api/chat. The typed answers
+ * are AI-generated and labeled so; the tap-through path needs no model.
  */
 interface Option {
   label: string;
@@ -20,6 +26,11 @@ interface Step {
   options: Option[];
   /** Skip this question when it would not apply to the answers so far. */
   when?: (f: Filters) => boolean;
+}
+interface LiveMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  pieces?: string[];
 }
 
 const STEPS: Step[] = [
@@ -53,14 +64,9 @@ const STEPS: Step[] = [
   },
   {
     id: 'look',
-    ask: 'Which look are you drawn to?',
+    ask: 'Which style are you drawn to?',
     when: f => f.type === 'Cribs',
-    options: [
-      { label: 'Open slats', apply: { front: 'Slatted' } },
-      { label: 'Solid panel front', apply: { front: 'Panel' } },
-      { label: 'Arched top', apply: { top: 'Arched' } },
-      { label: 'Flat top', apply: { top: 'Flat' } },
-    ],
+    options: CRIB_STYLES.map(s => ({ label: s.label, apply: { style: s.id } })),
   },
 ];
 
@@ -74,6 +80,16 @@ export default function GuidedPicker({
   onCompare: (slugs: string[]) => void;
 }) {
   const [answers, setAnswers] = useState<{ step: Step; option: Option }[]>([]);
+  const [live, setLive] = useState<LiveMessage[]>([]);
+  const [draft, setDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  // The Turnstile script loads only once someone starts to type a question.
+  const [engaged, setEngaged] = useState(false);
+  const [token, setToken] = useState('');
+  const [status, setStatus] = useState<TurnstileStatus>('pending');
+  const turnstile = useRef<TurnstileHandle>(null);
+
   const filters = answers.reduce<Filters>((f, a) => ({ ...f, ...a.option.apply }), EMPTY_FILTERS);
   const current = STEPS.filter(s => !s.when || s.when(filters)).find(
     s => !answers.some(a => a.step.id === s.id),
@@ -87,13 +103,51 @@ export default function GuidedPicker({
   };
   const restart = () => {
     setAnswers([]);
+    setLive([]);
+    setError('');
     onFilters(EMPTY_FILTERS);
   };
 
+  const send = async (e: FormEvent) => {
+    e.preventDefault();
+    const content = draft.trim();
+    if (!content || busy) return;
+    const history: LiveMessage[] = [...live, { role: 'user', content }];
+    setLive(history);
+    setDraft('');
+    setBusy(true);
+    setError('');
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: history.map(m => ({ role: m.role, content: m.content })),
+          turnstileToken: token,
+        }),
+      });
+      const data = (await res.json()) as { reply?: string; pieces?: string[]; error?: string };
+      if (!res.ok || !data.reply) throw new Error(data.error);
+      setLive([...history, { role: 'assistant', content: data.reply, pieces: data.pieces ?? [] }]);
+    } catch (err) {
+      setLive(live);
+      setDraft(content);
+      setError(err instanceof Error && err.message ? err.message : 'Live chat is unavailable right now.');
+    } finally {
+      // A token is single-use whether the request worked or not.
+      setToken('');
+      turnstile.current?.reset();
+      setBusy(false);
+    }
+  };
+
+  const nameOf = (slug: string) => items.find(i => i.slug === slug)?.name;
+  const waiting = engaged && status === 'pending';
+
   return (
-    <aside className="guide" aria-label="Help me pick">
+    <aside id="help-me-pick" className="guide" aria-label="Help me pick">
       <p className="guide__title">Help me pick</p>
-      <p className="guide__note">A quick guided chat. It filters the real catalog.</p>
+      <p className="guide__note">Tap an answer, or ask anything below.</p>
       <div className="guide__log" aria-live="polite">
         {answers.map(a => (
           <div key={a.step.id}>
@@ -111,6 +165,32 @@ export default function GuidedPicker({
             filtered for you here. Want to see the first few side by side?
           </p>
         )}
+        {live.map((m, i) => (
+          <div key={i}>
+            <p className={m.role === 'user' ? 'guide__bubble guide__bubble--me' : 'guide__bubble'}>
+              {m.content}
+            </p>
+            {m.pieces && m.pieces.length > 0 && (
+              <div className="guide__replies">
+                {m.pieces.map(slug => (
+                  <Link key={slug} href={`/product/${slug}`} className="shop-chip">
+                    {nameOf(slug) ?? slug}
+                  </Link>
+                ))}
+                {m.pieces.length >= 2 && (
+                  <button
+                    type="button"
+                    className="shop-chip shop-chip--solid"
+                    onClick={() => onCompare(m.pieces ?? [])}
+                  >
+                    Compare these
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+        {busy && <p className="guide__bubble">Looking through the catalog&hellip;</p>}
       </div>
 
       {current ? (
@@ -138,7 +218,36 @@ export default function GuidedPicker({
           <Link href="/contact" className="shop-chip">Talk to a person</Link>
         </div>
       )}
-      {answers.length > 0 && (
+
+      <form className="guide__form" onSubmit={send}>
+        <label className="guide__label" htmlFor="guide-question">Ask about the catalog</label>
+        <div className="guide__row">
+          <input
+            id="guide-question"
+            value={draft}
+            maxLength={600}
+            placeholder="Which crib is ready soonest?"
+            autoComplete="off"
+            onChange={e => setDraft(e.target.value)}
+            onFocus={() => setEngaged(true)}
+          />
+          <button type="submit" className="shop-chip shop-chip--solid" disabled={busy || waiting || !draft.trim()}>
+            Ask
+          </button>
+        </div>
+        {engaged && (
+          <TurnstileWidget
+            ref={turnstile}
+            action={TURNSTILE_ACTIONS.chat}
+            onToken={setToken}
+            onStatus={setStatus}
+          />
+        )}
+        <p className="guide__fine">AI answers from our catalog. It can make mistakes, so confirm details with us. Please don&rsquo;t share personal information.</p>
+        {error && <p className="guide__fine guide__fine--error" role="alert">{error}</p>}
+      </form>
+
+      {(answers.length > 0 || live.length > 0) && (
         <button type="button" className="shop-clear" onClick={restart}>Start over</button>
       )}
     </aside>
