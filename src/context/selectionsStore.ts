@@ -1,26 +1,26 @@
 'use client';
 
 import { useSyncExternalStore } from 'react';
+import type { Side } from '@/lib/pick-run';
 import type { ShopItem } from '@/lib/shop';
 import { EMPTY_SELECTIONS, parseSelections, type Selections } from './selectionsParse';
 
 export type { RunState, Selections } from './selectionsParse';
 
 /*
- * What a shopper has set aside, and which of those they are comparing.
+ * What a shopper has saved, is comparing, and how far they are through the pick
+ * run. localStorage through useSyncExternalStore, like the cart, so it survives
+ * Back, reloads and other tabs without any page reading the URL or cookies.
  *
- * localStorage through useSyncExternalStore, the same pattern as the cart, so it
- * survives Back, reloads and other tabs without any page reading the URL or
- * cookies. Each row keeps what the tray needs to draw it. Those prices are for
- * display only: an order is always priced by src/lib/pricing.ts.
+ * Rows keep what the dock needs to draw them. Their prices are for display only:
+ * an order is always priced by src/lib/pricing.ts.
  */
 export const MAX_COMPARE = 3;
 
 const STORAGE_KEY = 'heirloom_selections';
 const EVENT = 'heirloom_selections_change';
-const EMPTY = EMPTY_SELECTIONS;
 
-let cached: Selections = EMPTY;
+let cached: Selections = EMPTY_SELECTIONS;
 let cachedRaw: string | null = null;
 
 function read(): Selections {
@@ -56,111 +56,132 @@ function subscribe(listener: () => void) {
   };
 }
 
-const serverSnapshot = () => EMPTY;
+const serverSnapshot = () => EMPTY_SELECTIONS;
 
 export function useSelections(): Selections {
   return useSyncExternalStore(subscribe, read, serverSnapshot);
 }
 
-/** For code that must check once rather than subscribe. */
-export function currentSelections(): Selections {
-  return read();
-}
-
-export function isSetAside(selections: Selections, slug: string): boolean {
+export function isSaved(selections: Selections, slug: string): boolean {
   return selections.items.some(i => i.slug === slug);
 }
 
-/** Setting a piece aside also lines it up to compare, while there is room. */
-export function setAside(item: ShopItem) {
+export function setFinish(slug: string, finish: string) {
   const state = read();
-  if (state.items.some(i => i.slug === item.slug)) return;
+  if (state.finishes[slug] !== finish) write({ ...state, finishes: { ...state.finishes, [slug]: finish } });
+}
+
+/** Saving keeps a piece. It does not fill the cart, or the nursery progress. */
+export function toggleSaved(item: ShopItem, finish?: string | null) {
+  const state = read();
+  if (state.items.some(i => i.slug === item.slug)) {
+    write({ ...state, items: state.items.filter(i => i.slug !== item.slug) });
+    return false;
+  }
   write({
     ...state,
     items: [...state.items, item],
-    compare: state.compare.length < MAX_COMPARE ? [...state.compare, item.slug] : state.compare,
+    finishes: finish ? { ...state.finishes, [item.slug]: finish } : state.finishes,
   });
+  return true;
 }
 
-export function removeSelection(slug: string) {
+export function removeSaved(slug: string) {
   const state = read();
-  write({ ...state, items: state.items.filter(i => i.slug !== slug), compare: state.compare.filter(s => s !== slug) });
+  write({ ...state, items: state.items.filter(i => i.slug !== slug) });
 }
 
-export function toggleSetAside(item: ShopItem) {
-  if (read().items.some(i => i.slug === item.slug)) removeSelection(item.slug);
-  else setAside(item);
+export type CompareResult = 'added' | 'removed' | 'full';
+
+function compareExtras(state: Selections, item: ShopItem, compare: string[]) {
+  return [...state.compareExtras.filter(i => i.slug !== item.slug && compare.includes(i.slug)), item];
 }
 
-export function toggleCompare(slug: string) {
+/** Returns 'full' instead of quietly dropping a piece: the shopper picks which goes. */
+export function toggleCompare(item: ShopItem, finish?: string | null): CompareResult {
   const state = read();
-  if (state.compare.includes(slug)) {
-    write({ ...state, compare: state.compare.filter(s => s !== slug) });
-  } else if (state.compare.length < MAX_COMPARE) {
-    write({ ...state, compare: [...state.compare, slug] });
+  if (state.compare.includes(item.slug)) {
+    write({ ...state, compare: state.compare.filter(s => s !== item.slug) });
+    return 'removed';
   }
-}
-
-/** Make these pieces the comparison, setting aside any that are new. */
-export function compareOnly(items: ShopItem[]) {
-  const state = read();
-  const known = new Set(state.items.map(i => i.slug));
+  if (state.compare.length >= MAX_COMPARE) return 'full';
+  const compare = [...state.compare, item.slug];
   write({
     ...state,
-    items: [...state.items, ...items.filter(i => !known.has(i.slug))],
-    compare: items.slice(0, MAX_COMPARE).map(i => i.slug),
+    compare,
+    compareExtras: compareExtras(state, item, compare),
+    finishes: finish ? { ...state.finishes, [item.slug]: finish } : state.finishes,
+  });
+  return 'added';
+}
+
+export function removeCompare(slug: string) {
+  const state = read();
+  write({ ...state, compare: state.compare.filter(s => s !== slug) });
+}
+
+export function setCompare(items: readonly { item: ShopItem; finish: string | null }[]) {
+  const state = read();
+  const compare = items.slice(0, MAX_COMPARE).map(i => i.item.slug);
+  const finishes = { ...state.finishes };
+  for (const { item, finish } of items) if (finish) finishes[item.slug] = finish;
+  write({
+    ...state,
+    compare,
+    compareExtras: [...items.map(i => i.item)],
+    finishes,
   });
 }
 
-/** Flip one side of the comparison to another piece, in place. */
-export function swapCompare(fromSlug: string, to: ShopItem) {
+/** Swap one column for another piece, in place. */
+export function replaceCompare(fromSlug: string, to: ShopItem, finish?: string | null) {
   const state = read();
   const compare = state.compare.map(s => (s === fromSlug ? to.slug : s));
   write({
     ...state,
     compare,
-    compareExtras: [...state.compareExtras.filter(i => i.slug !== to.slug && compare.includes(i.slug)), to],
+    compareExtras: compareExtras(state, to, compare),
+    finishes: finish ? { ...state.finishes, [to.slug]: finish } : state.finishes,
   });
 }
 
-export function pickRun(plateId: string, side: 'left' | 'right') {
+export function setSharedFinish(slugs: readonly string[], finish: string) {
   const state = read();
-  write({ ...state, run: { ...state.run, picks: { ...state.run.picks, [plateId]: side } } });
+  const finishes = { ...state.finishes };
+  for (const slug of slugs) finishes[slug] = finish;
+  write({ ...state, finishes });
 }
 
-export function setRunAt(at: number) {
+export function pickRun(pairId: string, side: Side, at: number) {
   const state = read();
-  if (state.run.at !== at) write({ ...state, run: { ...state.run, at } });
+  write({ ...state, run: { picks: { ...state.run.picks, [pairId]: side }, at } });
+}
+
+export function undoPick(pairId: string, at: number) {
+  const state = read();
+  const picks = { ...state.run.picks };
+  delete picks[pairId];
+  write({ ...state, run: { picks, at } });
 }
 
 export function resetRun() {
   write({ ...read(), run: { picks: {}, at: 0 } });
 }
 
-export type TrayTab = 'saved' | 'compare' | 'cart' | 'registry';
-const TRAY_EVENT = 'heirloom_tray_open';
+export type PanelRequest = { kind: 'tray' } | { kind: 'chat'; piece?: string };
+const PANEL_EVENT = 'heirloom_panel_open';
 
-/** Returns false off the catalog routes, where the tray is not mounted. */
-export function requestTrayOpen(tab: TrayTab): boolean {
-  if (!document.querySelector('.tray')) return false;
-  window.dispatchEvent(new CustomEvent<TrayTab>(TRAY_EVENT, { detail: tab }));
-  return true;
+export function requestPanel(request: PanelRequest) {
+  window.dispatchEvent(new CustomEvent<PanelRequest>(PANEL_EVENT, { detail: request }));
 }
 
-export function onTrayOpen(listener: (tab: TrayTab) => void) {
-  const handler = (e: Event) => listener((e as CustomEvent<TrayTab>).detail);
-  window.addEventListener(TRAY_EVENT, handler);
-  return () => window.removeEventListener(TRAY_EVENT, handler);
+export function onPanelRequest(listener: (request: PanelRequest) => void) {
+  const handler = (e: Event) => listener((e as CustomEvent<PanelRequest>).detail);
+  window.addEventListener(PANEL_EVENT, handler);
+  return () => window.removeEventListener(PANEL_EVENT, handler);
 }
 
-/* The compare view opens from pages that do not own it. */
-const OPEN_EVENT = 'heirloom_compare_open';
-
-export function requestCompareOpen() {
-  window.dispatchEvent(new Event(OPEN_EVENT));
-}
-
-export function onCompareOpen(listener: () => void) {
-  window.addEventListener(OPEN_EVENT, listener);
-  return () => window.removeEventListener(OPEN_EVENT, listener);
+/** For code that must check once rather than subscribe. */
+export function currentSelections(): Selections {
+  return read();
 }

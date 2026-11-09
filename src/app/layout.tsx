@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import { GFS_Didot, Open_Sans } from 'next/font/google';
 import './globals.css';
+import '@/styles/site.css';
 import { Providers } from './providers';
 import Header from '@/components/layout/Header';
-import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
-import SelectionsTray from '@/components/selections/SelectionsTray';
+import Dock from '@/components/dock/Dock';
+import Toaster from '@/components/ui/Toaster';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
 /*
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   // Makes every relative canonical and og:image absolute in one place.
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'Heirloom Cribs — Built to Grow Up.',
+    default: SITE_NAME,
     template: `%s | ${SITE_NAME}`,
   },
   description:
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: 'en_US',
     url: '/',
-    title: 'Heirloom Cribs — Built to Grow Up.',
+    title: SITE_NAME,
     description:
       'Solid hardwood nursery furniture, made to order and designed to grow with your child. ' +
       'Delivery is charged separately, with Curbside and White Glove options.',
@@ -64,7 +65,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Heirloom Cribs — Built to Grow Up.',
+    title: SITE_NAME,
     description: 'Solid hardwood nursery furniture, made to order and designed to grow with your child.',
     images: ['/logo-wide.png'],
   },
@@ -116,9 +117,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
           <Header />
           <main id="main-content">{children}</main>
-          <SelectionsTray />
-          <BottomNav />
           <Footer />
+          <Dock />
+          <Toaster />
         </Providers>
       </body>
     </html>

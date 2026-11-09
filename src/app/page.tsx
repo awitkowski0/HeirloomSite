@@ -1,89 +1,80 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
-import { getNurserySets, getPlates, LEARN_CARDS } from '@/lib/plates';
-import { organizationJsonLd, webSiteJsonLd, jsonLdScript } from '@/lib/seo';
-import HomeHero from '@/components/home/HomeHero';
+import IntentBox from '@/components/home/IntentBox';
+import StartWith from '@/components/home/StartWith';
 import TalkToPerson from '@/components/layout/TalkToPerson';
-import ProvenanceBand from '@/components/home/ProvenanceBand';
-import NurserySetSpread from '@/components/plates/NurserySetSpread';
-import PlateRun from '@/components/plates/PlateRun';
-import UsesNav from '@/components/uses/UsesNav';
-import '@/styles/home.css';
+import { getBrowsableProducts } from '@/lib/content';
+import { getInterestCatalog } from '@/lib/interest/catalog-server';
+import { organizationJsonLd, webSiteJsonLd, jsonLdScript } from '@/lib/seo';
+import { toShopItems } from '@/lib/shop';
+import { SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
-/*
- * Statically prerendered. Plates are client islands over server-built rows, and
- * must stay free of useSearchParams(), which would make this route dynamic.
- */
+const OPENING = 'bloomington';
+const STARTERS = ['bloomington', 'mini-newport-with-mattress', 'newport-7-drawer-dresser', 'newport-nightstand'];
+
+/* Statically prerendered. The prompt and the four pieces are client islands. */
 export default function HomePage() {
-  const plates = getPlates();
-  const sets = getNurserySets();
-  const promptPlates = plates.map(({ id, number, title, keywords }) => ({ id, number, title, keywords }));
+  const items = toShopItems(getBrowsableProducts());
+  const opening = items.find(i => i.slug === OPENING);
+  const natural = opening?.finishImages.find(f => f.name === 'Natural');
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd()) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd()) }} />
 
-      <HomeHero plates={promptPlates} />
-      <PlateRun plates={plates} cards={LEARN_CARDS} />
-      <UsesNav />
-
-      <nav className="contents" aria-label="In this edition">
-        <p className="label-caps">In this edition</p>
-        <ol>
-          {plates.map(p => (
-            <li key={p.id}>
-              <a href={`#${p.id}`}><span>{p.number}</span> {p.title}</a>
-            </li>
-          ))}
-        </ol>
-        <Link href="/products" className="button-primary">See everything</Link>
-      </nav>
-
-      <ProvenanceBand />
-
-      <section className="sets" aria-labelledby="sets-heading">
-        <h2 id="sets-heading">Whole Rooms</h2>
-        {sets.map(set => <NurserySetSpread key={set.id} set={set} />)}
+      <section className="opening">
+        <Link href={`/product/${OPENING}`} className="opening-photo" aria-label="Bloomington crib">
+          {natural ? <Image src={natural.image} alt="Bloomington crib in Natural" fill priority sizes="(max-width: 859px) 100vw, 55vw" /> : null}
+        </Link>
+        <IntentBox />
       </section>
 
-      <section className="see-all">
-        <h2>Want to See It All?</h2>
-        <Link href="/products" className="button-primary">See everything</Link>
-        <p className="see-all-help"><TalkToPerson /></p>
-      </section>
+      <div className="page">
+        <section className="section">
+          <div className="section-head">
+            <h2>A few to start with</h2>
+            <Link href="/products" className="link">See everything</Link>
+          </div>
+          <StartWith items={items} starters={STARTERS} catalog={getInterestCatalog()} />
+          <p className="section-more"><Link href="/pick" className="link">Not sure? Pick between two photos, seven times</Link></p>
+        </section>
 
-      <section className="home-steps" aria-labelledby="home-steps-heading">
-        <h2 id="home-steps-heading">How Buying Works</h2>
-        <ol>
-          <li>
-            <h3>Order with no card</h3>
-            <p>We don&rsquo;t take payment at checkout. We call to confirm the stain, the kit list, and the delivery before anything is built.</p>
-          </li>
-          <li>
-            <h3>Pay how you like</h3>
-            <p>A secure Stripe invoice follows within 48 hours of your order. A minimum 50% deposit begins production. You can also pay in full or finance the whole order with Affirm.</p>
-          </li>
-          <li>
-            <h3>The builder makes it</h3>
-            <p>Every piece is made to order. <Link href="/timeline">Lead times</Link> are estimates that we confirm when you order. We&rsquo;ll collect the remaining balance before we schedule final delivery.</p>
-          </li>
-          <li>
-            <h3>We deliver it</h3>
-            <p>Choose Curbside or White Glove when you order. Shipping is charged separately, and assembly comes only with White Glove. See our <Link href="/shipping">Delivery page</Link> for the areas we serve.</p>
-          </li>
-        </ol>
-      </section>
+        <section className="section section--two">
+          <div>
+            <h2>Why does a crib cost over $2,000?</h2>
+            <p>Fair question. A shop builds this one after you order, in solid brown maple. It also keeps going after the baby years, when you add the conversion kits.</p>
+            <p className="section-more"><Link href={`/product/${OPENING}#why`} className="link">See how one adds up</Link></p>
+          </div>
+          <div>
+            <h2>Solid wood cribs from shops we can name.</h2>
+            <p>We started Heirloom after a hard search for a solid wood crib for our first grandchild. Everything here is built to order by an independent shop.</p>
+            <p className="section-more"><Link href="/about-heirloom" className="link">Our story</Link> <Link href="/builders" className="link">The builders</Link></p>
+          </div>
+        </section>
+
+        <section className="section section--two">
+          <div>
+            <h2>Buying it for someone else?</h2>
+            <p>Call us and we’ll set up the order by hand. You can also add pieces to a Babylist registry.</p>
+            <p className="section-more"><Link href="/gifts" className="link">Gift ideas</Link> <TalkToPerson /></p>
+          </div>
+          <div>
+            <h2>How buying works</h2>
+            <ol className="steps">
+              <li>Order with no card. We call to confirm the stain, the kit list and the delivery.</li>
+              <li>A secure Stripe invoice follows within 48 hours of your order. A minimum 50% deposit begins production. You can also pay in full, or use Affirm.</li>
+              <li>The builder makes it. We confirm your <Link href="/timeline">lead time</Link> when you order, and collect the balance before final delivery.</li>
+              <li>You choose Curbside or White Glove. Shipping is charged separately, and assembly comes only with White Glove. {SHIPPING_LIMIT_NOTE} <Link href="/shipping">Delivery</Link></li>
+            </ol>
+          </div>
+        </section>
+      </div>
     </>
   );
 }

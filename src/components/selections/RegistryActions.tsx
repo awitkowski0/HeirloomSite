@@ -1,18 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { recordInterest } from '@/lib/interest/store';
 import { preloadBabylist, sendToBabylist, type RegistryLine } from '@/lib/babylist';
 
 function Fallback({ line }: { line: RegistryLine }) {
   const [copied, setCopied] = useState(false);
   const url = typeof window === 'undefined' ? line.href : `${window.location.origin}${line.href}`;
   return (
-    <p className="registry-fallback" role="status">
-      Babylist&rsquo;s button isn&rsquo;t available in this browser. Copy this link and add it on Babylist:{' '}
-      <a href={line.href} className="doc-link">{line.title}</a>{' '}
+    <p className="registry-note" role="status">
+      Babylist’s button isn’t available in this browser. Copy this link and add it on Babylist.{' '}
       <button
         type="button"
-        className="tray-link"
+        className="link"
         onClick={() => {
           void navigator.clipboard?.writeText(url).then(() => setCopied(true), () => setCopied(false));
         }}
@@ -23,18 +23,14 @@ function Fallback({ line }: { line: RegistryLine }) {
   );
 }
 
-/*
- * Each line is its own call, made by its own click. The whole-list stepper
- * exists because the API takes one item at a time: the shopper advances it, so
- * Babylist's window is never asked to open several times at once.
- */
+/* add.js takes one item per call and reports nothing back, so each is its own click. */
 export default function RegistryActions({ lines }: { lines: RegistryLine[] }) {
   const [sent, setSent] = useState<ReadonlySet<string>>(new Set());
   const [blocked, setBlocked] = useState<string | null>(null);
   const [step, setStep] = useState<number | null>(null);
 
   if (lines.length === 0) {
-    return <p className="tray-empty">Set something aside and you can send it to your Babylist registry from here.</p>;
+    return <p className="panel-empty">Save a piece and you can send it to your Babylist registry from here.</p>;
   }
 
   const prepare = () => void preloadBabylist();
@@ -43,47 +39,45 @@ export default function RegistryActions({ lines }: { lines: RegistryLine[] }) {
     if (result === 'sent') {
       setSent(prev => new Set(prev).add(line.key));
       setBlocked(null);
+      const slug = line.href.split('/')[2];
+      if (slug) recordInterest({ kind: 'babylist', slug });
     } else {
       setBlocked(line.key);
     }
-    return result;
   };
   const current = step === null ? null : lines[step];
 
   return (
-    <div className="registry">
-      <ul className="tray-items">
+    <div>
+      <ul className="lines">
         {lines.map(line => (
-          <li key={line.key} className="registry-line">
-            <span className="tray-name">{line.title}</span>
+          <li key={line.key} className="line line--plain">
+            <span className="line-name">{line.title}</span>
             {sent.has(line.key) ? (
-              <span className="registry-sent">Sent to Babylist</span>
+              <span className="line-meta">Sent to Babylist</span>
             ) : (
-              <button type="button" className="tray-link" onPointerEnter={prepare} onFocus={prepare} onClick={() => void send(line)}>Add to Babylist</button>
+              <button type="button" className="link" onPointerEnter={prepare} onFocus={prepare} onClick={() => void send(line)}>Add to Babylist</button>
             )}
             {blocked === line.key && step === null && <Fallback line={line} />}
           </li>
         ))}
       </ul>
       {lines.length > 1 && step === null && (
-        <button type="button" className="button-secondary registry-start" onClick={() => setStep(0)}>
-          Send all, one at a time
-        </button>
+        <p className="panel-row"><button type="button" className="link" onClick={() => setStep(0)}>Send all, one at a time</button></p>
       )}
       {current && step !== null && (
-        <div className="registry-stepper">
-          <p className="label-caps">Item {step + 1} of {lines.length}</p>
-          <p>{current.title}</p>
+        <div className="registry-step">
+          <p className="small">{step + 1} of {lines.length}: {current.title}</p>
           {blocked === current.key && <Fallback line={current} />}
-          <div className="tray-actions">
+          <div className="panel-row">
             {sent.has(current.key) ? (
-              <span className="registry-sent">Sent to Babylist</span>
+              <span className="line-meta">Sent to Babylist</span>
             ) : (
-              <button type="button" className="button-primary" onPointerEnter={prepare} onFocus={prepare} onClick={() => void send(current)}>Add to Babylist</button>
+              <button type="button" className="link" onPointerEnter={prepare} onFocus={prepare} onClick={() => void send(current)}>Add to Babylist</button>
             )}
             <button
               type="button"
-              className="button-secondary"
+              className="link"
               onClick={() => {
                 setBlocked(null);
                 setStep(step + 1 < lines.length ? step + 1 : null);

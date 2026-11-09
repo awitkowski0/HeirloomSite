@@ -27,7 +27,7 @@ export default function VisibleProductGrid({ products }: { products: GridProduct
   const visible = products.filter(p => !isDelisted(p.slug));
 
   return (
-    <div className="featured-grid">
+    <div className="grid">
       {visible.map((p, i) => (
         <ProductCard
           key={p.slug}

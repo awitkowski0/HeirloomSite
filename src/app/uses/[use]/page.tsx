@@ -29,11 +29,10 @@ export default async function UsePage({ params }: { params: Promise<{ use: strin
   const items = toShopItems(getBrowsableProducts()).filter(i => i.uses.includes(entry.tag));
 
   return (
-    <div className="container products-page">
-      <header className="page-header">
-        <p className="label-caps text-on-surface-variant">What it can be</p>
-        <h1 className="headline-lg text-primary">{entry.tag}</h1>
-        <p className="body-lg text-on-surface-variant">{items.length} {items.length === 1 ? 'piece' : 'pieces'}</p>
+    <div className="page">
+      <header className="page-intro">
+        <h1>{`${entry.tag[0]}${entry.tag.slice(1).toLowerCase()}`}</h1>
+        <p className="small">{items.length} {items.length === 1 ? 'piece' : 'pieces'} that can be this.</p>
       </header>
       <section aria-label={`${entry.tag} pieces`}>
         <ShopBrowser items={items} priorityCount={3} />

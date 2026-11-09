@@ -1,37 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
-import { sep } from 'node:path';
-import { PLATE_SPECS } from '../src/lib/plates';
+import { readFileSync } from 'node:fs';
 import { registryPayload } from '../src/lib/babylist';
 import { toneOf } from '../src/lib/finish-tones';
-
-/* Frames that show soft items in the crib, or a wood the site does not sell. */
-const NOT_FOR_PLATES = /^(Mission|Arched Top|Moyerton|Hudson|Darlington|Princeton|Newport Crib|Addison|French Country|West Lake)/;
-
-test('every plate photo exists and comes from the cleared set', () => {
-  for (const plate of PLATE_SPECS) {
-    for (const side of [plate.left, plate.right]) {
-      assert.doesNotMatch(side.dir, NOT_FOR_PLATES, `${plate.id} uses ${side.dir}`);
-      assert.ok(existsSync(`public/data/products/${side.dir}${sep}${side.file}`), side.file);
-      assert.notEqual(side.file, 'mackenzie_crib_slat_back_0.jpg', 'the audit excludes _0 frames');
-    }
-    for (const finish of plate.finishes ?? []) {
-      assert.ok(existsSync(`public/data/products/${plate.left.dir}/${finish.left}`), finish.left);
-      assert.ok(existsSync(`public/data/products/${plate.right.dir}/${finish.right}`), finish.right);
-    }
-  }
-});
-
-test('plate opinions make no claim in our voice', () => {
-  for (const plate of PLATE_SPECS) {
-    assert.doesNotMatch(
-      plate.opinion,
-      /\b(safe|safer|safest|certified|tested|non-?toxic|american|made in|amish|ceo|grandfather)\b/i,
-      plate.id,
-    );
-  }
-});
 
 test('a registry item describes one exact piece', () => {
   const payload = registryPayload(

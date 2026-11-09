@@ -267,16 +267,14 @@ body {
  */
 :where(
   .headline-xl,
-  .headline-lg,
-  .headline-md,
-  .journey-step-title,
-  .wordmark,
-  .footer-brand,
-  .product-title,
-  .product-extended h2,
-  .cart-popup-content h2,
-  .featured-card-body h3,
-  .featured-card-body .price
+.headline-lg,
+.headline-md,
+.wordmark,
+.product-title,
+.product-extended h2,
+.cart-popup-content h2,
+.featured-card-body h3,
+.featured-card-body .price
 ) {
   font-synthesis: none;
 }
@@ -302,26 +300,6 @@ body {
 }
 
 /*
- * Three cells: nav | wordmark | nav+tools. Grid, not flex space-between,
- * because the wordmark has to be optically centred and the two side clusters
- * are never the same width - under space-between the mark drifts.
- *
- * Opaque, never translucent: a 1px rule under a blurred bar reads as a
- * rendering artefact rather than as a rule.
- */
-.app-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 3000;
-  background-color: var(--paper);
-  border-bottom: 1px solid var(--rule);
-  max-width: 100vw;
-  overflow: visible;
-}
-
-/*
  * Two rows, so --header-h is their sum rather than a single bar's height.
  * `main` reserves this much space; get it wrong and the first heading on every
  * page hides under the header.
@@ -329,172 +307,6 @@ body {
 :root {
   --header-row-h: 68px;
   --category-bar-h: 44px;
-}
-
-/*
- * Row one: identity, search, help, cart.
- *
- * `auto 1fr auto` and not `1fr auto 1fr`. The old bar centred the wordmark
- * between two 1fr cells, which forced the two navs to be treated as equal
- * weights when they were 167px and 504px of content - the mark measured dead
- * centre and looked shoved against the right-hand group. Here the middle
- * column is the search field, so 1fr goes to the thing that should absorb
- * every spare pixel, and the two fixed clusters take exactly what they need.
- */
-.header-inner {
-  height: var(--header-row-h);
-  max-width: var(--spacing-container-max);
-  margin: 0 auto;
-  padding: 0 24px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  /* One rhythm across the bar. Help and the cart used to sit 8px apart while
-     everything else was 32px, so the right-hand pair read as one clumped
-     object rather than two controls. */
-  gap: 24px;
-}
-
-.header-search {
-  min-width: 0;
-}
-
-.header-end {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 24px;
-}
-
-/*
- * Row two: the catalogue.
- *
- * Nine categories at 11px tracked caps fit a 1232px row comfortably, so this
- * does not scroll on desktop. It is hidden on phones rather than made
- * scrollable - see the note in CategoryBar.tsx.
- */
-.category-bar {
-  border-top: 1px solid var(--rule);
-  background: var(--paper-2);
-}
-
-/*
- * Distributed, not clustered.
- *
- * The labels sat at the left of a 1232px row with 26px gaps, leaving dead
- * space against the right edge - so the bar ended under the search field while
- * the bar above it ran to the cart, and the two rows visibly failed to line up.
- * space-between spends that space on the gaps instead, which puts the first
- * category under the wordmark and the last under the cart. It matters more now
- * that the taxonomy is three top-level categories rather than nine flat ones.
- *
- * `gap` stays as a floor so the labels cannot collide on a narrow desktop
- * window, where space-between has nothing spare to distribute.
- */
-.category-bar-inner {
-  height: var(--category-bar-h);
-  max-width: var(--spacing-container-max);
-  margin: 0 auto;
-  padding: 0 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 26px;
-  list-style: none;
-}
-
-/* The positioning context for the sub-menu below. */
-.category-bar-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  height: 100%;
-}
-
-.category-bar-link {
-  text-decoration: none;
-  color: var(--ink-muted);
-  font-family: var(--font-caps);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  padding: 4px 0;
-  border-bottom: 1px solid transparent;
-}
-.category-bar-link:hover {
-  color: var(--ink);
-}
-/*
- * Set apart by weight, not by a divider.
- *
- * A border-right sat oddly here: the row is space-between, so the gap either
- * side of the rule changes with the viewport and the divider drifted away from
- * the item it was meant to separate. Weight and colour say "this one is
- * different" without depending on the geometry.
- */
-.category-bar-link--all {
-  color: var(--ink);
-  font-weight: 600;
-}
-/* The current category is marked, which the old header never did for any
-   route despite the stylesheet having carried an .active rule for years. */
-.category-bar-link.active {
-  color: var(--ink);
-  border-bottom-color: var(--accent);
-}
-
-/*
- * Sub-menus, in CSS alone.
- *
- * No client component and no state: CategoryBar is a server component rendered
- * into every statically prerendered page on the site, and giving it JavaScript
- * to open a menu would ship a bundle to all 305 of them for a hover.
- *
- * `:focus-within` is what makes it keyboard-reachable - tabbing to the parent
- * link opens the panel, and tabbing on through its links keeps it open. The
- * padding-top on the panel bridges the gap to the bar so the pointer can cross
- * into it without the menu closing underneath.
- */
-.category-submenu {
-  position: absolute;
-  top: 100%;
-  left: -14px;
-  z-index: 3100;
-  margin: 0;
-  padding: 8px 0;
-  min-width: 220px;
-  list-style: none;
-  background: var(--paper);
-  border: 1px solid var(--rule);
-  border-top: none;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-4px);
-  transition: opacity 120ms ease, transform 120ms ease, visibility 120ms;
-}
-.category-bar-item:hover > .category-submenu,
-.category-bar-item:focus-within > .category-submenu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-.category-submenu-link {
-  display: block;
-  padding: 8px 16px;
-  text-decoration: none;
-  color: var(--ink-muted);
-  font-family: var(--font-caps);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-.category-submenu-link:hover {
-  color: var(--ink);
-  background: var(--paper-2);
 }
 
 /*
@@ -523,149 +335,10 @@ body {
   border-color: var(--accent);
 }
 
-/*
- * The cribs landing page on a phone is just the gallery.
- *
- * On a wide screen the All Cribs / Mini Cribs cards and the finish pills sit
- * comfortably above the grid. On a phone they were two screens of chrome - the
- * finish filter alone wraps twenty-odd pills - before the first crib. Neither
- * holds an image, so display:none costs no wasted requests, and the children
- * stay reachable from the category bar and the crumbs.
- */
-@media (max-width: 767px) {
-  .subcategory-nav--desktop-only,
-  .finish-browser .gallery-header {
-    display: none;
-  }
-}
-
 /* A note under a fieldset's options, applying to the set rather than to any
    one of them: the stair limit on delivery, the Affirm instruction on payment. */
 .fieldset-note {
   margin: 10px 2px 0;
-}
-
-/* ---------------------------------------------------------------------------
-   Homepage journey — the four steps that structure the page below the banner
-   --------------------------------------------------------------------------- */
-
-.home-journey {
-  counter-reset: journey;
-}
-
-/*
- * A rule at the top of each step, so the four read as one sequence rather than
- * four unrelated sections. The last one has none: a trailing rule above the
- * footer looks like something failed to load.
- */
-.journey-step {
-  max-width: var(--spacing-container-max);
-  margin: 0 auto;
-  padding: 56px 24px 0;
-}
-.journey-step + .journey-step {
-  border-top: 1px solid var(--rule);
-  margin-top: 56px;
-}
-.journey-step:last-child {
-  padding-bottom: 72px;
-}
-
-.journey-step-head {
-  max-width: 62ch;
-  margin-bottom: 32px;
-}
-.journey-step-num {
-  color: var(--accent);
-  margin: 0 0 8px;
-}
-.journey-step-title {
-  font-family: var(--font-display);
-  font-size: clamp(26px, 3.4vw, 38px);
-  font-weight: 400;
-  line-height: 1.15;
-  margin: 0 0 12px;
-}
-.journey-step-lead {
-  margin: 0;
-  color: var(--ink-muted);
-  font-size: 17px;
-  line-height: 1.6;
-}
-
-/*
- * Step 01 holds whole sections that bring their own container and padding, so
- * the step must not add a second one around them.
- */
-.journey-step-body > .home-featured,
-.journey-step-body > .home-styles {
-  max-width: none;
-  padding-left: 0;
-  padding-right: 0;
-}
-.journey-step-body > .home-featured {
-  padding-top: 0;
-}
-
-.journey-points {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px 32px;
-}
-.journey-points li {
-  /* Grid items will not shrink below their content without this. */
-  min-width: 0;
-  padding-left: 16px;
-  border-left: 2px solid var(--accent);
-  color: var(--ink-muted);
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-@media (max-width: 767px) {
-  .journey-step {
-    padding-top: 40px;
-  }
-  .journey-step + .journey-step {
-    margin-top: 40px;
-  }
-  .journey-step-head {
-    margin-bottom: 24px;
-  }
-}
-
-/* ---------------------------------------------------------------------------
-   Homepage featured range
-   --------------------------------------------------------------------------- */
-
-.home-featured {
-  max-width: var(--spacing-container-max);
-  margin: 0 auto;
-  padding: 64px 24px 0;
-}
-.home-featured-intro {
-  margin-bottom: 32px;
-}
-.home-featured-label {
-  margin: 0 0 8px;
-}
-.home-featured-label a {
-  color: inherit;
-  text-decoration: none;
-  border-bottom: 1px solid transparent;
-}
-.home-featured-label a:hover {
-  color: var(--ink);
-  border-bottom-color: var(--accent);
-}
-
-@media (max-width: 767px) {
-  .home-featured {
-    padding-top: 40px;
-  }
 }
 
 /* Included-with-this-line rows in the cart. Indented and quiet: they are part
@@ -722,66 +395,6 @@ body {
   background: var(--paper-2);
 }
 
-/* ---------------------------------------------------------------------------
-   Help menu
-   --------------------------------------------------------------------------- */
-
-.help-menu {
-  position: relative;
-}
-
-/*
- * A button, not another 11px tracked-caps link. Help is the one control here
- * someone reaches for when something has gone wrong, and it should not take
- * the same visual effort to find as a category.
- */
-.help-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border: 1px solid var(--rule-strong);
-  background: transparent;
-  color: var(--ink);
-  font-family: var(--font-label);
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.help-button:hover {
-  background: var(--plate);
-}
-.help-button .material-symbols-outlined {
-  font-size: 18px;
-}
-
-.help-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 3100;
-  min-width: 232px;
-  display: flex;
-  flex-direction: column;
-  background: var(--paper);
-  border: 1px solid var(--rule-strong);
-}
-
-.help-panel-link {
-  padding: 12px 16px;
-  text-decoration: none;
-  color: var(--ink);
-  font-family: var(--font-label);
-  font-size: 14px;
-  border-bottom: 1px solid var(--rule);
-}
-.help-panel-link:last-child {
-  border-bottom: 0;
-}
-.help-panel-link:hover {
-  background: var(--plate);
-}
-
 /*
  * text-indent compensates for letter-spacing, which adds its full value AFTER
  * the last glyph. Without it a centred tracked string sits ~half a track to
@@ -797,12 +410,6 @@ body {
   text-decoration: none;
   white-space: nowrap;
   color: var(--ink);
-}
-
-.header-left, .header-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
 }
 
 .icon-btn {
@@ -863,101 +470,6 @@ main {
     grid-template-columns: repeat(12, 1fr);
     gap: var(--spacing-xl);
   }
-  .grid-layout > .product-showcase {
-    grid-column: span 7;
-  }
-  .grid-layout > .configuration-panel {
-    grid-column: span 5;
-  }
-}
-
-/* ---------------------------------------------------------------------------
-   Product page grid
-
-   Photograph left, decision column right, name in whichever place reads first.
-
-   Named areas rather than column spans, because the name has to sit ABOVE the
-   photograph on a phone and BESIDE it from 1024px, and mounting the heading
-   twice to achieve that is the arrangement AGENTS.md rules out. One <h1>, two
-   placements.
-
-   Its own class rather than /checkout's .grid-layout, which it used to share.
-   Two rows against a spanning left column is not the shape a checkout wants:
-   with no title element to fill the first row, the order summary would have
-   been pushed down by an empty one.
-   --------------------------------------------------------------------------- */
-
-.product-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  grid-template-areas:
-    'title'
-    'image'
-    'panel';
-  /* The 48px stack gap is right between the photograph and the panel, and far
-     too much between a heading and the thing it names. */
-  column-gap: var(--spacing-lg);
-  row-gap: var(--spacing-md);
-  padding-top: var(--spacing-sm);
-  padding-bottom: var(--spacing-sm);
-}
-
-/* Same reasoning as .grid-layout > *: the stain rail's eleven non-shrinking
-   swatches would otherwise set an ~650px floor for the whole page. */
-.product-layout > * {
-  min-width: 0;
-}
-
-.product-layout > .product-title {
-  grid-area: title;
-}
-.product-layout > .product-showcase {
-  grid-area: image;
-}
-.product-layout > .configuration-panel {
-  grid-area: panel;
-}
-
-@media (min-width: 1024px) {
-  .product-layout {
-    /* 7/5 of twelve, stated directly now that the areas do the placing. */
-    grid-template-columns: 7fr 5fr;
-    grid-template-areas:
-      'image title'
-      'image panel';
-    /*
-     * `auto 1fr`, not implicit `auto auto`.
-     *
-     * With two auto rows and the photograph spanning both, a photograph taller
-     * than name + panel has its surplus distributed across BOTH tracks - so
-     * the name's row grows too and the heading floats in a void above the
-     * price. An `fr` track is sized after the spanning item is accounted for,
-     * so row one pins to the name and row two absorbs the rest.
-     */
-    grid-template-rows: auto 1fr;
-    column-gap: var(--spacing-xl);
-    /* Not the 48px stack gap: this is the space between the name and the
-       price directly under it, which is one heading and its own value. */
-    row-gap: var(--spacing-md);
-  }
-
-  /*
-   * The photograph spans both rows, so whichever side is taller sets the
-   * height. When it is the photograph, the surplus is handed to the two
-   * spanned rows - and a grid item stretches by default, so the panel would
-   * grow and its 48px internal gaps would open up to fill space it does not
-   * want. Sized to content instead; the surplus becomes room below.
-   */
-  .product-layout > .product-title,
-  .product-layout > .configuration-panel {
-    align-self: start;
-  }
-}
-
-.product-showcase {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
 }
 
 .image-container {
@@ -980,35 +492,6 @@ main {
   object-fit: cover;
 }
 
-/*
- * 32px, not the 48px stack gap.
- *
- * The panel used to hold two or three blocks; it now holds five - price,
- * variant picker, finish picker, buy controls, description - and 48px between
- * each put ~200px of pure gap in a column whose whole job is to be read in one
- * go. The sections are already separated by their own headings and rules.
- */
-.configuration-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.pricing-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.pricing-section h2 {
-  color: var(--primary);
-}
-
-.pricing-section .subtitle {
-  color: var(--on-surface-variant);
-  font-style: italic;
-}
-
 .price-row {
   display: flex;
   align-items: center;
@@ -1017,26 +500,6 @@ main {
 
 .price-current {
   color: var(--primary);
-}
-
-.config-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.config-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-
-.config-header h3 {
-  color: var(--primary);
-}
-
-.config-header span {
-  color: var(--on-surface-variant);
 }
 
 .wood-grid {
@@ -1295,22 +758,8 @@ main {
   color: var(--accent);
 }
 
-.stain-desc {
-  display: block;
-  margin-top: 2px;
-  color: var(--on-surface-variant);
-}
-
 .stain-check {
   color: var(--accent);
-}
-
-/* No extra padding on top of the panel's own 32px gap - together they were
-   72px above the most important control on the page. */
-.action-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
 }
 
 .add-to-cart {
@@ -1337,28 +786,6 @@ main {
 
 .add-to-cart:active {
   transform: scale(0.95);
-}
-
-.delivery-info {
-  text-align: center;
-  color: var(--on-surface-variant);
-}
-
-/* Bottom Nav */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 50;
-  /* Opaque and square, matching the header bar. A blurred translucent panel
-     makes its own hairline read as an artefact. */
-  background-color: var(--paper);
-  border-top: 1px solid var(--rule);
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 8px 12px 10px;
 }
 
 .nav-item {
@@ -1514,11 +941,6 @@ main {
   }
 }
 
-/* Featured products grid */
-.featured-section {
-  padding: 80px 24px;
-}
-
 .featured-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1639,9 +1061,6 @@ main {
   .product-image img {
     object-fit: contain;
   }
-  .configuration-panel {
-    gap: 28px;
-  }
 
   /*
    * Phone order: name, then the style and stain pickers, then the photograph
@@ -1664,42 +1083,6 @@ main {
   .product-page > .breadcrumb {
     display: none;
   }
-  .product-layout {
-    grid-template-areas: none;
-  }
-  .product-layout > .product-showcase,
-  .product-layout > .configuration-panel {
-    display: contents;
-  }
-  /* Their children are the grid items now, so they need the min-width guard
-     `.product-layout > *` gives - without it the stain rail's eleven swatches
-     widened the page to ~670px again and the rail itself never scrolled. */
-  .product-showcase > *,
-  .configuration-panel > * {
-    min-width: 0;
-  }
-  .product-layout > .product-title {
-    grid-area: auto;
-    order: -2;
-  }
-  .product-layout .config-section {
-    order: -1;
-  }
-
-  /*
-   * With a bundle, the flattened phone column ran: bundle box (ending in its
-   * Bundle Total), the bundle's copy of the add button, the crib-only price,
-   * then the main add button - two identical "ADD 2 ITEMS" buttons with a
-   * price between them that disagreed with both. On a phone the main button
-   * already comes straight after the bundle, so the copy goes, and so does the
-   * crib-only price: the bundle box shows the crib's own price row and the
-   * total the button charges. A button and a text block, no images, so
-   * hiding them is the CSS-first switch AGENTS.md asks for.
-   */
-  .product-layout--bundle .bundle-cta,
-  .product-layout--bundle .pricing-section {
-    display: none;
-  }
 
   .stain-strip .stain-swatch {
     width: 52px;
@@ -1709,54 +1092,11 @@ main {
   }
 }
 
-/* Checkout trust badges */
-
-
-@media (max-width: 767px) {
-  .footer-grid {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-}
-
 /* ========== MOBILE RESPONSIVE ========== */
 
 
 /* Mobile typography & spacing */
 @media (max-width: 767px) {
-  .app-header {
-    /* One row on phones, so the sum collapses to that row. */
-    --header-row-h: 52px;
-    --category-bar-h: 0px;
-    position: static;
-  }
-
-  /*
-   * Search, help and the whole category bar go away on phones, and the bottom
-   * nav carries all three: it already has a search trigger, a Help link, and
-   * the shop and category entry points. Nine tracked-caps category labels
-   * cannot share a 390px bar, and a second scrolling strip under the header
-   * would eat a third of the screen before any product appeared.
-   */
-  .app-header .category-bar,
-  .app-header .header-search,
-  .app-header .help-menu {
-    display: none;
-  }
-
-  /* Explicit cells, so the wordmark stays optically centred with only the
-     cart beside it rather than sliding into column 1. */
-  .header-inner {
-    grid-template-columns: 1fr auto 1fr;
-    padding: 0 16px;
-    gap: 0;
-  }
-  .header-inner .wordmark {
-    grid-column: 2;
-  }
-  .header-inner .header-end {
-    grid-column: 3;
-  }
 
   .container {
     padding: 0 16px;
@@ -1765,10 +1105,6 @@ main {
   main {
     padding-top: 0;
     padding-bottom: 80px;
-  }
-
-  .bottom-nav {
-    display: flex;
   }
 
   .mobile-search-overlay {
@@ -1794,9 +1130,6 @@ main {
 }
 
 @media (min-width: 768px) {
-  .bottom-nav {
-    display: none;
-  }
 
   /* The 128px bottom padding exists to clear the mobile bottom nav. With the
      nav gone it is just a gap between the last section and the footer rule. */
@@ -1994,16 +1327,6 @@ main {
   }
 }
 
-/* ===========================================================================
-   Layout shell
-   =========================================================================== */
-
-.nav-links {
-  display: flex;
-  gap: 1rem;
-  margin-left: 2rem;
-}
-
 .nav-text-link {
   text-decoration: none;
   color: var(--ink-muted);
@@ -2024,84 +1347,6 @@ main {
 .nav-text-link.active {
   color: var(--ink);
   border-bottom-color: var(--accent);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cart-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background-color: var(--primary);
-  color: var(--on-primary);
-  border-radius: var(--radius-circle);
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  font-size: 10px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.cart-badge--nav {
-  top: 2px;
-  right: 12px;
-}
-
-.site-footer {
-  background-color: var(--paper);
-  /* No margin: the footer's own hairline and 64px padding are the separation.
-     A 96px gap on top of a section's own bottom padding read as dead space. */
-  margin-top: 0;
-  border-top: 1px solid var(--rule);
-  padding: 64px 24px;
-}
-.footer-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 48px;
-  align-items: start;
-}
-.footer-brand {
-  display: block;
-  margin-bottom: 16px;
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: 0.26em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-.footer-tagline {
-  max-width: 300px;
-}
-.footer-heading {
-  margin-bottom: 16px;
-  font-size: 12px;
-}
-.footer-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.footer-links a {
-  text-decoration: none;
-  color: var(--on-surface-variant);
-  font-size: 13px;
-}
-.footer-links a:hover {
-  color: var(--primary);
-}
-.footer-copyright {
-  margin-top: 24px;
 }
 
 .narrow-page {
@@ -2415,14 +1660,6 @@ main {
   max-width: 60ch;
 }
 
-.section-heading {
-  text-align: center;
-  margin-bottom: 48px;
-}
-.section-heading h2 {
-  margin-top: 8px;
-}
-
 /*
  * 24px, not 40px. The header is two bars now, so `main`'s padding-top already
  * reserves 112px before any of this; another 40 put the breadcrumb a sixth of
@@ -2434,10 +1671,6 @@ main {
 .product-page {
   padding-top: 24px;
   padding-bottom: 64px;
-}
-
-.featured-section {
-  padding-top: 48px;
 }
 
 .breadcrumb {
@@ -2698,28 +1931,7 @@ main {
   letter-spacing: -0.02em;
   color: var(--ink);
 }
-.product-description {
-  /* No longer centred with `margin: 0 auto`: it is the last block in a ~440px
-     column now, so 65ch never binds and auto margins have nothing to centre
-     within. */
-  max-width: 65ch;
-  margin: 0;
-  color: var(--ink-muted);
-  font-family: var(--font-label);
-  font-size: var(--text-body-lg);
-  font-weight: 400;
-  line-height: 1.65;
-}
-.product-description p {
-  margin: 0 0 0.9em;
-  font: inherit;
-  color: inherit;
-}
-.product-description p:last-child {
-  margin-bottom: 0;
-}
 /* In-copy links: Safety page, Get Personal Assistance — same treatment everywhere */
-.product-description a,
 a.product-inline-link {
   color: var(--accent);
   text-decoration: underline;
@@ -2727,11 +1939,9 @@ a.product-inline-link {
   text-decoration-thickness: 1px;
   font: inherit;
 }
-.product-description a:hover,
 a.product-inline-link:hover {
   color: var(--ink);
 }
-.product-description a:focus-visible,
 a.product-inline-link:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -2758,102 +1968,9 @@ a.product-inline-link:focus-visible {
   min-height: 420px;
   background-color: transparent;
 }
-/*
- * Phone scroll preview (ProductGallery). The track adds --scrub-length of
- * page below the photograph; the pin sticks in place on screen while that
- * length scrolls past, and ProductGallery fades a different finish in
- * every 80px of it. Then the track ends, the pin scrolls away with it, and the
- * page carries straight on to the bundle and the price. No nested scroller and
- * no captured gesture, so the scroll is never trapped.
- *
- * From 768px none of this applies: no --scrub-length is set and nothing is
- * sticky.
- */
-.stain-scrub-panel {
-  display: none;
-}
 @media (max-width: 767px) {
-  /* A spacer, not padding-bottom: a sticky element is confined to its
-     containing block's CONTENT box, so padding gave the pin nowhere to go. */
-  .stain-scrub::after {
-    content: '';
-    display: block;
-    height: var(--scrub-length, 0px);
-  }
-  /*
-   * Centred in the space above the bottom nav (~80px) rather than parked at
-   * the top with a quarter of the screen blank beneath it. The pin's height is
-   * known without measuring: the photograph is 5:6 of the 16px-guttered width
-   * (see below), plus the 60px panel.
-   *
-   * The background is load-bearing. Sticky makes the pin a stacking context,
-   * so the photographs' mix-blend-mode: multiply blends against the pin, not
-   * the page - transparent, which brought back the white plate they were shot
-   * on.
-   */
-  .stain-scrub-pin {
-    position: sticky;
-    top: max(12px, calc((100svh - 80px - (100vw - 32px) * 5 / 6 - 60px) / 2));
-    background-color: var(--background);
-  }
-  /*
-   * Shaped to the photographs, not the generic 4:5 product frame.
-   *
-   * Only cribs have finishes to preview, and every crib photograph is
-   * landscape - 0.8 to 0.9 as tall as wide, 157 of 167 of them. In a portrait
-   * 4:5 box `contain` left a ~75px band of nothing above and below each one,
-   * which read as padding between the photo and the finish name under it. 6:5
-   * fits the common 0.83 exactly and costs the outliers a sliver. The phone
-   * min-height is dropped for the same reason: it would force the band back.
-   */
-  .stain-scrub .product-image {
-    aspect-ratio: 6 / 5;
-    min-height: 0;
-  }
-  .stain-scrub-layers {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  .stain-scrub-layers img {
-    opacity: 0;
-    transition: opacity 160ms ease;
-  }
-  .stain-scrub-layers img.is-visible {
-    opacity: 1;
-  }
   .product-image.is-previewing .product-image-trigger img {
     opacity: 0;
-  }
-  .stain-scrub-panel {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: 48px;
-    padding-top: 12px;
-  }
-  .stain-scrub-name {
-    margin: 0;
-    font-family: var(--font-label);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-  .stain-scrub-count {
-    margin-left: 8px;
-    color: var(--on-surface-variant);
-  }
-  .stain-scrub-hint {
-    margin: 0;
-    color: var(--on-surface-variant);
-  }
-  .stain-scrub-choose {
-    flex-shrink: 0;
-    width: auto;
-    padding: 10px 16px;
   }
 }
 
@@ -2906,11 +2023,6 @@ a.product-inline-link:focus-visible {
   height: 100%;
   object-fit: cover;
   border-radius: 0;
-}
-
-.babylist-btn {
-  width: 100%;
-  margin-top: 12px;
 }
 
 /* Stain selector */
@@ -2966,19 +2078,6 @@ a.product-inline-link:focus-visible {
   font-size: var(--text-headline-md);
   font-weight: 400;
   margin-bottom: 8px;
-}
-.cart-popup-icon {
-  font-size: 48px;
-  color: var(--primary);
-  margin-bottom: 16px;
-}
-.cart-popup-detail {
-  margin-bottom: 32px;
-}
-.cart-popup-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
 .lightbox-content {
@@ -3456,21 +2555,6 @@ a.product-inline-link:focus-visible {
   color: var(--on-surface-variant);
 }
 
-/* The old footer right-aligned its last column with an inline style, which the
-   stylesheet then had to fight with !important. Right-align only where there is
-   room for it. */
-.footer-support {
-  text-align: left;
-}
-@media (min-width: 768px) {
-  .footer-support {
-    text-align: right;
-  }
-  .footer-support .footer-links {
-    align-items: flex-end;
-  }
-}
-
 /* ===========================================================================
    Long-form document pages (/safety, /care)
    =========================================================================== */
@@ -3596,63 +2680,11 @@ a.product-inline-link:focus-visible {
   appearance: none;
 }
 
-/* ---------------------------------------------------------------------------
-   Purchase assurances, under Add to Cart
-   --------------------------------------------------------------------------- */
-
-.assurances {
-  list-style: none;
-  margin: 26px 0 0;
-  padding: 22px 0 0;
-  border-top: 1px solid var(--rule);
-  display: grid;
-  gap: 18px;
-}
-
 .assurance {
   display: grid;
   grid-template-columns: 22px 1fr;
   gap: 12px;
   align-items: start;
-}
-
-.assurance-icon {
-  font-size: 20px;
-  color: var(--accent);
-  line-height: 1.2;
-}
-
-.assurance-body {
-  display: block;
-}
-
-.assurance-title {
-  display: block;
-  font-family: var(--font-caps);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-
-.assurance-link {
-  color: var(--ink);
-  text-decoration: none;
-  border-bottom: 1px solid var(--accent);
-  padding-bottom: 1px;
-}
-
-.assurance-link:hover {
-  color: var(--accent);
-}
-
-.assurance-copy {
-  display: block;
-  margin-top: 5px;
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--ink-muted);
 }
 
 /* A search hit whose matched finish is currently withdrawn. */
@@ -3692,247 +2724,12 @@ a.product-inline-link:focus-visible {
 }
 
 /* ---------------------------------------------------------------------------
-   Build Your Bundle (product page)
-
-   Lives in the configuration panel, which on products with few choices was
-   ~200px of content against a ~910px photo. This is what that column is for.
-   --------------------------------------------------------------------------- */
-
-.bundle {
-  border: 1px solid var(--rule);
-  display: flex;
-  flex-direction: column;
-}
-
-.bundle-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--rule);
-}
-
-.bundle-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/*
- * Grid, not flex: the checkboxes, thumbnails and prices have to line up in
- * columns down the list, and with flex each row sizes itself independently so
- * a long product name shunts that row's price out of line with the others.
- *
- * Columns: checkbox | thumbnail | name | price. The checkbox sits directly
- * beside its thumbnail. Rows with no checkbox (the crib itself, the included
- * kits) leave the first column empty so every thumbnail stays in one column.
- */
-.bundle-row {
-  display: grid;
-  grid-template-columns: 20px 48px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--rule);
-}
-.bundle-row > .bundle-thumb {
-  grid-column: 2;
-}
-.bundle-list > li:last-child > .bundle-row,
-.bundle-list > .bundle-row:last-child {
-  border-bottom: 0;
-}
-
-/* A selectable add-on: the whole row is the label. */
-.bundle-option {
-  cursor: pointer;
-  transition: background-color 120ms ease;
-}
-.bundle-option:hover {
-  background: var(--paper-2);
-}
-.bundle-option[data-checked='true'] {
-  background: var(--paper-2);
-}
-.bundle-option > .bundle-check {
-  grid-column: 1;
-  margin: 0;
-}
-/* Visible keyboard focus on the row, not only on the 20px box. Inset so the
-   ring is not clipped by the bundle border. */
-.bundle-option:has(.bundle-check:focus-visible) {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
-}
-.bundle-check:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* The crib itself. Tinted to read as context rather than another option. */
-.bundle-row--base {
-  background: var(--paper-2);
-  border-bottom: 1px solid var(--rule);
-}
-.bundle-row--base .bundle-name {
-  font-weight: 500;
-}
-/* Keeps the base row's price in the same column as the ticked rows' prices,
-   which carry a checkbox this row does not have. */
-/* Pinned to the last column rather than a hard-coded 4, so it survives the
-   mobile rule dropping the thumbnail column. */
-.bundle-row--base .bundle-price {
-  grid-column: -2 / -1;
-}
-
-/* Sits directly under the bundle box, aligned to it. The .product-showcase
-   column already puts 24px between them. */
-.bundle-cta {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Group labels. The two halves of this box are different in kind - one is what
-   you have already bought, the other is what you can still add - and without a
-   label the "Included" rows read as unticked options someone forgot. */
-.bundle-group {
-  margin: 0;
-  padding: 12px 16px 6px;
-  color: var(--ink-muted);
-}
-
-.bundle-row--included .bundle-name {
-  color: var(--ink-muted);
-}
-
-/* Sits in the price column so the two groups line up down the right edge. */
-.bundle-included {
-  grid-column: -2 / -1;
-  color: var(--ink-muted);
-  white-space: nowrap;
-}
-
-.bundle-thumb {
-  width: 48px;
-  height: 48px;
-  overflow: hidden;
-  background: var(--plate);
-}
-.bundle-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.bundle-name {
-  min-width: 0;
-  cursor: pointer;
-}
-
-.bundle-check {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.bundle-price {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.bundle-total {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--spacing-sm);
-  padding: 14px 16px;
-  border-top: 1px solid var(--rule-strong);
-}
-
-@media (max-width: 767px) {
-  /* Kept on a phone, but smaller: the checkbox has to sit next to the picture
-     of what it adds, and 40px still leaves the name the room it needs on a
-     390px screen. The row stays 44px+ tall, a comfortable tap target. */
-  .bundle-row {
-    grid-template-columns: 22px 40px minmax(0, 1fr) auto;
-    gap: 10px;
-    padding: 10px 12px;
-  }
-  .bundle-thumb {
-    width: 40px;
-    height: 40px;
-  }
-  .bundle-check {
-    width: 22px;
-    height: 22px;
-  }
-}
-
-/* ---------------------------------------------------------------------------
    Related products ("Completes the collection")
    --------------------------------------------------------------------------- */
 
 .related {
   border-top: 1px solid var(--rule);
   padding-top: 16px;
-}
-
-.related-head {
-  margin-bottom: 8px;
-  color: var(--ink-muted);
-}
-
-.related-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-/*
- * Same 48px / 1fr / auto rhythm as .bundle-row, so a page showing one and a
- * page showing the other read as the same component in the same slot.
- */
-.related-row {
-  display: grid;
-  grid-template-columns: 48px 1fr auto;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--rule);
-  text-decoration: none;
-  color: inherit;
-}
-.related-list li:last-child .related-row {
-  border-bottom: 0;
-}
-.related-row:hover .related-name {
-  color: var(--accent);
-}
-
-.related-thumb {
-  width: 48px;
-  height: 48px;
-  overflow: hidden;
-  background: var(--plate);
-}
-.related-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.related-name {
-  min-width: 0;
-}
-
-.related-price {
-  white-space: nowrap;
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
 }
 
 /* ---------------------------------------------------------------------------
@@ -4036,11 +2833,6 @@ a.product-inline-link:focus-visible {
 }
 .product-related {
   margin-top: var(--spacing-lg);
-}
-
-.product-bottom-head {
-  margin-bottom: var(--spacing-md);
-  color: var(--ink-muted);
 }
 
 /* Recommendations run the full width; .featured-grid is four columns here and
@@ -4305,36 +3097,14 @@ a.product-inline-link:focus-visible {
   height: auto;
 }
 
-/*
- * The sources are a mix of 3:2 and 1:1, so a two-up row would otherwise be
- * ragged. Cropping to a common ratio keeps the pair aligned; next/image still
- * gets the true intrinsic size from the width/height props, so nothing shifts
- * while it loads. Only pairs: a full-width sketch shows its own ratio uncropped.
- */
-.doc-sketches--pair .brand-sketch img {
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
-}
-
-.journey-sketches,
 .doc-sketches {
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr;
 }
 
-.journey-sketches {
-  margin: 2rem 0 0;
-}
-
 .doc-sketches {
   margin: 1.5rem 0;
-}
-
-@media (min-width: 768px) {
-  .doc-sketches--pair {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 .brand-sketch figcaption {
@@ -4548,16 +3318,6 @@ a.product-inline-link:focus-visible {
   margin: 0.25rem 0 0;
   color: var(--on-surface-muted);
 }
-
-/* ---------------------------------------------------------------------------
-   Builder-led shopping: directory, comparison, product-page origin panel.
-   --------------------------------------------------------------------------- */
-.home-builders {
-  padding-block: 64px;
-}
-.home-builders > p {
-  max-width: 62ch;
-}
 .builder-directory {
   list-style: none;
   margin: 32px 0;
@@ -4596,7 +3356,6 @@ a.product-inline-link:focus-visible {
   margin: 0 0 8px;
 }
 .builder-entry__quote cite,
-.builder-origin cite,
 .builder-statement cite {
   font-size: 0.8125rem;
   font-style: normal;
@@ -4660,222 +3419,15 @@ a.product-inline-link:focus-visible {
 .builder-statement blockquote p {
   margin: 0 0 8px;
 }
-.builder-origin {
-  margin-bottom: 24px;
-  padding: 20px;
-  border: 1px solid var(--rule);
-}
-.builder-origin p {
-  margin: 0 0 8px;
-}
-.builder-origin__label {
-  color: var(--ink-muted);
-}
-.builder-origin__name {
-  font-family: var(--font-display);
-  font-size: 1.375rem;
-}
-.builder-origin__name a {
-  color: inherit;
-}
-.builder-origin__meta,
-.builder-origin__note {
-  font-size: 0.9375rem;
-}
-.builder-origin__safety {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--rule);
-}
-.builder-origin blockquote {
-  margin: 0;
-}
 @media (min-width: 900px) {
   .builder-directory,
   .builder-statements {
     grid-template-columns: repeat(3, 1fr);
   }
 }
-/* ---------------------------------------------------------------------------
-   Catalog tags and feature lists, in the brand kit: tracked caps, hairlines.
-   --------------------------------------------------------------------------- */
-.builder-tag {
-  display: inline-block;
-  font-family: var(--font-caps);
-  font-size: 0.6875rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  line-height: 1.5;
-  color: var(--ink-muted);
-}
-.builder-tag--link {
-  width: fit-content;
-  margin: 8px 0 4px;
-  padding-bottom: 2px;
-  border-bottom: 1px solid var(--rule-strong);
-  text-decoration: none;
-}
-.feature-chips {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.feature-chips li {
-  padding: 4px 10px;
-  border: 1px solid var(--rule);
-  font-size: 0.8125rem;
-}
-.feature-chips--safety li {
-  border-color: var(--rule-strong);
-}
-.builder-origin details {
-  margin-top: 10px;
-  font-size: 0.9375rem;
-}
-.builder-origin summary {
-  cursor: pointer;
-}
-.builder-origin blockquote {
-  margin-top: 8px;
-}
-.builder-origin__note {
-  margin: 14px 0 0;
-  color: var(--ink-muted);
-}
-.builder-tag-safety {
-  margin-top: 10px;
-}
-
-/* Product page: name, price and builder first; one add control. */
-.product-layout > .product-titleblock {
-  grid-area: title;
-}
-.product-price {
-  margin: 6px 0 0;
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 400;
-}
-.assurance-line {
-  margin: 0;
-  font-size: 0.875rem;
-  color: var(--ink-muted);
-}
-.assurance-line a {
-  color: inherit;
-}
-.action-secondary {
-  display: flex;
-  gap: 24px;
-}
-.registry-sent {
-  font-size: 0.8125rem;
-  color: var(--ink-muted);
-}
-.registry-fallback {
-  margin: 6px 0 0;
-  font-size: 0.8125rem;
-  color: var(--ink-muted);
-}
-.finish-wall-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-.finish-wall-head p {
-  margin: 0;
-  font-size: 0.9375rem;
-}
-.finish-group {
-  margin-top: 12px;
-}
-.finish-group-label {
-  margin: 0 0 6px;
-  font-size: 0.8125rem;
-  color: var(--ink-muted);
-}
-.finish-tiles {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  gap: 8px;
-}
-.finish-tile {
-  width: 100%;
-  padding: 4px;
-  border: 1px solid var(--rule);
-  background: none;
-  color: var(--ink);
-  cursor: pointer;
-}
-.finish-tile[aria-pressed='true'] {
-  border-color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--ink);
-}
-.finish-tile-img {
-  position: relative;
-  display: block;
-  aspect-ratio: 4 / 3;
-}
-.finish-tile-img img {
-  mix-blend-mode: multiply;
-}
-.finish-tile-name {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.6875rem;
-  line-height: 1.2;
-}
-.finish-fine {
-  margin: 10px 0 0;
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-}
-.pdp-sticky {
-  display: none;
-}
 @media (max-width: 1023px) {
-  .product-layout > .product-titleblock {
-    grid-area: auto;
-    order: -2;
-  }
-  .product-layout .config-section {
-    order: 0;
-  }
-  .pdp-sticky {
-    display: block;
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 78px;
-    z-index: 35;
-    padding: 8px 12px;
-    border-top: 1px solid var(--rule-strong);
-    background: var(--paper);
-  }
-  .pdp-sticky .add-to-cart {
-    width: 100%;
-    margin: 0;
-  }
   .product-page {
     padding-bottom: 96px;
-  }
-  /* One cart: the tab bar and tray hold it on a phone. */
-  .header-end > .icon-btn {
-    display: none;
-  }
-}
-@media (min-width: 768px) and (max-width: 1023px) {
-  .pdp-sticky {
-    bottom: 0;
-  }
-  .header-end > .icon-btn {
-    display: inline-flex;
   }
 }
 
@@ -4883,9 +3435,6 @@ a.product-inline-link:focus-visible {
   display: none;
 }
 @media (max-width: 1023px) {
-  .checkout-page .grid-layout > .configuration-panel {
-    order: -1;
-  }
   .checkout-page .order-summary {
     position: static;
     padding: 12px 16px;
@@ -4906,119 +3455,21 @@ a.product-inline-link:focus-visible {
     display: none;
   }
 }
-
-.talk a {
-  color: inherit;
-}
-.talk-desk {
-  display: none;
-}
-@media (min-width: 768px) {
-  .talk-call {
-    display: none;
-  }
-  .talk-desk {
-    display: inline;
-  }
-}
-
-.digital-preview {
-  margin: -8px 0 0;
-  font-size: 0.75rem;
-  color: var(--ink-muted);
-}
-
-.pdp-sticky {
-  padding-bottom: 8px;
-}
 @media (max-width: 767px) {
-  .pdp-sticky {
-    bottom: calc(78px + env(safe-area-inset-bottom, 0px));
-  }
-  .prompt-form input,
   .checkout-page input,
-  .checkout-page select {
+.checkout-page select {
     font-size: 16px;
-  }
-  .shop-tones button,
-  .finish-tile {
-    min-height: 44px;
   }
 }
 @media (max-width: 767px) {
   /* Stand-alone tap targets reach 44px. Links inside a sentence are exempt. */
-  .plate-name,
-  .tray-name,
-  .compare-name,
-  .compare-cell .doc-link,
-  .talk-call,
-  .builder-tag--link,
   .summary-toggle,
-  .also-like-add {
+.also-like-add {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
   }
-  .tray-name {
-    display: flex;
-    min-width: 0;
-  }
   .summary-toggle {
     display: flex;
   }
-}
-
-/* What it can be: big square tags. */
-.use-tags {
-  margin-top: 10px;
-}
-.use-tags ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.use-tag {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-  padding: 0 12px;
-  background: var(--ink);
-  color: var(--paper);
-  font-family: var(--font-caps);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-decoration: none;
-  white-space: nowrap;
-}
-.use-tag:hover {
-  background: var(--accent);
-}
-.use-note {
-  margin: 6px 0 0;
-  font-size: 0.8125rem;
-  color: var(--ink-muted);
-}
-.uses-nav {
-  max-width: var(--spacing-container-max);
-  margin: 0 auto;
-  padding: 24px 16px;
-  text-align: center;
-}
-.products-page .uses-nav {
-  padding-inline: 0;
-  text-align: left;
-}
-.uses-nav .label-caps {
-  margin: 0;
-  color: var(--ink-muted);
-}
-.uses-nav ul {
-  justify-content: center;
-}
-.products-page .uses-nav ul {
-  justify-content: flex-start;
 }

@@ -1,18 +1,21 @@
 'use client';
 
-import { useState, useMemo, useEffect, type ReactNode } from 'react';
+import { useState, useMemo, useEffect, useRef, type ReactNode } from 'react';
 import { productAddedToCart, productViewed, variantConfigured } from '@/lib/analytics';
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
-import ProductGallery, { type FeedItem } from './ProductGallery';
+import ProductGallery from './ProductGallery';
 import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
-import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
 import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import BundleBuilder from './BundleBuilder';
 import FinishWall from './FinishWall';
-import SetAsideButton from '@/components/selections/SetAsideButton';
+import PieceActions from '@/components/selections/PieceActions';
+import TalkToPerson from '@/components/layout/TalkToPerson';
+import { recordInterest } from '@/lib/interest/store';
+import { finishDisplayName } from '@/lib/names';
+import { toast } from '@/lib/toast';
 import { preloadBabylist, registryTitle, sendToBabylist, type RegistryLine } from '@/lib/babylist';
 import type { ShopItem } from '@/lib/shop';
 import { formatPrice } from '@/lib/format';
@@ -60,8 +63,14 @@ interface Props {
    * bundle just to be positioned.
    */
   title: ReactNode;
-  /** The builder tag and safety features, under the name and price. */
+  /** The builder credit, under the name and price. */
   byline?: ReactNode;
+  /** What this piece can be. */
+  tags?: ReactNode;
+  /** A note about something in the photo. */
+  photoNote?: string | null;
+  /** Why this price, who makes it, and what they say about safety. */
+  details?: ReactNode;
   /** Absent for the unlisted kits and mattress. */
   shopItem?: ShopItem;
   description: ReactNode;
@@ -77,6 +86,9 @@ export default function ProductConfigurator({
   slug,
   title,
   byline,
+  tags,
+  photoNote,
+  details,
   shopItem,
   description,
   initialWood,
@@ -85,7 +97,8 @@ export default function ProductConfigurator({
   const { addToCart } = useCart();
   const [userWood, setUserWood] = useState<string | null>(initialWood);
   const [userStain, setUserStain] = useState<string | null>(initialStain);
-  const [showCartPopup, setShowCartPopup] = useState(false);
+  const addButton = useRef<HTMLButtonElement>(null);
+  const [addOffScreen, setAddOffScreen] = useState(false);
   const [registryState, setRegistryState] = useState<{ key: string; result: 'sent' | 'unavailable' } | null>(null);
 
   /*
@@ -184,7 +197,7 @@ export default function ProductConfigurator({
    * be bought, or a blank, is a dead end. `size` and `none`
    * products get no feed.
    */
-  const feedItems = useMemo<FeedItem[]>(() => {
+  const feedItems = useMemo(() => {
     if (variantType === 'wood') {
       return (currentConfig?.stains ?? [])
         .filter(s => s.inStock && s.image)
@@ -209,12 +222,22 @@ export default function ProductConfigurator({
    */
   useEffect(() => {
     if (!productName) return;
+    recordInterest({ kind: 'view', slug });
     productViewed({
       product_name: productName,
       product_category: configurations[0]?.category ?? null,
       price: (configurations[0]?.basePrice as number) ?? 0,
     });
-  }, [productName, configurations]);
+  }, [productName, configurations, slug]);
+
+  /* The sticky add bar appears only once the real button has scrolled away. */
+  useEffect(() => {
+    const target = addButton.current;
+    if (!target) return;
+    const observer = new IntersectionObserver(([entry]) => setAddOffScreen(!entry.isIntersecting));
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   if (!currentConfig) return null;
 
@@ -245,6 +268,7 @@ export default function ProductConfigurator({
   const handleStainChange = (stain: string) => {
     setUserStain(stain);
     syncUrl(selection.wood, stain);
+    recordInterest({ kind: 'finish_chosen', slug, finish: stain });
     variantConfigured({
       product_name: productName,
       wood: selection.wood,
@@ -259,6 +283,7 @@ export default function ProductConfigurator({
     setUserWood(wood);
     setUserStain(nextStain);
     syncUrl(wood, nextStain);
+    if (variantType === 'finish') recordInterest({ kind: 'finish_chosen', slug, finish: wood });
   };
 
   const feedKey = variantType === 'wood' ? selection.stain : selection.wood;
@@ -276,6 +301,9 @@ export default function ProductConfigurator({
     const config = configurations.find(c => c.wood === wood);
     return config ? !config.stains.some(s => s.inStock) : true;
   };
+
+  const rawFinish = variantType === 'wood' ? selection.stain : variantType === 'finish' ? selection.wood : null;
+  const finishForShopper = rawFinish ? finishDisplayName(humanizeWood(rawFinish)) : null;
 
   const handleAddToCart = () => {
     const item = {
@@ -355,7 +383,8 @@ export default function ProductConfigurator({
       });
     }
 
-    setShowCartPopup(true);
+    recordInterest({ kind: 'add_to_cart', slug, finish: finishForShopper ?? undefined });
+    toast(`In your cart: ${currentConfig.productName}${finishForShopper ? `, ${finishForShopper}` : ''}`);
   };
 
   const addLabel = selection.stain ? `Add to order · ${formatPrice(cartTotal)}` : 'Out of stock';
@@ -372,106 +401,90 @@ export default function ProductConfigurator({
 
   return (
     <>
-      <div className={hasBundle ? 'product-layout product-layout--bundle' : 'product-layout'}>
-        {/*
-          One block in the grid's title area: on a phone it comes first, above
-          the photograph, and from 1024px it tops the decision column.
-        */}
-        <div className="product-titleblock">
+      <div className="pdp">
+        <div className="pdp-media">
+          <ProductGallery images={galleryImages} productName={productName} priority />
+          {feedItems.length > 1 || photoNote ? (
+            <p className="small pdp-caption">
+              {feedItems.length > 1 ? 'Colors are digital previews of one photo. ' : ''}
+              {photoNote ?? ''}
+            </p>
+          ) : null}
+        </div>
+
+        <div className="pdp-info">
           {title}
-          <p className="product-price">{formatPrice(totalPrice)}</p>
+          <p className="pdp-price">
+            {formatPrice(totalPrice)}
+            {finishForShopper ? <span className="small"> in {finishForShopper}</span> : null}
+          </p>
           {byline}
-        </div>
 
-        <div className="product-showcase">
-          <ProductGallery images={galleryImages} productName={productName} priority feed={feed} />
-          {feedItems.length > 1 && <p className="digital-preview">Digital preview of this finish</p>}
-
-        </div>
-
-        <div className="configuration-panel">
           <p role="status" aria-live="polite" className="visually-hidden">
-            {selection.stain
-              ? `${finishName ? `Selected: ${finishName}. ` : ''}${formatPrice(totalPrice)}.`
-              : ''}
+            {selection.stain ? `${finishName ? `Selected: ${finishName}. ` : ''}${formatPrice(totalPrice)}.` : ''}
           </p>
 
-          {variantLabel && (variantType === 'size' || (variantType === 'wood' && woods.length > 1) || (variantType === 'finish' && feedItems.length < 2)) && (
-            <WoodSelector
-              woods={woods}
-              selected={selection.wood}
-              onSelect={handleWoodChange}
-              disabled={isWoodSoldOut}
-              label={variantLabel}
-            />
+          {variantLabel && (variantType === 'size' || (variantType === 'wood' && woods.length > 1)) && (
+            <WoodSelector woods={woods} selected={selection.wood} onSelect={handleWoodChange} disabled={isWoodSoldOut} label={variantLabel} />
           )}
 
           {feedItems.length > 1 && <FinishWall tiles={feedItems} active={feed.activeIndex} onChoose={feed.onChoose} />}
 
-          {/* Only when photographs are missing, so a stain can still be chosen. */}
           {showStainStep && feedItems.length < 2 && (
             <StainSelector stains={currentConfig.stains} selected={selection.stain} onSelect={handleStainChange} />
           )}
 
-          {hasBundle && (
-            <BundleBuilder
-              included={includedItems}
-              items={bundleItems}
-              selected={bundleSelected}
-              onToggle={toggleBundleItem}
-            />
+          {hasBundle && <BundleBuilder included={includedItems} items={bundleItems} selected={bundleSelected} onToggle={toggleBundleItem} />}
+
+          <button ref={addButton} type="button" className="btn btn--wide" disabled={!selection.stain} onClick={handleAddToCart}>
+            {addLabel}
+          </button>
+
+          <p className="card-actions pdp-actions">
+            {shopItem && <PieceActions item={shopItem} finish={finishForShopper} />}
+            {registryResult === 'sent' ? (
+              <span className="small">Sent to Babylist</span>
+            ) : (
+              <button
+                type="button"
+                className="link"
+                onPointerEnter={() => void preloadBabylist()}
+                onFocus={() => void preloadBabylist()}
+                onClick={() => {
+                  const key = registryLine.key;
+                  void sendToBabylist(registryLine).then(result => {
+                    setRegistryState({ key, result });
+                    if (result === 'sent') recordInterest({ kind: 'babylist', slug });
+                  });
+                }}
+              >
+                Add to Babylist
+              </button>
+            )}
+          </p>
+          {registryResult === 'unavailable' && (
+            <p className="registry-note" role="status">Babylist’s button isn’t available in this browser. Copy this page’s address and add it on Babylist.</p>
           )}
 
-          <section className="action-section">
-            <button type="button" className="add-to-cart" disabled={!selection.stain} onClick={handleAddToCart}>
-              {addLabel}
-            </button>
+          {tags}
 
-            <div className="action-secondary">
-              {shopItem && <SetAsideButton item={shopItem} />}
-              {registryResult === 'sent' ? (
-                <span className="registry-sent">Sent to Babylist</span>
-              ) : (
-                <button
-                  type="button"
-                  className="set-aside"
-                  onPointerEnter={() => void preloadBabylist()}
-                  onFocus={() => void preloadBabylist()}
-                  onClick={() => {
-                    const key = registryLine.key;
-                    void sendToBabylist(registryLine).then(result => setRegistryState({ key, result }));
-                  }}
-                >
-                  Add to Babylist
-                </button>
-              )}
-            </div>
-            {registryResult === 'unavailable' && (
-              <p className="registry-fallback" role="status">
-                Babylist&rsquo;s button isn&rsquo;t available in this browser. Copy this page&rsquo;s address and add it on Babylist.
-              </p>
-            )}
+          {showDeliveryMessage && <PurchaseAssurances />}
+          <p className="pdp-help"><TalkToPerson piece={currentConfig.productName} label="Talk to someone about this" /></p>
+        </div>
 
-            {showDeliveryMessage && <PurchaseAssurances />}
-          </section>
-
+        <div className="pdp-below">
           {description}
+          {details}
         </div>
       </div>
 
-      <div className="pdp-sticky">
-        <button type="button" className="add-to-cart" disabled={!selection.stain} onClick={handleAddToCart}>
-          {selection.stain ? `Add · ${formatPrice(cartTotal)}` : 'Out of stock'}
-        </button>
-      </div>
-
-      <CartPopup
-        open={showCartPopup}
-        productName={currentConfig.productName}
-        wood={selection.wood}
-        stain={selection.stain}
-        onClose={() => setShowCartPopup(false)}
-      />
+      {addOffScreen && (
+        <div className="pdp-sticky">
+          <button type="button" className="btn btn--wide" disabled={!selection.stain} onClick={handleAddToCart}>
+            {selection.stain ? `Add · ${formatPrice(cartTotal)}` : 'Out of stock'}
+          </button>
+        </div>
+      )}
     </>
   );
 }

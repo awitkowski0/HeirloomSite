@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
+import { getBrowsableProducts } from '@/lib/content';
 import { getCollections } from '@/lib/collections';
 import { breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
 
@@ -19,9 +21,11 @@ export const metadata: Metadata = {
  */
 export default function CollectionsPage() {
   const collections = getCollections();
+  const photoOf = (name: string) =>
+    getBrowsableProducts().filter(p => p.collection === name && p.defaultImage).sort((a, b) => Number(b.category === 'Cribs') - Number(a.category === 'Cribs'))[0]?.defaultImage ?? null;
 
   return (
-    <div className="container products-page">
+    <div className="page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -34,28 +38,23 @@ export default function CollectionsPage() {
         }}
       />
 
-      <header className="page-header">
-        <h1 className="headline-lg text-primary">Shop by Collection</h1>
-        <p className="body-lg text-on-surface-variant">
-          Each collection is a full range in one design language — crib, dresser, nightstand
-          and chest, built to sit together in the same room.
-        </p>
+      <header className="page-intro">
+        <h1>Shop by collection</h1>
+        <p>Each collection is a full range in one design, so the pieces sit well together.</p>
       </header>
 
-      <nav className="subcategory-nav" aria-label="Collections">
-        {collections.map(collection => (
-          <Link
-            key={collection.slug}
-            href={`/collections/${collection.slug}`}
-            className="subcategory-card"
-          >
-            <span className="body-lg">{collection.name}</span>
-            <span className="label-caps text-on-surface-variant">
-              {collection.count} {collection.count === 1 ? 'piece' : 'pieces'}
-            </span>
-          </Link>
-        ))}
-      </nav>
+      <div className="grid">
+        {collections.map(collection => {
+          const photo = photoOf(collection.name);
+          return (
+            <Link key={collection.slug} href={`/collections/${collection.slug}`} className="piece-link">
+              <span className="piece-photo">{photo ? <Image src={photo} alt="" fill sizes="(max-width: 859px) 46vw, 260px" /> : null}</span>
+              <span className="piece-name">{collection.name}</span>
+              <span className="piece-meta">{collection.count} {collection.count === 1 ? 'piece' : 'pieces'}</span>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

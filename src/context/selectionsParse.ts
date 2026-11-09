@@ -1,7 +1,8 @@
+import type { Side } from '@/lib/pick-run';
 import type { ShopItem } from '@/lib/shop';
 
 export interface RunState {
-  picks: Record<string, 'left' | 'right'>;
+  picks: Record<string, Side>;
   at: number;
 }
 
@@ -11,9 +12,11 @@ export interface Selections {
   /** Flipped into the comparison without being set aside. */
   compareExtras: ShopItem[];
   run: RunState;
+  /** The finish a shopper last chose for each piece. */
+  finishes: Record<string, string>;
 }
 
-export const EMPTY_SELECTIONS: Selections = { items: [], compare: [], compareExtras: [], run: { picks: {}, at: 0 } };
+export const EMPTY_SELECTIONS: Selections = { items: [], compare: [], compareExtras: [], run: { picks: {}, at: 0 }, finishes: {} };
 
 const ITEM_DEFAULTS: Omit<ShopItem, 'slug' | 'name' | 'price'> = {
   category: null,
@@ -38,6 +41,7 @@ const ITEM_DEFAULTS: Omit<ShopItem, 'slug' | 'name' | 'price'> = {
   buildStatement: null,
   safetyStatement: null,
   finishImages: [],
+  priceVaries: false,
   registry: null,
 };
 
@@ -66,6 +70,22 @@ const normalizeItems = (value: unknown[]): ShopItem[] =>
     return item ? [item] : [];
   });
 
+function parseRun(value: unknown): RunState {
+  if (!value || typeof value !== 'object') return EMPTY_SELECTIONS.run;
+  const run = value as Partial<RunState>;
+  const picks: Record<string, Side> = {};
+  // Runs saved by an earlier design used left and right, and cannot be replayed.
+  for (const [id, side] of Object.entries(run.picks ?? {})) {
+    if (side === 'a' || side === 'b' || side === 'skip') picks[id] = side;
+  }
+  return { picks, at: Object.keys(picks).length > 0 && typeof run.at === 'number' ? run.at : 0 };
+}
+
+function parseFinishes(value: unknown): Record<string, string> {
+  if (!value || typeof value !== 'object') return {};
+  return Object.fromEntries(Object.entries(value).filter((e): e is [string, string] => typeof e[1] === 'string'));
+}
+
 /** Turns whatever is in storage into a state that is safe to render. */
 export function parseSelections(raw: string | null): Selections {
   try {
@@ -78,7 +98,8 @@ export function parseSelections(raw: string | null): Selections {
       items,
       compare: parsed.compare.filter((slug): slug is string => typeof slug === 'string' && known.has(slug)),
       compareExtras,
-      run: parsed.run && typeof parsed.run === 'object' ? { picks: parsed.run.picks ?? {}, at: parsed.run.at ?? 0 } : EMPTY_SELECTIONS.run,
+      run: parseRun(parsed.run),
+      finishes: parseFinishes(parsed.finishes),
     };
   } catch {
     return EMPTY_SELECTIONS;

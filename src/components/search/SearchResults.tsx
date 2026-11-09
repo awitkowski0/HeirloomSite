@@ -2,9 +2,9 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchAll } from '@/lib/search';
 import { formatPriceApprox } from '@/lib/format';
-import { humanizeWood } from '@/lib/labels';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
@@ -12,53 +12,37 @@ export default function SearchResults() {
   const { results, loading } = useSearchAll(query);
 
   return (
-    <>
-      <header className="page-header">
-        <h1 className="headline-lg text-primary">
-          {query ? `Search: “${query}”` : 'Search'}
-        </h1>
-        <p role="status" aria-live="polite" className="body-lg text-on-surface-variant">
-          {!query
-            ? 'Enter a search term to find products.'
-            : loading
-              ? 'Searching…'
-              : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
+    <div className="page">
+      <header className="page-intro">
+        <h1>{query ? `Search: “${query}”` : 'Search'}</h1>
+        <form className="ask" action="/search">
+          <input name="q" defaultValue={query} aria-label="Search the catalog" placeholder="A crib, a finish, a dresser" autoComplete="off" />
+          <button type="submit">Search</button>
+        </form>
+        <p role="status" aria-live="polite" className="small">
+          {!query ? '' : loading ? 'Searching…' : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
         </p>
       </header>
 
       {query && !loading && results.length === 0 && (
-        <p className="body-lg gallery-empty">
+        <p className="page-note">
           Nothing matched that search. <Link href="/products">Browse all products</Link> instead.
         </p>
       )}
 
       {results.length > 0 && (
-        <div className="featured-grid">
+        <div className="grid">
           {results.map(r => (
-            <Link key={r.slug} href={`/product/${r.slug}`} className="featured-card product-card-link">
-              <article>
-                <div className="featured-card-img">
-                  {r.image ? (
-                    /* eslint-disable-next-line @next/next/no-img-element -- result
-                       thumbnails are transient; not worth an optimizer round-trip. */
-                    <img src={r.image} alt={r.productName} loading="lazy" />
-                  ) : (
-                    <span className="material-symbols-outlined product-card-placeholder" aria-hidden="true">crib</span>
-                  )}
-                </div>
-                <div className="featured-card-body">
-                  <span className="product-card-category">{r.category || 'Crib'}</span>
-                  <h2>{r.productName}</h2>
-                  <p className="price">
-                    {formatPriceApprox(r.basePrice)}
-                    <span className="search-result-wood"> · {humanizeWood(r.wood)}</span>
-                  </p>
-                </div>
-              </article>
+            <Link key={r.slug} href={`/product/${r.slug}`} className="piece-link">
+              <span className="piece-photo">
+                {r.image ? <Image src={r.image} alt={r.productName} fill sizes="(max-width: 859px) 46vw, 260px" /> : null}
+              </span>
+              <span className="piece-name">{r.productName}</span>
+              <span className="piece-meta">{formatPriceApprox(r.basePrice)}</span>
             </Link>
           ))}
         </div>
       )}
-    </>
+    </div>
   );
 }

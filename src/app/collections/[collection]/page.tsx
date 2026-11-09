@@ -60,7 +60,7 @@ export default async function CollectionPage({
   const products = getProductsInCollection(collection.name);
 
   return (
-    <div className="container products-page">
+    <div className="page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -80,12 +80,8 @@ export default async function CollectionPage({
         }}
       />
 
-      <header className="page-header">
-        <h1 className="headline-lg text-primary">{collection.name}</h1>
-        <p className="body-lg text-on-surface-variant">
-          The full {collection.name} range — {collection.count} pieces designed to sit
-          together in one room.
-        </p>
+      <header className="page-intro">
+        <h1>{collection.name}</h1>
       </header>
 
       <section aria-label={`${collection.name} products`}>

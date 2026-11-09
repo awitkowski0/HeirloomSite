@@ -5,7 +5,7 @@ import { getProductBySlug, getAllProductSlugs, getInventory, getProductIndex } f
 import { builderForProduct } from '@/lib/builders';
 import { toShopItems } from '@/lib/shop';
 import UseTags from '@/components/uses/UseTags';
-import BuilderPanel, { BuilderTag } from '@/components/product/BuilderPanel';
+import PieceDetails from '@/components/product/PieceDetails';
 import { categoryToSlug } from '@/lib/categories';
 import {
   truncate,
@@ -19,6 +19,8 @@ import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
+import { shortBuilderName } from '@/lib/names';
+import { softItemNote } from '@/lib/photo-notes';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import type { ReactNode } from 'react';
 
@@ -334,22 +336,17 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           <h1 className="product-title">{product.productName}</h1>
         }
         byline={
-          <>
-            {builder ? <BuilderTag builder={builder} category={indexEntry?.category ?? null} /> : null}
-            {shopItem ? <UseTags uses={shopItem.uses} note={shopItem.usesNote} /> : null}
-          </>
+          builder ? (
+            <p className="byline">
+              By <Link href={builder.href}>{shortBuilderName(builder.name)}</Link>. {builder.leadTime}, confirmed when you order.
+            </p>
+          ) : null
         }
+        tags={shopItem ? <UseTags uses={shopItem.uses} note={shopItem.usesNote} /> : null}
+        photoNote={softItemNote(slug)}
         shopItem={shopItem}
-        description={
-          <>
-            {builder ? <BuilderPanel builder={builder} category={indexEntry?.category ?? null} /> : null}
-            {primary.description ? (
-              <div className="product-description">
-                {renderProductDescription(primary.description)}
-              </div>
-            ) : null}
-          </>
-        }
+        description={primary.description ? <div className="product-description">{renderProductDescription(primary.description)}</div> : null}
+        details={<PieceDetails builder={builder} category={indexEntry?.category ?? null} price={Number(primary.basePrice) || 0} bundle={primary.bundle ?? []} />}
         initialWood={resolved.wood ?? data.config.wood}
         initialStain={resolved.stain}
       />
@@ -366,9 +363,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
       */}
       {relatedProducts.length > 0 && (
         <section className="product-bottom product-related" aria-labelledby="complete-the-set">
-          <h2 id="complete-the-set" className="label-caps product-bottom-head">
-            Complete the set
-          </h2>
+          <h2 id="complete-the-set" className="sub">Goes with it</h2>
           <VisibleProductGrid products={relatedProducts} />
         </section>
       )}

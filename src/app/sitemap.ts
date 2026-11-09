@@ -23,6 +23,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/products`, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${SITE_URL}/pick`, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${SITE_URL}/gifts`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/collections`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/safety`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/care`, changeFrequency: 'yearly', priority: 0.4 },

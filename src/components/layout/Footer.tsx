@@ -1,113 +1,70 @@
 import Link from 'next/link';
 import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
+import { HOURS_LABEL, PHONE_DISPLAY, PHONE_HREF } from '@/lib/hours';
+
+const COLUMNS: readonly { heading: string; links: readonly { href: string; label: string }[] }[] = [
+  {
+    heading: 'Shop',
+    links: [
+      { href: '/products', label: 'Everything' },
+      { href: '/products/cribs', label: 'Cribs' },
+      { href: '/products/dressers-changing-tables', label: 'Dressers' },
+      { href: '/products/nightstands-storage', label: 'Nightstands' },
+      { href: '/collections', label: 'Collections' },
+      { href: '/pick', label: 'Help me pick' },
+      { href: '/gifts', label: 'Gifts' },
+    ],
+  },
+  {
+    heading: 'Learn',
+    links: [
+      { href: '/how-conversion-works', label: 'How conversion works' },
+      { href: '/why-hardwood', label: 'Why solid hardwood' },
+      { href: '/woods-and-finishes', label: 'Woods and stains' },
+      { href: '/safe-sleep', label: 'Safe sleep' },
+      { href: '/timeline', label: 'Timeline' },
+      { href: '/faq', label: 'FAQ' },
+    ],
+  },
+  {
+    heading: 'About',
+    links: [
+      { href: '/about-heirloom', label: 'About Heirloom' },
+      { href: '/builders', label: 'Our builders' },
+      { href: '/safety', label: 'Safety' },
+      { href: '/your-taste', label: 'What we’ve learned' },
+    ],
+  },
+  {
+    heading: 'Help',
+    links: [
+      { href: '/care', label: 'Care' },
+      { href: '/shipping', label: 'Delivery' },
+      { href: '/returns', label: 'Returns and cancellations' },
+      { href: '/terms', label: 'Terms' },
+      { href: '/privacy', label: 'Privacy' },
+      { href: '/contact', label: 'Contact us' },
+    ],
+  },
+];
 
 export default function Footer() {
   return (
-    <footer className="site-footer">
-      <div className="container">
-        <div className="footer-grid">
-          <div>
-            <span className="footer-brand">Heirloom</span>
-            <p className="body-md text-on-surface-variant footer-tagline">
-              Solid hardwood nursery furniture from independent builders, made to order. Choose Curbside or White Glove delivery.
-            </p>
-          </div>
-          <div>
-            <h2 className="label-caps text-primary footer-heading">Shop</h2>
-            <ul className="footer-links">
-              <li>
-                <Link href="/products">All Products</Link>
-              </li>
-              <li>
-                <Link href="/products/cribs">Cribs</Link>
-              </li>
+    <footer className="site-foot">
+      <div className="foot-grid">
+        {COLUMNS.map(col => (
+          <div key={col.heading}>
+            <h2>{col.heading}</h2>
+            <ul>
+              {col.links.map(l => <li key={l.href}><Link href={l.href}>{l.label}</Link></li>)}
             </ul>
           </div>
-          {/*
-            The owner's guides. These pages are in the sitemap, so without a
-            link from the shared chrome they would be submitted to Google with
-            no internal link pointing at them from anywhere on the site - which
-            is how a page gets crawled once and then treated as an orphan.
-          */}
-          <div>
-            <h2 className="label-caps text-primary footer-heading">Guides</h2>
-            <ul className="footer-links">
-              <li>
-                <Link href="/faq">FAQ</Link>
-              </li>
-              <li>
-                <Link href="/how-conversion-works">How Conversion Works</Link>
-              </li>
-              <li>
-                <Link href="/why-hardwood">Why Solid Hardwood</Link>
-              </li>
-              <li>
-                <Link href="/safe-sleep">Safe Sleep</Link>
-              </li>
-              <li>
-                <Link href="/timeline">Timeline</Link>
-              </li>
-            </ul>
-          </div>
-          {/*
-            About + builder pages are in the sitemap, so they get a footer link
-            for the same reason as the guides above: a sitemap page with no
-            internal link is crawled once and then treated as an orphan.
-          */}
-          <div>
-            <h2 className="label-caps text-primary footer-heading">Our builders</h2>
-            <ul className="footer-links">
-              <li>
-                <Link href="/about-heirloom">About Heirloom</Link>
-              </li>
-              <li>
-                <Link href="/builders">Compare the Builders</Link>
-              </li>
-              <li>
-                <Link href="/builders/old-town-oak">Old Town Oak</Link>
-              </li>
-              <li>
-                <Link href="/builders/fishers-quality-products">Fisher&rsquo;s Quality Products</Link>
-              </li>
-              <li>
-                <Link href="/builders/kids-comfort">Kids Comfort</Link>
-              </li>
-            </ul>
-          </div>
-          <div className="footer-support">
-            <h2 className="label-caps text-primary footer-heading">Support</h2>
-            <ul className="footer-links">
-              <li>
-                <Link href="/safety">Safety</Link>
-              </li>
-              <li>
-                <Link href="/care">Care &amp; Finishes</Link>
-              </li>
-              <li>
-                <Link href="/shipping">Delivery</Link>
-              </li>
-              <li>
-                <Link href="/returns">Returns &amp; Cancellations</Link>
-              </li>
-              <li>
-                <Link href="/terms">Terms</Link>
-              </li>
-              <li>
-                <Link href="/contact">Contact Us</Link>
-              </li>
-              <li>
-                <Link href="/privacy">Privacy</Link>
-              </li>
-              <li>
-                <CookieSettingsLink />
-              </li>
-            </ul>
-            <p className="body-md text-on-surface-variant footer-copyright">
-              © {new Date().getFullYear()} Heirloom Cribs &amp; More. All Rights Reserved.
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
+      <p className="foot-note">
+        <a href={PHONE_HREF}>{PHONE_DISPLAY}</a> · {HOURS_LABEL} · <CookieSettingsLink />
+      </p>
+      <p className="foot-note">© {new Date().getFullYear()} Heirloom Cribs &amp; More. We don’t build the furniture. We take the order, answer the phone, and handle delivery.</p>
     </footer>
   );
 }

@@ -17,11 +17,9 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, '');
 const rendered = (f: string) => stripComments(readFileSync(resolve(root, f), 'utf8'));
 
-// #112 "four pages" (home = page + HomeHero + ProvenanceBand).
+// #112 "four pages" (home is one file now).
 const FOUR_PAGES = [
   'src/app/page.tsx',
-  'src/components/home/HomeHero.tsx',
-  'src/components/home/ProvenanceBand.tsx',
   'src/app/safety/page.tsx',
   'src/app/why-hardwood/page.tsx',
 ];
@@ -95,7 +93,7 @@ test('no Cherry or Red Oak in sold-wood copy', () => {
 
 test('Brown Maple is still named as a wood on the home/safety/why-hardwood/finishes copy', () => {
   // Signed homepage strings (#52) drop brown maple from page.tsx and HomeHero; the ProvenanceBand line still carries it, so the home files are checked together.
-  const HOME = ['src/app/page.tsx', 'src/components/home/HomeHero.tsx', 'src/components/home/ProvenanceBand.tsx'];
+  const HOME = ['src/app/page.tsx'];
   assert.match(HOME.map(rendered).join('\n'), /brown maple/i, 'home (page + HomeHero + ProvenanceBand) should still name brown maple');
   // Held-origin strings (#52 6576700054/6576722581, Director 6576727700) name no species on /safety and /why-hardwood; only /finishes is still checked.
   // /finishes line 49 (#52 Brand 6577433010, Director 6577718945) drops "brown maple", so /finishes now names no species either.

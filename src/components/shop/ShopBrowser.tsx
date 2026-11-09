@@ -1,97 +1,117 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import SetAsideButton from '@/components/selections/SetAsideButton';
-import { TONES, type Tone } from '@/lib/finish-tones';
+import { useMemo, useSyncExternalStore } from 'react';
+import PieceLink from './PieceLink';
+import TalkToPerson from '@/components/layout/TalkToPerson';
+import { TONES } from '@/lib/finish-tones';
+import { filtersFromHash, filtersToHash, type Filters } from '@/lib/intent';
 import { formatPriceApprox } from '@/lib/format';
+import { PICK_CRIBS, photoRank } from '@/lib/photo-notes';
 import type { ShopItem } from '@/lib/shop';
 import { useDelistedProducts } from '@/lib/useDelistedProducts';
-import '@/styles/shop.css';
 
 /*
- * The plain index behind the edited plates. One control: which tone of wood to
- * look at. It lives in sessionStorage so Back returns to the same cards, and the
- * scroll offset still points at what the shopper was looking at.
+ * Filters live in the URL hash: a page can stay prerendered, Back restores them,
+ * and a link from the home prompt can carry them.
  */
-const KEY = 'heirloom_catalog_tone';
-const EVENT = 'heirloom_catalog_tone_change';
+function subscribeHash(listener: () => void) {
+  window.addEventListener('hashchange', listener);
+  return () => window.removeEventListener('hashchange', listener);
+}
+const readHash = () => window.location.hash;
+const serverHash = () => '';
 
-function subscribe(listener: () => void) {
-  window.addEventListener(EVENT, listener);
-  return () => window.removeEventListener(EVENT, listener);
-}
-function read(): Tone | '' {
-  try {
-    return (sessionStorage.getItem(KEY) as Tone | null) ?? '';
-  } catch {
-    return '';
-  }
-}
-function write(value: Tone | '') {
-  try {
-    sessionStorage.setItem(KEY, value);
-  } catch {
-    // Private windows can refuse storage; the page still works for this view.
-  }
-  window.dispatchEvent(new Event(EVENT));
+function setHash(filters: Filters) {
+  const next = filtersToHash(filters);
+  window.history.pushState(null, '', next || window.location.pathname);
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
 
-export default function ShopBrowser({ items, priorityCount = 0 }: { items: ShopItem[]; priorityCount?: number }) {
+const LABELS: Record<string, (f: Filters) => string> = {
+  use: f => `${f.use?.[0]}${f.use?.slice(1).toLowerCase()}`,
+  top: f => (f.top === 'arched' ? 'Curved top' : 'Straight top'),
+  front: f => (f.front === 'slats' ? 'Open slats' : 'Solid front'),
+  tone: f => (f.tone === 'light' ? 'Light wood' : 'Dark wood'),
+  max: f => `Under ${formatPriceApprox(f.max ?? 0)}`,
+};
+
+const finishForTone = (item: ShopItem, tone: 'light' | 'dark' | undefined) =>
+  tone && item.finishImages.length > 1 ? item.finishImages.find(f => f.tone === tone)?.name ?? null : null;
+
+export default function ShopBrowser({
+  items,
+  priorityCount = 0,
+  heading,
+}: {
+  items: ShopItem[];
+  priorityCount?: number;
+  heading?: boolean;
+}) {
   const { isDelisted } = useDelistedProducts();
-  const tone = useSyncExternalStore(subscribe, read, () => '' as const);
-  const hasTones = items.some(i => i.finishImages.length > 1);
-  const shown = items
-    .filter(i => !isDelisted(i.slug))
-    .flatMap(item => {
-      if (!tone) return [{ item, image: item.image }];
-      const match = item.finishImages.find(f => f.tone === tone);
-      return match ? [{ item, image: match.image }] : [];
-    });
+  const hash = useSyncExternalStore(subscribeHash, readHash, serverHash);
+  const filters = useMemo(() => filtersFromHash(hash), [hash]);
+  const active = (Object.keys(LABELS) as (keyof Filters)[]).filter(k => filters[k] !== undefined);
+
+  const visible = useMemo(
+    () =>
+      items
+        .filter(i => !isDelisted(i.slug))
+        .filter(i => {
+          const tag = PICK_CRIBS[i.slug];
+          if (filters.use && !i.uses.includes(filters.use)) return false;
+          if (filters.top && (tag ? tag.top !== filters.top : i.top?.toLowerCase() !== filters.top)) return false;
+          if (filters.front && (tag ? tag.front !== filters.front : (i.front === 'Slatted' ? 'slats' : i.front === 'Panel' ? 'panel' : null) !== filters.front)) return false;
+          if (filters.tone && !i.finishImages.some(f => f.tone === filters.tone)) return false;
+          if (filters.max && i.price > filters.max) return false;
+          return true;
+        })
+        .sort((a, b) => photoRank(a.slug) - photoRank(b.slug)),
+    [items, filters, isDelisted],
+  );
+
+  const tones = TONES.filter(t => t.id !== 'mid') as readonly { id: 'light' | 'dark'; label: string }[];
 
   return (
-    <div className="shop">
-      {hasTones && (
-        <div className="shop-tones" role="group" aria-label="Show finishes by tone">
-          <span className="label-caps">Finish</span>
-          <button type="button" aria-pressed={!tone} onClick={() => write('')}>All</button>
-          {TONES.map(t => (
-            <button key={t.id} type="button" aria-pressed={tone === t.id} onClick={() => write(t.id)}>{t.label}</button>
+    <div className="browser">
+      {heading && <h1 className="browser-title">{active.length > 0 ? 'Here’s what fits' : 'Everything we carry'}</h1>}
+      {filters.q && active.length > 0 ? <p className="small">For “{filters.q}”</p> : null}
+      <div className="filters" role="group" aria-label="Filter">
+        {active.map(key => (
+          <button
+            key={key}
+            type="button"
+            className="filter"
+            aria-label={`Remove ${LABELS[key](filters)}`}
+            onClick={() => {
+              const next = { ...filters };
+              delete next[key];
+              setHash(next);
+            }}
+          >
+            {LABELS[key](filters)} <span aria-hidden="true">×</span>
+          </button>
+        ))}
+        {tones
+          .filter(t => filters.tone !== t.id)
+          .map(t => (
+            <button key={t.id} type="button" className="link link--quiet" onClick={() => setHash({ ...filters, tone: t.id })}>
+              {t.label} wood
+            </button>
           ))}
-          <span className="shop-count" aria-live="polite">{shown.length} {shown.length === 1 ? 'piece' : 'pieces'}</span>
+        {active.length > 0 && (
+          <button type="button" className="link" onClick={() => setHash({})}>Clear</button>
+        )}
+      </div>
+      {visible.length === 0 ? (
+        <p className="page-note">Nothing matches all of that. Remove a filter above, or <TalkToPerson />.</p>
+      ) : (
+        <div className="grid">
+          {visible.map((item, i) => (
+            <PieceLink key={item.slug} item={item} finish={finishForTone(item, filters.tone)} priority={i < priorityCount} />
+          ))}
         </div>
       )}
-      {tone && <p className="plate-fine">Digital preview of each finish.</p>}
-      <ul className="shop-grid">
-        {shown.map(({ item, image }, i) => (
-          <li key={item.slug} className="shop-card">
-            <Link
-              href={`/product/${item.slug}`}
-              className="shop-card__link"
-              data-product-name={item.name}
-              data-product-category={item.category ?? undefined}
-            >
-              <span className="shop-card__img">
-                {image ? (
-                  <Image
-                    src={image}
-                    alt={item.name}
-                    fill
-                    sizes="(max-width: 767px) 50vw, (max-width: 1199px) 33vw, 400px"
-                    priority={i < priorityCount}
-                    style={{ objectFit: 'contain', objectPosition: 'bottom' }}
-                  />
-                ) : null}
-              </span>
-              <span className="shop-card__name">{item.name}</span>
-              {item.builder && <span className="builder-tag">{item.builder} · {item.state}</span>}
-              <span className="shop-card__price">From {formatPriceApprox(item.price)}</span>
-            </Link>
-            <SetAsideButton item={item} />
-          </li>
-        ))}
-      </ul>
+      <p className="small page-note">Colors are digital previews of one photo.</p>
     </div>
   );
 }

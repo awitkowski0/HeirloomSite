@@ -7,6 +7,7 @@ import type { InventoryItem } from '@/types';
 import { builderForProduct, featuresFor, safetyAnswerFor } from '@/lib/builders';
 import { getInventory, type ProductIndexItem } from '@/lib/content';
 import { CRIB_STYLES, type CribStyleId } from '@/lib/crib-styles';
+import { finishDisplayName } from '@/lib/names';
 
 /*
  * One flat, serialisable row per product for the shop browser, built on the
@@ -37,20 +38,28 @@ export interface ShopItem {
   converts: string | null;
   buildStatement: { text: string; source: string } | null;
   safetyStatement: { text: string; source: string } | null;
-  finishImages: { name: string; image: string; tone: Tone | null }[];
+  /** Every buyable finish with the exact configuration a cart line needs. */
+  finishImages: { name: string; image: string; tone: Tone | null; wood: string; stainName: string; price: number }[];
+  /** True when finishes cost different amounts, so the price needs a "from". */
+  priceVaries: boolean;
   /** The lowest-priced configuration, so a registry item names one real thing. */
   registry: { title: string; image: string; href: string; price: number } | null;
 }
 
 function finishImagesFor(rows: InventoryItem[]): ShopItem['finishImages'] {
+  const priceOf = (row: InventoryItem, stain: { priceAddition?: number }) =>
+    (Number(row.basePrice) || 0) + (Number(stain.priceAddition) || 0);
+  const first = rows[0];
   const finishes =
-    rows[0]?.variantType === 'finish'
+    first?.variantType === 'finish'
       ? rows.flatMap(r => {
-          const stain = r.stains.find(s => s.inStock && s.image);
-          return stain?.image ? [{ name: r.wood, image: stain.image }] : [];
+          const stain = r.stains.find(st => st.inStock && st.image);
+          return stain?.image ? [{ name: r.wood, image: stain.image, wood: r.wood, stainName: stain.name, price: priceOf(r, stain) }] : [];
         })
-      : (rows[0]?.stains ?? []).flatMap(s => (s.inStock && s.image ? [{ name: s.name, image: s.image }] : []));
-  return finishes.map(f => ({ ...f, tone: toneOf(f.name) }));
+      : (first?.stains ?? []).flatMap(st =>
+          st.inStock && st.image ? [{ name: st.name, image: st.image, wood: first.wood, stainName: st.name, price: priceOf(first, st) }] : [],
+        );
+  return finishes.map(f => ({ ...f, name: finishDisplayName(f.name), tone: toneOf(f.name) }));
 }
 
 /* What the catalogue's own kit lists say this crib becomes. */
@@ -124,6 +133,7 @@ export function toShopItems(products: ProductIndexItem[]): ShopItem[] {
       buildStatement: builder?.construction ? { text: builder.construction.text, source: builder.construction.source } : null,
       safetyStatement: safetyQuote,
       finishImages: finishImagesFor(rows),
+      priceVaries: new Set(finishImagesFor(rows).map(f => f.price)).size > 1,
       registry: registryFor(p.productName, p.slug, rows),
     };
   });

@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
-import { assertNoOrphanedCategories, getBrowsableProducts, getCategories } from '@/lib/content';
+import { assertNoOrphanedCategories, getBrowsableProducts } from '@/lib/content';
 import { itemListJsonLd,
   jsonLdScript,
 } from '@/lib/seo';
-import CategoryPills from '@/components/products/CategoryPills';
 import ShopBrowser from '@/components/shop/ShopBrowser';
 import UsesNav from '@/components/uses/UsesNav';
 import { toShopItems } from '@/lib/shop';
@@ -25,30 +24,17 @@ export default function ProductsPage() {
    */
   assertNoOrphanedCategories();
   const products = getBrowsableProducts();
-  const categories = getCategories();
 
   return (
-    <div className="container products-page">
+    <div className="page">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdScript(itemListJsonLd(products, '/products')) }}
       />
 
-      <header className="page-header">
-        {/* "Shop All", matching the nav label that leads here. This said "Our
-            Collections" while the nav item labelled "Collections" pointed at
-            /gallery instead - so the one word named two different pages. */}
-        <h1 className="headline-lg text-primary">Everything</h1>
-        <p className="body-lg text-on-surface-variant">
-          {products.length} pieces across {categories.length} categories.
-        </p>
-      </header>
-
-      <UsesNav />
-      <CategoryPills categories={categories} activeSlug={null} />
-
       <section aria-label="Product grid">
-        <ShopBrowser items={toShopItems(products)} priorityCount={3} />
+        <ShopBrowser items={toShopItems(products)} priorityCount={4} heading />
+        <UsesNav />
         <ListingAnalytics />
       </section>
     </div>

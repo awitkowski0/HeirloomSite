@@ -1,3 +1,4 @@
+import { possessive } from '@/lib/names';
 /*
  * Who makes what, and what each builder says about it.
  *
@@ -124,5 +125,5 @@ export function featuresFor(
 }
 
 export function missingStatementCopy(builderName: string): string {
-  return `We don't have a written statement from ${builderName} to show for this piece yet. Ask us and we'll request it from the shop.`;
+  return `We can request ${possessive(builderName)} written safety statement for you. Just ask.`;
 }
