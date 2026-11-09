@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getProductBySlug, getAllProductSlugs, getInventory, getProductIndex } from '@/lib/content';
 import { builderForProduct } from '@/lib/builders';
-import BuilderPanel from '@/components/product/BuilderPanel';
+import BuilderPanel, { BuilderTag } from '@/components/product/BuilderPanel';
 import { categoryToSlug } from '@/lib/categories';
 import {
   truncate,
@@ -326,7 +326,10 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           /* The page's h1. It was previously an <h2 className="headline-xl">
              with no h1 anywhere on the page, so the visual hierarchy
              contradicted the semantic one. */
-          <h1 className="product-title">{product.productName}</h1>
+          <div className="product-heading">
+            <h1 className="product-title">{product.productName}</h1>
+            {builder ? <BuilderTag builder={builder} category={indexEntry?.category ?? null} /> : null}
+          </div>
         }
         description={
           <>

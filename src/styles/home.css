@@ -538,3 +538,7 @@
     align-items: start;
   }
 }
+/* The catalog sits inside step 01 of the journey. */
+#catalog {
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}

@@ -34,9 +34,9 @@ export default function HomeHero({ detail, heroImage }: Props) {
     <section className="home-hero">
       <div className="home-hero-copy">
         <h1 className="home-hero-headline">
-          Find the Workshop
+          A Virtual Catalog
           <br />
-          Behind the Crib.
+          of American Workshops.
         </h1>
 
         <div className="home-ornament" aria-hidden="true">
@@ -46,13 +46,13 @@ export default function HomeHero({ detail, heroImage }: Props) {
         </div>
 
         <p className="home-hero-sub">
-          We don&rsquo;t build furniture. We find independent American workshops
-          that do, and show you who made each piece, how it&rsquo;s built, and what
-          the builder says about its safety.
+          Solid hardwood cribs and nursery furniture from independent builders, in
+          one place. See who builds each piece, how it&rsquo;s built, and what the
+          builder says about its safety.
         </p>
 
-        <Link href="/builders" className="button-primary home-hero-cta">
-          Meet the builders
+        <Link href="#catalog" className="button-primary home-hero-cta">
+          Browse the catalog
         </Link>
       </div>
 

@@ -4696,3 +4696,55 @@ a.product-inline-link:focus-visible {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+/* ---------------------------------------------------------------------------
+   Catalog tags and feature lists, in the brand kit: tracked caps, hairlines.
+   --------------------------------------------------------------------------- */
+.builder-tag {
+  display: inline-block;
+  font-family: var(--font-caps);
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+.builder-tag--link {
+  width: fit-content;
+  margin: 8px 0 4px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--rule-strong);
+  text-decoration: none;
+}
+.feature-chips {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.feature-chips li {
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  font-size: 0.8125rem;
+}
+.feature-chips--safety li {
+  border-color: var(--rule-strong);
+}
+.builder-origin details {
+  margin-top: 10px;
+  font-size: 0.9375rem;
+}
+.builder-origin summary {
+  cursor: pointer;
+}
+.builder-origin blockquote {
+  margin-top: 8px;
+}
+.builder-origin__note {
+  margin: 14px 0 0;
+  color: var(--ink-muted);
+}
+.builder-tag-safety {
+  margin-top: 10px;
+}

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { BUILDERS, CASE_GOOD_CATEGORIES, builderForProduct, safetyAnswerFor, getBuilder } from '../src/lib/builders';
 
+const words = (s: string) => s.toLowerCase().replace(/[()]/g, ' ').split(/\s+/).filter(Boolean);
+
 /*
  * The registry may only repeat what the sourced builder pages already say.
  * A statement that exists nowhere else has no source behind it.
@@ -20,6 +22,31 @@ test('every builder quote is verbatim from a sourced page', () => {
     for (const q of quotes) {
       if (q) assert.ok(source.includes(q.text), `${b.name}: not found in source: ${q.text.slice(0, 60)}`);
     }
+  }
+});
+
+test('every chip uses only the words of the statement it summarises', () => {
+  for (const b of BUILDERS) {
+    const checks = [
+      ...[b.safety.crib, b.safety.caseGoods].flatMap(q => (q?.features ?? []).map(f => [f, q!.text])),
+      ...[...b.buildFeatures.crib, ...b.buildFeatures.caseGoods].map(f => [f, b.construction?.text ?? '']),
+    ];
+    for (const [feature, text] of checks) {
+      const source = new Set(words(text.replace(/[.,]/g, ' ')));
+      for (const w of words(feature)) assert.ok(source.has(w), `${b.name}: "${w}" in chip "${feature}" is not in its source`);
+    }
+  }
+});
+
+test('every crib has a look tag', () => {
+  const src = readFileSync('src/lib/shop.ts', 'utf8');
+  const root = 'public/data/products';
+  for (const dir of readdirSync(root)) {
+    const file = `${root}/${dir}/product.json`;
+    if (!existsSync(file)) continue;
+    const p = JSON.parse(readFileSync(file, 'utf8'));
+    if (p.hidden || !['Cribs', 'Mini Cribs'].includes(p.category)) continue;
+    assert.ok(src.includes(`${p.slug}`), `${p.productName} has no look`);
   }
 });
 

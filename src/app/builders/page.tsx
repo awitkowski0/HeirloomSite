@@ -42,11 +42,10 @@ export default function BuildersPage() {
     <div className="container builders-index">
       <header className="builders-index__intro">
         <p className="label-caps text-on-surface-variant">The builders</p>
-        <h1 className="headline-xl">We don&rsquo;t build furniture. These shops do.</h1>
+        <h1 className="headline-xl">The Builders in the Catalog</h1>
         <p className="body-lg">
-          Heirloom Cribs &amp; More finds independent workshops, then handles everything between you
-          and them. Here is who they are and how they compare, in their own words wherever we
-          can quote them.
+          Heirloom Cribs &amp; More does not build furniture. This catalog gathers the work of
+          independent workshops, and we handle everything between you and them.
         </p>
       </header>
 
@@ -93,7 +92,7 @@ export default function BuildersPage() {
       </section>
 
       <section aria-labelledby="safety-heading">
-        <h2 id="safety-heading" className="headline-md">Safety, builder by builder</h2>
+        <h2 id="safety-heading" className="headline-md" style={{ scrollMarginTop: 'calc(var(--header-h) + 16px)' }}>Safety, builder by builder</h2>
         <p>
           Heirloom makes no safety claims of its own. Each statement below is the builder&rsquo;s,
           quoted from its own materials, and each product page shows the one that applies to it.

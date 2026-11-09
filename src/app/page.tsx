@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getShowroom, getInventory } from '@/lib/content';
+import { getBrowsableProducts, getShowroom, getInventory } from '@/lib/content';
+import { toShopItems } from '@/lib/shop';
+import ListingAnalytics from '@/components/products/ListingAnalytics';
+import ShopBrowser from '@/components/shop/ShopBrowser';
 import { variantHref } from '@/lib/variants';
 import { organizationJsonLd, webSiteJsonLd,
   jsonLdScript,
@@ -8,9 +11,6 @@ import { organizationJsonLd, webSiteJsonLd,
 import { resolveFeature, indexByProductName } from '@/lib/showroom';
 import HomeHero from '@/components/home/HomeHero';
 import ProvenanceBand from '@/components/home/ProvenanceBand';
-import StyleCards from '@/components/home/StyleCards';
-import BuilderDirectory from '@/components/builders/BuilderDirectory';
-import FeaturedProducts from '@/components/home/FeaturedProducts';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
 import BrandSketch from '@/components/marketing/BrandSketch';
@@ -24,8 +24,8 @@ export const metadata: Metadata = {
 /**
  * Server component, statically prerendered.
  *
- * Every child here is a server component too. One 'use client' or one
- * useSearchParams() in this tree flips the route to dynamic without failing
+ * The catalog is a client island over server-built rows and must stay free of
+ * useSearchParams(): that, in this tree, flips the route to dynamic without failing
  * the build, which would quietly undo the migration's SEO work - watch the
  * route table, not just the exit code.
  */
@@ -73,16 +73,6 @@ export default function HomePage() {
       <HomeHero detail={detail} heroImage={heroImage} />
       <ProvenanceBand />
 
-      <section className="container home-builders" aria-labelledby="home-builders-heading">
-        <h2 id="home-builders-heading" className="headline-lg">Shop by the people who build it</h2>
-        <p className="body-lg">
-          Three independent workshops, each introduced in its own words. Compare how they build,
-          what they say about safety, and how long each one takes.
-        </p>
-        <BuilderDirectory />
-        <Link href="/builders" className="doc-link">Compare the builders side by side &rarr;</Link>
-      </section>
-
       {/*
         Everything below the banner is the buying journey, in order.
         
@@ -96,11 +86,13 @@ export default function HomePage() {
       <div className="home-journey">
         <JourneyStep
           n="01"
-          title="Choose a Builder and a Look"
-          lead="Start with who makes it or how it looks; the finish follows. Conversion kits for the toddler bed and full-size bed are listed on each product page."
+          title="Browse the Catalog"
+          lead="Filter by type, builder, look, budget, and timing, then compare up to three pieces side by side."
         >
-          <FeaturedProducts />
-          <StyleCards inventory={inventory} />
+          <div id="catalog">
+            <ShopBrowser items={toShopItems(getBrowsableProducts())} initialType="Cribs" />
+            <ListingAnalytics />
+          </div>
           <div className="journey-sketches">
             <BrandSketch
               src="/images/brand/crib-room-placement.jpg"

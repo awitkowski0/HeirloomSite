@@ -22,6 +22,8 @@ export type BuilderId = 'old-town-oak' | 'fishers-quality-products' | 'kids-comf
 export interface BuilderQuote {
   text: string;
   source: string;
+  /** Short chips. Every word must appear in `text` (tests/builders.test.ts). */
+  features?: string[];
 }
 
 export interface Builder {
@@ -32,6 +34,9 @@ export interface Builder {
   background: string;
   intro: BuilderQuote;
   leadTime: string;
+  leadWeeksMax: number;
+  /** Short chips by piece type. Every word must appear in `construction` or be empty. */
+  buildFeatures: { crib: string[]; caseGoods: string[] };
   /** False while its pieces are available on request rather than in the catalogue. */
   listed: boolean;
   construction: BuilderQuote | null;
@@ -57,6 +62,11 @@ export const BUILDERS: readonly Builder[] = [
       source: OTO_CATALOG,
     },
     leadTime: 'About 6 to 8 weeks',
+    leadWeeksMax: 8,
+    buildFeatures: {
+      crib: ['Mortise and tenon joints', 'Steel inserts and connector bolts'],
+      caseGoods: ['Dovetail wood drawer boxes', 'Full extension slides'],
+    },
     listed: true,
     construction: {
       text: 'Our cribs are sturdy and durable with mortise and tenon joints and a substructure made of steel inserts and connector bolts. Our dressers feature dovetail wood drawer boxes and full extension slides, all features that make sure our baby furniture will stand the test of time.',
@@ -70,10 +80,12 @@ export const BUILDERS: readonly Builder[] = [
       crib: {
         text: 'All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs.',
         source: OTO_CATALOG,
+        features: ['CPSC 16CFR1219', 'ASTM F1169-19', 'Certified third party labs'],
       },
       caseGoods: {
         text: 'For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species.',
         source: OTO_CATALOG,
+        features: ['Rear mount interlock system', 'Counterweights as needed', 'Warning and extension labels', 'General Certificate of Conformity'],
       },
     },
   },
@@ -88,6 +100,8 @@ export const BUILDERS: readonly Builder[] = [
       source: "Fisher's Quality Products, from its profile on All American Wholesalers",
     },
     leadTime: '10 to 14 weeks',
+    leadWeeksMax: 14,
+    buildFeatures: { crib: [], caseGoods: [] },
     listed: true,
     construction: null,
     setup: null,
@@ -104,6 +118,8 @@ export const BUILDERS: readonly Builder[] = [
       source: `Joe Troyer, ${KC_CATALOG}`,
     },
     leadTime: 'About 8 weeks',
+    leadWeeksMax: 8,
+    buildFeatures: { crib: ['Completely solid wood including the mattress support'], caseGoods: [] },
     listed: false,
     construction: {
       text: 'All cribs are completely solid wood including the mattress support.',
@@ -114,10 +130,12 @@ export const BUILDERS: readonly Builder[] = [
       crib: {
         text: 'As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards.',
         source: KC_CATALOG,
+        features: ['Tested and certified to CPSIA and ASTM'],
       },
       caseGoods: {
         text: 'All furniture pieces come with a wall anchor to prevent tipping hazards in your nursery.',
         source: KC_CATALOG,
+        features: ['Wall anchor'],
       },
     },
   },
@@ -188,6 +206,20 @@ export function safetyAnswerFor(builder: Builder, category: string | null | unde
   else if (category && CASE_GOOD_CATEGORIES.includes(category)) quote = builder.safety.caseGoods;
   else return { kind: 'not-applicable' };
   return quote ? { kind: 'statement', quote } : { kind: 'missing' };
+}
+
+/** The chips for one piece: what the builder says about how it is built and its safety. */
+export function featuresFor(
+  builder: Builder,
+  category: string | null | undefined,
+): { build: string[]; safety: string[] } {
+  const answer = safetyAnswerFor(builder, category);
+  const isCrib = category === 'Cribs' || category === 'Mini Cribs';
+  const isCase = Boolean(category && CASE_GOOD_CATEGORIES.includes(category));
+  return {
+    build: isCrib ? builder.buildFeatures.crib : isCase ? builder.buildFeatures.caseGoods : [],
+    safety: answer.kind === 'statement' ? (answer.quote.features ?? []) : [],
+  };
 }
 
 export function missingStatementCopy(builderName: string): string {
