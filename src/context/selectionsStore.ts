@@ -2,6 +2,9 @@
 
 import { useSyncExternalStore } from 'react';
 import type { ShopItem } from '@/lib/shop';
+import { EMPTY_SELECTIONS, parseSelections, type Selections } from './selectionsParse';
+
+export type { RunState, Selections } from './selectionsParse';
 
 /*
  * What a shopper has set aside, and which of those they are comparing.
@@ -13,22 +16,9 @@ import type { ShopItem } from '@/lib/shop';
  */
 export const MAX_COMPARE = 3;
 
-export interface RunState {
-  picks: Record<string, 'left' | 'right'>;
-  at: number;
-}
-
-export interface Selections {
-  items: ShopItem[];
-  compare: string[];
-  /** Flipped into the comparison without being set aside. */
-  compareExtras: ShopItem[];
-  run: RunState;
-}
-
 const STORAGE_KEY = 'heirloom_selections';
 const EVENT = 'heirloom_selections_change';
-const EMPTY: Selections = { items: [], compare: [], compareExtras: [], run: { picks: {}, at: 0 } };
+const EMPTY = EMPTY_SELECTIONS;
 
 let cached: Selections = EMPTY;
 let cachedRaw: string | null = null;
@@ -42,20 +32,7 @@ function read(): Selections {
   }
   if (raw === cachedRaw) return cached;
   cachedRaw = raw;
-  try {
-    const parsed = raw ? (JSON.parse(raw) as Partial<Selections>) : null;
-    cached =
-      parsed && Array.isArray(parsed.items) && Array.isArray(parsed.compare)
-        ? {
-            items: parsed.items,
-            compare: parsed.compare,
-            compareExtras: Array.isArray(parsed.compareExtras) ? parsed.compareExtras : [],
-            run: parsed.run && typeof parsed.run === 'object' ? { picks: parsed.run.picks ?? {}, at: parsed.run.at ?? 0 } : EMPTY.run,
-          }
-        : EMPTY;
-  } catch {
-    cached = EMPTY;
-  }
+  cached = parseSelections(raw);
   return cached;
 }
 
