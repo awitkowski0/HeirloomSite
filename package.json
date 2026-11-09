@@ -10,14 +10,19 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/build-data.mjs && node --conditions=react-server --import ./tests/register.mjs --test \"tests/**/*.test.ts\"",
-    "data:build": "node scripts/build-data.mjs"
+    "data:build": "node scripts/build-data.mjs",
+    "db:start": "node scripts/db-local.mjs start",
+    "db:stop": "node scripts/db-local.mjs stop",
+    "db:migrate": "node --conditions=react-server --import ./tests/register.mjs scripts/db-migrate.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.6.0",
     "@heycatch/sdk": "^0.8.5",
     "@posthog/react": "^1.10.5",
+    "better-auth": "^1.7.18",
     "minisearch": "^7.2.0",
     "next": "16.4.1",
+    "pg": "^8.23.1",
     "posthog-js": "^1.422.5",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
@@ -28,6 +33,7 @@
     "@eslint/js": "^10.0.1",
     "@next/eslint-plugin-next": "^16.3.0",
     "@types/node": "^22.13.5",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "dotenv": "^17.4.2",

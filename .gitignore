@@ -44,3 +44,6 @@ data/pricing.json
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# Local development database
+.data/
