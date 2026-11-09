@@ -143,7 +143,7 @@ export default function AboutHeirloomPage() {
             <div className="builder-card">
               <h3>White Glove</h3>
               <p>
-                {`A two-person crew brings the furniture into your home, unpacks it, assembles it, sets each piece where you want it and takes the packing away. Up to 3 flights of stairs are included. `}
+                {`A two-person crew brings the furniture into your home, unpacks it, assembles it, sets each piece where you want it and takes the packing away. `}
                 <strong>White Glove is the only service that includes assembly.</strong>
               </p>
             </div>
@@ -165,7 +165,7 @@ export default function AboutHeirloomPage() {
 
         <section>
           <h2 className="headline-md">The builders we resell</h2>
-          <p>{`Each builder runs its own shop. Here are a few details. Words in quotation marks are the builders' own.`}</p>
+          <p>{`Each builder runs its own shop.`}</p>
           <ul>
             <li>
               <Link href="/builders/old-town-oak" className="doc-link">Old Town Oak</Link>

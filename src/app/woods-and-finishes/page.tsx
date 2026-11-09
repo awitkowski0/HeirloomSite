@@ -9,14 +9,10 @@ const Q = {
   q8Kc: `Kids Comfort pieces aren't listed on our site yet; they are available on request.`,
 };
 
-const OTO_FINISHES = `FC Almond · Shadow FC24427 · Tavern · Golden Brown · Michael's Cherry Low Sheen · FC 30529 · Sealy · Cappuccino · Summit Path · Rich Tobacco · Kona · Oatmilk · Granola · FC 19093 Dark Knight · Butter · S-14 Medium Cherry · OCS-113 Michael's Cherry · Hoosier Special · Harvest · FC19852 Antique Slate · FC Carbon · Amber · Earthtone FC40592 · RR-003 Bernett Slate Paint / Glaze · Muted Gray · Limed Oak · 922 Sealy · 7992 Sealy · 7992 Asbury Brown · 5190 Old World Mission`;
-const KC_STAINS = `OCS-100 natural · 101 S-2 · 102 fruitwood · 103 M-X · 104 seely · 106 acres · 107 washington · 110 medium · 111 boston · 112 provincial · 113 michael's · 116 harvest · 117 asbury · 118 antique slate · 119 cappuccino · 121 smoke · 122 cocoa · 131 frost · 132 sand · 133 tundra · 134 argos · 135 driftwood · 226 coffee · 227 rich cherry · 228 rich tobacco · 230 onyx`;
-const KC_PAINTS = `Antique White · Black · Celery · Chelsea Grey · Country White · Decorator White · Georgian · Glacier · Grey Sky · Metropolitan · Millington Gold · Panda White · Pearl · Regal Blue · Sand Dollar · White`;
-
 export const metadata: Metadata = {
   title: { absolute: 'Woods and Finishes | Heirloom Cribs & More' },
   description:
-    "Our cribs are listed in brown maple with a choice of stains. Our builders' catalogs show many more woods and finishes. Here they are, builder by builder.",
+    "Our cribs are listed in brown maple with a choice of stains. Other woods and finishes are available by request.",
   alternates: { canonical: '/woods-and-finishes' },
   openGraph: { title: 'Woods and Finishes | Heirloom Cribs & More', url: '/woods-and-finishes' },
   twitter: { title: 'Woods and Finishes | Heirloom Cribs & More' },
@@ -30,7 +26,7 @@ export default function WoodsAndFinishesPage() {
           <p className="label-caps text-on-surface-variant">Woods and finishes</p>
           <h1 className="headline-xl">Woods and finishes</h1>
           <p className="body-lg builder-header__sub">
-            {`On our site, cribs are listed in brown maple with a choice of stains. Our builders' catalogs show many more woods and finishes. This page lays them out, builder by builder.`}
+            {`Our cribs are listed in brown maple with a choice of stains. Other woods and finishes are available by request.`}
           </p>
           <Link href="/contact" className="button-primary">Get Personal Assistance</Link>
           <p className="builder-header__contact">
@@ -82,51 +78,13 @@ export default function WoodsAndFinishesPage() {
         </section>
 
         <section>
-          <h2 className="headline-md">Each builder's catalog range</h2>
+          <h2 className="headline-md">Other woods and finishes</h2>
           <p>
-            {`Cherry, red oak and the other woods below are not listed on our site. They are here so you can see what each builder's own catalog shows, in the builder's own words and spellings.`}
+            {`Our builders can work in other woods and finishes. Tell us what you have in mind and we'll check with them. `}
+            <Link href="/contact" className="doc-link">Contact us</Link>
+            {`.`}
           </p>
-
-          <h3>Old Town Oak</h3>
-          <p>
-            <strong>Woods named in its 2026 catalog:</strong>
-            {` "Sap Cherry, Cherry, Red Oak, Brown Soft Maple, White Oak Quartersawn, and Grey Elm."`}
-          </p>
-          <p>
-            <strong>Finishes shown in its 2026 catalog:</strong>
-            {` `}
-            {OTO_FINISHES}
-          </p>
-          <p><Link href="/builders/old-town-oak" className="doc-link">Old Town Oak builder page</Link></p>
-
-          <h3>Fisher's Quality Products</h3>
-          <p>
-            <strong>Finishes shown in its catalog:</strong>
-            {` Tundra, Antique Slate, Asbury, Husk and "341 White Paint." The catalog also says "Ask About Our Stain Color & Hardware Choices."`}
-          </p>
-          <p><Link href="/builders/fishers-quality-products" className="doc-link">Fisher's Quality Products builder page</Link></p>
-
-          <h3>Kids Comfort</h3>
           <p>{Q.q8Kc}</p>
-          <p>
-            <strong>Woods:</strong>
-            {` its catalog says the Haven style "is popular in brown maple wood but also available in any other native wood species."`}
-          </p>
-          <p>
-            <strong>Stains, from the January 2023 catalog (26 Ohio Certified Stains):</strong>
-            {` `}
-            {KC_STAINS}
-          </p>
-          <p>
-            <strong>Paints, from the January 2023 catalog:</strong>
-            {` `}
-            {KC_PAINTS}
-          </p>
-          <p>
-            <strong>Organic finish:</strong>
-            {` Kids Comfort offers an organic option it calls Kid's Comfort Organic. Its own description, with what it says about the glue, is on its builder page.`}
-          </p>
-          <p><Link href="/builders/kids-comfort" className="doc-link">Kids Comfort builder page</Link></p>
         </section>
 
         <section>

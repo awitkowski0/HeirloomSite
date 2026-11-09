@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/useCart';
-import { orphanedKits } from '@/lib/cart-lines';
+import { orphanedKits, stepFor } from '@/lib/cart-lines';
 import {
   createQuote,
   type CartItemPayload,
@@ -515,12 +515,8 @@ export default function CheckoutClient({ recommendations }: Props) {
               because some people would rather not have a second invoice
               arriving in two months.
 
-              Affirm is listed FIRST and still not the default. It belongs at
-              the top because it is the option that answers "I cannot put three
-              thousand dollars down at once", and someone in that position
-              should not have to read to the bottom to find out they do not
-              have to - but defaulting to a credit application for a customer
-              who never asked for one is a different thing entirely.
+              Deposit is the default and comes first. Affirm is offered last and is
+              only ever chosen on purpose.
             */}
             {/*
               Delivery is a paid choice, not a free inclusion.
@@ -573,15 +569,6 @@ export default function CheckoutClient({ recommendations }: Props) {
               <legend className="headline-md">How you&rsquo;d like to pay</legend>
               {(
                 [
-                  ...(affirmOffered
-                    ? [
-                        {
-                          value: 'affirm' as const,
-                          label: 'Pay over time with Affirm',
-                          note: `${formatPrice(fromCents(totals.totalCents))} financed · Affirm shows you their plans, rates and eligibility when you open the invoice`,
-                        },
-                      ]
-                    : []),
                   {
                     value: 'deposit' as const,
                     label: '50% deposit now',
@@ -592,6 +579,15 @@ export default function CheckoutClient({ recommendations }: Props) {
                     label: 'Pay in full',
                     note: `${formatPrice(fromCents(totals.totalCents))} on one invoice`,
                   },
+                  ...(affirmOffered
+                    ? [
+                        {
+                          value: 'affirm' as const,
+                          label: 'Pay over time with Affirm',
+                          note: `${formatPrice(fromCents(totals.totalCents))} financed · Affirm shows you their plans, rates and eligibility when you open the invoice`,
+                        },
+                      ]
+                    : []),
                 ]
               ).map(option => (
                 <label
@@ -613,16 +609,14 @@ export default function CheckoutClient({ recommendations }: Props) {
                 </label>
               ))}
               {/*
-                Says nothing when Affirm is simply not on offer. A cart under
-                $35 or over $30,000 is a rare edge, and explaining an absent
-                option to everyone who hits it would draw more attention to
-                financing than the option itself does.
-
                 What this DOES say, always, is that nothing is decided here.
                 The customer picks Affirm on Stripe's invoice page, not on this
                 form - so a line promising an instant decision would be a
                 promise this checkout cannot keep.
               */}
+              {!affirmOffered && (
+                <p className="body-md text-on-surface-variant fieldset-note">Affirm is available on orders from $35 to $30,000.</p>
+              )}
               {paymentOption === 'affirm' && (
                 <p className="body-md text-on-surface-variant fieldset-note">
                   Choose Affirm when your invoice arrives. Approval, rates and the length
@@ -785,6 +779,10 @@ export default function CheckoutClient({ recommendations }: Props) {
               </p>
             )}
 
+            {cart.some(i => stepFor(i.productName) === 'crib' && i.quantity > 1) && cart.some(i => stepFor(i.productName) === 'kits') && (
+              <p className="registry-note">Kits are counted separately. If each crib needs its own, raise the kit quantity too.</p>
+            )}
+
             <CouponInput
               cart={cartPayload}
               applied={appliedCoupon}
@@ -808,7 +806,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                 <dt>
                   {SHIPPING_METHODS.find(m => m.id === shippingMethod)?.name ?? 'Delivery'}
                 </dt>
-                <dd>{deliveryQuoted ? formatPrice(fromCents(totals.shippingCents)) : '—'}</dd>
+                <dd>{deliveryQuoted ? formatPrice(fromCents(totals.shippingCents)) : 'Enter ZIP'}</dd>
               </div>
               {/*
                 The label carries the reason. Sales tax is charged only where
@@ -819,12 +817,12 @@ export default function CheckoutClient({ recommendations }: Props) {
               <div>
                 <dt>
                   {shipping.state === ''
-                    ? 'Estimated tax'
+                    ? 'Tax'
                     : shipping.state === TAXED_STATE
                       ? `Sales tax (${TAXED_STATE} 6%)`
                       : `Sales tax (none outside ${TAXED_STATE})`}
                 </dt>
-                <dd>{formatPrice(fromCents(totals.taxCents))}</dd>
+                <dd>{shipping.state === '' ? 'Calculated on invoice' : formatPrice(fromCents(totals.taxCents))}</dd>
               </div>
               <div className="order-total-row">
                 <dt className="headline-md">Order total</dt>

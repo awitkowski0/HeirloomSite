@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { getProductBySlug, getAllProductSlugs, getInventory, getProductIndex } from '@/lib/content';
+import { getProductBySlug, getAllProductSlugs, getInventory, getProductIndex, getTaxonomyNodeBySlug } from '@/lib/content';
 import { builderForProduct } from '@/lib/builders';
 import { toShopItems } from '@/lib/shop';
 import UseTags from '@/components/uses/UseTags';
@@ -202,11 +202,13 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   const primary = product.configurations[0];
   const images = galleryImagesFor(product.configurations);
   const category = primary.category;
+  // Unlisted categories have no page, so they get no crumb rather than a redirect.
+  const categoryNode = category ? getTaxonomyNodeBySlug(categoryToSlug(category)) : null;
 
   const breadcrumb = [
     { name: 'Home', path: '/' },
     { name: 'Products', path: '/products' },
-    ...(category ? [{ name: category, path: `/products/${categoryToSlug(category)}` }] : []),
+    ...(categoryNode ? [{ name: categoryNode.name, path: `/products/${categoryNode.slug}` }] : []),
     { name: product.productName, path: `/product/${slug}` },
     ...(resolved.wood
       ? [

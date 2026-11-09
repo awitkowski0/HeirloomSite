@@ -8,9 +8,6 @@ const Q = {
   q8Order: `Tell us which pieces, wood and finish you're interested in, and a real person on our team follows up with options.`,
 };
 
-const KC_STAINS = `OCS-100 natural · 101 S-2 · 102 fruitwood · 103 M-X · 104 seely · 106 acres · 107 washington · 110 medium · 111 boston · 112 provincial · 113 michael's · 116 harvest · 117 asbury · 118 antique slate · 119 cappuccino · 121 smoke · 122 cocoa · 131 frost · 132 sand · 133 tundra · 134 argos · 135 driftwood · 226 coffee · 227 rich cherry · 228 rich tobacco · 230 onyx`;
-const KC_PAINTS = `Antique White · Black · Celery · Chelsea Grey · Country White · Decorator White · Georgian · Glacier · Grey Sky · Metropolitan · Millington Gold · Panda White · Pearl · Regal Blue · Sand Dollar · White`;
-
 export const metadata: Metadata = {
   title: { absolute: 'Kids Comfort Cribs & Furniture | Heirloom Cribs & More' },
   description:
@@ -49,22 +46,6 @@ export default function KidsComfortPage() {
       <div className="doc-page">
         <hr className="doc-rule" />
         <section>
-          <h2 className="headline-md">In Joe Troyer's words</h2>
-          <p>{`Kids Comfort's catalog carries a letter from its owner headed "To Our Customers." Here is a passage from it:`}</p>
-          <blockquote>
-            <p>{`"As the owner of Kids Comfort … we realize the importance of quality, safety, endurance, and service. In closing my goal is to serve you."`}</p>
-            <cite>{`Joe Troyer, owner, Kids Comfort catalog, January 2023`}</cite>
-          </blockquote>
-        </section>
-
-        <section>
-          <h2 className="headline-md">From crib to teenager</h2>
-          <p>
-            {`The cover of the Kids Comfort catalog puts the idea in one line: "Our transitional furniture will match your child's progressive growth phases, from baby… to toddler… to teenager."`}
-          </p>
-        </section>
-
-        <section>
           <h2 className="headline-md">Safety and compliance, in Kids Comfort's words</h2>
           <p>
             {`The statements below are Kids Comfort's own, quoted from its January 2023 catalog. Heirloom Cribs & More does not build furniture and makes no safety claims of its own.`}
@@ -91,35 +72,6 @@ export default function KidsComfortPage() {
             <cite>{`Kids Comfort catalog, January 2023`}</cite>
           </blockquote>
           <p>{Q.q7}</p>
-        </section>
-
-        <section>
-          <h2 className="headline-md">Woods and finishes</h2>
-          <p>
-            <strong>Woods.</strong>
-            {` Kids Comfort's catalog says the Haven style "is popular in brown maple wood but also available in any other native wood species." None of these woods are listed on our site yet.`}
-          </p>
-          <p>
-            <strong>Stains.</strong>
-            {` The stain sample pages in the January 2023 catalog show 26 Ohio Certified Stains:`}
-          </p>
-          <p>{KC_STAINS}</p>
-          <p>
-            <strong>Paints.</strong>
-            {` The same catalog shows 16 paints: `}
-            {KC_PAINTS}
-            {`.`}
-          </p>
-          <p>{`Screens and printed pages shift color. The catalog says "we recommend using wood samples to select your stain."`}</p>
-          <p>
-            <strong>Custom work.</strong>
-            {` The catalog lists "Custom sizes · Custom furniture · Custom Colors · Custom Hardware · Organic Finish · Organic Construction" as options, with one firm limit: "*Due to federal standards, customization on cribs is not available."`}
-          </p>
-          <p>
-            {`More on how woods and stains work: `}
-            <Link href="/woods-and-finishes" className="doc-link">Woods and finishes</Link>
-            {`.`}
-          </p>
         </section>
 
         <section>

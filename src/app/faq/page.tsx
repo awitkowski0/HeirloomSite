@@ -60,7 +60,7 @@ const SECTIONS: Section[] = [
           <p>
             It means the crib is designed to be used and kept—not replaced every season. Solid
             hardwood, careful finishing, and a clean conversion path (crib, then toddler bed, then
-            full-size bed, depending on model and kits) allow one investment to serve multiple stages of
+            full bed, depending on model and kits) allow one investment to serve multiple stages of
             childhood.
           </p>
         ),
@@ -115,7 +115,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             It is the common name for a crib that converts to a toddler bed, a day bed, and a
-            full-size bed. Old Town Oak describes three stages (crib, toddler bed, and double bed) and
+            full bed. Old Town Oak describes three stages (crib, toddler bed, and double bed) and
             notes that its toddler bed can be used as a day bed: &ldquo;Use as a day bed for toddlers
             to preschoolers.&rdquo; Fisher&rsquo;s conversion kit makes a toddler bed or a day bed,
             described in its catalog as a &ldquo;Toddler Bed/Day Bed Conversion Kit: Includes day bed
@@ -162,35 +162,16 @@ const SECTIONS: Section[] = [
         question: 'How does ordering work?',
         answer: (
           <>
-            <ol className="doc-list">
-              <li>
-                <strong>Choose and Customize.</strong> Pick the silhouette first; the hardwood and
-                the finish follow.
-              </li>
-              <li>
-                <strong>Confirm Order</strong> (this is the quality check). Nothing is charged when
-                you place an order. We read it, check the details with you, and only then ask for
-                anything. We don’t take payment at checkout. We call you, then send an invoice. We
-                call to confirm the stain, the kit list, and the delivery before anything is built.
-                A secure Stripe invoice follows within 48 hours of your order. Custom orders require
-                a 50% deposit. You can pay by credit card or Affirm.
-              </li>
-              <li>
-                <strong>Made to Order.</strong> Every piece is made to order. Lead times are
-                estimates that we confirm when you order: Old Town Oak about 6–8 weeks, and Fisher&rsquo;s 10–14 weeks. We&rsquo;ll collect the remaining balance
-                before we schedule final delivery.
-              </li>
-              <li>
-                <strong>Delivered to Your Nursery.</strong> You choose Curbside or White Glove when
-                you order. Curbside is a one-person crew to the curb; White Glove is a two-person
-                crew into your home, with unpacking, assembly, placement, and packing-material
-                removal. White Glove includes up to 3 flights of stairs. See{' '}
-                <Link href="/shipping" className="doc-link">
-                  Delivery
-                </Link>
-                .
-              </li>
-            </ol>
+            <p>
+              Choose your piece and finish, then place the order. We don’t take payment at checkout.
+              We call to confirm the stain, the kit list and the delivery, and a secure Stripe
+              invoice follows within 48 hours of your order. You can pay a 50% deposit, pay in full,
+              or finance the whole order with Affirm. The full path is on the{' '}
+              <Link href="/timeline" className="doc-link">
+                timeline
+              </Link>
+              .
+            </p>
             <p>
               You can cancel at no cost until the deposit is paid. Once the deposit is received, the
               order goes to the builder and cannot be cancelled. Read the{' '}
@@ -279,7 +260,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             It depends on the delivery tier you choose. White Glove includes unpacking, assembly and
-            placement in your home. White Glove includes up to 3 flights of stairs. Curbside does
+            placement in your home. Curbside does
             not include carrying items indoors, unpacking, assembly or placement. We clarify what
             your order includes before we schedule final delivery.
           </p>
@@ -374,8 +355,8 @@ const SECTIONS: Section[] = [
           <>
             <p>
               Safety details live on our {SafetyLink} and each product page. One crib converts to a
-              toddler bed and a full-size bed when the kits for your model are in place.  When you’re ready to order, you choose Curbside delivery or
-              White Glove with in-home assembly. White Glove includes up to 3 flights of stairs. We
+              toddler bed and a full bed when the kits for your model are in place.  When you’re ready to order, you choose Curbside delivery or
+              White Glove with in-home assembly. We
               confirm what fits your address before production starts.
             </p>
             <p>

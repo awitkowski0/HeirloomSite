@@ -22,15 +22,8 @@ export default function SafeSleepPage() {
       <p className="label-caps text-on-surface-variant">Owner&rsquo;s guide</p>
       <h1 className="headline-xl">Safe Sleep &amp; Crib Transition</h1>
       <p className="body-lg doc-lede">
-        Informational only — not medical advice. This page summarizes public safe-sleep guidance
-        from official sources. Every family is different: contact your pediatrician or pediatric
-        healthcare provider for recommendations specific to your child, follow the manufacturer&rsquo;s
-        instructions, and check for recalls.
-      </p>
-      <p>
-        Heirloom Cribs &amp; More is a reseller of hardwood nursery furniture. Independent builders make the case goods to order. Safe-sleep guidance on this page comes from
-        the official sources linked below, not from Heirloom as a clinical expert. Guidelines can
-        change, so verify the live primary pages.
+        Informational only, not medical advice. Ask your pediatrician about your own child, follow
+        the manufacturer&rsquo;s instructions, and check for recalls. The sources are linked below.
       </p>
 
       <section>

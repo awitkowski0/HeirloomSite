@@ -53,7 +53,7 @@ export default function HardwoodPage() {
       <section>
         <h2 className="headline-md">Longevity and the convertible path</h2>
         <p>
-          One solid hardwood frame can move from a crib to a toddler bed and then to a full-size bed
+          One solid hardwood frame can move from a crib to a toddler bed and then to a full bed
           when the kits for your model are in place. That&rsquo;s what we mean by Built to Grow Up.
           Rails and separately sold conversion parts are confirmed on the product page and on the
           Confirm Order call. See{' '}

@@ -75,8 +75,7 @@ export default function CarePage() {
           Pieces are built after you order rather than pulled from a warehouse. Lead times depend
           on the builder and are estimates we confirm when you order: about 6–8 weeks for Old Town
           Oak, and 10–14 weeks for Fisher&rsquo;s. Delivery is
-          charged separately at checkout (Curbside or White Glove, based on your cart total). White
-          Glove includes up to 3 flights of stairs. See{' '}
+          charged separately at checkout (Curbside or White Glove, based on your cart total). See{' '}
           <Link href="/shipping" className="doc-link">
             Delivery
           </Link>{' '}

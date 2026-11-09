@@ -5,7 +5,7 @@ import BrandSketch from '@/components/marketing/BrandSketch';
 export const metadata: Metadata = {
   title: 'How Conversion Works',
   description:
-    'How a 3-stage convertible crib converts to a toddler bed and a full-size bed, what Old Town Oak and Fisher\'s say, and what to check before you buy.',
+    'How a 3-stage convertible crib converts to a toddler bed and a full bed, what Old Town Oak and Fisher\'s say, and what to check before you buy.',
   alternates: { canonical: '/how-conversion-works' },
   openGraph: { url: '/how-conversion-works' },
 };

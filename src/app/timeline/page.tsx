@@ -40,7 +40,7 @@ export default function TimelinePage() {
         <h2 className="headline-md">The order journey</h2>
         <ol className="doc-list">
           <li>
-            <strong>01 Choose and Customize.</strong> Pick the silhouette first; the finish follows. Conversion kits for the toddler bed and full-size bed are listed on each
+            <strong>01 Choose and Customize.</strong> Pick the silhouette first; the finish follows. Conversion kits for the toddler bed and full bed are listed on each
             product page. Styles come in brown maple with a choice of stains on the product page. If you&rsquo;re unsure
             which finish will match your room, ask us before you place an order — share inspiration
             photos through <Link href="/contact" className="doc-link">Get Personal Assistance</Link>.
@@ -60,8 +60,7 @@ export default function TimelinePage() {
           </li>
           <li>
             <strong>04 Delivered to Your Nursery.</strong> You choose Curbside (to the curb) or
-            White Glove (into your home, with unpacking, assembly and placement). White Glove
-            includes up to 3 flights of stairs. We deliver in{' '}
+            White Glove (into your home, with unpacking, assembly and placement). We deliver in{' '}
             <strong>Pennsylvania, New Jersey and Maryland</strong>. Delivery to some Newark, NJ ZIP
             codes is quoted individually. Other areas may be available on request, so contact us
             for a quote. See{' '}
