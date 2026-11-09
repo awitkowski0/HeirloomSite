@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getProductBySlug, getAllProductSlugs, getInventory, getProductIndex } from '@/lib/content';
 import { builderForProduct } from '@/lib/builders';
+import { toShopItems } from '@/lib/shop';
+import UseTags from '@/components/uses/UseTags';
 import BuilderPanel, { BuilderTag } from '@/components/product/BuilderPanel';
 import { categoryToSlug } from '@/lib/categories';
 import {
@@ -29,7 +31,9 @@ function renderProductDescription(text: string): ReactNode {
   const paragraphs = text
     .split(/\n\n+/)
     .map((p) => p.replace(/\s+/g, ' ').trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    // The audit's boilerplate closer, identical on every product: the page already has one help line.
+    .filter(p => !p.startsWith('If you would like help choosing'));
 
   return paragraphs.map((para, i) => (
     <p key={i}>{linkifyProductCopy(para)}</p>
@@ -269,6 +273,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
 
   const indexEntry = getProductIndex().find(p => p.slug === slug);
   const builder = indexEntry ? builderForProduct(indexEntry) : null;
+  const shopItem = indexEntry ? toShopItems([indexEntry])[0] : undefined;
 
   return (
     <div className="container product-page">
@@ -326,11 +331,15 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           /* The page's h1. It was previously an <h2 className="headline-xl">
              with no h1 anywhere on the page, so the visual hierarchy
              contradicted the semantic one. */
-          <div className="product-heading">
-            <h1 className="product-title">{product.productName}</h1>
-            {builder ? <BuilderTag builder={builder} category={indexEntry?.category ?? null} /> : null}
-          </div>
+          <h1 className="product-title">{product.productName}</h1>
         }
+        byline={
+          <>
+            {builder ? <BuilderTag builder={builder} category={indexEntry?.category ?? null} /> : null}
+            {shopItem ? <UseTags uses={shopItem.uses} note={shopItem.usesNote} /> : null}
+          </>
+        }
+        shopItem={shopItem}
         description={
           <>
             {builder ? <BuilderPanel builder={builder} category={indexEntry?.category ?? null} /> : null}

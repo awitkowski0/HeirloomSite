@@ -19,7 +19,7 @@ export default function NotFound() {
       </p>
       <div className="not-found-actions">
         <Link href="/products" className="button-primary">Browse all products</Link>
-        <Link href="/" className="button-secondary">Back to the showroom</Link>
+        <Link href="/" className="button-secondary">Back to the home page</Link>
       </div>
     </div>
   );

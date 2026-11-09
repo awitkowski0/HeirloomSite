@@ -18,5 +18,8 @@
     "addison-7-drawer-dresser",
     "addison-3-drawer-nightstand"
   ],
-  "collection": "Addison"
+  "collection": "Addison",
+  "uses": [
+    "DRESSER"
+  ]
 }

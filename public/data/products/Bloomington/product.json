@@ -21,5 +21,11 @@
   "bundlePriceOverrides": {
     "toddler-conversion-rail": 250,
     "full-bed-rail-kit": 250
-  }
+  },
+  "uses": [
+    "CRIB",
+    "TODDLER BED",
+    "DAY BED",
+    "FULL BED"
+  ]
 }

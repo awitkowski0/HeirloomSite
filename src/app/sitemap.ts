@@ -1,3 +1,4 @@
+import { USE_TAGS } from '@/lib/uses';
 import type { MetadataRoute } from 'next';
 import { getBrowsableProducts, getTaxonomyNodes, getInventory } from '@/lib/content';
 import { variantPathsFor } from '@/lib/variants';
@@ -31,11 +32,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/faq`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/how-conversion-works`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/why-hardwood`, changeFrequency: 'yearly', priority: 0.5 },
-    { url: `${SITE_URL}/finishes`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/timeline`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/safe-sleep`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/about-heirloom`, changeFrequency: 'yearly', priority: 0.5 },
+    ...USE_TAGS.map(u => ({ url: `${SITE_URL}/uses/${u.slug}`, changeFrequency: 'monthly' as const, priority: 0.5 })),
     { url: `${SITE_URL}/builders`, changeFrequency: 'monthly', priority: 0.6 },
     ...BUILDERS.map(b => ({ url: `${SITE_URL}${b.href}`, changeFrequency: 'yearly' as const, priority: 0.4 })),
     { url: `${SITE_URL}/woods-and-finishes`, changeFrequency: 'yearly', priority: 0.4 },

@@ -17,5 +17,8 @@
     "mini-newport-with-mattress",
     "newport-nightstand"
   ],
-  "collection": "Newport"
+  "collection": "Newport",
+  "uses": [
+    "DRESSER"
+  ]
 }

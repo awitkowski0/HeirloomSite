@@ -17,5 +17,8 @@
     "newport-7-drawer-dresser",
     "newport-nightstand"
   ],
-  "collection": "Newport"
+  "collection": "Newport",
+  "uses": [
+    "MINI"
+  ]
 }

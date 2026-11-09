@@ -97,7 +97,7 @@ export default function SafeSleepPage() {
 
       <hr className="doc-rule" />
       <section>
-        <h2 className="headline-md">Making the transition with a 4-in-1 convertible crib</h2>
+        <h2 className="headline-md">Making the transition with a 3-stage convertible crib</h2>
         <p>
           Our convertible cribs are designed to move from a crib to a toddler bed and then a
           full-size bed, depending on the model and kits. Use only the parts made for your model and
@@ -112,7 +112,7 @@ export default function SafeSleepPage() {
           <li>Install toddler conversion parts per the manufacturer&rsquo;s instructions for your model.</li>
           <li>Keep a firm, appropriately sized mattress and fitted sheet; keep soft objects out of the sleep space per AAP/CPSC guidance.</li>
         </ol>
-        <p>See also <Link href="/how-conversion-works" className="doc-link">How Our 4-in-1 Conversion Works</Link>.</p>
+        <p>See also <Link href="/how-conversion-works" className="doc-link">How Conversion Works</Link>.</p>
       </section>
 
       <section>

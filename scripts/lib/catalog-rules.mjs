@@ -16,6 +16,8 @@ import { createHash } from 'node:crypto';
 import { closeSync, existsSync, openSync, readFileSync, readSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
+const USE_TAGS = new Set(['CRIB', 'TODDLER BED', 'DAY BED', 'FULL BED', 'MINI', 'DRESSER', 'CHANGING TABLE', 'HUTCH', 'MIRROR']);
+
 export const VARIANT_TYPES = new Set(['wood', 'size', 'finish', 'none']);
 export const WOOD_SPECIES = new Set(['brownmaple', 'cherrywood', 'redoak']);
 
@@ -576,6 +578,31 @@ function validateProduct(catalog, product, push, ctx) {
     }
   } else if (meta.style !== undefined && meta.style !== null) {
     push('error', 'style-not-applicable', where, 'only cribs carry a style', 'Remove the style key.');
+  }
+
+  // What it can be. Each tag has to be backed by the product's own record.
+  const uses = meta.uses === undefined ? [] : meta.uses;
+  if (!Array.isArray(uses)) {
+    push('error', 'uses-invalid', where, 'uses must be an array of tags', `Use tags from: ${[...USE_TAGS].join(', ')}.`);
+  } else {
+    if (meta.category === 'Cribs' || meta.category === 'Mini Cribs') {
+      if (meta.uses === undefined) push('error', 'uses-missing', where, 'a crib must declare uses', 'Add uses, for example ["CRIB", "TODDLER BED", "FULL BED"].');
+    }
+    const kits = [...(meta.bundle ?? []), ...(meta.includes ?? [])].join(' ');
+    for (const tag of uses) {
+      if (!USE_TAGS.has(tag)) {
+        push('error', 'uses-invalid', where, `uses tag ${JSON.stringify(tag)} is not allowed`, `Use tags from: ${[...USE_TAGS].join(', ')}. There is no bassinet tag: no product is a bassinet.`);
+      }
+    }
+    const refuse = (message, fix) => push('error', 'uses-unsupported', where, message, fix);
+    if (uses.includes('CRIB') && meta.category !== 'Cribs') refuse('CRIB is for full-size cribs', 'Use MINI on a mini crib.');
+    if ((uses.includes('TODDLER BED') || uses.includes('DAY BED')) && !(meta.category === 'Cribs' && /toddler/.test(kits))) refuse('a toddler or day bed tag needs a toddler kit in this crib\'s bundle', 'Add the kit or remove the tag.');
+    if (uses.includes('FULL BED') && !(meta.category === 'Cribs' && /full-bed/.test(kits))) refuse('FULL BED needs a full bed kit in this crib\'s bundle', 'Add the kit or remove the tag.');
+    if (uses.includes('MINI') && meta.category !== 'Mini Cribs') refuse('MINI is for mini cribs', 'Remove the tag.');
+    if (uses.includes('CHANGING TABLE') && !/changing/i.test(meta.productName ?? '')) refuse('CHANGING TABLE needs a changing table in the product name', 'Remove the tag.');
+    if (uses.includes('HUTCH') && !/hutch/i.test(meta.productName ?? '')) refuse('HUTCH needs a hutch in the product name', 'Remove the tag.');
+    if (uses.includes('MIRROR') && !/mirror/i.test(meta.productName ?? '')) refuse('MIRROR needs a mirror in the product name', 'Remove the tag.');
+    if (uses.includes('DRESSER') && meta.category === 'Changing Tables' && !meta.usesCredit) refuse('a changing table sold as a dresser needs usesCredit naming the builder', 'Add usesCredit with the builder\'s statement.');
   }
 
   // Prices

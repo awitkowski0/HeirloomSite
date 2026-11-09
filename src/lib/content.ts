@@ -31,6 +31,9 @@ import {
 
 export interface ProductIndexItem {
   productName: string;
+  /** What the piece can be, validated in catalog-rules. */
+  uses?: string[];
+  usesCredit?: string | null;
   slug: string;
   category: string | null;
   /** The range this piece belongs to (Addison, West Lake...), or null. */

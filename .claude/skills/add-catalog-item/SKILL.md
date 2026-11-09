@@ -69,6 +69,8 @@ npm run typecheck
 npm test
 ```
 
+Set `uses`, the tags for what the piece can be. Allowed: `CRIB`, `TODDLER BED`, `DAY BED`, `FULL BED` (full-size cribs whose bundle has those kits), `MINI` (mini cribs, no bed stages), `DRESSER`, `CHANGING TABLE`, `HUTCH`, `MIRROR` (only when the name says so). A changing table tagged `DRESSER` needs `usesCredit` with the builder's statement. There is no bassinet tag, and a crib must never be described as one.
+
 Confirm the product shows the right builder, style and price in the scaffold's summary line. Report the warnings (missing photos, `matchesSoldWood` not `yes`, an unlisted builder).
 
 ## Stop and ask when

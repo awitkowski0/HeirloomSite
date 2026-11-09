@@ -32,7 +32,7 @@ export default function ProvenanceBand() {
   return (
     <section className="home-band">
       <p className="label-caps home-band-line">
-        Full furniture. Not a wood print.
+        Full furniture. Built new to order.
       </p>
 
       <ul className="home-band-cols">

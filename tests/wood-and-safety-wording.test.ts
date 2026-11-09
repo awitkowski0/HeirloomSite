@@ -24,7 +24,6 @@ const FOUR_PAGES = [
   'src/components/home/ProvenanceBand.tsx',
   'src/app/safety/page.tsx',
   'src/app/why-hardwood/page.tsx',
-  'src/app/finishes/page.tsx',
 ];
 
 // All public-facing copy files cleaned across #112 + this follow-up.
@@ -100,7 +99,7 @@ test('Brown Maple is still named as a wood on the home/safety/why-hardwood/finis
   assert.match(HOME.map(rendered).join('\n'), /brown maple/i, 'home (page + HomeHero + ProvenanceBand) should still name brown maple');
   // Held-origin strings (#52 6576700054/6576722581, Director 6576727700) name no species on /safety and /why-hardwood; only /finishes is still checked.
   // /finishes line 49 (#52 Brand 6577433010, Director 6577718945) drops "brown maple", so /finishes now names no species either.
-  const NO_SPECIES = ['src/app/safety/page.tsx', 'src/app/why-hardwood/page.tsx', 'src/app/finishes/page.tsx'];
+  const NO_SPECIES = ['src/app/safety/page.tsx', 'src/app/why-hardwood/page.tsx'];
   for (const f of FOUR_PAGES.filter(f => !HOME.includes(f) && !NO_SPECIES.includes(f))) {
     assert.match(rendered(f), /brown maple/i, `${f} should still name brown maple`);
   }

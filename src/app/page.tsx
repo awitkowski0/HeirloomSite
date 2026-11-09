@@ -1,64 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getBrowsableProducts, getShowroom, getInventory } from '@/lib/content';
-import { toShopItems } from '@/lib/shop';
-import ListingAnalytics from '@/components/products/ListingAnalytics';
-import ShopBrowser from '@/components/shop/ShopBrowser';
-import { variantHref } from '@/lib/variants';
-import { organizationJsonLd, webSiteJsonLd,
-  jsonLdScript,
-} from '@/lib/seo';
-import { resolveFeature, indexByProductName } from '@/lib/showroom';
+import { getNurserySets, getPlates, LEARN_CARDS } from '@/lib/plates';
+import { organizationJsonLd, webSiteJsonLd, jsonLdScript } from '@/lib/seo';
 import HomeHero from '@/components/home/HomeHero';
+import TalkToPerson from '@/components/layout/TalkToPerson';
 import ProvenanceBand from '@/components/home/ProvenanceBand';
-import ShopTiles from '@/components/home/ShopTiles';
-import JourneyStep from '@/components/home/JourneyStep';
-import JourneyPoints from '@/components/home/JourneyPoints';
-import BrandSketch from '@/components/marketing/BrandSketch';
-import { SHIPPING_METHODS, SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
+import NurserySetSpread from '@/components/plates/NurserySetSpread';
+import PlateRun from '@/components/plates/PlateRun';
+import UsesNav from '@/components/uses/UsesNav';
 import '@/styles/home.css';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
 };
 
-/**
- * Server component, statically prerendered.
- *
- * The catalog is a client island over server-built rows and must stay free of
- * useSearchParams(): that, in this tree, flips the route to dynamic without failing
- * the build, which would quietly undo the migration's SEO work - watch the
- * route table, not just the exit code.
+/*
+ * Statically prerendered. Plates are client islands over server-built rows, and
+ * must stay free of useSearchParams(), which would make this route dynamic.
  */
 export default function HomePage() {
-  const showroom = getShowroom();
-  const inventory = getInventory();
-  const byName = indexByProductName(inventory);
-
-  // The hero's detail crops come from a real catalogue photograph rather than
-  // a placeholder, so the wood shown is wood we actually sell.
-  /*
-   * The Mission crib in Natural, which is what the hero photography shows.
-   *
-   * 'Mission', not 'Mission Style' - the same stale name that emptied
-   * StyleCards also left the hero with no detail image. `resolveFeature`
-   * already prefers Natural and falls back to the first in-stock stain, so the
-   * link cannot point at a finish that is not for sale.
-   */
-  const detailSource = resolveFeature({ productName: 'Mission', stainName: 'Natural' }, byName);
-  const detail =
-    detailSource?.image
-      ? {
-          slug: detailSource.slug,
-          image: detailSource.image,
-          name: detailSource.productName,
-          // Deep link to the exact configuration rather than the bare product
-          // page, so the finish in the photograph is the finish that loads.
-          href: variantHref(detailSource.slug, detailSource.wood, detailSource.stainName),
-        }
-      : null;
-
-  const heroImage = showroom?.slides?.[0]?.image ?? '/data/products/showroom/showroom_0.jpg';
+  const plates = getPlates();
+  const sets = getNurserySets();
+  const promptPlates = plates.map(({ id, number, title, keywords }) => ({ id, number, title, keywords }));
 
   return (
     <>
@@ -71,93 +34,55 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: jsonLdScript(webSiteJsonLd()) }}
       />
 
-      <HomeHero detail={detail} heroImage={heroImage} />
-      <ShopTiles />
+      <HomeHero plates={promptPlates} />
+      <PlateRun plates={plates} cards={LEARN_CARDS} />
+      <UsesNav />
+
+      <nav className="contents" aria-label="In this edition">
+        <p className="label-caps">In this edition</p>
+        <ol>
+          {plates.map(p => (
+            <li key={p.id}>
+              <a href={`#${p.id}`}><span>{p.number}</span> {p.title}</a>
+            </li>
+          ))}
+        </ol>
+        <Link href="/products" className="button-primary">See everything</Link>
+      </nav>
+
       <ProvenanceBand />
 
-      {/*
-        Everything below the banner is the buying journey, in order.
-        
-        The four steps are the page's structure rather than a band summarising
-        it: a made-to-order shop's hardest job on a homepage is explaining the
-        SEQUENCE - no card at checkout, an invoice later, weeks of building -
-        and a visitor who does not know that misreads the whole thing. Step 01
-        carries the products, so the journey is where the shopping happens
-        rather than a detour around it.
-      */}
-      <div className="home-journey">
-        <JourneyStep
-          n="01"
-          title="Browse the Catalog"
-          lead="Filter by type, style, budget, and timing, then compare up to three pieces side by side."
-        >
-          <div id="catalog">
-            <ShopBrowser items={toShopItems(getBrowsableProducts())} initialType="Cribs" />
-            <ListingAnalytics />
-          </div>
-          <div className="journey-sketches">
-            <BrandSketch
-              src="/images/brand/crib-room-placement.jpg"
-              alt="Sketch of a crib in a nursery"
-              width={1728}
-              height={1152}
-              sizes="(max-width: 1199px) 100vw, 1140px"
-            />
-          </div>
-        </JourneyStep>
+      <section className="sets" aria-labelledby="sets-heading">
+        <h2 id="sets-heading">Whole Rooms</h2>
+        {sets.map(set => <NurserySetSpread key={set.id} set={set} />)}
+      </section>
 
-        <JourneyStep
-          n="02"
-          title="Confirm Order"
-          lead="Nothing is charged when you place an order. We read it, check the details with you, and only then ask for anything."
-        >
-          <JourneyPoints
-            points={[
-              'No card is taken at checkout — the order is a commitment, not a charge.',
-              'We call to confirm the stain, the kit list, and the delivery before anything is built.',
-              'A secure Stripe invoice follows within 48 hours of your order. A minimum 50% deposit begins production.',
-            ]}
-          />
-        </JourneyStep>
+      <section className="see-all">
+        <h2>Want to See It All?</h2>
+        <Link href="/products" className="button-primary">See everything</Link>
+        <p className="see-all-help"><TalkToPerson /></p>
+      </section>
 
-        <JourneyStep
-          n="03"
-          title="Made to Order"
-          lead={<>Every piece is made to order. <Link href="/timeline">Lead times</Link> are estimates that we confirm when you order: Old Town Oak about 6–8 weeks, Kids Comfort about 8 weeks, and Fisher&rsquo;s 10–14 weeks.</>}
-        >
-          <JourneyPoints
-            points={[
-              'We’ll collect the remaining balance before we schedule final delivery.',
-            ]}
-          />
-        </JourneyStep>
-
-        <JourneyStep
-          n="04"
-          title="Delivered to Your Nursery"
-          lead={<>You choose Curbside or White Glove when you order. Shipping is charged separately, and assembly comes only with White Glove. See our <Link href="/shipping">Delivery page</Link> for the areas we serve.</>}
-        >
-          {/*
-            Named from SHIPPING_METHODS but deliberately UNPRICED: delivery is
-            quoted at checkout, where the destination is known. The tiers still
-            come from the constant the checkout charges from so the two cannot
-            drift apart on what is on offer.
-          */}
-          <JourneyPoints
-            points={[
-              ...SHIPPING_METHODS.map(m => `${m.name} — ${m.description}`),
-              SHIPPING_LIMIT_NOTE,
-            ]}
-          />
-        </JourneyStep>
-      </div>
-
-      <section className="home-cta" aria-labelledby="home-cta-heading">
-        <h2 id="home-cta-heading">Ready to Find Yours?</h2>
-        <div className="home-cta-actions">
-          <Link href="#catalog" className="home-cta-button">Shop the catalog</Link>
-          <Link href="/contact" className="home-cta-link">Talk to a real person</Link>
-        </div>
+      <section className="home-steps" aria-labelledby="home-steps-heading">
+        <h2 id="home-steps-heading">How Buying Works</h2>
+        <ol>
+          <li>
+            <h3>Order with no card</h3>
+            <p>We don&rsquo;t take payment at checkout. We call to confirm the stain, the kit list, and the delivery before anything is built.</p>
+          </li>
+          <li>
+            <h3>Pay how you like</h3>
+            <p>A secure Stripe invoice follows within 48 hours of your order. A minimum 50% deposit begins production. You can also pay in full or finance the whole order with Affirm.</p>
+          </li>
+          <li>
+            <h3>The builder makes it</h3>
+            <p>Every piece is made to order. <Link href="/timeline">Lead times</Link> are estimates that we confirm when you order. We&rsquo;ll collect the remaining balance before we schedule final delivery.</p>
+          </li>
+          <li>
+            <h3>We deliver it</h3>
+            <p>Choose Curbside or White Glove when you order. Shipping is charged separately, and assembly comes only with White Glove. See our <Link href="/shipping">Delivery page</Link> for the areas we serve.</p>
+          </li>
+        </ol>
       </section>
     </>
   );

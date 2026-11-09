@@ -71,6 +71,8 @@ const nextConfig: NextConfig = {
 
   async redirects() {
     return [
+      // Folded into Care. Permanent so an indexed link keeps working.
+      { source: '/finishes', destination: '/care', permanent: true },
       /*
        * On the PRODUCTION deployment only, everything served on a *.vercel.app
        * host goes to the brand domain.

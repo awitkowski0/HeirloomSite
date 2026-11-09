@@ -163,6 +163,8 @@ export interface CartInclude {
 export interface CartItem {
   id: string;
   productName: string;
+  /** For linking and registry items only. Lines from older carts lack it. */
+  slug?: string;
   cribName?: string;
   wood: string;
   stainName: string;

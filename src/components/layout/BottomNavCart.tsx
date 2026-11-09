@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/useCart';
+import { requestTrayOpen } from '@/context/selectionsStore';
 
 /** Cart entry in the mobile bottom nav. Hydration-gated, same as CartBadge. */
 export default function BottomNavCart() {
@@ -14,6 +15,10 @@ export default function BottomNavCart() {
   return (
     <Link
       href="/checkout"
+      onClick={e => {
+        // The tray is the cart; /checkout is the fallback where it is not mounted.
+        if (requestTrayOpen('cart')) e.preventDefault();
+      }}
       className={isActive ? 'nav-item active' : 'nav-item'}
       aria-current={isActive ? 'page' : undefined}
       aria-label={

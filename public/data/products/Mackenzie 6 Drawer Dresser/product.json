@@ -18,5 +18,8 @@
     "mackenzie-7-drawer-dresser",
     "mackenzie-nightstand"
   ],
-  "collection": "Mackenzie"
+  "collection": "Mackenzie",
+  "uses": [
+    "DRESSER"
+  ]
 }

@@ -59,7 +59,7 @@ export default function HardwoodPage() {
           Rails and separately sold conversion parts are confirmed on the product page and on the
           Confirm Order call. See{' '}
           <Link href="/how-conversion-works" className="doc-link">
-            How Our 4-in-1 Conversion Works
+            How Conversion Works
           </Link>
           .
         </p>
@@ -78,7 +78,7 @@ export default function HardwoodPage() {
             Care &amp; Finishes
           </Link>
           . For more on finishes and emissions language, see{' '}
-          <Link href="/finishes" className="doc-link">
+          <Link href="/care" className="doc-link">
             Finishes &amp; Nursery Air Quality
           </Link>
           .

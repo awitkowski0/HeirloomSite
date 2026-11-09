@@ -74,6 +74,7 @@ export default function CheckoutClient({ recommendations }: Props) {
   );
   const [errors, setErrors] = useState<Partial<Record<keyof ShippingValues, string>>>({});
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [summaryOpen, setSummaryOpen] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   /*
    * Starts 'pending', not 'disabled': until the widget has reported, we do not
@@ -689,7 +690,10 @@ export default function CheckoutClient({ recommendations }: Props) {
         </div>
 
         <div className="configuration-panel">
-          <div className="order-summary">
+          <div className="order-summary" data-open={summaryOpen}>
+            <button type="button" className="summary-toggle" aria-expanded={summaryOpen} onClick={() => setSummaryOpen(o => !o)}>
+              Your order ({cart.reduce((n, i) => n + i.quantity, 0)}) · {formatPrice(fromCents(totals.totalCents))}
+            </button>
             <h2 className="headline-md">Order Summary</h2>
             <ul className="order-summary-items">
               {cart.map((item, idx) => (

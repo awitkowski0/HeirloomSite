@@ -11,6 +11,10 @@ import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
 import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import BundleBuilder from './BundleBuilder';
+import FinishWall from './FinishWall';
+import SetAsideButton from '@/components/selections/SetAsideButton';
+import { registryTitle, sendToBabylist, type RegistryLine } from '@/lib/babylist';
+import type { ShopItem } from '@/lib/shop';
 import { formatPrice } from '@/lib/format';
 import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
 import { stainLabel } from '@/lib/stainColors';
@@ -56,6 +60,10 @@ interface Props {
    * bundle just to be positioned.
    */
   title: ReactNode;
+  /** The builder tag and safety features, under the name and price. */
+  byline?: ReactNode;
+  /** Absent for the unlisted kits and mattress. */
+  shopItem?: ShopItem;
   description: ReactNode;
   /** Resolved on the server from the URL path, so the correct configuration is
       in the initial HTML rather than applied after hydration. */
@@ -68,6 +76,8 @@ export default function ProductConfigurator({
   configurations,
   slug,
   title,
+  byline,
+  shopItem,
   description,
   initialWood,
   initialStain,
@@ -76,12 +86,12 @@ export default function ProductConfigurator({
   const [userWood, setUserWood] = useState<string | null>(initialWood);
   const [userStain, setUserStain] = useState<string | null>(initialStain);
   const [showCartPopup, setShowCartPopup] = useState(false);
+  const [registryState, setRegistryState] = useState<{ key: string; result: 'sent' | 'unavailable' } | null>(null);
 
   /*
-   * Bundle items start ticked, so this is seeded from the catalogue rather
-   * than empty. Keyed on slug because that is what the toggle and the cart
-   * line both need, and it is stable across a wood or finish change - the
-   * conversion kits do not depend on the crib's finish.
+   * Keyed on slug because that is what the toggle and the cart line both need,
+   * and it is stable across a wood or finish change - the conversion kits do
+   * not depend on the crib's finish.
    */
   const { isDelisted } = useDelistedProducts();
   // A de-listed kit must not be offered as a tickbox, and a de-listed dresser
@@ -89,12 +99,9 @@ export default function ProductConfigurator({
   const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
   // Display only - already inside the crib's price, never added to the cart.
   const includedItems = (configurations[0]?.includes ?? []).filter(i => !isDelisted(i.slug));
-  // Every row starts ticked except those the product marks bundleUnchecked
-  // (OTO: the full guard rail). A ticked optional rail adds its own price on
-  // top of the package; it is never part of the package itself.
-  const [bundleSelected, setBundleSelected] = useState<Set<string>>(
-    () => new Set(bundleItems.filter(i => !i.startsUnchecked).map(i => i.slug))
-  );
+  // Nothing starts ticked: every row is an optional paid add-on, and the price
+  // on the button should be the price of the piece until someone chooses more.
+  const [bundleSelected, setBundleSelected] = useState<Set<string>>(() => new Set());
   /*
    * What pressing Add to Cart will actually put in the cart. Derived rather
    * than tracked, so it cannot drift from the loop in handleAddToCart.
@@ -216,10 +223,8 @@ export default function ProductConfigurator({
   const totalPrice = basePrice + addition;
 
   // What the Add to Cart button will add, and what it will come to.
-  const addedCount = 1 + selectedBundleItems.length;
   const cartTotal = totalPrice + selectedBundleItems.reduce((sum, i) => sum + i.price, 0);
   const hasBundle = includedItems.length > 0 || bundleItems.length > 0;
-
 
   /*
    * Keep the address bar on the configuration being shown, so the URL is
@@ -288,6 +293,7 @@ export default function ProductConfigurator({
     addToCart({
       ...item,
       id: cartItemId(item),
+      slug,
       price: totalPrice,
       image: galleryImages[0] || '',
       quantity: 1,
@@ -339,6 +345,7 @@ export default function ProductConfigurator({
       addToCart({
         ...line,
         id: cartItemId(line),
+        slug: bundleItem.slug,
         price: bundleItem.price,
         ...(bundleItem.bundleOverride && typeof bundleItem.listPrice === 'number'
           ? { listPrice: bundleItem.listPrice }
@@ -351,99 +358,45 @@ export default function ProductConfigurator({
     setShowCartPopup(true);
   };
 
-  /*
-   * One button, rendered twice.
-   *
-   * The primary sits in the decision column; the second sits under the bundle,
-   * because that is where the last decision is actually taken - you tick the
-   * mattress and then you are done, and the first button is a column away and
-   * usually off-screen by then.
-   *
-   * Deliberately the SAME action, not a separate "add the bundle": two buttons
-   * that add different subsets of one order is how someone ends up with two
-   * cribs. Both add the crib and whatever is ticked, and CartPopup confirms
-   * what went in either way.
-   *
-   * Described once so the label - which counts what the click will add - can
-   * never say one thing in one place and something else in the other.
-   */
-  const addToCartButton = (
-    <button
-      type="button"
-      className="add-to-cart"
-      disabled={!selection.stain}
-      onClick={handleAddToCart}
-    >
-      {!selection.stain
-        ? 'OUT OF STOCK'
-        : addedCount > 1
-          ? `ADD ${addedCount} ITEMS — ${formatPrice(cartTotal)}`
-          : 'ADD TO CART'}
-    </button>
-  );
+  const addLabel = selection.stain ? `Add to order · ${formatPrice(cartTotal)}` : 'Out of stock';
+  const finishName = formatVariant(selection.wood, selection.stain);
+
+  const registryLine: RegistryLine = {
+    key: `${slug}:${selection.wood}:${selection.stain}`,
+    title: registryTitle(currentConfig.productName, finishName || null),
+    image: galleryImages[0] || '',
+    href: finishName ? variantHref(slug, selection.wood, selection.stain) : `/product/${slug}`,
+    price: totalPrice,
+  };
+  const registryResult = registryState?.key === registryLine.key ? registryState.result : null;
 
   return (
     <>
       <div className={hasBundle ? 'product-layout product-layout--bundle' : 'product-layout'}>
         {/*
-          The name is a direct child of the grid, not part of either column.
-          On a phone it is the first thing on the page, above the photograph;
-          from 1024px it is the top of the decision column beside it. Named
-          grid areas put one element in both places, rather than mounting the
-          heading twice and hiding one, which is the arrangement AGENTS.md
-          rules out.
+          One block in the grid's title area: on a phone it comes first, above
+          the photograph, and from 1024px it tops the decision column.
         */}
-        {title}
+        <div className="product-titleblock">
+          {title}
+          <p className="product-price">{formatPrice(totalPrice)}</p>
+          {byline}
+        </div>
 
         <div className="product-showcase">
           <ProductGallery images={galleryImages} productName={productName} priority feed={feed} />
+          {feedItems.length > 1 && <p className="digital-preview">Digital preview of this finish</p>}
 
-          {/*
-            Under the photograph, not in the decision column and not at the
-            foot of the page.
-            
-            In the column it sat between the finish picker and the price, so a
-            five-row box with its own total pushed the price of the thing being
-            configured most of a screen down. At the foot of the page it was
-            below the buy button - and every row is ticked by default, so a
-            customer who never scrolled that far would have had four extra
-            products added by a button they pressed before seeing them.
-          */}
-          <BundleBuilder
-            productName={currentConfig.productName}
-            basePrice={totalPrice}
-            baseImage={galleryImages[0] || ''}
-            included={includedItems}
-            items={bundleItems}
-            selected={bundleSelected}
-            onToggle={toggleBundleItem}
-          />
-
-          {/* The bundle is where the last decision gets made, so the commit
-              belongs here too rather than only a column away. */}
-          {hasBundle && <div className="bundle-cta">{addToCartButton}</div>}
         </div>
 
-        {/*
-          One column, in the order the decision is actually made: what it
-          costs, what it comes in, buy it, then the copy that justifies it.
-          The price used to sit BELOW the variant pickers and the bundle,
-          which put the two things being weighed against each other - the
-          photograph and the price - at opposite ends of a scroll.
-        */}
         <div className="configuration-panel">
-          <section className="pricing-section">
-            <div className="price-row">
-              <span className="headline-lg price-current">{formatPrice(totalPrice)}</span>
-            </div>
-            <p role="status" aria-live="polite" className="visually-hidden">
-              {selection.stain
-                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. ${formatPrice(totalPrice)}.`
-                : ''}
-            </p>
-          </section>
+          <p role="status" aria-live="polite" className="visually-hidden">
+            {selection.stain
+              ? `${finishName ? `Selected: ${finishName}. ` : ''}${formatPrice(totalPrice)}.`
+              : ''}
+          </p>
 
-          {variantLabel && (
+          {variantLabel && (variantType === 'size' || (variantType === 'wood' && woods.length > 1) || (variantType === 'finish' && feedItems.length < 2)) && (
             <WoodSelector
               woods={woods}
               selected={selection.wood}
@@ -453,57 +406,58 @@ export default function ProductConfigurator({
             />
           )}
 
-          {/* One instance. Its layout - horizontal swatch rail vs. vertical
-              list with text - is decided in CSS, not by mounting twice. */}
-          {showStainStep && (
-            <StainSelector
-              stains={currentConfig.stains}
-              selected={selection.stain}
-              onSelect={handleStainChange}
+          {feedItems.length > 1 && <FinishWall tiles={feedItems} active={feed.activeIndex} onChoose={feed.onChoose} />}
+
+          {/* Only when photographs are missing, so a stain can still be chosen. */}
+          {showStainStep && feedItems.length < 2 && (
+            <StainSelector stains={currentConfig.stains} selected={selection.stain} onSelect={handleStainChange} />
+          )}
+
+          {hasBundle && (
+            <BundleBuilder
+              included={includedItems}
+              items={bundleItems}
+              selected={bundleSelected}
+              onToggle={toggleBundleItem}
             />
           )}
 
           <section className="action-section">
-            {/*
-              The label counts what the click will actually add.
-
-              A ticked add-on adds its own cart line, so the button can be
-              putting two products and $3,178 in the cart rather than one and
-              $2,868 - and the bundle it was ticked in is a column away, below
-              the fold on a laptop. The button has to be the thing that tells
-              the truth about its own consequences.
-            */}
-            {addToCartButton}
-
-            <button
-              type="button"
-              className="babylist-btn button-secondary"
-              onClick={() => {
-                const bl = (
-                  window as typeof window & {
-                    bl?: { addToRegistry: (d: Record<string, string>) => void };
-                  }
-                ).bl;
-                bl?.addToRegistry?.({
-                  images: galleryImages[0] || '',
-                  price: String(totalPrice),
-                  title: currentConfig.productName,
-                  url: window.location.href,
-                });
-              }}
-            >
-              Add to Babylist
+            <button type="button" className="add-to-cart" disabled={!selection.stain} onClick={handleAddToCart}>
+              {addLabel}
             </button>
 
-            {/* Replaces a single "Expected delivery: 6-8 weeks" line. That
-                answered the least important of the four questions a first-time
-                buyer has, and left the other three - cost of delivery, safety,
-                who to ask - unanswered at the point of decision. */}
+            <div className="action-secondary">
+              {shopItem && <SetAsideButton item={shopItem} />}
+              {registryResult === 'sent' ? (
+                <span className="registry-sent">Sent to Babylist</span>
+              ) : (
+                <button
+                  type="button"
+                  className="set-aside"
+                  onClick={() => setRegistryState({ key: registryLine.key, result: sendToBabylist(registryLine) })}
+                >
+                  Add to Babylist
+                </button>
+              )}
+            </div>
+            {registryResult === 'unavailable' && (
+              <p className="registry-fallback" role="status">
+                Babylist&rsquo;s button isn&rsquo;t available in this browser. Copy this page&rsquo;s address and add it on Babylist.
+              </p>
+            )}
+
             {showDeliveryMessage && <PurchaseAssurances />}
           </section>
 
           {description}
         </div>
+      </div>
+
+      <div className="pdp-sticky">
+        <button type="button" className="add-to-cart" disabled={!selection.stain} onClick={handleAddToCart}>
+          {selection.stain ? `Add · ${formatPrice(cartTotal)}` : 'Out of stock'}
+        </button>
       </div>
 
       <CartPopup

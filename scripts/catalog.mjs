@@ -28,7 +28,7 @@ const BUILDERS = join(root, 'data', 'builders');
 const LIVE_SLUGS = join(root, 'data', 'live-slugs.json');
 
 const PRODUCT_INPUT_KEYS = new Set([
-  'productName', 'slug', 'category', 'builder', 'style', 'collection', 'variantType', 'soldWoods',
+  'productName', 'slug', 'category', 'builder', 'style', 'uses', 'usesCredit', 'collection', 'variantType', 'soldWoods',
   'description', 'extendedDescription', 'title', 'metaDescription', 'tags', 'addons', 'variants',
   'bundle', 'bundlePriceOverrides', 'bundleOptional', 'bundleUnchecked', 'related', 'includes',
   'images', 'photos',
@@ -45,6 +45,7 @@ const TEMPLATES = {
     category: 'Cribs',
     builder: '<builder id in data/builders, or null only outside cribs and case goods>',
     style: 'classic-slats',
+    uses: ['CRIB', 'TODDLER BED', 'DAY BED', 'FULL BED'],
     collection: null,
     variantType: 'wood',
     soldWoods: ['Brown Maple'],
@@ -163,6 +164,8 @@ function buildCandidate(input, baseDir) {
     category: input.category,
     builder: input.builder === undefined ? null : input.builder,
     ...(CRIB_CATEGORIES.has(input.category) || input.style !== undefined ? { style: input.style } : {}),
+    ...(input.uses !== undefined ? { uses: input.uses } : {}),
+    ...(input.usesCredit !== undefined ? { usesCredit: input.usesCredit } : {}),
     variantType: input.variantType,
     ...(input.soldWoods !== undefined ? { soldWoods: input.soldWoods } : {}),
     description,

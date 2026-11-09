@@ -27,7 +27,7 @@ export default function Error({
       </p>
       <div className="not-found-actions">
         <button type="button" className="button-primary" onClick={reset}>Try again</button>
-        <Link href="/" className="button-secondary">Back to the showroom</Link>
+        <Link href="/" className="button-secondary">Back to the home page</Link>
       </div>
     </div>
   );

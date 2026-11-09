@@ -130,6 +130,7 @@ export function parseStoredCart(raw: string | null): CartItem[] {
       price: e.price,
       image: typeof e.image === 'string' ? e.image : '',
       includes,
+      ...(typeof e.slug === 'string' && e.slug ? { slug: e.slug } : {}),
       ...(typeof e.listPrice === 'number' && Number.isFinite(e.listPrice) && e.listPrice >= 0
         ? { listPrice: e.listPrice }
         : {}),

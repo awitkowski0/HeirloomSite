@@ -4,14 +4,14 @@
   "builder": "old-town-oak",
   "style": "classic-slats",
   "variantType": "finish",
-  "description": "Bring classic charm to your nursery with the Newport Crib, a timeless 4-in-1 convertible design crafted from solid hardwood. Solid Brown Maple wood and clean lines create a warm, inviting centerpiece for your baby's room.\n\nThis crib converts to a toddler bed and then a full-size (double) bed. Three adjustable mattress positions let you lower the mattress as your baby gets bigger.\n\nCoordinates beautifully with the full Newport collection of dressers, chests, and nightstands to create a complete nursery you'll treasure.\n\nIf you would like help choosing a finish, confirming timing, or picturing how this piece fits your nursery plans, use Get Personal Assistance. We reply the same or next business day so you can decide with full information, at your own pace.",
+  "description": "Straight slats and tapered legs, made to order by Old Town Oak in solid brown maple. A 3-stage convertible: crib, then toddler bed or day bed, then full-size bed, using the conversion kits listed on this page.",
   "extendedDescription": null,
   "tags": [],
   "addons": [],
   "defaultVariant": "Natural",
   "slug": "newport-crib",
   "title": "Newport Crib",
-  "metaDescription": "Bring classic charm to your nursery with the Newport Crib, a timeless 4-in-1 convertible design crafted from solid hardwood.",
+  "metaDescription": "Straight slats and tapered legs, made to order by Old Town Oak in solid brown maple.",
   "bundle": [
     "newport-toddler-bed",
     "newport-full-bed-rail-kit",
@@ -36,5 +36,11 @@
   ],
   "bundleUnchecked": [
     "newport-full-guard-rail"
+  ],
+  "uses": [
+    "CRIB",
+    "TODDLER BED",
+    "DAY BED",
+    "FULL BED"
   ]
 }

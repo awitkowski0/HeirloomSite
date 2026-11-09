@@ -8,6 +8,7 @@ import TurnstileWidget, {
   type TurnstileStatus,
 } from '@/components/checkout/TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
+import { currentSelections } from '@/context/selectionsStore';
 import {
   getConsentServerSnapshot,
   getConsentSnapshot,
@@ -127,7 +128,10 @@ export default function EmailCapturePopup() {
      * popup would slam in the instant the banner closed for anyone who took
      * more than fifteen seconds to answer it.
      */
-    const timer = setTimeout(() => show('timer'), TIMER_MS);
+    const timer = setTimeout(() => {
+      // Never cover someone who is partway through choosing.
+      if (currentSelections().items.length === 0) show('timer');
+    }, TIMER_MS);
 
     // Exit intent: the cursor leaving through the TOP of the viewport, toward
     // the tab bar and the close button. Desktop only - there is no such gesture

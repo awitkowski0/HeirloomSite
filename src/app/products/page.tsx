@@ -3,7 +3,9 @@ import { assertNoOrphanedCategories, getBrowsableProducts, getCategories } from 
 import { itemListJsonLd,
   jsonLdScript,
 } from '@/lib/seo';
+import CategoryPills from '@/components/products/CategoryPills';
 import ShopBrowser from '@/components/shop/ShopBrowser';
+import UsesNav from '@/components/uses/UsesNav';
 import { toShopItems } from '@/lib/shop';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
@@ -36,11 +38,14 @@ export default function ProductsPage() {
         {/* "Shop All", matching the nav label that leads here. This said "Our
             Collections" while the nav item labelled "Collections" pointed at
             /gallery instead - so the one word named two different pages. */}
-        <h1 className="headline-lg text-primary">Shop All</h1>
+        <h1 className="headline-lg text-primary">Everything</h1>
         <p className="body-lg text-on-surface-variant">
           {products.length} pieces across {categories.length} categories.
         </p>
       </header>
+
+      <UsesNav />
+      <CategoryPills categories={categories} activeSlug={null} />
 
       <section aria-label="Product grid">
         <ShopBrowser items={toShopItems(products)} priorityCount={3} />

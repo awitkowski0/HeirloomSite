@@ -9,7 +9,7 @@ import { nodeTextCompact } from '@/lib/node-text';
 export const metadata: Metadata = {
   title: 'FAQ',
   description:
-    'Answers on solid hardwood cribs, finishes, 4-in-1 conversion, ordering, shipping, and safety standards from Heirloom Cribs & More (Nazareth / Lehigh Valley, PA).',
+    'Answers on solid hardwood cribs, finishes, 3-stage conversion, ordering, shipping, and safety standards from Heirloom Cribs & More (Nazareth / Lehigh Valley, PA).',
   alternates: { canonical: '/faq' },
   openGraph: { url: '/faq' },
 };
@@ -85,7 +85,7 @@ const SECTIONS: Section[] = [
             Finishes vary by builder, so we don&rsquo;t make one blanket claim for all of them. Tell
             us the model and finish you&rsquo;re looking at, and we&rsquo;ll find that builder&rsquo;s own
             documentation for you. You can also read our {SafetyLink}, or see{' '}
-            <Link href="/finishes" className="doc-link">
+            <Link href="/care" className="doc-link">
               Finishes &amp; Nursery Air Quality
             </Link>{' '}
             for how we describe the finishes on the cribs we carry. For a sensitivity or chemical
@@ -98,7 +98,7 @@ const SECTIONS: Section[] = [
         question: 'Can I choose wood species and stain?',
         answer: (
           <p>
-            Yes. Most cribs offer wood and stain options on the product page. If you are unsure
+            Stain, yes. Wood: our cribs are listed in brown maple, and other woods are by request. If you are unsure
             which finish will match your nursery, use <strong>Get Personal Assistance</strong> and
             share photos or inspiration before Confirm Order. Nothing is charged until after that
             call.
@@ -111,7 +111,7 @@ const SECTIONS: Section[] = [
     heading: 'Conversion path',
     entries: [
       {
-        question: 'What does 4-in-1 convertible mean?',
+        question: 'What does 3-stage convertible mean?',
         answer: (
           <p>
             It is the common name for a crib that converts to a toddler bed, a day bed, and a
@@ -122,7 +122,7 @@ const SECTIONS: Section[] = [
             frame, toddler bed rail, and hardware.&rdquo; Check the product page for the stages and
             kits that apply to your model. See{' '}
             <Link href="/how-conversion-works" className="doc-link">
-              How Our 4-in-1 Conversion Works
+              How Conversion Works
             </Link>
             .
           </p>

@@ -36,13 +36,10 @@ export default function Footer() {
                 <Link href="/faq">FAQ</Link>
               </li>
               <li>
-                <Link href="/how-conversion-works">How 4-in-1 Conversion Works</Link>
+                <Link href="/how-conversion-works">How Conversion Works</Link>
               </li>
               <li>
                 <Link href="/why-hardwood">Why Solid Hardwood</Link>
-              </li>
-              <li>
-                <Link href="/finishes">Finishes &amp; Air Quality</Link>
               </li>
               <li>
                 <Link href="/safe-sleep">Safe Sleep</Link>
@@ -73,7 +70,7 @@ export default function Footer() {
                 <Link href="/builders/fishers-quality-products">Fisher&rsquo;s Quality Products</Link>
               </li>
               <li>
-                <Link href="/builders/kids-comfort">Kid&rsquo;s Comfort</Link>
+                <Link href="/builders/kids-comfort">Kids Comfort</Link>
               </li>
             </ul>
           </div>

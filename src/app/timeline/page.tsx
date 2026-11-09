@@ -40,9 +40,8 @@ export default function TimelinePage() {
         <h2 className="headline-md">The order journey</h2>
         <ol className="doc-list">
           <li>
-            <strong>01 Choose and Customize.</strong> Pick the silhouette first; hardwood and
-            finish follow. Conversion kits for the toddler bed and full-size bed are listed on each
-            product page. Most styles offer wood and stain options on the product page. If you&rsquo;re unsure
+            <strong>01 Choose and Customize.</strong> Pick the silhouette first; the finish follows. Conversion kits for the toddler bed and full-size bed are listed on each
+            product page. Styles come in brown maple with a choice of stains on the product page. If you&rsquo;re unsure
             which finish will match your room, ask us before you place an order — share inspiration
             photos through <Link href="/contact" className="doc-link">Get Personal Assistance</Link>.
           </li>

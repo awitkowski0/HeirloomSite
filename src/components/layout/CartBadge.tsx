@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCart } from '@/context/useCart';
+import { requestTrayOpen } from '@/context/selectionsStore';
 
 /**
  * The cart link and its item-count badge.
@@ -18,6 +19,10 @@ export default function CartBadge() {
   return (
     <Link
       href="/checkout"
+      onClick={e => {
+        // The tray is the cart; /checkout is the fallback where it is not mounted.
+        if (requestTrayOpen('cart')) e.preventDefault();
+      }}
       className="icon-btn"
       style={{ position: 'relative' }}
       aria-label={

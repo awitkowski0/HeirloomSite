@@ -6,6 +6,7 @@ import { Providers } from './providers';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
+import SelectionsTray from '@/components/selections/SelectionsTray';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
 /*
@@ -116,6 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
           <Header />
           <main id="main-content">{children}</main>
+          <SelectionsTray />
           <BottomNav />
           <Footer />
         </Providers>

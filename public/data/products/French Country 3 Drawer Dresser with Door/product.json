@@ -19,5 +19,8 @@
     "french-country-7-drawer-dresser-with-top-mirror",
     "french-country-7-drawer-dresser-with-changing-table"
   ],
-  "collection": "French Country"
+  "collection": "French Country",
+  "uses": [
+    "DRESSER"
+  ]
 }

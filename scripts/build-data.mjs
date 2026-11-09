@@ -287,6 +287,8 @@ for (const dirName of productDirs) {
     // on file names a builder. `style` is set on cribs only.
     builder: meta.builder ?? null,
     style: meta.style ?? null,
+    uses: meta.uses ?? [],
+    usesCredit: meta.usesCredit ?? null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,
   });

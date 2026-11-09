@@ -12,5 +12,10 @@
   "defaultVariant": "Default Title",
   "slug": "changing-table-6-drawer",
   "title": "Changing Table - 6 Drawer",
-  "metaDescription": "The Changing Table - 6 Drawer from Fisher's has six drawers and measures 50¼ inches wide, 21¼ inches deep, and 33½ inches high."
+  "metaDescription": "The Changing Table - 6 Drawer from Fisher's has six drawers and measures 50¼ inches wide, 21¼ inches deep, and 33½ inches high.",
+  "usesCredit": "Per Fisher's: the changing table has a removable top, so it can be used as a dresser later.",
+  "uses": [
+    "CHANGING TABLE",
+    "DRESSER"
+  ]
 }

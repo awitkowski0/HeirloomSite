@@ -76,6 +76,11 @@ export function loadSearchIndex(): Promise<MiniSearch<SearchDoc>> {
   return indexPromise;
 }
 
+const WHOLE_STAINS = [
+  'Antique Slate', 'Asbury Brown', 'Michaels Cherry', 'Almond', 'Carbon', 'Driftwood', 'Earthtone', 'Ebony', 'Frost',
+  'Fruitwood', 'Harvest', 'Manchester', 'Mx', 'Natural', 'Provincial', 'Sandstone', 'Seely', 'Smoke', 'Washington',
+];
+
 /**
  * Resolve which stain the query referred to, so the result row can show that
  * stain's photo.
@@ -89,11 +94,10 @@ function findMatchedStain(stainNames: string, query: string): string | undefined
   if (!stainNames) return undefined;
   const words = query.toLowerCase().split(/\s+/).filter(Boolean);
   if (words.length === 0) return undefined;
-  const stains = stainNames.split(' ').filter(Boolean);
-  return stains.find(stain => {
-    const s = stain.toLowerCase();
-    return words.some(w => s.includes(w) || w.includes(s));
-  });
+  const q = words.join(' ');
+  // Stain names can be two words ("Michaels Cherry"), so the query must match a
+  // whole known name rather than one word of the joined list.
+  return WHOLE_STAINS.find(stain => stainNames.includes(stain) && stain.toLowerCase().includes(q));
 }
 
 function toResults(
