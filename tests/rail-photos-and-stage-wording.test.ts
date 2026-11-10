@@ -3,10 +3,9 @@
  *  - Mackenzie and French Country 3/4 and full guard-rail photos were
  *    byte-identical to the Addison OTO-1275 / OTO-1290 images. No
  *    collection-specific source exists, so those photos were removed.
- *  - OTO crib pages that said "4-in-1" but listed only three stages
- *    (crib, toddler bed, full-size / double bed) now say "3-in-1",
- *    matching the OTO 2026 catalog "Three Stage Bed System"
- *    (Stage 1 Crib, Stage 2 Toddler Bed, Stage 3 Double Bed).
+ *  - OTO crib "4-in-1" wording is kept. Phil (via CoS and Director,
+ *    12:20 PM ET) held the 3-in-1 change: OTO's toddler rail also
+ *    serves as a day bed, so 4-in-1 is correct.
  *  - The site-wide footer link "How 4-in-1 Conversion Works" is unchanged.
  *  - Kit prices are out of scope and are not touched here.
  *
@@ -114,15 +113,12 @@ function listedStages(description: string): string[] {
   return stages;
 }
 
-test('OTO crib product copy that lists three stages says 3-in-1, not 4-in-1', () => {
+test('OTO crib product copy keeps 4-in-1, not 3-in-1 (Phil HOLD 12:20 PM ET)', () => {
   for (const folder of OTO_THREE_STAGE_CRIBS) {
     const p = productJson(folder);
     const text = `${p.description}\n${p.metaDescription ?? ''}`;
-    const stages = listedStages(p.description);
-    assert.ok(stages.includes('crib') && stages.includes('toddler') && stages.includes('full'), `${folder} lists crib, toddler, and full-size stages`);
-    assert.ok(!stages.includes('daybed'), `${folder} does not list a daybed stage`);
-    assert.match(text, /3-in-1/);
-    assert.doesNotMatch(text, /4-in-1/);
+    assert.match(text, /4-in-1/);
+    assert.doesNotMatch(text, /3-in-1/);
   }
 });
 
