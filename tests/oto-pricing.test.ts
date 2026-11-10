@@ -143,7 +143,19 @@ for (const p of OTO) {
         ],
         `${p.name} pick list`
       );
-      for (const b of inv.bundle ?? []) assert.ok(b.image, `${p.name}: ${b.productName} has a thumbnail`);
+      const GAP_RAIL_PHOTOS = new Set([
+        'Mackenzie 3/4 Guard Rail Kit',
+        'Mackenzie Full Guard Rail Kit',
+        'French Country 3/4 Guard Rail Kit',
+        'French Country Full Guard Rail Kit',
+      ]);
+      for (const b of inv.bundle ?? []) {
+        if (GAP_RAIL_PHOTOS.has(b.productName)) {
+          assert.ok(!b.image, `${p.name}: ${b.productName} has no photo (wrong Addison image removed)`);
+        } else {
+          assert.ok(b.image, `${p.name}: ${b.productName} has a thumbnail`);
+        }
+      }
     }
   });
 }

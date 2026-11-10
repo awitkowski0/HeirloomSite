@@ -114,13 +114,33 @@ for (const c of CRIBS) {
         ],
         `${c.name} pick list (name, price, add-on price?, own price, outside the package?, starts ticked?)`
       );
-      for (const b of inv.bundle ?? []) assert.ok(b.image, `${c.name}: ${b.productName} has a thumbnail`);
+      const GAP_RAIL_PHOTOS = new Set([
+        'Mackenzie 3/4 Guard Rail Kit',
+        'Mackenzie Full Guard Rail Kit',
+        'French Country 3/4 Guard Rail Kit',
+        'French Country Full Guard Rail Kit',
+      ]);
+      for (const b of inv.bundle ?? []) {
+        if (GAP_RAIL_PHOTOS.has(b.productName)) {
+          assert.ok(!b.image, `${c.name}: ${b.productName} has no photo (Addison rail image removed; no collection-specific source)`);
+        } else {
+          assert.ok(b.image, `${c.name}: ${b.productName} has a thumbnail`);
+        }
+      }
       // Initial picker total = crib + every row that starts ticked = package + 3/4 rail + mattress.
       const initial = inv.basePrice + (inv.bundle ?? []).filter(b => !b.startsUnchecked).reduce((sum, b) => sum + b.price, 0);
       assert.equal(initial, c.pkg + r34.price + MATTRESS_PRICE, `${c.name} initial picker total`);
       const img = (n: string) => (inv.bundle ?? []).find(b => b.productName === n)?.image ?? '';
-      assert.match(img(r34.name), /3_4_guard_rail_0(_v2)?\.jpg$|34_guard_rail_0(_v2)?\.jpg$/, `${r34.name} uses the 3/4 guard rail photo`);
-      assert.match(img(rFull.name), /full_guard_rail_0(_v2)?\.jpg$|guard_rail_0(_v2)?\.jpg$/, `${rFull.name} uses the full guard rail photo`);
+      if (GAP_RAIL_PHOTOS.has(r34.name)) {
+        assert.equal(img(r34.name), '', `${r34.name} has no photo`);
+      } else {
+        assert.match(img(r34.name), /3_4_guard_rail_0(_v2)?\.jpg$|34_guard_rail_0(_v2)?\.jpg$/, `${r34.name} uses the 3/4 guard rail photo`);
+      }
+      if (GAP_RAIL_PHOTOS.has(rFull.name)) {
+        assert.equal(img(rFull.name), '', `${rFull.name} has no photo`);
+      } else {
+        assert.match(img(rFull.name), /full_guard_rail_0(_v2)?\.jpg$|guard_rail_0(_v2)?\.jpg$/, `${rFull.name} uses the full guard rail photo`);
+      }
     }
     // Each rail is the builder's SKU for this crib, and its own price is as stated.
     for (const r of c.rails) {
