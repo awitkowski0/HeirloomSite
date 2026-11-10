@@ -15,5 +15,14 @@
     "newport-7-drawer-dresser",
     "newport-nightstand"
   ],
-  "collection": "Newport"
+  "collection": "Newport",
+  "bundle": [
+    "mini-newport-twin-bed-conversion"
+  ],
+  "bundleOptional": [
+    "mini-newport-twin-bed-conversion"
+  ],
+  "bundleUnchecked": [
+    "mini-newport-twin-bed-conversion"
+  ]
 }

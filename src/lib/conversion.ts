@@ -9,10 +9,10 @@ import type { RelatedProduct } from '@/types';
  * piece (a rail kit, toddler bed, or guard rail). Description text and
  * product handles are not consulted.
  *
- * The Mini Newport has no bundle and no includes. The catalogue records a
- * Twin Bed Conversion (OTO-1380B) with no price in the builder book, on 8808,
- * or on the site, so that SKU is not in inventory and does not make this
- * mini crib convertible.
+ * The Mini Newport lists the Twin Bed Conversion kit (OTO-1380B) as an
+ * optional, sold-separately add-on, so it is convertible in this sense. It
+ * is a 2-stage path (crib, then single/twin bed), not a 4-in-1, and it has
+ * no daybed stage. Rendering of that case lives in mini-newport-conversion.ts.
  */
 
 const ACCESSORY_CONVERSION_SLUGS = new Set([

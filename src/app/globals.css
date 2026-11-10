@@ -3655,6 +3655,19 @@ a.product-inline-link:focus-visible {
   color: var(--ink-muted);
 }
 
+.assurance-stage {
+  display: block;
+}
+
+.assurance-stage + .assurance-stage {
+  margin-top: 0.35em;
+}
+
+.bundle-addon-line {
+  margin: 0.35rem 0 0.75rem;
+}
+
+
 /* A search hit whose matched finish is currently withdrawn. */
 .search-result-oos {
   color: var(--error);
