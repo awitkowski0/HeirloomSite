@@ -45,10 +45,18 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
   },
 ];
 
-export default function PurchaseAssurances() {
+export default function PurchaseAssurances({
+  showConversion = false,
+}: {
+  /** Conversion line only when the catalogue shows the product is convertible. */
+  showConversion?: boolean;
+}) {
+  const items = showConversion
+    ? ASSURANCES
+    : ASSURANCES.filter(a => a.title !== 'Built to convert as they grow');
   return (
     <ul className="assurances">
-      {ASSURANCES.map(a => (
+      {items.map(a => (
         <li key={a.title} className="assurance">
           <span className="material-symbols-outlined assurance-icon" aria-hidden="true">
             {a.icon}
