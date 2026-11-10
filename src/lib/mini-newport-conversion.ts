@@ -11,9 +11,10 @@ import {
  * line 60, "Mini Newport Collection" / "1380-B Twin Bed Conversion". Brown Maple unfinished
  * is $155 and estimated finishing is $49. That cost is not the retail price.
  *
- * TWIN_BED_CONVERSION_PRICE is the sell price: $481, matching OTO-401B
- * Full Bed Rail Kit (Pricing App PR 77, catalog.ts, cost $155 + $49 = $204
- * is not the retail). Keep variants.json in sync — the test checks they match.
+ * TWIN_BED_CONVERSION_PRICE is the sell price: $368 (Phil via CoS and
+ * Director, 10:48 AM ET). The price-book cost $155 + $49 = $204 is not
+ * the retail. OTO-401B Full Bed Rail Kit stays at $481. Keep variants.json
+ * in sync — the test checks they match.
  *
  * Customer-facing name is "Twin Bed Conversion Kit" (Director). Brand copy
  * (signed file sha256 5850186a0c36b225e36e0f211ea70ff40ec13f47951bb44b5ddd82b3b45a9446,
@@ -27,8 +28,8 @@ export const TWIN_BED_CONVERSION_SLUG = 'mini-newport-twin-bed-conversion';
 /** Customer-facing product name: add-on (stem), variant, feed title. */
 export const TWIN_BED_CONVERSION_NAME = 'Twin Bed Conversion Kit';
 
-/** Sell price in dollars. Mirrors OTO-401B ($481). Not the price-book cost ($155 + $49 = $204). */
-export const TWIN_BED_CONVERSION_PRICE = 481;
+/** Sell price in dollars: $368. Not the price-book cost ($155 + $49 = $204). OTO-401B stays $481. */
+export const TWIN_BED_CONVERSION_PRICE = 368;
 
 /** Brand part (a) Label, exact. */
 export const TWIN_BED_CONVERSION_ADDON_LABEL =

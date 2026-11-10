@@ -7,8 +7,8 @@
  *
  * OTO-1380B is in the OTO price book (merchant/checks/2026-11-02-issue52-facts/
  * oto-pricebook-excerpt.txt line 60: Brown Maple unfinished $155, estimated
- * finishing $49). Retail is $481, matching OTO-401B (Pricing App PR 77),
- * not that cost. Run with `npm test`.
+ * finishing $49). Retail is $368 (Phil via CoS and Director, 10:48 AM ET),
+ * not that cost. OTO-401B stays at $481. Run with `npm test`.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -156,7 +156,7 @@ test('Mini Newport is a Mini Crib, is convertible as a 2-stage twin path, and sh
   }
 });
 
-test('OTO-1380B Twin Bed Conversion Kit is in variants at $481, matching OTO-401B, not the price-book cost', () => {
+test('OTO-1380B Twin Bed Conversion Kit is in variants at $368, not the price-book cost; OTO-401B stays $481', () => {
   const variants = JSON.parse(
     readFileSync(
       new URL('../public/data/products/Mini Newport Twin Bed Conversion/variants.json', import.meta.url),
@@ -166,9 +166,11 @@ test('OTO-1380B Twin Bed Conversion Kit is in variants at $481, matching OTO-401
   assert.equal(variants.length, 1);
   assert.equal(variants[0].sku, TWIN_BED_CONVERSION_SKU);
   assert.equal(variants[0].basePrice, TWIN_BED_CONVERSION_PRICE);
+  assert.equal(variants[0].basePrice, 368);
   assert.equal(variants[0].dimensions, '42 3/4"w x 36"h x 79 3/4"d');
-  // Price-book cost is $155 + $49; retail is a placeholder and must not use that sum.
+  // Price-book cost is $155 + $49; retail must not use that sum. 401B stays $481.
   assert.notEqual(TWIN_BED_CONVERSION_PRICE, 155 + 49);
+  assert.notEqual(TWIN_BED_CONVERSION_PRICE, 481);
   assert.notEqual(TWIN_BED_CONVERSION_PRICE, 155);
   assert.notEqual(TWIN_BED_CONVERSION_PRICE, 49);
 
@@ -179,6 +181,7 @@ test('OTO-1380B Twin Bed Conversion Kit is in variants at $481, matching OTO-401
     assert.equal(row.slug, TWIN_BED_CONVERSION_SLUG);
     assert.equal(row.category, 'Guard Rails & Conversions');
     assert.equal(row.basePrice, TWIN_BED_CONVERSION_PRICE);
+    assert.equal(row.basePrice, 368);
     assert.equal(isConversionPiece(row as { slug: string; productName: string; category: string | null }), true);
   }
 });

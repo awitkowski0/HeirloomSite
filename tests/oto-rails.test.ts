@@ -26,12 +26,13 @@
  *
  * Mini Newport Twin Bed Conversion Kit OTO-1380B is in the OTO price book
  * (merchant/checks/2026-11-02-issue52-facts/oto-pricebook-excerpt.txt line 60:
- * Brown Maple unfinished $155, estimated finishing $49). Retail is $481,
- * matching OTO-401B Full Bed Rail Kit (Pricing App PR 77); that $155 + $49
- * cost is not the selling price. The kit is an optional, sold-separately
- * add-on on the Mini, not part of the crib package, and starts unticked.
- * Brown Maple only, finish included. Like OTO-401B, it is not in the merchant
- * feed, and it does not carry its own delivery charge on the add-on row.
+ * Brown Maple unfinished $155, estimated finishing $49). Retail is $368
+ * (Phil via CoS and Director, 10:48 AM ET); that $155 + $49 cost is not
+ * the selling price. OTO-401B Full Bed Rail Kit stays at $481. The kit is
+ * an optional, sold-separately add-on on the Mini, not part of the crib
+ * package, and starts unticked. Brown Maple only, finish included. Like
+ * OTO-401B, it is not in the merchant feed, and it does not carry its own
+ * delivery charge on the add-on row.
  *
  * Still left off: the Mackenzie kit SKUs OTO-1401A / OTO-1402B (the site sells
  * OTO-1402A + OTO-1401B for both Mackenzie cribs).
@@ -190,11 +191,16 @@ for (const c of CRIBS) {
   });
 }
 
-test('Mini Newport with Mattress: optional Twin Bed Conversion Kit OTO-1380B at $481, sold separately', () => {
+test('Mini Newport with Mattress: optional Twin Bed Conversion Kit OTO-1380B at $368, sold separately', () => {
   const kit = inventory.find(i => i.sku === TWIN_BED_CONVERSION_SKU);
-  assert.ok(kit, 'OTO-1380B must be in inventory (price book line 60; retail $481, same as OTO-401B)');
+  assert.ok(kit, 'OTO-1380B must be in inventory (price book line 60; retail $368)');
   assert.equal(kit.productName, TWIN_BED_CONVERSION_NAME);
   assert.equal(kit.basePrice, TWIN_BED_CONVERSION_PRICE);
+  assert.equal(kit.basePrice, 368);
+  const fullRail = inventory.find(i => i.sku === 'OTO-401B');
+  assert.ok(fullRail, 'OTO-401B missing');
+  assert.equal(fullRail.basePrice, 481, 'OTO-401B Full Bed Rail Kit must stay at $481');
+  assert.notEqual(kit.basePrice, fullRail.basePrice);
   for (const inv of inventory.filter(i => i.productName === 'Mini Newport with Mattress')) {
     const bundle = inv.bundle ?? [];
     assert.equal(bundle.length, 1);
