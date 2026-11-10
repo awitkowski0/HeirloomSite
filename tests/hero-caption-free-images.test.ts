@@ -18,9 +18,13 @@ import { pickDefaultImage } from '../src/lib/images';
 /** slug -> [product folder, new hero file] */
 const SWAPPED: Record<string, [string, string]> = {
   '34-guard-rail': ['3-4 Guard Rail', '3_4_guard_rail_0_v2.jpg'],
+  'french-country-34-guard-rail': ['French Country 3-4 Guard Rail', 'french_country_34_guard_rail_0_v2.jpg'],
+  'mackenzie-34-guard-rail': ['Mackenzie 3-4 Guard Rail', 'mackenzie_34_guard_rail_0_v2.jpg'],
   'newport-34-guard-rail': ['Newport 3-4 Guard Rail', 'newport_34_guard_rail_0_v2.jpg'],
   'west-lake-34-guard-rail': ['West Lake 3-4 Guard Rail', 'west_lake_34_guard_rail_0_v2.jpg'],
   'full-guard-rail': ['Full Guard Rail', 'full_guard_rail_0_v2.jpg'],
+  'guard-rail': ['Guard Rail', 'guard_rail_0_v2.jpg'],
+  'mackenzie-full-guard-rail': ['Mackenzie Full Guard Rail', 'mackenzie_full_guard_rail_0_v2.jpg'],
   'newport-full-guard-rail': ['Newport Full Guard Rail', 'newport_full_guard_rail_0_v2.jpg'],
   'west-lake-full-guard-rail': ['West Lake Full Guard Rail', 'west_lake_full_guard_rail_0_v2.jpg'],
   'mackenzie-toddler-bed': ['Mackenzie Toddler Bed', 'mackenzie_toddler_bed_0_v2.jpg'],
