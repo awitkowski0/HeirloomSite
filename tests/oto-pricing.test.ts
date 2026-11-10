@@ -25,6 +25,7 @@ import { readFileSync } from 'node:fs';
 import { priceCart, cartSubtotalCents } from '../src/lib/pricing';
 import { chargedSubtotalCents, type PricedCartLineInput } from '../src/lib/cart-pricing';
 import { deliveryChargeFor } from '../src/lib/order-terms';
+import { TWIN_BED_CONVERSION_NAME, TWIN_BED_CONVERSION_PRICE } from '../src/lib/mini-newport-conversion';
 
 interface Oto { name: string; sku: string; crib: number; pkg: number; toddler: string; full: string; split: [number, number] }
 const OTO: readonly Oto[] = [
@@ -148,12 +149,27 @@ for (const p of OTO) {
   });
 }
 
-test('Mini Newport with Mattress (OTO-1380): package = crib $1,800, no kits', () => {
+test('Mini Newport with Mattress (OTO-1380): package = crib $1,800; Twin Bed Conversion is optional and not in the package', () => {
   for (const row of rowsFor('Mini Newport with Mattress')) {
     assert.equal(row.basePrice, 1800);
     assert.deepEqual(row.bundleOverrides ?? [], []);
     assert.equal(cartSubtotalCents([cribLine(row)]), cents(1800));
   }
+  const kitRows = rowsFor(TWIN_BED_CONVERSION_NAME);
+  assert.ok(kitRows.length > 0, 'Twin Bed Conversion missing from pricing.json');
+  for (const kit of kitRows) {
+    assert.equal(kit.basePrice, TWIN_BED_CONVERSION_PRICE);
+  }
+  const crib = rowsFor('Mini Newport with Mattress')[0];
+  const kit = kitRows[0];
+  const stain = crib.stains.find(s => s.inStock);
+  assert.ok(stain);
+  const kitStain = kit.stains[0];
+  const together = [
+    { productName: crib.productName, wood: crib.wood, stainName: stain.name, quantity: 1 },
+    { productName: kit.productName, wood: kit.wood, stainName: kitStain.name, quantity: 1 },
+  ];
+  assert.equal(cartSubtotalCents(together), cents(1800 + TWIN_BED_CONVERSION_PRICE));
 });
 
 test('shared kits OTO-401A/B: Fisher $250 and French Country add-on prices stay per crib', () => {

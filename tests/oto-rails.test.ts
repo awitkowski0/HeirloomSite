@@ -24,9 +24,18 @@
  * (bundleUnchecked), so the initial picker total is package + 3/4 rail +
  * mattress.
  *
- * Left off on purpose (no price anywhere - book, 8808 or site): Mini Newport's
- * Twin Bed Conversion OTO-1380B, and the Mackenzie kit SKUs OTO-1401A /
- * OTO-1402B (the site sells OTO-1402A + OTO-1401B for both Mackenzie cribs).
+ * Mini Newport Twin Bed Conversion Kit OTO-1380B is in the OTO price book
+ * (merchant/checks/2026-11-02-issue52-facts/oto-pricebook-excerpt.txt line 60:
+ * Brown Maple unfinished $155, estimated finishing $49). Retail is $368
+ * (Phil via CoS and Director, 10:48 AM ET); that $155 + $49 cost is not
+ * the selling price. OTO-401B Full Bed Rail Kit stays at $481. The kit is
+ * an optional, sold-separately add-on on the Mini, not part of the crib
+ * package, and starts unticked. Brown Maple only, finish included. Like
+ * OTO-401B, it is not in the merchant feed, and it does not carry its own
+ * delivery charge on the add-on row.
+ *
+ * Still left off: the Mackenzie kit SKUs OTO-1401A / OTO-1402B (the site sells
+ * OTO-1402A + OTO-1401B for both Mackenzie cribs).
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -34,6 +43,12 @@ import { readFileSync } from 'node:fs';
 import { priceCart, cartSubtotalCents } from '../src/lib/pricing';
 import { chargedSubtotalCents, type PricedCartLineInput } from '../src/lib/cart-pricing';
 import { deliveryChargeFor } from '../src/lib/order-terms';
+import {
+  TWIN_BED_CONVERSION_NAME,
+  TWIN_BED_CONVERSION_PRICE,
+  TWIN_BED_CONVERSION_SKU,
+} from '../src/lib/mini-newport-conversion';
+
 
 interface Rail { name: string; sku: string; price: number; list: number; override: boolean }
 interface Crib { name: string; crib: number; pkg: number; toddler: string; full: string; split: [number, number]; rails: [Rail, Rail] }
@@ -176,11 +191,24 @@ for (const c of CRIBS) {
   });
 }
 
-test('Mini Newport with Mattress: no pick list (Twin Bed Conversion OTO-1380B has no price anywhere)', () => {
+test('Mini Newport with Mattress: optional Twin Bed Conversion Kit OTO-1380B at $368, sold separately', () => {
+  const kit = inventory.find(i => i.sku === TWIN_BED_CONVERSION_SKU);
+  assert.ok(kit, 'OTO-1380B must be in inventory (price book line 60; retail $368)');
+  assert.equal(kit.productName, TWIN_BED_CONVERSION_NAME);
+  assert.equal(kit.basePrice, TWIN_BED_CONVERSION_PRICE);
+  assert.equal(kit.basePrice, 368);
+  const fullRail = inventory.find(i => i.sku === 'OTO-401B');
+  assert.ok(fullRail, 'OTO-401B missing');
+  assert.equal(fullRail.basePrice, 481, 'OTO-401B Full Bed Rail Kit must stay at $481');
+  assert.notEqual(kit.basePrice, fullRail.basePrice);
   for (const inv of inventory.filter(i => i.productName === 'Mini Newport with Mattress')) {
-    assert.deepEqual(inv.bundle ?? [], []);
+    const bundle = inv.bundle ?? [];
+    assert.equal(bundle.length, 1);
+    assert.equal(bundle[0].productName, TWIN_BED_CONVERSION_NAME);
+    assert.equal(bundle[0].optional, true);
+    assert.equal(bundle[0].startsUnchecked, true);
+    assert.equal(bundle[0].price, TWIN_BED_CONVERSION_PRICE);
   }
-  assert.equal(inventory.some(i => i.sku === 'OTO-1380B'), false);
 });
 
 test('only OTO cribs list guard rails; Fisher cribs keep kits + mattress', () => {
@@ -195,7 +223,9 @@ test('only OTO cribs list guard rails; Fisher cribs keep kits + mattress', () =>
   // rails start unticked; on Fisher (and everywhere else) every row starts ticked.
   const fullRails = new Set(CRIBS.map(c => c.rails[1].name));
   for (const inv of inventory) for (const b of inv.bundle ?? []) {
-    assert.equal(b.optional ?? false, railNames.has(b.productName), `${inv.productName}: ${b.productName} optional flag`);
-    assert.equal(b.startsUnchecked ?? false, fullRails.has(b.productName), `${inv.productName}: ${b.productName} starts unticked`);
+    const optional = railNames.has(b.productName) || b.productName === TWIN_BED_CONVERSION_NAME;
+    const unchecked = fullRails.has(b.productName) || b.productName === TWIN_BED_CONVERSION_NAME;
+    assert.equal(b.optional ?? false, optional, `${inv.productName}: ${b.productName} optional flag`);
+    assert.equal(b.startsUnchecked ?? false, unchecked, `${inv.productName}: ${b.productName} starts unticked`);
   }
 });

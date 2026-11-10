@@ -2,6 +2,11 @@
 
 import { formatPrice } from '@/lib/format';
 import type { RelatedProduct } from '@/types';
+import {
+  TWIN_BED_CONVERSION_ADDON_LABEL,
+  TWIN_BED_CONVERSION_ADDON_LINE,
+  TWIN_BED_CONVERSION_SLUG,
+} from '@/lib/mini-newport-conversion';
 
 /**
  * What comes with the crib, and what can be added to it.
@@ -127,12 +132,19 @@ export default function BundleBuilder({
                       {/* eslint-disable-next-line @next/next/no-img-element -- 48px thumbnail. */}
                       {item.image ? <img src={item.image} alt="" /> : null}
                     </span>
-                    <span className="bundle-name body-md">{item.productName}</span>
+                    <span className="bundle-name body-md">
+                      {item.slug === TWIN_BED_CONVERSION_SLUG
+                        ? TWIN_BED_CONVERSION_ADDON_LABEL
+                        : item.productName}
+                    </span>
                     {/* The add-on's own item price, shown plainly (no "+"): for a crib with
                         bundlePriceOverrides this is that crib's rail price. Variant
                         surcharges in StainSelector keep their "(+$x)" delta. */}
                     <span className="bundle-price body-md">{formatPrice(item.price)}</span>
                   </label>
+                  {item.slug === TWIN_BED_CONVERSION_SLUG ? (
+                    <p className="bundle-addon-line body-md text-on-surface-variant">{TWIN_BED_CONVERSION_ADDON_LINE}</p>
+                  ) : null}
                 </li>
               );
             })}

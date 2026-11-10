@@ -10,6 +10,10 @@ import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import PurchaseAssurances from './PurchaseAssurances';
 import { showsPurchaseAssurances } from '@/lib/delivery-line';
+import {
+  showsFourInOneConversionAssurance,
+  twoStageConversionNote,
+} from '@/lib/mini-newport-conversion';
 import BundleBuilder from './BundleBuilder';
 import { formatPrice } from '@/lib/format';
 import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
@@ -118,6 +122,8 @@ export default function ProductConfigurator({
   // Every furniture order carries a delivery charge, so the assurance block
   // (delivery tiers etc.) follows the category, not the variant type.
   const showDeliveryMessage = showsPurchaseAssurances(configurations[0]?.category);
+  const showConversion = showsFourInOneConversionAssurance(configurations[0]);
+  const conversionNote = twoStageConversionNote(configurations[0]);
 
   /**
    * Legacy ?wood= / ?stain= links only.
@@ -499,7 +505,9 @@ export default function ProductConfigurator({
                 answered the least important of the four questions a first-time
                 buyer has, and left the other three - cost of delivery, safety,
                 who to ask - unanswered at the point of decision. */}
-            {showDeliveryMessage && <PurchaseAssurances />}
+            {showDeliveryMessage && (
+              <PurchaseAssurances showConversion={showConversion} conversionNote={conversionNote} />
+            )}
           </section>
 
           {description}

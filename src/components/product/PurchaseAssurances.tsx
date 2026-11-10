@@ -2,6 +2,7 @@ import Link from 'next/link';
 /* The delivery title reads from order-terms (via delivery-line) so it can never
    quote a different number from the checkout that charges it. */
 import { deliveryLineTitle } from '@/lib/delivery-line';
+import type { TwoStageNote } from '@/lib/mini-newport-conversion';
 
 /*
  * The four questions a first-time buyer of a $2,500 crib from an unknown brand
@@ -45,10 +46,19 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
   },
 ];
 
-export default function PurchaseAssurances() {
+export default function PurchaseAssurances({
+  showConversion = false,
+  conversionNote = null,
+}: {
+  /** 4-in-1 line, only when the catalogue shows a full-size convertible crib. */
+  showConversion?: boolean;
+  /** Mini Newport 2-stage note (Brand part b). Replaces the 4-in-1 assurance when set. */
+  conversionNote?: TwoStageNote | null;
+}) {
+  const items = ASSURANCES.filter(a => a.title !== 'Built to convert as they grow' || (showConversion && !conversionNote));
   return (
     <ul className="assurances">
-      {ASSURANCES.map(a => (
+      {items.map(a => (
         <li key={a.title} className="assurance">
           <span className="material-symbols-outlined assurance-icon" aria-hidden="true">
             {a.icon}
@@ -63,10 +73,27 @@ export default function PurchaseAssurances() {
                 a.title
               )}
             </span>
-            <span className="assurance-copy">{a.body}</span>
+            {a.body ? <span className="assurance-copy">{a.body}</span> : null}
           </span>
         </li>
       ))}
+      {conversionNote ? (
+        <li className="assurance" key={conversionNote.heading}>
+          <span className="material-symbols-outlined assurance-icon" aria-hidden="true">
+            handyman
+          </span>
+          <span className="assurance-body">
+            <span className="assurance-title">{conversionNote.heading}</span>
+            <span className="assurance-copy">
+              {conversionNote.stages.map(stage => (
+                <span key={stage.label} className="assurance-stage">
+                  {stage.label}: {stage.text}
+                </span>
+              ))}
+            </span>
+          </span>
+        </li>
+      ) : null}
     </ul>
   );
 }
