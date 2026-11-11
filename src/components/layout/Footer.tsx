@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
+import { hasGuides } from '@/content/guides';
 
 export default function Footer() {
   return (
@@ -50,6 +51,12 @@ export default function Footer() {
               <li>
                 <Link href="/timeline">Timeline</Link>
               </li>
+              {/* Only once at least one guide exists: until then /guides is a 404. */}
+              {hasGuides() ? (
+                <li>
+                  <Link href="/guides">All guides</Link>
+                </li>
+              ) : null}
             </ul>
           </div>
           {/*
