@@ -2,7 +2,7 @@ import type { InventoryItem } from '@/types';
 import { getBrowsableProducts, getInventory } from './content';
 import { pickDefaultImage } from './images';
 import { variantLabel } from './labels';
-import { SHIPPABLE_STATE_CODES, deliveryChargeFor } from './order-terms';
+import { SHIPPABLE_STATE_CODES, deliveryChargeFor, type ShippingMethodId } from './order-terms';
 import { toCents } from './format';
 import {
   BRAND_SITE_URL,
@@ -252,16 +252,27 @@ function renderItem(item: InventoryItem): string {
   const priceDollars = itemPriceDollars(item);
   const priceCents = toCents(priceDollars);
   const price = merchantPrice(priceCents);
-  const shipping = merchantPrice(deliveryChargeFor(priceCents, 'threshold'));
   const handling = handlingBusinessDays(sku);
-  const shippingBlocks = SHIPPABLE_STATE_CODES.map(
-    region =>
-      `      <g:shipping>\n` +
-      `        <g:country>${xmlEscape('US')}</g:country>\n` +
-      `        <g:region>${xmlEscape(region)}</g:region>\n` +
-      `        <g:price>${xmlEscape(shipping)}</g:price>\n` +
-      `      </g:shipping>`
-  ).join('\n');
+  // Both checkout services, at this item's Curbside / White Glove band.
+  // Google requires advertised shipping not to be lower than checkout.
+  const shippingServices: { name: string; method: ShippingMethodId }[] = [
+    { name: 'Curbside', method: 'threshold' },
+    { name: 'White Glove', method: 'white_glove' },
+  ];
+  const shippingBlocks = shippingServices
+    .flatMap(({ name, method }) => {
+      const shipping = merchantPrice(deliveryChargeFor(priceCents, method));
+      return SHIPPABLE_STATE_CODES.map(
+        region =>
+          `      <g:shipping>\n` +
+          `        <g:country>${xmlEscape('US')}</g:country>\n` +
+          `        <g:region>${xmlEscape(region)}</g:region>\n` +
+          `        <g:service>${xmlEscape(name)}</g:service>\n` +
+          `        <g:price>${xmlEscape(shipping)}</g:price>\n` +
+          `      </g:shipping>`
+      );
+    })
+    .join('\n');
 
   const category = item.category ? GOOGLE_PRODUCT_CATEGORY[item.category] : undefined;
   const productType = itemProductType(item);

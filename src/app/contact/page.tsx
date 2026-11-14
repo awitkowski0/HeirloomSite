@@ -44,6 +44,13 @@ export default function ContactPage() {
         </div>
       </dl>
 
+      {/* Verbatim from /shipping ("Where we deliver") and /returns (mail-office
+          line). No new wording — Pricing App #59 contact-page gap. */}
+      <p className="body-md">We deliver in Pennsylvania, New Jersey and Maryland.</p>
+      <p className="body-md">
+        421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom)
+      </p>
+
       <ContactPageForm email={EMAIL} />
     </div>
   );

@@ -167,7 +167,7 @@ test('priceCart recomputes delivery from the merchandise subtotal', () => {
   assert.equal(two.shippingCents, 55_000);
 });
 
-test('product JSON-LD shipping rate follows the Curbside tier, destination is PA/NJ/MD, handling time follows the builder', () => {
+test('product JSON-LD shipping rates list Curbside and White Glove, destination is PA/NJ/MD, handling time follows the builder', () => {
   assert.deepEqual(handlingBusinessDays('OTO-1201'), { minValue: 30, maxValue: 40 });
   assert.deepEqual(handlingBusinessDays('KC-10'), { minValue: 40, maxValue: 40 });
   assert.deepEqual(handlingBusinessDays('FQP-501'), { minValue: 50, maxValue: 70 });
@@ -186,19 +186,23 @@ test('product JSON-LD shipping rate follows the Curbside tier, destination is PA
     priceDollars: 2500,
     inStock: true,
   });
-  const offers = ld.offers as {
-    shippingDetails: {
-      shippingRate: { value: number };
-      shippingDestination: { addressCountry: string; addressRegion: string[] };
-      deliveryTime: { handlingTime: { minValue: number; maxValue: number; unitText: string } };
-    };
+  type Ship = {
+    name: string;
+    shippingRate: { value: number };
+    shippingDestination: { addressCountry: string; addressRegion: string[] };
+    deliveryTime: { handlingTime: { minValue: number; maxValue: number; unitText: string } };
   };
-  assert.equal(offers.shippingDetails.shippingRate.value, 325);
-  assert.equal(offers.shippingDetails.shippingDestination.addressCountry, 'US');
-  assert.deepEqual(offers.shippingDetails.shippingDestination.addressRegion, ['PA', 'NJ', 'MD']);
-  assert.equal(offers.shippingDetails.deliveryTime.handlingTime.minValue, 30);
-  assert.equal(offers.shippingDetails.deliveryTime.handlingTime.maxValue, 40);
-  assert.equal(offers.shippingDetails.deliveryTime.handlingTime.unitText, 'business days');
+  const offers = ld.offers as { shippingDetails: Ship[] };
+  assert.equal(offers.shippingDetails.length, 2);
+  assert.equal(offers.shippingDetails[0].name, 'Curbside');
+  assert.equal(offers.shippingDetails[0].shippingRate.value, 325);
+  assert.equal(offers.shippingDetails[1].name, 'White Glove');
+  assert.equal(offers.shippingDetails[1].shippingRate.value, 425);
+  assert.equal(offers.shippingDetails[0].shippingDestination.addressCountry, 'US');
+  assert.deepEqual(offers.shippingDetails[0].shippingDestination.addressRegion, ['PA', 'NJ', 'MD']);
+  assert.equal(offers.shippingDetails[0].deliveryTime.handlingTime.minValue, 30);
+  assert.equal(offers.shippingDetails[0].deliveryTime.handlingTime.maxValue, 40);
+  assert.equal(offers.shippingDetails[0].deliveryTime.handlingTime.unitText, 'business days');
 
   const fisher = productJsonLd({
     name: 'Hudson',
@@ -209,6 +213,7 @@ test('product JSON-LD shipping rate follows the Curbside tier, destination is PA
     priceDollars: 1950,
     inStock: true,
   });
-  const fisherOffers = fisher.offers as { shippingDetails: { shippingRate: { value: number } } };
-  assert.equal(fisherOffers.shippingDetails.shippingRate.value, 175);
+  const fisherOffers = fisher.offers as { shippingDetails: { name: string; shippingRate: { value: number } }[] };
+  assert.equal(fisherOffers.shippingDetails[0].shippingRate.value, 175);
+  assert.equal(fisherOffers.shippingDetails[1].shippingRate.value, 299);
 });
