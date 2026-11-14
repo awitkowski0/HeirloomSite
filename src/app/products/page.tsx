@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description:
     'Browse the full collection of cribs, dressers, nightstands, and nursery furniture, made to order by independent builders.',
   alternates: { canonical: '/products' },
+  openGraph: { url: '/products' },
 };
 
 export default function ProductsPage() {
