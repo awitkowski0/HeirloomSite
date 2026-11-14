@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Modal from '@/components/ui/Modal';
 import { variantLabel } from '@/lib/labels';
+import InvoiceModelNote from '@/components/checkout/InvoiceModelNote';
 
 interface Props {
   open: boolean;
@@ -40,6 +41,7 @@ export default function CartPopup({ open, productName, wood, stain, onClose }: P
       <p className="body-md text-on-surface-variant cart-popup-detail">
         {variant ? `${productName} — ${variant}` : productName}
       </p>
+      <InvoiceModelNote />
       <div className="cart-popup-actions">
         <Link href="/checkout" className="button-primary">
           Go to Cart

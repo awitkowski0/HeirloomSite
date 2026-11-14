@@ -7,21 +7,13 @@ const SUPPORT_EMAIL = SUPPORT_INBOX.toLowerCase();
 // Split at '@' so a <wbr /> can offer a clean line break before the domain on narrow screens.
 const [SUPPORT_EMAIL_USER, SUPPORT_EMAIL_HOST] = SUPPORT_EMAIL.split('@');
 
-// Q#-dependent copy, one place each, for easy swapping if Phil's answers change.
-// (About: Q1, Q3, Q4, Q5, Q7, Q8. Q2/Q6/Q9 render nothing by decision.)
 // Q3 is ON by default (MKT Director/Brand). To strike it, set q3WomanOwned to '' or delete the key.
 // Self-description only: never add a certification word to this line.
 const Q: Record<string, string> = {
-  q1: `Heirloom Cribs & More brings made-to-order nursery furniture from three independent builders to families in Pennsylvania, New Jersey, and Maryland.`,
   q3WomanOwned: `Heirloom Cribs & More is a woman-owned business.`,
-  q4: `Each builder is introduced in its own words on its own page.`,
-  q5: `our warehouse in Bethlehem, Pennsylvania`,
-  q7Babylist: `If you're building a baby registry, pieces on our site can be added to a Babylist registry, and we can also create a custom order that can be added to your personal Babylist registry.`,
-  q8Sub: `three independent builders`,
-  q8KidsComfort: `Kids Comfort pieces aren't listed on our site yet; they are available on request.`,
 };
 
-// 'Our story': Phil's own words (revised-r3/about-heirloom.md), copied verbatim.
+// 'Our story': Phil's own words (Q1), kept word for word from the #25 package.
 const OUR_STORY = [
   `When we found out we were going to become grandparents, we began searching for a crib for our first grandchild. We wanted something special: beautiful, well-made, and built to last for generations.`,
   `Twenty-eight years ago, when we were expecting our own daughter, we found a solid wood crib that became a cherished part of our family's story. As we searched for that same quality for our grandson, we realized how difficult it was to find heirloom-quality nursery furniture in the Lehigh Valley.`,
@@ -33,7 +25,7 @@ const OUR_STORY = [
 export const metadata: Metadata = {
   title: { absolute: 'About Heirloom Cribs & More | How We Work' },
   description:
-    'Heirloom Cribs & More brings made-to-order nursery furniture from three independent builders to families in PA, NJ, and MD. See how ordering works.',
+    'Heirloom Cribs & More sells nursery furniture made to order by independent builders, made in the U.S. by craftspeople. See how ordering works.',
   alternates: { canonical: '/about-heirloom' },
   openGraph: { title: 'About Heirloom Cribs & More | How We Work', url: '/about-heirloom' },
   twitter: { title: 'About Heirloom Cribs & More | How We Work' },
@@ -47,7 +39,7 @@ export default function AboutHeirloomPage() {
           <p className="label-caps text-on-surface-variant">About Heirloom Cribs &amp; More</p>
           <h1 className="headline-xl">One team from your first question to delivery day</h1>
           <p className="body-lg builder-header__sub">
-            {`Heirloom Cribs & More sells cribs and nursery furniture made to order by ${Q.q8Sub}. We take your order, answer your calls, send your invoice, schedule your delivery, and sort out any damage with the builder and the carrier.`}
+            {`Heirloom Cribs & More sells cribs and nursery furniture made to order by independent builders, made in the U.S. by craftspeople. We take your order, answer your calls, send your invoice, schedule your delivery and sort out any damage with the builder and the carrier.`}
           </p>
           <Link href="/contact" className="button-primary">Get Personal Assistance</Link>
           <p className="builder-header__contact">
@@ -88,7 +80,9 @@ export default function AboutHeirloomPage() {
 
         <section>
           <h2 className="headline-md">Who we are</h2>
-          <p>{Q.q1}</p>
+          <p>
+            {`Heirloom Cribs & More brings nursery furniture made to order by independent builders, made in the U.S. by craftspeople, to families in Pennsylvania, New Jersey and Maryland.`}
+          </p>
           <p>
             {`We don't build furniture. Old Town Oak, Fisher's Quality Products and Kids Comfort do, and we resell their work. Everything between you and the workshop is ours: the questions before you order, the confirmation call, the invoice, the delivery and any damage claim after your furniture arrives.`}
           </p>
@@ -98,28 +92,28 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md" id="how-an-order-works">How an order works</h2>
           <p>
-            {`Every piece is made to order. Placing an order is a commitment, not a charge: nothing is billed until we've checked the details with you, and nothing is built until the deposit is in.`}
+            {`Every piece is made to order. Placing an order is a commitment, not a charge: we don't bill you until we've confirmed the details with you, and nothing is built until the deposit is in.`}
           </p>
           <ol>
             <li>
               <strong>You choose.</strong>{` Pick the piece, then the wood and stain where the product page offers them, and place the order. No card is taken at checkout.`}
             </li>
             <li>
-              <strong>We call you.</strong>{` We read the order and call to confirm the stain, the kit list, and the delivery before anything is built.`}
+              <strong>We call you.</strong>{` We review the order and call to confirm the stain, the kit list and the delivery before anything is built.`}
             </li>
             <li>
               <strong>You pay a 50% deposit.</strong>{` We send a secure Stripe invoice. You can pay by credit card or Affirm.`}
             </li>
             <li>
-              <strong>The builder makes it.</strong>{` Once the deposit is in, we place the order with the builder and the build starts. Our current estimates are about 6 to 8 weeks for Old Town Oak, about 8 weeks for Kids Comfort and 10 to 14 weeks for Fisher's. We confirm yours when you order.`}
+              <strong>The builder makes it.</strong>{` Once we receive the deposit, we place the order with the builder and the build starts. Our current estimates are about 6 to 8 weeks for Old Town Oak, about 8 weeks for Kids Comfort and 10 to 14 weeks for Fisher's. We confirm yours when you order.`}
             </li>
             <li>
-              <strong>We schedule delivery.</strong>{` When your furniture is ready, we contact you to set a delivery date. The balance is paid before we schedule final delivery.`}
+              <strong>We schedule delivery.</strong>{` When your furniture is ready, we contact you to set a delivery date. You pay the balance before we schedule final delivery.`}
             </li>
           </ol>
           <div className="builder-note">
             <p>
-              {`Until the deposit is paid, you can cancel at no cost. Just tell us in writing. Once it's paid, the order is with the builder: it can't be cancelled, the deposit is non-refundable, and made-to-order furniture can't be returned. The full terms are on `}
+              {`Until you pay the deposit, you can cancel at no cost. Just tell us in writing. Once it's paid, the order is with the builder: it can't be cancelled, the deposit is non-refundable, and made-to-order furniture can't be returned. The full terms are on `}
               <Link href="/returns" className="doc-link">Returns, Cancellations &amp; Refunds</Link>
               {` and `}
               <Link href="/terms" className="doc-link">Terms of Sale</Link>
@@ -131,26 +125,25 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">Delivery</h2>
           <p>
-            {`Orders ship from ${Q.q5} with our professional furniture delivery partner, blanket-wrapped and strapped in transit. We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.`}
+            {`Orders ship from our warehouse in Bethlehem, Pennsylvania, with our professional furniture delivery partner, blanket-wrapped and strapped in transit. The warehouse has no showroom, and our Nazareth office accepts mail only. We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.`}
           </p>
           <p>{`You choose one of two services:`}</p>
           <div className="builder-cards">
             <div className="builder-card">
-              <h3>Curbside</h3>
+              <h3>Curbside.</h3>
               <p>
-                {`A one-person crew brings the furniture to the curb at your address. Someone there needs to help unload it and carry it inside. Curbside does not include unpacking, assembly or placement.`}
+                {`A one-person crew brings the furniture to the curb at your address. Someone at your home needs to help unload it and carry it inside. Curbside does not include unpacking, assembly or placement.`}
               </p>
             </div>
             <div className="builder-card">
-              <h3>White Glove</h3>
+              <h3>White Glove.</h3>
               <p>
-                {`A two-person crew brings the furniture into your home, unpacks it, assembles it, sets each piece where you want it and takes the packing away. Up to 3 flights of stairs are included. `}
-                <strong>White Glove is the only service that includes assembly.</strong>
+                {`A two-person crew brings the furniture into your home, unpacks it, assembles it, sets each piece where you want it and takes the packing away. Up to 3 flights of stairs are included. White Glove is the only service that includes assembly.`}
               </p>
             </div>
           </div>
           <p>
-            {`Shipping is charged on every order, based on your cart subtotal. Under $2,500, Curbside is $175 and White Glove is $299. The full table is on our `}
+            {`Shipping is charged on every order, based on your cart subtotal. For orders under $2,500, Curbside is $175 and White Glove is $299. The full table is on our `}
             <Link href="/shipping" className="doc-link">Delivery</Link>
             {` page.`}
           </p>
@@ -159,7 +152,7 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">If something arrives damaged</h2>
           <p>
-            {`Check the furniture before the driver leaves, and note any visible damage on the delivery receipt when you sign it. If you find hidden damage later, tell us in writing within 5 business days. We arrange the repair or replacement with the builder and handle the claim with the carrier, so you aren't chasing anyone.`}
+            {`Check the furniture before the driver leaves, and note any visible damage on the delivery receipt when you sign it. If you find hidden damage later, please tell us in writing within 5 business days. We arrange the repair or replacement with the builder and handle the claim with the carrier, so you won't have to chase anyone.`}
           </p>
           <p>{`The builder's warranty passes through to you.`}</p>
         </section>
@@ -170,7 +163,7 @@ export default function AboutHeirloomPage() {
           <ul>
             <li>
               <Link href="/builders/old-town-oak" className="doc-link">Old Town Oak</Link>
-              {` says in its 2026 catalog that it has been in business for 21 years. The catalog describes cribs with mortise and tenon joints and steel inserts and dressers with dovetail drawer boxes, and says "every piece is signed by the artisan, Marlin Miller."`}
+              {` says in its 2026 catalog that it has been in business for 21 years. The catalog describes cribs with mortise-and-tenon joints and steel inserts and dressers with dovetail drawer boxes, and says "every piece is signed by the artisan, Marlin Miller."`}
             </li>
             <li>
               <Link href="/builders/fishers-quality-products" className="doc-link">Fisher's Quality Products</Link>
@@ -178,11 +171,11 @@ export default function AboutHeirloomPage() {
             </li>
             <li>
               <Link href="/builders/kids-comfort" className="doc-link">Kids Comfort</Link>
-              {` is Joe Troyer's shop in Sugarcreek, Ohio. ${Q.q8KidsComfort}`}
+              {` pieces aren't listed on our site yet; they are available on request. Kids Comfort is introduced in its own words on its own page.`}
             </li>
           </ul>
           <p>
-            {`${Q.q4} All three describe their cribs as convertible, so a crib can keep working as your child grows. On most cribs, conversion rail kits are sold separately. Wood and stain choices are explained on `}
+            {`Each builder is introduced in its own words on its own page. All three describe their cribs as convertible, so a crib can keep working as your child grows. On most cribs, conversion rail kits are sold separately. Wood and stain choices are explained on `}
             <Link href="/woods-and-finishes" className="doc-link">Woods and finishes</Link>
             {`.`}
           </p>
@@ -211,10 +204,12 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">Help before you order</h2>
           <p>
-            {`Use Get Personal Assistance if you're between two cribs or unsure which stain suits the room. Tell us the style you like, your finish ideas, your ZIP code, and your timing, and send inspiration photos if you have them. A real person follows up with options. We reply the same or next business day.`}
+            {`Use Get Personal Assistance if you're between two cribs or unsure which stain suits the room. Tell us the style you like, your finish ideas, your ZIP code and your timing, and send inspiration photos if you have them. A real person follows up with options. We reply the same or next business day.`}
           </p>
-          <p>{`Gift orders are arranged by hand. Call or email us and we'll set it up.`}</p>
-          <p>{Q.q7Babylist}</p>
+          <p>{`Gift orders are arranged by hand. Call or email us, and we'll set it up.`}</p>
+          <p>
+            {`If you're building a baby registry, you can add pieces from our site to a Babylist registry, and we can also create a custom order to add to your personal Babylist registry.`}
+          </p>
         </section>
 
         <section>

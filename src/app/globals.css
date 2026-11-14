@@ -2080,6 +2080,17 @@ main {
 .footer-tagline {
   max-width: 300px;
 }
+.footer-contact {
+  margin: 12px 0 0;
+  max-width: 300px;
+}
+.footer-contact a {
+  text-decoration: none;
+  color: var(--on-surface-variant);
+}
+.footer-contact a:hover {
+  color: var(--primary);
+}
 .footer-heading {
   margin-bottom: 16px;
   font-size: 12px;

@@ -1,7 +1,8 @@
 import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
-import { SHIPPABLE_STATE_CODES, deliveryChargeFor } from './order-terms';
+import { SHIPPABLE_STATE_CODES, deliveryChargeFor, type ShippingMethodId } from './order-terms';
 import { fromCents, toCents } from './format';
+import { MAIL_OFFICE_LINE, PUBLISHED_EMAIL, PUBLISHED_PHONE } from './published-contact';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
@@ -114,6 +115,22 @@ export function organizationJsonLd(): JsonLd {
       'Heirloom Cribs & More sells solid hardwood nursery furniture made to order by our ' +
       'builders and designed to grow with your child. Delivery is charged separately, with Curbside ' +
       'and White Glove options.',
+    telephone: PUBLISHED_PHONE,
+    email: PUBLISHED_EMAIL,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '421 Manor Dr',
+      addressLocality: 'Nazareth',
+      addressRegion: 'PA',
+      postalCode: '18064',
+      addressCountry: 'US',
+      description: MAIL_OFFICE_LINE,
+    },
+    areaServed: [
+      { '@type': 'State', name: 'Pennsylvania' },
+      { '@type': 'State', name: 'New Jersey' },
+      { '@type': 'State', name: 'Maryland' },
+    ],
   };
 }
 
@@ -174,12 +191,48 @@ export function handlingBusinessDays(
 }
 
 /**
- * Curbside charge for a product's price, in cents. Falls back to the $175
- * floor when the price is missing.
+ * Delivery charge for a product's price, in cents. Defaults to Curbside.
+ * Falls back to that method's opening-band floor when the price is missing.
  */
-export function productShippingCents(priceDollars: number): number {
-  if (!Number.isFinite(priceDollars) || priceDollars < 0) return deliveryChargeFor(0, 'threshold');
-  return deliveryChargeFor(toCents(priceDollars), 'threshold');
+export function productShippingCents(
+  priceDollars: number,
+  method: ShippingMethodId = 'threshold',
+): number {
+  if (!Number.isFinite(priceDollars) || priceDollars < 0) return deliveryChargeFor(0, method);
+  return deliveryChargeFor(toCents(priceDollars), method);
+}
+
+function offerShippingDetails(
+  priceDollars: number,
+  handling: { minValue: number; maxValue: number },
+  method: ShippingMethodId,
+  name: string,
+) {
+  return {
+    '@type': 'OfferShippingDetails',
+    name,
+    shippingRate: {
+      '@type': 'MonetaryAmount',
+      value: fromCents(productShippingCents(priceDollars, method)),
+      currency: 'USD',
+    },
+    // US regions PA, NJ, MD — the same list checkout delivers to.
+    shippingDestination: {
+      '@type': 'DefinedRegion',
+      addressCountry: 'US',
+      addressRegion: [...SHIPPABLE_STATE_CODES],
+    },
+    deliveryTime: {
+      '@type': 'ShippingDeliveryTime',
+      handlingTime: {
+        '@type': 'QuantitativeValue',
+        minValue: handling.minValue,
+        maxValue: handling.maxValue,
+        unitCode: 'DAY',
+        unitText: 'business days',
+      },
+    },
+  };
 }
 
 /** The returns page `hasMerchantReturnPolicy` points at. */
@@ -286,37 +339,15 @@ export function productJsonLd(opts: {
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
       /*
-       * shippingRate is the Curbside charge for this page's price, not a flat
-       * figure and not 0. Advertising free shipping and then charging for
-       * delivery is a promise we would not keep. A multi-item cart can land in
-       * a higher band at checkout, where the charge is recomputed from the
-       * cart. A missing price falls back to the $175 Curbside floor. See
-       * deliveryChargeFor in src/lib/order-terms.ts. Same rate the feed sends.
+       * shippingDetails lists both checkout services at this page's price
+       * band, the same rates the feed sends. A multi-item cart can still
+       * land in a higher band at checkout, where the charge is recomputed
+       * from the cart. See deliveryChargeFor in src/lib/order-terms.ts.
        */
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingRate: {
-          '@type': 'MonetaryAmount',
-          value: fromCents(productShippingCents(opts.priceDollars)),
-          currency: 'USD',
-        },
-        // US regions PA, NJ, MD — the same list checkout delivers to.
-        shippingDestination: {
-          '@type': 'DefinedRegion',
-          addressCountry: 'US',
-          addressRegion: [...SHIPPABLE_STATE_CODES],
-        },
-        deliveryTime: {
-          '@type': 'ShippingDeliveryTime',
-          handlingTime: {
-            '@type': 'QuantitativeValue',
-            minValue: handling.minValue,
-            maxValue: handling.maxValue,
-            unitCode: 'DAY',
-            unitText: 'business days',
-          },
-        },
-      },
+      shippingDetails: [
+        offerShippingDetails(opts.priceDollars, handling, 'threshold', 'Curbside'),
+        offerShippingDetails(opts.priceDollars, handling, 'white_glove', 'White Glove'),
+      ],
       hasMerchantReturnPolicy: merchantReturnPolicyJsonLd(),
     },
   };

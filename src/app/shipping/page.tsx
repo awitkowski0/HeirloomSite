@@ -30,11 +30,7 @@ export default function ShippingPage() {
         <h2 className="headline-md">Where we deliver</h2>
         <p>
           We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes
-          is quoted individually. Other areas may be available on request, so{' '}
-          <Link href="/contact" className="doc-link">
-            contact us
-          </Link>{' '}
-          for details and a quote.
+          is quoted individually.
         </p>
       </section>
 
@@ -152,13 +148,13 @@ export default function ShippingPage() {
         <p>
           <a href="tel:+14842931840" className="doc-link">
             (484) 293-1840
-          </a>{' '}
-          ·{' '}
+          </a> 
+          · 
           <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
             heirloomcribs.care@heirloomcribsandmore.com
-          </a>{' '}
-          · 421 Manor Dr, Nazareth, PA 18064 (mail only, no showroom)
+          </a>
         </p>
+        <p>421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom). Orders ship from our warehouse in Bethlehem, Pennsylvania.</p>
       </section>
     </div>
   );

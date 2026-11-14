@@ -38,6 +38,7 @@ import {
 } from '@/lib/analytics';
 import ShippingForm, { EMAIL_RE, validateShipping, type ShippingValues } from './ShippingForm';
 import TermsBlock from './TermsBlock';
+import InvoiceModelNote from './InvoiceModelNote';
 import CouponInput, { type AppliedCoupon } from './CouponInput';
 import TurnstileWidget, { type TurnstileHandle, type TurnstileStatus } from './TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
@@ -408,6 +409,7 @@ export default function CheckoutClient({ recommendations }: Props) {
             <> The full {formatPrice(fromCents(quote.dueNowCents))} is due when it arrives.</>
           )}
         </p>
+        <InvoiceModelNote />
         {/*
           Conditional, because the send genuinely may not have happened: the
           server skips the customer email while Turnstile is unconfigured in
@@ -445,6 +447,7 @@ export default function CheckoutClient({ recommendations }: Props) {
     return (
       <div className="container narrow-page">
         <p className="body-lg text-on-surface-variant">Loading your cart…</p>
+        <InvoiceModelNote />
       </div>
     );
   }
@@ -456,6 +459,7 @@ export default function CheckoutClient({ recommendations }: Props) {
         <p className="body-lg">
           Add a crib or accessory to get started.
         </p>
+        <InvoiceModelNote />
         <div className="not-found-actions">
           <Link href="/products/cribs" className="button-primary">Browse Cribs</Link>
           <Link href="/products" className="button-secondary">All Products</Link>
@@ -473,6 +477,7 @@ export default function CheckoutClient({ recommendations }: Props) {
             <span className="label-caps text-on-surface-variant">No payment taken today</span>
             <span className="material-symbols-outlined text-secondary" aria-hidden="true">lock</span>
           </div>
+          <InvoiceModelNote />
 
           <form onSubmit={handleSubmitDetails} noValidate>
             <ShippingForm
@@ -660,6 +665,7 @@ export default function CheckoutClient({ recommendations }: Props) {
               </div>
             )}
 
+            <InvoiceModelNote />
             <button
               type="submit"
               className="add-to-cart checkout-continue"
@@ -691,6 +697,7 @@ export default function CheckoutClient({ recommendations }: Props) {
         <div className="configuration-panel">
           <div className="order-summary">
             <h2 className="headline-md">Order Summary</h2>
+            <InvoiceModelNote />
             <ul className="order-summary-items">
               {cart.map((item, idx) => (
                 <li key={item.id}>
