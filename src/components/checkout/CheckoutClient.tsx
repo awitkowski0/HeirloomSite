@@ -447,6 +447,7 @@ export default function CheckoutClient({ recommendations }: Props) {
     return (
       <div className="container narrow-page">
         <p className="body-lg text-on-surface-variant">Loading your cart…</p>
+        <InvoiceModelNote />
       </div>
     );
   }

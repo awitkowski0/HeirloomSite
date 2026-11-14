@@ -47,9 +47,10 @@ test('CheckoutClient shows the invoice-model note at cart, form, submit, and con
   const src = read('src/components/checkout/CheckoutClient.tsx');
   assert.equal(
     (src.match(/<InvoiceModelNote/g) ?? []).length,
-    5,
-    'expected InvoiceModelNote at empty cart, form, submit, confirmation, and order summary',
+    6,
+    'expected InvoiceModelNote at loading, empty cart, form, submit, confirmation, and order summary',
   );
+  assert.match(src, /Loading your cart[\s\S]*?<InvoiceModelNote/);
   assert.match(src, /Your cart is empty[\s\S]*?<InvoiceModelNote/);
   assert.match(src, /No payment taken today[\s\S]*?<InvoiceModelNote/);
   assert.match(src, /<InvoiceModelNote \/>\s*<button\s+type="submit"/);
