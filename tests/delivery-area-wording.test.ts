@@ -3,8 +3,9 @@
  * (Pricing App issue #23; source: Heirloom-Pricing-App mkt/merchant eb25fc4 (v3),
  * marketing/merchant/delivery-area-wording/RECOMMENDATION.md section 5).
  * Reads each page's source, flattens the JSX to visible text and checks the
- * delivery sentences. "may be available" is deliberate (Google misrepresentation
- * policy): never "are available". Run with `npm test`.
+ * delivery sentences. The old "Other areas may be available on request" sentence
+ * was removed (Pricing App #59 / HeirloomSite #143 QC): the feed and the
+ * PA/NJ/MD-only rule do not allow it. Run with `npm test`.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -23,9 +24,9 @@ function pageText(rel: string): string {
 // Copy v2 (Brand writer pass + proof pass, 2026-11-01): same facts, plainer wording.
 // Round 2: Brand #114 D13; D12 'Newark, NJ' (order-terms.ts EXCLUDED_METRO_ZIPS); D14 'contact us'.
 const EXPECTED: Array<[string, string]> = [
-  ['shipping', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually. Other areas may be available on request, so contact us for details and a quote.'],
-  ['faq', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually. Other areas may be available on request, so contact us for details and a quote. Once you enter your state and ZIP at checkout, you\u2019ll see your delivery options and the charge. If your ZIP needs a quote, checkout will ask you to contact us. See Delivery.'],
-  ['timeline', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually. Other areas may be available on request, so contact us for a quote.'],
+  ['shipping', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually.'],
+  ['faq', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually. Once you enter your state and ZIP at checkout, you\u2019ll see your delivery options and the charge. If your ZIP needs a quote, checkout will ask you to contact us. See Delivery.'],
+  ['timeline', 'We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually.'],
   ['timeline', 'Delivery ZIP code: we deliver in Pennsylvania, New Jersey and Maryland, and some Newark, NJ ZIP codes are quoted individually.'],
 ];
 
@@ -39,12 +40,8 @@ for (const [page, sentence] of EXPECTED) {
   });
 }
 
-test('delivery sentences say "may be available", never "are available"', () => {
-  for (const [, sentence] of EXPECTED) {
-    if (/available/.test(sentence)) assert.match(sentence, /may be available/);
-  }
+test('delivery-area pages do not say "are available"', () => {
   for (const page of PAGES) {
-    assert.ok(pageText(page).includes('may be available'), `/${page}`);
     assert.ok(!pageText(page).includes('are available'), `/${page} says "are available"`);
   }
 });
