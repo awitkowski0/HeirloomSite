@@ -2,6 +2,7 @@ import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
 import { SHIPPABLE_STATE_CODES, deliveryChargeFor } from './order-terms';
 import { fromCents, toCents } from './format';
+import { MAIL_OFFICE_LINE, PUBLISHED_EMAIL, PUBLISHED_PHONE } from './published-contact';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
@@ -114,6 +115,17 @@ export function organizationJsonLd(): JsonLd {
       'Heirloom Cribs & More sells solid hardwood nursery furniture made to order by our ' +
       'builders and designed to grow with your child. Delivery is charged separately, with Curbside ' +
       'and White Glove options.',
+    telephone: PUBLISHED_PHONE,
+    email: PUBLISHED_EMAIL,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: '421 Manor Dr',
+      addressLocality: 'Nazareth',
+      addressRegion: 'PA',
+      postalCode: '18064',
+      addressCountry: 'US',
+      description: MAIL_OFFICE_LINE,
+    },
   };
 }
 

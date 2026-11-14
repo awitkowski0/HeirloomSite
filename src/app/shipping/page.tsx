@@ -152,13 +152,13 @@ export default function ShippingPage() {
         <p>
           <a href="tel:+14842931840" className="doc-link">
             (484) 293-1840
-          </a>{' '}
-          ·{' '}
+          </a> 
+          · 
           <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
             heirloomcribs.care@heirloomcribsandmore.com
-          </a>{' '}
-          · 421 Manor Dr, Nazareth, PA 18064 (mail only, no showroom)
+          </a>
         </p>
+        <p>421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom). Orders ship from our warehouse in Bethlehem, Pennsylvania.</p>
       </section>
     </div>
   );

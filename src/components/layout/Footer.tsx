@@ -1,5 +1,11 @@
 import Link from 'next/link';
 import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
+import {
+  MAIL_OFFICE_LINE,
+  PUBLISHED_EMAIL,
+  PUBLISHED_PHONE,
+  PUBLISHED_PHONE_TEL,
+} from '@/lib/published-contact';
 
 export default function Footer() {
   return (
@@ -11,6 +17,12 @@ export default function Footer() {
             <p className="body-md text-on-surface-variant footer-tagline">
               Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.
             </p>
+            <p className="body-md text-on-surface-variant footer-contact">
+              <a href={`tel:${PUBLISHED_PHONE_TEL}`}>{PUBLISHED_PHONE}</a>
+              {' · '}
+              <a href={`mailto:${PUBLISHED_EMAIL}`}>{PUBLISHED_EMAIL}</a>
+            </p>
+            <p className="body-md text-on-surface-variant footer-contact">{MAIL_OFFICE_LINE}</p>
           </div>
           <div>
             <h2 className="label-caps text-primary footer-heading">Shop</h2>
