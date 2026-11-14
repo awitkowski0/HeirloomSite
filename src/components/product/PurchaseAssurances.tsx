@@ -41,7 +41,7 @@ const ASSURANCES: { icon: string; title: string; body: string; href?: string }[]
   {
     icon: 'chat_bubble',
     title: 'Talk to a person first',
-    body: 'Unsure between two finishes, or matching an existing piece? Ask before you buy.',
+    body: 'Unsure between two finishes, or trying to coordinate with an existing piece? Ask before you buy.',
     href: '/contact',
   },
 ];
