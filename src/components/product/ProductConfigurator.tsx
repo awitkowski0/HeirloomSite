@@ -8,6 +8,7 @@ import ProductGallery, { type FeedItem } from './ProductGallery';
 import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
+import InvoiceModelNote from '@/components/checkout/InvoiceModelNote';
 import PurchaseAssurances from './PurchaseAssurances';
 import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import {
@@ -375,19 +376,22 @@ export default function ProductConfigurator({
    * never say one thing in one place and something else in the other.
    */
   const addToCartButton = (
-    <button
-      type="button"
-      className="add-to-cart"
-      disabled={!selection.stain}
-      onClick={handleAddToCart}
-    >
-      {addToCartButtonLabel({
-        stainSelected: Boolean(selection.stain),
-        listedPrice: totalPrice,
-        selectedAddOnCount: selectedBundleItems.length,
-        cartTotal,
-      })}
-    </button>
+    <>
+      <button
+        type="button"
+        className="add-to-cart"
+        disabled={!selection.stain}
+        onClick={handleAddToCart}
+      >
+        {addToCartButtonLabel({
+          stainSelected: Boolean(selection.stain),
+          listedPrice: totalPrice,
+          selectedAddOnCount: selectedBundleItems.length,
+          cartTotal,
+        })}
+      </button>
+      <InvoiceModelNote />
+    </>
   );
 
   return (

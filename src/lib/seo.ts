@@ -126,6 +126,11 @@ export function organizationJsonLd(): JsonLd {
       addressCountry: 'US',
       description: MAIL_OFFICE_LINE,
     },
+    areaServed: [
+      { '@type': 'State', name: 'Pennsylvania' },
+      { '@type': 'State', name: 'New Jersey' },
+      { '@type': 'State', name: 'Maryland' },
+    ],
   };
 }
 

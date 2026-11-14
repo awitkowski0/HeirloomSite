@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import ContactPageForm from '@/components/contact/ContactPageForm';
 import { SUPPORT_INBOX } from '@/lib/email';
-import { MAIL_OFFICE_LINE, PUBLISHED_PHONE } from '@/lib/published-contact';
+import { MAIL_OFFICE_LINE, PUBLISHED_PHONE, SERVICE_AREA_LINE } from '@/lib/published-contact';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
@@ -45,6 +45,7 @@ export default function ContactPage() {
         </div>
       </dl>
 
+      <p className="body-md text-on-surface-variant">{SERVICE_AREA_LINE}</p>
       <p className="body-md text-on-surface-variant">{MAIL_OFFICE_LINE}</p>
 
       <ContactPageForm email={EMAIL} />

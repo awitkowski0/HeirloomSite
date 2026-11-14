@@ -7,6 +7,7 @@ import {
   MAIL_OFFICE_LINE,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
+  SERVICE_AREA_LINE,
 } from '../src/lib/published-contact';
 import { organizationJsonLd } from '../src/lib/seo';
 
@@ -31,6 +32,10 @@ test('published contact values match the live /contact phone and email', () => {
     MAIL_OFFICE_LINE,
     '421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom)',
   );
+  assert.equal(
+    SERVICE_AREA_LINE,
+    'We deliver in Pennsylvania, New Jersey and Maryland.',
+  );
 });
 
 test('footer and /contact include phone, email, and the mail-only office line', () => {
@@ -43,6 +48,10 @@ test('footer and /contact include phone, email, and the mail-only office line', 
       `${name} missing email`,
     );
     assert.ok(src.includes('MAIL_OFFICE_LINE') || src.includes(MAIL_OFFICE_LINE), `${name} missing mail-office line`);
+    assert.ok(
+      src.includes('SERVICE_AREA_LINE') || src.includes(SERVICE_AREA_LINE),
+      `${name} missing service-area line`,
+    );
     assert.doesNotMatch(src, /Hanoverville|4651/);
     assert.doesNotMatch(src, /openingHours|Monday|hours:/i);
   }
@@ -64,4 +73,27 @@ test('Organization JSON-LD has telephone, email, and a Nazareth PostalAddress', 
   assert.equal(ld.openingHoursSpecification, undefined);
   const src = read('src/lib/seo.ts');
   assert.doesNotMatch(src, /Hanoverville|4651/);
+});
+
+test('footer identity heading is Heirloom Cribs & More', () => {
+  const footer = read('src/components/layout/Footer.tsx');
+  assert.match(footer, /footer-brand">Heirloom Cribs &(?:amp;)? More</);
+  assert.doesNotMatch(footer, /footer-brand">Heirloom</);
+});
+
+test('Organization JSON-LD lists areaServed for PA, NJ and MD and is injected site-wide once', () => {
+  const ld = organizationJsonLd();
+  const served = ld.areaServed as { '@type': string; name: string }[];
+  assert.ok(Array.isArray(served));
+  assert.deepEqual(
+    served.map((s) => s.name),
+    ['Pennsylvania', 'New Jersey', 'Maryland'],
+  );
+  for (const entry of served) assert.equal(entry['@type'], 'State');
+
+  const layout = read('src/app/layout.tsx');
+  const home = read('src/app/page.tsx');
+  assert.ok(layout.includes('organizationJsonLd()'), 'layout must inject Organization JSON-LD');
+  assert.ok(!home.includes('organizationJsonLd()'), 'home must not also emit Organization JSON-LD');
+  assert.equal(layout.split('organizationJsonLd()').length - 1, 1);
 });
