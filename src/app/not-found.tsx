@@ -3,7 +3,9 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Page not found',
-  robots: { index: false, follow: true },
+  // Next.js already emits one noindex robots tag on the 404 boundary.
+  // A second robots export was producing two tags (Pricing App #55 a4).
+  alternates: { canonical: null },
 };
 
 /**

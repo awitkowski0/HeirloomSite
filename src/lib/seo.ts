@@ -118,16 +118,14 @@ export function organizationJsonLd(): JsonLd {
 }
 
 export function webSiteJsonLd(): JsonLd {
+  // SearchAction / potentialAction omitted on purpose (Pricing App #55 a5):
+  // the search box is JS-only, /search is noindex and robots-blocked, and
+  // Google retired the sitelinks search box. Keep WebSite name and url.
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     name: SITE_NAME,
     url: SITE_URL,
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
-      'query-input': 'required name=search_term_string',
-    },
   };
 }
 
