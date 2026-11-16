@@ -34,7 +34,6 @@ export default function Header() {
           {/* <picture> switches artwork by width, which next/image cannot do. */}
           <picture>
             <source media="(min-width: 768px)" srcSet="/brand/logo-wide.png" width={562} height={128} />
-            {/* eslint-disable-next-line @next/next/no-img-element -- art-directed <picture>; two small PNGs, no optimizer needed. */}
             <img src="/brand/logo-text.png" alt="" width={452} height={128} />
           </picture>
         </Link>
