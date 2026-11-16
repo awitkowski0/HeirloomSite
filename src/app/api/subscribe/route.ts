@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyTurnstile, TurnstileError, TURNSTILE_ACTIONS } from '@/lib/turnstile';
-import { looksLikeEmail, sendWelcomeCoupon } from '@/lib/email';
+import { looksLikeEmail, sendSubscribeAlert, sendWelcomeCoupon } from '@/lib/email';
 import { addToAudience, AudienceError, AudienceNotConfiguredError } from '@/lib/audience';
 import { lookupCouponTerms } from '@/lib/coupon';
 import { NEWSLETTER_COUPON_CODE, newsletterCouponActive } from '@/lib/newsletter-promo';
@@ -69,6 +69,9 @@ export async function POST(req: Request) {
     }
     throw err;
   }
+
+  // Fails soft (never throws), so it cannot undo the subscription above.
+  await sendSubscribeAlert(body.email);
 
   /*
    * The welcome coupon, fire-and-awaited but never load-bearing: the address

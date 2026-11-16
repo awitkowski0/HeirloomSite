@@ -236,6 +236,9 @@ this customer still owe".
   and every `metaTrack()` is a no-op. Unlike the PostHog origins, the Meta ones
   are named in the CSP unconditionally: a policy that only permits the pixel in
   the single environment where it runs cannot be tested before it ships.
+- `SIGNUP_NOTIFICATION_EMAIL` — server only, comma-separated, optional. Extra
+  recipients of the "new mailing list signup" alert; the support inbox always
+  gets it. Personal addresses go here, not in code: the repo is public.
 - `RESEND_AUDIENCE_ID` — server only; the audience the email-capture popup
   writes to. Without it `/api/subscribe` answers 503 rather than accepting an
   address it has nowhere to put. Note the deliberate contrast with the order
