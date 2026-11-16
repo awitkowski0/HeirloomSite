@@ -8,7 +8,7 @@ import { dirname, resolve, join, relative } from 'node:path';
  * Pricing App #11 guard: Heirloom makes no safety, testing or certification
  * claim of its own. Only a builder's verbatim words, attributed to the builder
  * ("<Builder> states: ...") and sourced, may say what a piece is tested to.
- * Those live on the builder pages, which are the only allow-listed files.
+ * Those live in data/builders/<id>.json, shown only by the generated stores.
  *
  * Scans every rendered .ts/.tsx under src/ (comments stripped) and every
  * string field of every public/data/products/<name>/product.json.
@@ -17,10 +17,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const stripComments = (s: string) =>
   s.replace(/\{\/\*[\s\S]*?\*\/\}/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
-// Builder pages carry verbatim, attributed builder quotes (OTO 2026 catalog, KC Jan 2023 catalog).
+// Builder stores render statements from data/builders/*.json, so no store template needs an exemption.
 const ALLOW = new Set([
-  'src/app/builders/old-town-oak/page.tsx',
-  'src/app/builders/kids-comfort/page.tsx',
   // The chat's claim filter and system prompt name these terms in order to forbid them.
   'src/lib/shop-chat.ts',
 ]);
@@ -107,67 +105,50 @@ test('no Heirloom-voice safety claim in any product.json copy field', () => {
 });
 
 /*
- * Builder pages: the only place safety wording may appear, and only as the
- * builders' own words. Six builder lines are allowed, word for word, each with
- * its credit (checked against OTO 2026 catalog PDF pp.3-4 and Kids Comfort
- * January 2023 catalog PDF pp.5-6). Any other rendered text on these pages
- * that uses safety/standards wording fails unless it is one of the short
- * framing lines below (headings and "no safety claims of its own" notes).
+ * Builder stores: the only place safety wording may appear, and only as the
+ * builders' own words, read from the record. Four builder lines are on file,
+ * word for word (checked against OTO 2026 catalog PDF pp.3-4 and Kids Comfort
+ * January 2023 catalog PDF pp.5-6). The store template's only safety wording is
+ * the heading that introduces them, credited to the builder by name.
  */
-const BUILDER_QUOTES: { page: string; credit: string; quote: string }[] = [
+const BUILDER_RECORD = (id: string) => JSON.parse(readFileSync(resolve(root, 'data', 'builders', `${id}.json`), 'utf8'));
+const BUILDER_QUOTES: { record: string; field: 'crib' | 'caseGoods'; quote: string }[] = [
   {
-    page: 'src/app/builders/old-town-oak/page.tsx',
-    credit: 'Old Town Oak states: ',
+    record: 'old-town-oak',
+    field: 'crib',
     quote:
       'All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs.',
   },
   {
-    page: 'src/app/builders/old-town-oak/page.tsx',
-    credit: 'Old Town Oak states: ',
+    record: 'old-town-oak',
+    field: 'caseGoods',
     quote:
       'For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species.',
   },
   {
-    page: 'src/app/builders/kids-comfort/page.tsx',
-    credit: 'Kids Comfort states: ',
+    record: 'kids-comfort',
+    field: 'crib',
     quote:
       'As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards.',
   },
   {
-    page: 'src/app/builders/kids-comfort/page.tsx',
-    credit: 'Kids Comfort states: ',
+    record: 'kids-comfort',
+    field: 'caseGoods',
     quote: 'All furniture pieces come with a wall anchor to prevent tipping hazards in your nursery.',
   },
-  {
-    page: 'src/app/builders/kids-comfort/page.tsx',
-    credit: 'Kids Comfort states: ',
-    quote:
-      'All our standard products are created with child safe varnishes and meet ASTM standards and consumer safety product standards.',
-  },
-  {
-    // Organic finish, shown as a blockquote under the catalog credit line, always with the glue disclosure.
-    page: 'src/app/builders/kids-comfort/page.tsx',
-    credit: "Kids Comfort's January 2023 catalog describes the finish this way:",
-    quote:
-      'Our Organic finish is a linseed oil derived from natural flaxseed. This product is non toxic, 100% VOC free, has no chemical driers, is non flammable, compostable, and environmentally & food safe. Two applications of this organic finish is hand rubbed onto raw wood, preserving the natural beauty and appearance of your furniture.',
-  },
 ];
-// Shown with the organic finish quote (Brand: always together). Not a safety claim on its own.
-const KC_GLUE =
-  "The glue used in assembling Kid's Comfort Organic products is not totally chemical free but it is water-based with a very low chemical content. The only reason we use this glue is lack of any organic wood glues. We are committed to upgrading as organic glues are developed.";
 
-const BUILDER_FRAMING = [
-  "Safety and compliance, in Old Town Oak's words",
-  "Safety and compliance, in Kids Comfort's words",
-  'Heirloom Cribs & More does not build furniture and makes no safety claims of its own.',
-  'Read its own words on construction and safety',
-  // KC owner letter (catalog p.6), quoted and attributed; mentions safety as a value, not a standard.
-  'we realize the importance of quality, safety, endurance, and service',
-  // KC stain-line name from its catalog, not a certification claim.
-  'Ohio Certified Stains',
-  // KC catalog customization limit (quoted, attributed to "The catalog").
-  '*Due to federal standards, customization on cribs is not available',
+const STORE_TEMPLATES = [
+  'src/app/builders/[builder]/layout.tsx',
+  'src/app/builders/[builder]/page.tsx',
+  'src/app/builders/[builder]/[section]/page.tsx',
+  'src/components/builders/StoreBanner.tsx',
+  'src/components/builders/StoreBannerSwitch.tsx',
+  'src/components/builders/StoreMenu.tsx',
+  'src/components/builders/StoreSearch.tsx',
 ];
+// The one heading, in the template. Anything else with safety wording fails.
+const BUILDER_FRAMING = ['Safety, from'];
 
 const SAFETY_WORDS =
   /\b(safe|safety|safely|standards|(safety|astm|cpsc|federal|crib) standard|cpsc|astm|cpsia|jpma|certif\w*|tested|conform\w*|complian\w*|compliant|toxic|voc|hazards?|tipping|tip-over|greenguard|lead[- ]free|lead paint|regulations?|lab|labs)\b/i;
@@ -182,35 +163,59 @@ function builderRenderedText(src: string): string {
   return parts.join('\n').replace(/\$\{[^}]*\}/g, ' ');
 }
 
-test('builder pages: the six builder safety lines are verbatim and credited', () => {
-  assert.equal(BUILDER_QUOTES.length, 6);
-  for (const { page, credit, quote } of BUILDER_QUOTES) {
-    const src = readFileSync(resolve(root, page), 'utf8');
-    if (credit.endsWith('states: ')) {
-      assert.ok(src.includes(`${credit}"${quote}"`), `${page}: missing or changed: ${credit}"${quote.slice(0, 60)}…"`);
-    } else {
-      assert.ok(src.includes(credit), `${page}: missing credit line "${credit}"`);
-      assert.ok(src.includes(`"${quote}"`), `${page}: missing or changed quote "${quote.slice(0, 60)}…"`);
-      assert.ok(src.indexOf(credit) < src.indexOf(`"${quote}"`), `${page}: credit must come before the quote`);
-    }
+test('builder stores: the builder safety lines are verbatim and rendered credited', () => {
+  assert.equal(BUILDER_QUOTES.length, 4);
+  for (const { record, field, quote } of BUILDER_QUOTES) {
+    assert.equal(BUILDER_RECORD(record).safety[field]?.text, quote, `${record} safety.${field} changed from the catalog wording`);
   }
-  const kc = readFileSync(resolve(root, 'src/app/builders/kids-comfort/page.tsx'), 'utf8');
-  assert.ok(kc.includes(`"${KC_GLUE}"`), 'KC glue disclosure must stay with the organic finish quote');
+  const home = readFileSync(resolve(root, 'src/app/builders/[builder]/page.tsx'), 'utf8');
+  assert.ok(home.includes('<cite>From {builder.name}</cite>'), 'statements must be credited From <builder>');
+  assert.ok(/Safety, from \{builder\.name\}/.test(home), 'the heading must name the builder');
+  assert.ok(home.includes('quote={s.quote}') && home.includes('builder.safety.crib') && home.includes('builder.safety.caseGoods'), 'the store must show the record\'s statements');
+  for (const { quote } of BUILDER_QUOTES) assert.ok(!home.includes(quote), 'statements must come from the record, not be retyped');
 });
 
-test('builder pages: no other safety/standards wording besides the allowlist', () => {
-  for (const page of new Set(BUILDER_QUOTES.map(q => q.page))) {
+test('builder stores: no other safety/standards wording besides the allowlist', () => {
+  for (const page of STORE_TEMPLATES) {
     let text = builderRenderedText(readFileSync(resolve(root, page), 'utf8'));
-    const allowed = [
-      ...BUILDER_QUOTES.filter(q => q.page === page).flatMap(q => [`${q.credit}"${q.quote}"`, `"${q.quote}"`, q.credit]),
-      `"${KC_GLUE}"`,
-      ...BUILDER_FRAMING,
-    ].sort((a, b) => b.length - a.length);
-    for (const a of allowed) text = text.split(a).join(' ');
+    for (const a of BUILDER_FRAMING) text = text.split(a).join(' ');
     for (const line of text.split('\n')) {
       for (const sentence of line.split(/(?<=[.!?])\s+/)) {
         assert.ok(!SAFETY_WORDS.test(sentence), `${page}: safety wording outside the builder allowlist: "${sentence.trim()}"`);
       }
     }
   }
+});
+
+test('builder stores: the health claims from the Kids Comfort catalog stay out until reviewed', () => {
+  // The organic-finish quote never moved to the record. It may only come back with a person's review.
+  const text = [...STORE_TEMPLATES.map(p => readFileSync(resolve(root, p), 'utf8')), readFileSync(resolve(root, 'data/builders/kids-comfort.json'), 'utf8')].join('\n');
+  assert.ok(!/non[- ]toxic|VOC free|food safe|child safe varnish/i.test(text), 'unreviewed health claim in a store or its record');
+});
+
+/*
+ * The one allowance for origin wording: ORIGIN_LINE, defined once, used in three
+ * places, and nowhere that makes a claim to a machine or an inbox. See src/lib/origin.ts.
+ */
+test('the origin line is defined once and appears only where the owner placed it', () => {
+  const PLACED = new Set([
+    'src/components/home/IntentBox.tsx',
+    'src/app/about-heirloom/page.tsx',
+    'src/app/product/[slug]/[[...variant]]/page.tsx',
+  ]);
+  const files = walk(resolve(root, 'src'));
+  const users = files.filter(f => f !== 'src/lib/origin.ts' && readFileSync(resolve(root, f), 'utf8').includes('ORIGIN_LINE'));
+  assert.deepEqual(new Set(users), PLACED, 'ORIGIN_LINE used outside its three placements');
+
+  // shop-chat.ts names these terms in order to forbid them.
+  for (const f of files.filter(n => n !== 'src/lib/origin.ts' && !ALLOW.has(n))) {
+    const src = stripComments(readFileSync(resolve(root, f), 'utf8'));
+    assert.ok(!/american[- ]made|made in (the )?(usa|america|u\.s\.)/i.test(src), `${f} states an origin outside ORIGIN_LINE`);
+  }
+
+  const pdp = readFileSync(resolve(root, 'src/app/product/[slug]/[[...variant]]/page.tsx'), 'utf8');
+  assert.match(pdp, /\) : null\}\s*<p className="byline">\{ORIGIN_LINE\}<\/p>/, 'the product line must follow, not sit inside, the named-builder branch');
+
+  const records = readdirSync(resolve(root, 'data/builders')).map(n => readFileSync(resolve(root, 'data/builders', n), 'utf8')).join('\n');
+  assert.ok(!/american[- ]made|made in (the )?(usa|america)/i.test(records), 'builder records stay free of origin wording');
 });

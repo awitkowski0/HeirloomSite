@@ -1,7 +1,11 @@
 'use client';
 
-import MiniSearch from 'minisearch';
+import type MiniSearch from 'minisearch';
 import { useEffect, useMemo, useState } from 'react';
+import builderRecords from '@/data/builders.json';
+import { createSearchEngine, type SearchDoc, type SearchEngine } from './search-engine';
+import type { SearchOutcome, SuggestedTag, QueryTag, CatalogProduct } from './search-intent';
+import { toneOf } from './finish-tones';
 import { useDelistedProducts } from './useDelistedProducts';
 import { isUnlistedCategory } from './taxonomy';
 
@@ -21,41 +25,7 @@ export interface SearchResult {
   variantCount: number;
 }
 
-interface SearchDoc {
-  id: string;
-  productName: string;
-  slug: string | null;
-  wood: string;
-  category: string;
-  stainNames: string;
-  unavailableStains: string[];
-  description: string;
-  basePrice: number;
-  stainImages: Record<string, string>;
-}
-
 const MAX_RESULTS = 8;
-
-function createIndex() {
-  return new MiniSearch<SearchDoc>({
-    fields: ['productName', 'wood', 'category', 'stainNames', 'description'],
-    storeFields: [
-      'productName',
-      'slug',
-      'wood',
-      'category',
-      'basePrice',
-      'stainImages',
-      'stainNames',
-      'unavailableStains',
-    ],
-    searchOptions: {
-      boost: { productName: 3, wood: 2, stainNames: 2, category: 2, description: 1 },
-      prefix: true,
-      fuzzy: 0.2,
-    },
-  });
-}
 
 /**
  * The search corpus is a build-time artifact (src/data/search-docs.json, ~18 KB
@@ -65,15 +35,17 @@ function createIndex() {
  *     can never serve a stale index,
  *   - both search surfaces share one promise, so it downloads at most once.
  */
-let indexPromise: Promise<MiniSearch<SearchDoc>> | null = null;
+let enginePromise: Promise<SearchEngine> | null = null;
+
+export function loadSearchEngine(): Promise<SearchEngine> {
+  enginePromise ??= import('@/data/search-docs.json').then(mod =>
+    createSearchEngine(mod.default as unknown as SearchDoc[], builderRecords as { id: string; name: string }[]),
+  );
+  return enginePromise;
+}
 
 export function loadSearchIndex(): Promise<MiniSearch<SearchDoc>> {
-  indexPromise ??= import('@/data/search-docs.json').then(mod => {
-    const ms = createIndex();
-    ms.addAll(mod.default as unknown as SearchDoc[]);
-    return ms;
-  });
-  return indexPromise;
+  return loadSearchEngine().then(e => e.index);
 }
 
 const WHOLE_STAINS = [
@@ -103,7 +75,8 @@ function findMatchedStain(stainNames: string, query: string): string | undefined
 function toResults(
   ms: MiniSearch<SearchDoc>,
   query: string,
-  limit = MAX_RESULTS
+  limit = MAX_RESULTS,
+  only?: ReadonlySet<string>
 ): SearchResult[] {
   /*
    * Unlisted categories never reach a result row.
@@ -115,7 +88,8 @@ function toResults(
    */
   const raw = ms
     .search(query, { prefix: true, fuzzy: 0.2 })
-    .filter(hit => !isUnlistedCategory((hit as unknown as SearchDoc).category));
+    .filter(hit => !isUnlistedCategory((hit as unknown as SearchDoc).category))
+    .filter(hit => !only || only.has((hit as unknown as SearchDoc).slug ?? ''));
 
   /*
    * One row per PRODUCT, not per variant.
@@ -179,7 +153,7 @@ function toResults(
  * Index construction now happens once in an effect and the query result is
  * memoised.
  */
-export function useSearch(query: string): SearchResult[] {
+export function useSearch(query: string, only?: ReadonlySet<string>): SearchResult[] {
   const [index, setIndex] = useState<MiniSearch<SearchDoc> | null>(null);
   const trimmed = query.trim();
   const { isDelisted } = useDelistedProducts();
@@ -205,41 +179,88 @@ export function useSearch(query: string): SearchResult[] {
   // product surfacing in either would be the most direct route to it.
   return useMemo(() => {
     if (!index || !trimmed) return [];
-    return toResults(index, trimmed).filter(r => !isDelisted(r.slug));
-  }, [index, trimmed, isDelisted]);
+    return toResults(index, trimmed, MAX_RESULTS, only).filter(r => !isDelisted(r.slug));
+  }, [index, trimmed, isDelisted, only]);
 }
 
-/** Full result list (no MAX_RESULTS cap) for the dedicated /search page. */
-export function useSearchAll(query: string): { results: SearchResult[]; loading: boolean } {
-  const [index, setIndex] = useState<MiniSearch<SearchDoc> | null>(null);
+export interface CatalogSearch {
+  loading: boolean;
+  tags: QueryTag[];
+  relaxed: QueryTag[];
+  unknown: string[];
+  refused: string[];
+  results: SearchResult[];
+  total: number;
+  suggestions: SuggestedTag[];
+}
+
+const EMPTY_SEARCH: CatalogSearch = { loading: false, tags: [], relaxed: [], unknown: [], refused: [], results: [], total: 0, suggestions: [] };
+
+/** A catalogue row as a result row: a named stain or tone picks the photo shown. */
+function toResultRow(product: CatalogProduct, outcome: SearchOutcome): SearchResult {
+  const stainTag = outcome.tags.find(t => t.kind === 'stain');
+  const toneTag = outcome.tags.find(t => t.kind === 'tone');
+  const available = product.stains.filter(s => s.available && s.image);
+  const stain =
+    (stainTag && available.find(s => s.name === stainTag.value)) ||
+    (toneTag && available.find(s => toneOf(s.name) === toneTag.value)) ||
+    available[0] ||
+    product.stains.find(s => s.image);
+  const matched = stainTag && stain?.name === stainTag.value ? stain.name : undefined;
+  return {
+    id: product.name,
+    productName: product.name,
+    slug: product.slug,
+    wood: stain?.wood ?? '',
+    category: product.category,
+    basePrice: product.price,
+    image: stain?.image ?? '',
+    matchedStain: matched,
+    matchedStainUnavailable: false,
+    variantCount: product.stains.length,
+  };
+}
+
+/**
+ * The header search: tags understood from the sentence, live counts, suggested
+ * tags and results, all from the one lazily loaded index. `enabled` starts the
+ * load on focus, so the starter tags have real counts before a key is pressed.
+ */
+export function useCatalogSearch(query: string, { enabled, limit }: { enabled: boolean; limit?: number }): CatalogSearch {
+  const [engine, setEngine] = useState<SearchEngine | null>(null);
   const trimmed = query.trim();
   const { isDelisted } = useDelistedProducts();
 
   useEffect(() => {
+    if (!enabled || engine) return;
     let cancelled = false;
-    loadSearchIndex().then(
-      ms => {
-        if (!cancelled) setIndex(ms);
+    loadSearchEngine().then(
+      e => {
+        if (!cancelled) setEngine(e);
       },
       err => {
         if (!cancelled) console.error('Failed to load search index:', err);
-      }
+      },
     );
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [enabled, engine]);
 
-  // Same grouping as the dropdown, uncapped. This used to be a third,
-  // hand-rolled copy of the result-building logic that deduplicated by slug
-  // instead of product name and produced a different shape.
-  const results = useMemo(
-    () =>
-      index && trimmed
-        ? toResults(index, trimmed, Number.MAX_SAFE_INTEGER).filter(r => !isDelisted(r.slug))
-        : [],
-    [index, trimmed, isDelisted]
-  );
-
-  return { results, loading: !index && Boolean(trimmed) };
+  return useMemo(() => {
+    if (!enabled) return EMPTY_SEARCH;
+    if (!engine) return { ...EMPTY_SEARCH, loading: true };
+    if (!trimmed) return { ...EMPTY_SEARCH, suggestions: engine.starters(isDelisted) };
+    const outcome = engine.search(trimmed, { limit, exclude: isDelisted });
+    return {
+      loading: false,
+      tags: outcome.tags,
+      relaxed: outcome.relaxed,
+      unknown: outcome.unknown,
+      refused: outcome.refused,
+      results: outcome.products.map(p => toResultRow(p, outcome)),
+      total: outcome.total,
+      suggestions: outcome.suggestions,
+    };
+  }, [enabled, engine, trimmed, limit, isDelisted]);
 }

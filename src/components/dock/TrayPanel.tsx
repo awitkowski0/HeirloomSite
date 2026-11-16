@@ -4,18 +4,17 @@ import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import RegistryActions from '@/components/selections/RegistryActions';
-import TalkToPerson from '@/components/layout/TalkToPerson';
 import { useCart } from '@/context/useCart';
 import { removeCompare, removeSaved, useSelections } from '@/context/selectionsStore';
 import type { RegistryLine } from '@/lib/babylist';
 import { registryTitle } from '@/lib/babylist';
+import { shortBuilderName } from '@/lib/names';
 import { hasBundlePrice } from '@/lib/bundle-prices';
 import { chargedUnitPrices } from '@/lib/cart-pricing';
 import { NURSERY_STEPS, orphanedKits, stepFor } from '@/lib/cart-lines';
 import { formatPrice } from '@/lib/format';
 import { recordInterest } from '@/lib/interest/store';
 import { variantLabel } from '@/lib/labels';
-import { buildLook, tasteWords } from '@/lib/pick-run';
 import type { ShopItem } from '@/lib/shop';
 import { variantHref } from '@/lib/variants';
 
@@ -34,7 +33,7 @@ const Thumb = ({ src }: { src: string | null }) => (
 
 export default function TrayPanel({ onClose }: { onClose: () => void }) {
   const { cart, hydrated, removeFromCart, subtotal } = useCart();
-  const { items, compare, compareExtras, finishes, run } = useSelections();
+  const { items, compare, compareExtras, finishes } = useSelections();
   const [tab, setTab] = useState<Tab>('cart');
   const lines = useMemo(() => (hydrated ? cart : []), [cart, hydrated]);
   const unitPrices = useMemo(() => chargedUnitPrices(lines, hasBundlePrice), [lines]);
@@ -61,8 +60,6 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
     return [...fromCart, ...fromSaved];
   }, [lines, unitPrices, items]);
 
-  const lookItems = useMemo(() => [...items, ...compareExtras], [items, compareExtras]);
-  const taste = tasteWords(buildLook(run.picks, lookItems).prefs).join(', ');
   const counts: Record<Tab, number> = { cart: lines.length, saved: items.length, compare: compared.length, babylist: 0 };
   const slot = (id: string) => lines.filter(l => stepFor(l.productName) === id).pop();
   const crib = [...lines].reverse().find(l => stepFor(l.productName) === 'crib' && l.slug);
@@ -73,21 +70,24 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
         <h2>Your nursery</h2>
         <button type="button" className="panel-close" aria-label="Close" onClick={onClose}>×</button>
       </div>
-      {taste && <p className="tray-taste">Your taste so far: {taste}.</p>}
 
-      <ol className="tray-slots" aria-label="Your nursery">
-        {NURSERY_STEPS.map(step => {
-          const line = slot(step.id);
-          return (
-            <li key={step.id} className={line ? 'tray-slot tray-slot--full' : 'tray-slot'}>
-              <span className="tray-slot-photo">{line?.image ? <Image src={line.image} alt="" fill sizes="64px" /> : null}</span>
-              {step.label}
-            </li>
-          );
-        })}
-      </ol>
-      {crib && !slot('kits') && (
-        <p className="tray-kits"><Link href={`/product/${crib.slug}#kits`} className="link">Conversion kits for your {crib.productName}</Link></p>
+      {lines.length > 0 && (
+        <>
+          <ol className="tray-slots" aria-label="Your nursery">
+            {NURSERY_STEPS.map(step => {
+              const line = slot(step.id);
+              return (
+                <li key={step.id} className={line ? 'tray-slot tray-slot--full' : 'tray-slot'}>
+                  <span className="tray-slot-photo">{line?.image ? <Image src={line.image} alt="" fill sizes="56px" /> : null}</span>
+                  {step.label}
+                </li>
+              );
+            })}
+          </ol>
+          {crib && !slot('kits') && (
+            <p className="tray-kits"><Link href={`/product/${crib.slug}#kits`} className="link">Conversion kits for your {crib.productName}</Link></p>
+          )}
+        </>
       )}
 
       <div className="tabs" role="tablist" aria-label="Your nursery">
@@ -100,7 +100,7 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
 
       {tab === 'cart' &&
         (lines.length === 0 ? (
-          <p className="panel-empty">Nothing in your cart yet. Nothing is charged until we’ve called you and sent an invoice.</p>
+          <p className="panel-empty">Your cart is empty.</p>
         ) : (
           <>
             <ul className="lines">
@@ -112,16 +112,19 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
                     <div>
                       <span className="line-name">{line.productName}{line.quantity > 1 ? ` × ${line.quantity}` : ''}</span>
                       <span className="line-meta">{finish ? `${finish} · ` : ''}{formatPrice(unitPrices[i] * line.quantity)}</span>
-                      <button
-                        type="button"
-                        className="link"
-                        onClick={() => {
-                          removeFromCart(line.id);
-                          if (line.slug) recordInterest({ kind: 'remove', slug: line.slug, from: 'cart' });
-                        }}
-                      >
-                        Remove
-                      </button>
+                      <span className="line-actions">
+                        {line.builder ? <Link href={line.builder.href} className="builder-name">{shortBuilderName(line.builder.name)}</Link> : null}
+                        <button
+                          type="button"
+                          className="link link--quiet"
+                          onClick={() => {
+                            removeFromCart(line.id);
+                            if (line.slug) recordInterest({ kind: 'remove', slug: line.slug, from: 'cart' });
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </span>
                     </div>
                   </li>
                 );
@@ -141,7 +144,7 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
 
       {tab === 'saved' &&
         (items.length === 0 ? (
-          <p className="panel-empty">Save anything you want to keep looking at.</p>
+          <p className="panel-empty">Pieces you save show up here.</p>
         ) : (
           <ul className="lines">
             {items.map(item => (
@@ -150,16 +153,18 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
                 <div>
                   <Link href={`/product/${item.slug}`} className="line-name">{item.name}</Link>
                   <span className="line-meta">{finishes[item.slug] ? `${finishes[item.slug]} · ` : ''}{formatPrice(item.price)}</span>
-                  <button
-                    type="button"
-                    className="link"
-                    onClick={() => {
-                      removeSaved(item.slug);
-                      recordInterest({ kind: 'remove', slug: item.slug, from: 'saved' });
-                    }}
-                  >
-                    Remove
-                  </button>
+                  <span className="line-actions">
+                    <button
+                      type="button"
+                      className="link link--quiet"
+                      onClick={() => {
+                        removeSaved(item.slug);
+                        recordInterest({ kind: 'remove', slug: item.slug, from: 'saved' });
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </span>
                 </div>
               </li>
             ))}
@@ -169,7 +174,7 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
       {tab === 'compare' && (
         <>
           {compared.length === 0 ? (
-            <p className="panel-empty">Tap Compare on any piece and it lands here.</p>
+            <p className="panel-empty">Pieces you add to Compare show up here.</p>
           ) : (
             <ul className="lines">
               {compared.map(item => (
@@ -178,7 +183,9 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
                   <div>
                     <span className="line-name">{item.name}</span>
                     <span className="line-meta">{finishes[item.slug] ? `${finishes[item.slug]} · ` : ''}{formatPrice(item.price)}</span>
-                    <button type="button" className="link" onClick={() => removeCompare(item.slug)}>Remove</button>
+                    <span className="line-actions">
+                      <button type="button" className="link link--quiet" onClick={() => removeCompare(item.slug)}>Remove</button>
+                    </span>
                   </div>
                 </li>
               ))}
@@ -189,11 +196,6 @@ export default function TrayPanel({ onClose }: { onClose: () => void }) {
       )}
 
       {tab === 'babylist' && <RegistryActions lines={registryLines} />}
-
-      <p className="panel-foot">
-        <TalkToPerson />
-        <Link href="/your-taste" className="link">What we’ve learned</Link>
-      </p>
     </div>
   );
 }

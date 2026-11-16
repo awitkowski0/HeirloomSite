@@ -96,7 +96,6 @@ export default function SafeSleepPage() {
           full-size bed, depending on the model and kits. Use only the parts made for your model and
           follow the manufacturer&rsquo;s instructions. Rails and separately sold conversion parts are
           listed on product pages and our <Link href="/safety" className="doc-link">Safety page</Link>.
-          Heirloom Cribs &amp; More is the reseller, and our builders make the cribs.
         </p>
         <p>When you and your pediatrician agree it is time:</p>
         <ol className="doc-list">

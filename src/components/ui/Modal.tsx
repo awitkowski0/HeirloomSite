@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 /*
  * How many dialogs are open right now.
@@ -48,6 +49,8 @@ interface ModalProps {
   title: string;
   /** Render the title visually. Off for overlays with their own visual header. */
   showTitle?: boolean;
+  /** Focus the dialog container itself instead of the first button inside it. */
+  initialFocus?: 'first' | 'dialog';
   className?: string;
   overlayClassName?: string;
   children: ReactNode;
@@ -68,6 +71,7 @@ export default function Modal({
   onClose,
   title,
   showTitle = false,
+  initialFocus = 'first',
   className,
   overlayClassName,
   children,
@@ -83,8 +87,8 @@ export default function Modal({
 
     // Move focus into the dialog so the next Tab lands inside it.
     const node = dialogRef.current;
-    const first = node?.querySelector<HTMLElement>(FOCUSABLE);
-    (first ?? node)?.focus();
+    const first = initialFocus === 'dialog' ? null : node?.querySelector<HTMLElement>(FOCUSABLE);
+    (first ?? node)?.focus({ preventScroll: true });
 
     // Scroll lock, compensating for the scrollbar so the page does not jump.
     // Refcounted - only the outermost dialog touches the body; see openCount.
@@ -132,14 +136,21 @@ export default function Modal({
         body.style.overflow = savedOverflow;
         body.style.paddingRight = savedPaddingRight;
       }
-      // Return focus to whatever opened the dialog.
-      previouslyFocused.current?.focus?.();
+      // Return focus to whatever opened the dialog, without scrolling to it: the
+      // opener may sit in a snap track the dialog has since moved.
+      previouslyFocused.current?.focus?.({ preventScroll: true });
     };
-  }, [open, onClose]);
+  }, [open, onClose, initialFocus]);
 
-  if (!open) return null;
+  if (!open || typeof document === 'undefined') return null;
 
-  return (
+  /*
+   * Portalled to <body>. Rendered in place, a dialog inherits its ancestors'
+   * stacking context - the product photo column is position: sticky, which
+   * creates one - so its z-index only ranked it inside that column and the
+   * fixed header and cart rail painted over the lightbox.
+   */
+  return createPortal(
     <div
       className={overlayClassName}
       onClick={e => {
@@ -159,6 +170,7 @@ export default function Modal({
         </h2>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

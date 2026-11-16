@@ -186,6 +186,8 @@ export interface CartItem {
    * (see src/lib/cart-pricing.ts). Display only; the server never reads it.
    */
   listPrice?: number;
+  /** For the link to the builder's store. Display only; lines from older carts lack it. */
+  builder?: { name: string; href: string };
 }
 
 export interface CartParentRef {

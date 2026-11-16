@@ -271,7 +271,10 @@ export function loadBuilders(root) {
     .sort()
     .map(name => {
       const parsed = readJson(join(dir, name));
-      return { fileId: name.replace(/\.json$/, ''), record: parsed.value, parseError: parsed.error };
+      const banner = parsed.value?.banner;
+      // A banner's file is read here so the rules can stay pure. Paths are public URLs, so %20 for a space.
+      const bannerInfo = typeof banner?.image === 'string' ? imageInfo(join(root, 'public', decodeURI(banner.image))) : undefined;
+      return { fileId: name.replace(/\.json$/, ''), record: parsed.value, parseError: parsed.error, bannerInfo };
     });
 }
 
@@ -485,6 +488,7 @@ function validateBuilders(catalog, push) {
       if (!(field in b)) push('error', 'quote-invalid', `${where} ${field}`, 'must be present', 'Set it to null when nothing is on file.');
       validateQuote(push, `${where} ${field}`, b[field] ?? null, { builderName: b.name });
     }
+    validateStory(push, where, b);
     if (!b.safety || typeof b.safety !== 'object') {
       push('error', 'safety-invalid', `${where} safety`, 'safety must be { crib, caseGoods }', 'Set both to null when nothing is on file.');
     } else {
@@ -505,13 +509,63 @@ function validateBuilders(catalog, push) {
       push('error', problem.code, `${where} background`, `${problem.label} ("${problem.match}")`, "This line is in Heirloom's voice. State only what a builder document shows.");
     }
 
-    const hasPage = catalog.builderPages.has(b.id);
-    if (b.bespokePage === true && !hasPage) {
-      push('error', 'builder-page', where, `bespokePage is true but src/app/builders/${b.id}/ does not exist`, 'Remove bespokePage to use the generated page.');
+    validateBanner(push, where, b, entry.bannerInfo);
+
+    if (catalog.builderPages.has(b.id)) {
+      push('error', 'builder-page', where, `src/app/builders/${b.id}/ exists and would shadow the generated store`, 'Delete that folder. Stores are generated from the record.');
     }
-    if (b.bespokePage !== true && hasPage) {
-      push('error', 'builder-page', where, `src/app/builders/${b.id}/ exists, so this needs "bespokePage": true`, 'Otherwise the generated page collides with it.');
+  }
+}
+
+/* Names a wood a banner caption must not assert: what a photo shows is not always what is sold. */
+const BANNER_WOOD = /\b(maple|cherry|oak|walnut|hickory|elm|ash|pine|quartersawn|birch|poplar|mahogany)\b/i;
+
+/* The story is the builder's words, but a claim that needs review belongs on a field that gets one. */
+const STORY_CLAIM = /\b(safe|safely|safety|non[- ]?toxic|voc|cpsc|cpsia|astm|jpma|certif\w*|tested|complian\w*|compliant|greenguard|lead[- ]free|made in|american|amish)\b/i;
+
+function validateStory(push, where, b) {
+  if (b.story === undefined) return;
+  if (!Array.isArray(b.story)) {
+    push('error', 'story-invalid', `${where} story`, 'story must be a list of { text, source }', 'Remove the key when nothing is on file. Never fill the gap.');
+    return;
+  }
+  b.story.forEach((entry, i) => {
+    const at = `${where} story[${i}]`;
+    if (entry === null || typeof entry !== 'object') {
+      push('error', 'story-invalid', at, 'must be { text, source }', "Copy the builder's words from a named document.");
+      return;
     }
+    validateQuote(push, at, entry, { builderName: b.name });
+    const claim = String(entry.text ?? '').match(STORY_CLAIM);
+    if (claim) push('error', 'story-claim', at, `story uses "${claim[0]}"`, 'Safety and materials statements go in safety or construction; origin and Amish claims stay off the site. Stop and ask.');
+  });
+}
+
+function validateBanner(push, where, b, info) {
+  if (b.banner === undefined) return;
+  const banner = b.banner;
+  const at = `${where} banner`;
+  if (!banner || typeof banner !== 'object' || typeof banner.image !== 'string' || typeof banner.alt !== 'string') {
+    push('error', 'banner-invalid', at, 'banner must be { image, alt }', 'Remove the key for a banner with no photo; the banner is then the name and quote alone.');
+    return;
+  }
+  if (!/^\/(data\/products|images\/builders)\//.test(banner.image)) {
+    push('error', 'banner-invalid', at, `image "${banner.image}" must be a catalog photo under /data/products/ or /images/builders/`, 'Use a real catalog photo with no loose bedding, pillows or toys in a crib, and no generated room scene.');
+  } else if (!/\.(jpe?g|png|webp)$/i.test(banner.image)) {
+    push('error', 'banner-invalid', at, 'image must be a jpg, png or webp', 'Use a catalog photo.');
+  } else if (info?.missing) {
+    push('error', 'banner-missing', at, `no file at public${banner.image}`, 'Check the path; spaces are written %20.');
+  } else if (info && Math.min(info.width, info.height) < 800) {
+    push('error', 'banner-small', at, `image is ${info.width}x${info.height}, under 800px on its short side`, 'Get a larger original from the builder.');
+  }
+  const alt = banner.alt.trim();
+  if (!alt) push('error', 'banner-invalid', at, 'alt is required', 'Describe what the photo shows.');
+  if (alt.length > 140) push('error', 'banner-invalid', at, 'alt is over 140 characters', 'Keep it to what the photo shows.');
+  const withoutName = alt.replaceAll(b.name ?? '', ' ').replaceAll(b.sku?.brand ?? '', ' ');
+  const wood = withoutName.match(BANNER_WOOD);
+  if (wood) push('error', 'banner-wood', at, `alt names a wood ("${wood[0]}")`, 'Describe the shape. What a photo shows is not always the wood that is sold.');
+  for (const problem of copyProblems(alt, { boilerplate: false })) {
+    push('error', problem.code, at, `${problem.label} ("${problem.match}")`, 'Describe only what the photo shows.');
   }
 }
 

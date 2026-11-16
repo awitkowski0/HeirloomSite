@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import TalkToPerson from '@/components/layout/TalkToPerson';
 import { filtersToHash, parseIntent } from '@/lib/intent';
+import { ORIGIN_LINE } from '@/lib/origin';
 
 const EXAMPLES = [
   ['Grows with them', 'crib that grows'],
@@ -24,7 +25,9 @@ export default function IntentBox() {
     if (intent.kind === 'gift') router.push('/gifts');
     else if (intent.kind === 'pick') router.push('/pick');
     else if (intent.kind === 'filter') router.push(`/products${filtersToHash(intent.filters)}`);
-    else setMiss(text.trim() ? `We couldn’t match “${text.trim()}” to anything we carry.` : 'Tell us a little about what you want.');
+    // Search names what it didn't understand and still shows the closest pieces.
+    else if (text.trim()) router.push(`/search?q=${encodeURIComponent(text.trim())}`);
+    else setMiss('Tell us a little about what you want.');
   };
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
@@ -36,6 +39,7 @@ export default function IntentBox() {
     <div className="intent">
       <h1>What are you looking for?</h1>
       <p className="intent-sub">Solid wood cribs and nursery furniture, made to order.</p>
+      <p className="origin-line">{ORIGIN_LINE}</p>
       <form className="ask" onSubmit={submit}>
         <input name="q" aria-label="What are you looking for?" placeholder="A pale crib with slats" autoComplete="off" />
         <button type="submit">Find it</button>

@@ -1,0 +1,227 @@
+/* ===========================================================================
+   Motion and the persistent shop furniture: the cart rail, header search, Help
+   menu, and the gallery facing and hover rules. Composite-only
+   wherever a value changes over time. Loaded after site.css.
+   =========================================================================== */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --rail-w: 348px;
+}
+html { -webkit-tap-highlight-color: transparent; }
+button, a, [role='button'] { touch-action: manipulation; }
+
+/* ---- Route changes: a crossfade, and one photo that travels. ---- */
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+::view-transition { pointer-events: none; }
+::view-transition-old(root) { animation: 150ms var(--ease-out) both vt-fade-out; }
+::view-transition-new(root) { animation: 220ms var(--ease-out) 50ms both vt-fade-in; }
+::view-transition-group(.morph) { animation-duration: 280ms; animation-timing-function: var(--ease-in-out); z-index: 1; }
+::view-transition-old(.morph), ::view-transition-new(.morph) { width: 100%; height: 100%; object-fit: contain; animation-duration: 280ms; }
+html[data-vt-off]::view-transition-group(*), html[data-vt-off]::view-transition-old(*), html[data-vt-off]::view-transition-new(*) { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) { animation-duration: 0s !important; animation-delay: 0s !important; }
+  ::view-transition-old(.morph), ::view-transition-new(.morph) { animation: none !important; }
+  ::view-transition-old(root) { animation: 120ms ease both vt-fade-out !important; }
+  ::view-transition-new(root) { animation: 120ms ease both vt-fade-in !important; }
+}
+/* The named photo is captured as its own layer, so give multiply a linen to dissolve into. */
+.piece-photo, .pdp-media .product-image { background: var(--paper); }
+
+/* ---- Press and first appearance. ---- */
+.btn, .button-primary, .add-to-cart, .btn--line, .button-secondary, .dock-yours, .finish-tile, .search-suggest, .search-chip { transition: transform 120ms var(--ease-out); }
+.btn:active, .button-primary:active, .add-to-cart:active, .btn--line:active, .button-secondary:active, .dock-yours:active, .finish-tile:active, .search-suggest:active, .search-chip:active { transform: scale(0.97); }
+[data-reveal='pending'] { opacity: 0; transform: translateY(10px); }
+[data-reveal='in'] { opacity: 1; transform: none; transition: opacity 280ms var(--ease-out), transform 280ms var(--ease-out); transition-delay: calc(var(--reveal-i, 0) * 40ms); }
+.browser .grid[data-settled] > .piece { transition: opacity 180ms var(--ease-out); }
+@starting-style { .browser .grid[data-settled] > .piece { opacity: 0; } }
+
+/* Finish change: the new photo fades in above the old one, which stays until it has loaded. */
+.photo-next { opacity: 0; transition: opacity 200ms var(--ease-out); }
+.photo-next--in { opacity: 1; }
+.product-image img { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .button-primary, .add-to-cart, .btn--line, .button-secondary, .dock-yours, .finish-tile, .search-suggest, .search-chip { transition: none; }
+  .btn:active, .button-primary:active, .add-to-cart:active, .btn--line:active, .button-secondary:active, .dock-yours:active, .finish-tile:active, .search-suggest:active, .search-chip:active { transform: none; }
+  [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .photo-next { transition: none; }
+}
+
+/* ---- Builder names and piece names. ---- */
+a.builder-name { transition: background-color 180ms ease; }
+@media (hover: hover) and (pointer: fine) {
+  a.piece-link:hover .piece-name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+}
+@media (prefers-reduced-motion: reduce) { a.builder-name { transition: none; } }
+
+/* ---- Gallery wall: each row turns inward. The flip is on the photo alone, and only
+   in grids; a product page, the zoom, cart lines and compare always show the true photo.
+   data-facing is only set on photos that are safe to mirror. ---- */
+@media (max-width: 859px) {
+  .grid > :nth-child(2n+1) .piece-photo[data-facing='left'] > img:not(.piece-photo-hover),
+  .grid > :nth-child(2n) .piece-photo[data-facing='right'] > img:not(.piece-photo-hover) { transform: scaleX(-1); }
+}
+@media (min-width: 860px) and (max-width: 1199px), (min-width: 1400px) {
+  .grid > :nth-child(4n+1) .piece-photo[data-facing='left'] > img:not(.piece-photo-hover),
+  .grid > :nth-child(4n+2) .piece-photo[data-facing='left'] > img:not(.piece-photo-hover),
+  .grid > :nth-child(4n+3) .piece-photo[data-facing='right'] > img:not(.piece-photo-hover),
+  .grid > :nth-child(4n) .piece-photo[data-facing='right'] > img:not(.piece-photo-hover) { transform: scaleX(-1); }
+}
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 22px; }
+  .grid > :nth-child(3n+1) .piece-photo[data-facing='left'] > img:not(.piece-photo-hover),
+  .grid > :nth-child(3n) .piece-photo[data-facing='right'] > img:not(.piece-photo-hover) { transform: scaleX(-1); }
+}
+
+/* Hover: a crossfade inside the frame. Nothing leaves the frame, so nothing can cover text. */
+.piece-photo { overflow: hidden; }
+.piece-photo-hover { display: none; }
+.piece-photo .piece-photo-hover { mix-blend-mode: normal; object-fit: cover; filter: none; }
+@media (hover: hover) and (pointer: fine) {
+  .piece-photo-hover { display: block; opacity: 0; transition: opacity 240ms ease; }
+  .piece-photo--two img:not(.piece-photo-hover) { transition: opacity 240ms ease; }
+  .piece-link:hover .piece-photo--two .piece-photo-hover { opacity: 1; }
+  .piece-link:hover .piece-photo--two img:not(.piece-photo-hover) { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .piece-photo-hover, .piece-photo--two img:not(.piece-photo-hover) { transition: none !important; } }
+
+/* Product gallery: a snap track, one DOM tree. Arrows sit in the frame and appear for a mouse or a keyboard. */
+.pgal { position: relative; margin: 4px var(--gut) 0; }
+.pgal-track { display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.pgal-track::-webkit-scrollbar { display: none; }
+.pgal-slide { flex: 0 0 100%; scroll-snap-align: start; min-width: 0; }
+.pgal .product-image { margin: 0; }
+.pgal-room img, .pgal-thumb-room, .pgal .pgal-room img { mix-blend-mode: normal !important; filter: none !important; }
+.gallery-arrow { position: absolute; top: 50%; left: 0; z-index: 2; width: 44px; height: 44px; transform: translateY(-50%); display: none; align-items: center; justify-content: center; padding: 0; border: 0; background: none; color: var(--ink); font-size: 26px; font-weight: 300; line-height: 1; cursor: pointer; }
+.gallery-arrow--next { left: auto; right: 0; }
+@media (hover: hover) and (pointer: fine) {
+  .gallery-arrow { display: flex; opacity: 0; transition: opacity 160ms ease, transform 160ms var(--ease-out); }
+  .pgal:hover .gallery-arrow, .room-row:hover .gallery-arrow, .gallery-arrow:focus-visible { opacity: 1; }
+  .pgal:hover .gallery-arrow--prev, .room-row:hover .gallery-arrow--prev { transform: translate(-2px, -50%); }
+  .pgal:hover .gallery-arrow--next, .room-row:hover .gallery-arrow--next { transform: translate(2px, -50%); }
+}
+@media (prefers-reduced-motion: reduce) { .gallery-arrow { transition: none; transform: translateY(-50%) !important; } }
+@media (min-width: 860px) { .pgal { margin: 8px 16px 0 var(--gut); } }
+
+/* Room shots: a small sliding row, in frame, no auto-advance. */
+.room-row { position: relative; }
+.room-rail { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; }
+.room-rail::-webkit-scrollbar { display: none; }
+.room-card { flex: 0 0 min(72vw, 320px); scroll-snap-align: start; color: inherit; text-decoration: none; }
+.room-photo { position: relative; display: block; aspect-ratio: 4 / 3; overflow: hidden; }
+.room-photo img { object-fit: cover; }
+.room-name { display: block; padding-top: 6px; font-size: 13.5px; }
+.room-row .gallery-arrow { top: 42%; }
+
+/* ---- Header search, from the live site. ---- */
+.header-search { display: none; flex: 1 1 0; min-width: 180px; max-width: none; margin: 0; }
+.mobile-search-trigger { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: auto; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; }
+.mobile-search-trigger .material-symbols-outlined { font-size: 22px; }
+.header-search .search-bar-form { min-height: 36px; height: 36px; padding: 0 11px; gap: 8px; background: var(--plate); border: 1px solid var(--line); transition: border-color 140ms ease; }
+.header-search .search-bar-form:focus-within { border-color: var(--ink); }
+.search-bar-icon { width: 15px; height: 15px; flex: none; color: var(--ink-muted); }
+.header-search .search-bar-input { padding: 0; height: 100%; font-size: 16px; }
+.search-bar-clear { flex: none; padding: 0 2px; border: 0; background: none; color: var(--ink-muted); font-size: 16px; line-height: 1; cursor: pointer; }
+.search-bar-clear:hover { color: var(--ink); }
+.search-dropdown { max-height: calc(100dvh - var(--header-row-h) - 16px); overflow-y: auto; overscroll-behavior: contain; }
+@media (min-width: 768px) {
+  .wordmark { margin-right: 12px; }
+  .header-search { display: block; }
+  .header-search .search-bar-input { font-size: 13.5px; }
+  .search-dropdown { left: 0; right: 0; width: auto; border-top: 1px solid var(--rule-strong); margin-top: 4px; }
+  .mobile-search-trigger { display: none; }
+}
+
+.search-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 0; }
+.search-chip { position: relative; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 9px; border: 1px solid var(--rule-strong); border-radius: 0; background: none; color: var(--ink); font: inherit; font-size: 12.5px; cursor: pointer; }
+.search-chip::after { content: ''; position: absolute; inset: 50% 0 auto; height: 44px; transform: translateY(-50%); }
+.search-chip span { color: var(--ink-muted); }
+.search-count { margin: 0; padding: 8px 14px 6px; font-size: 12.5px; color: var(--ink-muted); }
+.search-note { color: var(--ink); }
+.search-suggest { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 6px 14px; border: 0; border-bottom: 1px solid var(--rule); background: none; color: var(--ink); font: inherit; text-align: left; cursor: pointer; }
+.search-suggest img, .search-suggest-empty { flex: none; width: 36px; height: 36px; object-fit: contain; mix-blend-mode: multiply; }
+.search-suggest-label { flex: 1; min-width: 0; font-size: 13.5px; }
+.search-suggest-meta { flex: none; font-size: 12px; color: var(--ink-muted); }
+.search-suggest:hover, .search-suggest.is-active { background: var(--plate); }
+.search-result.is-active { background: var(--plate); }
+.search-result, .search-see-all { min-height: 44px; }
+.mobile-search-input { font-size: 16px; }
+
+/* ---- Help menu, from the live site. ---- */
+.help-menu { position: relative; display: flex; align-items: center; }
+.help-button { padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.help-panel { position: fixed; inset: var(--header-row-h) 0 auto; z-index: 50; max-height: calc(100dvh - var(--header-row-h)); overflow-y: auto; padding: 6px var(--gut) 12px; background: var(--paper); border-bottom: 1px solid var(--rule-strong); animation: help-in 160ms var(--ease-out); }
+@keyframes help-in { from { opacity: 0; transform: translateY(-4px); } }
+.help-panel ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 0; }
+.help-panel a { display: flex; align-items: center; min-height: 38px; color: var(--ink); font-size: 13.5px; text-decoration: none; }
+.help-panel a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.help-phone { margin: 4px 0 0; padding-top: 4px; border-top: 1px solid var(--line); }
+@media (min-width: 768px) {
+  .help-panel { position: absolute; inset: 100% 0 auto auto; width: 220px; margin-top: 6px; padding: 6px 16px 10px; border: 1px solid var(--rule-strong); }
+}
+@media (prefers-reduced-motion: reduce) { .help-panel { animation: none; } }
+
+/* ---- Cart and chat: a sheet below 1200px, a rail above. One tree. ---- */
+.rail { position: fixed; inset: var(--header-row-h) 0 calc(var(--dock-h) + var(--safe-bottom)); z-index: 44; overflow-y: auto; overscroll-behavior: contain; background: var(--paper); transform: translateY(100%); visibility: hidden; transition: transform 240ms var(--ease-drawer), visibility 0s linear 240ms; }
+.rail[data-open] { transform: none; visibility: visible; transition: transform 240ms var(--ease-drawer), visibility 0s; }
+.rail-part { display: none; }
+.rail[data-part='tray'] .rail-part--cart, .rail[data-part='chat'] .rail-part--chat { display: block; }
+.rail[data-part='chat'] .rail-part--chat { height: 100%; }
+.rail[data-checkout] { display: none; }
+.dock[data-checkout] { display: none; }
+@media (min-width: 860px) {
+  .rail { inset: var(--header-row-h) 0 calc(var(--dock-h) + var(--safe-bottom)) auto; width: 400px; border-left: 1px solid var(--line); transform: translateX(100%); }
+  .rail[data-open] { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) { .rail { transition: visibility 0s !important; } }
+
+.tray-slot-photo img, .dock-slot img { opacity: 1; }
+.rail[data-settled] .line, .dock[data-settled] .dock-slot img, .rail[data-settled] .tray-slot-photo img { transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+@starting-style {
+  .rail[data-settled] .line, .dock[data-settled] .dock-slot img, .rail[data-settled] .tray-slot-photo img { opacity: 0; transform: translateY(4px); }
+}
+.tray-slot-photo { transition: border-color 200ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .rail[data-settled] .line, .dock[data-settled] .dock-slot img, .rail[data-settled] .tray-slot-photo img { transition: none; }
+}
+
+@media (min-width: 1200px) {
+  :root { --dock-h: 0px; --content-w: calc(100vw - var(--rail-w)); }
+  .dock { display: none; }
+  .site-head { right: var(--rail-w); }
+  main, .site-foot { margin-right: var(--rail-w); }
+  .store { --store-inset: max(var(--gut), calc((var(--content-w) - 1160px) / 2 + var(--gut))); }
+  .rail { inset: 0 0 0 auto; width: var(--rail-w); display: flex; flex-direction: column; transform: none; visibility: visible; transition: none; z-index: 30; border-left: 1px solid var(--line); }
+  .rail .panel-head { padding-right: var(--gut); }
+  .rail-part { display: block; }
+  .rail-part--cart { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-top: 4px; }
+  .rail-part--chat { flex: 0 0 236px; height: 236px; min-height: 0; border-top: 1px solid var(--line); }
+  .rail[data-checkout] { display: flex; }
+  .rail[data-checkout] .rail-part--chat { position: absolute; inset: auto 0 0; height: 170px; }
+  .rail[data-checkout] .chat-log, .rail[data-checkout] .chat-attach { display: none; }
+  .rail .panel-close, .rail .panel-foot .talk { display: none; }
+  .pdp-sticky { display: none; }
+  .toast { left: calc((100vw - var(--rail-w)) / 2); }
+
+  /* Checkout's own summary takes the cart's place at the top of the rail. */
+  .checkout-page .grid-layout > .product-showcase { grid-column: span 12; }
+  .checkout-page .order-summary-items { max-height: 150px; overflow-y: auto; }
+  .checkout-page .grid-layout > .configuration-panel { position: fixed; top: 0; right: 0; width: var(--rail-w); max-height: calc(100dvh - 170px); overflow-y: auto; padding: 14px 18px; background: var(--paper); z-index: 31; }
+}
+
+/* ---- Timing strip on a product page: three steps on a thin line. ---- */
+.lead-strip { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); margin: 10px 0 0; padding: 0; list-style: none; max-width: 420px; }
+.lead-strip::before { content: ''; position: absolute; left: calc(100% / 6); right: calc(100% / 6); top: 10px; height: 1px; background: var(--rule-strong); transform-origin: left; }
+.lead-strip li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; text-align: center; min-width: 0; }
+.lead-strip svg { position: relative; display: block; width: 22px; height: 22px; padding: 1px 3px; background: var(--paper); color: var(--ink); box-sizing: content-box; }
+.lead-strip-label { margin-top: 2px; font-size: 12px; line-height: 1.25; color: var(--ink-muted); }
+.lead-strip-date { font-size: 13px; line-height: 1.3; color: var(--ink); min-height: 1.3em; }
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  .lead-strip:not([data-in])::before { transform: scaleX(0); }
+  .lead-strip:not([data-in]) li { opacity: 0; }
+  .lead-strip::before { transition: transform 320ms var(--ease-in-out); }
+  .lead-strip li { transition: opacity 240ms var(--ease-out); transition-delay: calc(var(--i, 0) * 80ms); }
+}

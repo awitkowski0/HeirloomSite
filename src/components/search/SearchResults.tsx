@@ -3,14 +3,14 @@
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useSearchAll } from '@/lib/search';
+import { useCatalogSearch } from '@/lib/search';
 import { formatPriceApprox } from '@/lib/format';
 import TalkToPerson from '@/components/layout/TalkToPerson';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  const { results, loading } = useSearchAll(query);
+  const { results, loading, tags, relaxed, unknown, refused, total } = useCatalogSearch(query, { enabled: true });
 
   return (
     <div className="page">
@@ -21,8 +21,12 @@ export default function SearchResults() {
           <button type="submit">Search</button>
         </form>
         <p role="status" aria-live="polite" className="small">
-          {!query ? '' : loading ? 'Searching…' : `${results.length} ${results.length === 1 ? 'result' : 'results'}`}
+          {!query ? '' : loading ? 'Searching…' : `${total} ${total === 1 ? 'result' : 'results'}`}
         </p>
+        {tags.length > 0 && <p className="small">Understood: {tags.map(t => t.label).join(', ')}.</p>}
+        {relaxed.length > 0 && <p className="small">Nothing matched {relaxed.map(t => `“${t.label}”`).join(', ')} too, so we left it out.</p>}
+        {unknown.length > 0 && <p className="small">We don’t know {unknown.map(w => `“${w}”`).join(', ')}. Here’s the closest we have.</p>}
+        {refused.length > 0 && <p className="small">Search can’t look for {refused.map(w => `“${w}”`).join(', ')}.</p>}
       </header>
 
       {query && !loading && results.length === 0 && (

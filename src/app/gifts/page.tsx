@@ -21,7 +21,7 @@ export default function GiftsPage() {
         <p>Tell us who it’s for and when it needs to arrive. Gift orders are arranged by hand, so a person sets it up with you.</p>
         <p className="intent-row"><TalkToPerson /></p>
       </header>
-      <h2 className="sub">Or start with a piece they’ll keep</h2>
+      <h2 className="sub">Popular gift pieces</h2>
       <div className="grid">{items.map(i => <PieceLink key={i.slug} item={i} />)}</div>
       <p className="small page-note">On a registry? Every piece has an Add to Babylist button.</p>
     </div>

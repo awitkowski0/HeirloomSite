@@ -5,6 +5,7 @@ import { variantPathsFor } from '@/lib/variants';
 import { getCollections } from '@/lib/collections';
 import { SITE_URL } from '@/lib/seo';
 import { BUILDERS } from '@/lib/builders';
+import { storeSections } from '@/lib/builder-stores';
 
 /**
  * Every indexable URL. Deliberately excludes /checkout and /search, which are
@@ -40,7 +41,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/about-heirloom`, changeFrequency: 'yearly', priority: 0.5 },
     ...USE_TAGS.map(u => ({ url: `${SITE_URL}/uses/${u.slug}`, changeFrequency: 'monthly' as const, priority: 0.5 })),
     { url: `${SITE_URL}/builders`, changeFrequency: 'monthly', priority: 0.6 },
-    ...BUILDERS.map(b => ({ url: `${SITE_URL}${b.href}`, changeFrequency: 'yearly' as const, priority: 0.4 })),
     { url: `${SITE_URL}/woods-and-finishes`, changeFrequency: 'yearly', priority: 0.4 },
   ];
 
@@ -73,11 +73,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }));
   });
 
+  /*
+   * Listed builders only. A `listed: false` builder is the same case as the
+   * unlisted conversion kits in src/lib/taxonomy.ts: the route stays, nothing
+   * links people there for browsing, and it is not put forward for indexing.
+   */
+  const storeRoutes: MetadataRoute.Sitemap = BUILDERS.filter(b => b.listed).flatMap(b => [
+    { url: `${SITE_URL}${b.href}`, changeFrequency: 'monthly' as const, priority: 0.5 },
+    ...storeSections(b).map(s => ({ url: `${SITE_URL}${b.href}/${s.slug}`, changeFrequency: 'weekly' as const, priority: 0.5 })),
+  ]);
+
   const collectionRoutes: MetadataRoute.Sitemap = getCollections().map(c => ({
     url: `${SITE_URL}/collections/${c.slug}`,
     changeFrequency: 'weekly',
     priority: 0.7,
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...collectionRoutes, ...productRoutes];
+  return [...staticRoutes, ...storeRoutes, ...categoryRoutes, ...collectionRoutes, ...productRoutes];
 }

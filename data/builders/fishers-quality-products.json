@@ -8,6 +8,32 @@
     "text": "We started very small out of our home shop, manufacturing just one line of cribs in 2010.",
     "source": "Fisher's Quality Products, from its profile on All American Wholesalers"
   },
+  "story": [
+    {
+      "text": "a family-owned business",
+      "source": "Fisher's Quality Products, from its profile on All American Wholesalers"
+    },
+    {
+      "text": "While working for a local woodshop for over 10 years, we noticed an increased demand for cribs coming into the shop.",
+      "source": "Fisher's Quality Products, from its profile on All American Wholesalers"
+    },
+    {
+      "text": "So, owner Joseph Fisher decided to start his own business … We started very small out of our home shop, manufacturing just one line of cribs in 2010. We have worked our way up to manufacturing a full line of convertible cribs, convertible changing tables, chests of drawers, and night stands.",
+      "source": "Fisher's Quality Products, from its profile on All American Wholesalers"
+    },
+    {
+      "text": "We know how difficult and expensive it can be to transition children from cribs, to toddler beds, to day beds, to full sized beds, so we make it easy.",
+      "source": "Fisher's Quality Products"
+    },
+    {
+      "text": "Toddler Bed/Day Bed Conversion Kits include day bed frame, toddler bed rail, and hardware",
+      "source": "Fisher's Quality Products"
+    },
+    {
+      "text": "Our Full Size Bed Conversion Kit includes bed rails, slats, and hardware",
+      "source": "Fisher's Quality Products"
+    }
+  ],
   "leadTime": "10 to 14 weeks",
   "leadWeeksMax": 14,
   "buildFeatures": {
@@ -15,7 +41,10 @@
     "caseGoods": []
   },
   "listed": true,
-  "bespokePage": true,
+  "banner": {
+    "image": "/data/products/Changing%20Table%20-%206%20Drawer/changing_table_6_drawer_1.jpg",
+    "alt": "Six-drawer changing table with inlaid lines and bail pulls"
+  },
   "sku": {
     "prefix": "FQP",
     "brand": "Fisher",

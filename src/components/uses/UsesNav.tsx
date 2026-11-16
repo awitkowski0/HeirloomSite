@@ -15,8 +15,8 @@ export default function UsesNav() {
     return pieces[0] ? [{ ...use, image: pieces[0].image as string }] : [];
   });
   return (
-    <nav className="uses-nav" aria-label="Shop by what it can be">
-      <p className="small">Shop by what it can be</p>
+    <nav className="uses-nav" aria-label="Shop by use">
+      <p className="small">Shop by use</p>
       <ul>
         {tiles.map(t => (
           <li key={t.slug}>

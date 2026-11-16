@@ -7,27 +7,44 @@ import { CRIB_STYLES } from '../src/lib/crib-styles';
 const words = (s: string) => s.toLowerCase().replace(/[()]/g, ' ').split(/\s+/).filter(Boolean);
 
 /*
- * The registry may only repeat what the sourced builder pages already say.
- * A statement that exists nowhere else has no source behind it.
+ * Each sentence on file, pinned word for word. Stores render these records and
+ * add nothing, so a changed statement is a change to the builder's words: change
+ * the record and this table together, from the source document.
  */
-const SOURCES: Record<string, string[] | undefined> = {
-  'old-town-oak': ['src/app/builders/old-town-oak/page.tsx'],
-  'fishers-quality-products': ['src/app/builders/fishers-quality-products/page.tsx'],
-  'kids-comfort': ['src/app/builders/kids-comfort/page.tsx', 'src/app/safety/page.tsx'],
+const STATEMENTS: Record<string, readonly string[]> = {
+  'old-town-oak': [
+    'Having been in business for 21 years, we can offer you the quality cribs and dressers you expect and deserve.',
+    'Specializing in Baby Furniture.',
+    'every piece is signed by the artisan, Marlin Miller.',
+    'Each crib is designed with a unique three stage system that adjusts with the age or size of your child. Use one piece of furniture for your child from newborn into adulthood.',
+    'Our cribs are sturdy and durable with mortise and tenon joints and a substructure made of steel inserts and connector bolts. Our dressers feature dovetail wood drawer boxes and full extension slides, all features that make sure our baby furniture will stand the test of time.',
+    'Tool and hardware kit comes standard attached to every crib spring with easy to read and understand instructions. Panels are specially marked for ease of assembly.',
+    'All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs.',
+    'For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species.',
+  ],
+  'fishers-quality-products': [
+    'We started very small out of our home shop, manufacturing just one line of cribs in 2010.',
+    'a family-owned business',
+    'While working for a local woodshop for over 10 years, we noticed an increased demand for cribs coming into the shop.',
+    'So, owner Joseph Fisher decided to start his own business … We started very small out of our home shop, manufacturing just one line of cribs in 2010. We have worked our way up to manufacturing a full line of convertible cribs, convertible changing tables, chests of drawers, and night stands.',
+    'We know how difficult and expensive it can be to transition children from cribs, to toddler beds, to day beds, to full sized beds, so we make it easy.',
+    'Toddler Bed/Day Bed Conversion Kits include day bed frame, toddler bed rail, and hardware',
+    'Our Full Size Bed Conversion Kit includes bed rails, slats, and hardware',
+  ],
+  'kids-comfort': [
+    'We are real people that answer our phone and personally work with you to accomplish your goals.',
+    'All cribs are completely solid wood including the mattress support.',
+    'As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards.',
+    'All furniture pieces come with a wall anchor to prevent tipping hazards in your nursery.',
+  ],
 };
 
-test('every builder quote is verbatim from a sourced page', () => {
+test('every builder statement on file is the pinned verbatim sentence, and nothing more', () => {
   for (const b of BUILDERS) {
-    // Only hand-written pages can be cross-checked. A generated builder page renders
-    // the record itself, and its quotes are held to a named source by the catalog rules.
-    const pages = SOURCES[b.id];
-    assert.equal(b.bespokePage, Boolean(pages), `${b.name}: bespokePage and tests/builders.test.ts SOURCES disagree`);
-    if (!pages) continue;
-    const source = pages.map(f => readFileSync(f, 'utf8')).join('\n');
-    const quotes = [b.intro, b.construction, b.setup, b.safety.crib, b.safety.caseGoods];
-    for (const q of quotes) {
-      if (q) assert.ok(source.includes(q.text), `${b.name}: not found in source: ${q.text.slice(0, 60)}`);
-    }
+    const pinned = STATEMENTS[b.id];
+    if (!pinned) continue; // A builder added with the scaffold is held to a named source by the catalog rules.
+    const onFile = [b.intro, ...(b.story ?? []), b.construction, b.setup, b.safety.crib, b.safety.caseGoods].flatMap(q => (q ? [q.text] : []));
+    assert.deepEqual(onFile, pinned, `${b.name}: statements on file differ from the pinned sentences`);
   }
 });
 

@@ -1,0 +1,547 @@
+{
+  "34-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.793,
+    "edgeRatio": -0.007
+  },
+  "addison-3-drawer-nightstand": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.879,
+    "edgeRatio": 0.006,
+    "override": true
+  },
+  "addison-6-drawer-dresser": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.821,
+    "edgeRatio": 0.068,
+    "override": true
+  },
+  "addison-7-drawer-dresser": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.844,
+    "edgeRatio": 0.06,
+    "override": true
+  },
+  "addison-chest-dresser": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "head-on view, and a decorative item on top",
+    "computed": true,
+    "iou": 0.846,
+    "edgeRatio": 0.056,
+    "override": true
+  },
+  "addison-crib": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.796,
+    "edgeRatio": -0.035
+  },
+  "addison-crib-with-raised-panel-headboard": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: back rail sits left of the front rail",
+    "computed": true,
+    "iou": 0.812,
+    "edgeRatio": -0.028,
+    "override": true
+  },
+  "addison-full-bed-rail-kit": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.631,
+    "edgeRatio": -0.183
+  },
+  "addison-toddler-bed": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.635,
+    "edgeRatio": -0.037
+  },
+  "arched-top": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.731,
+    "edgeRatio": -0.039
+  },
+  "bloomington": {
+    "facing": "left",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.77,
+    "edgeRatio": 0.056
+  },
+  "changing-table-6-drawer": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "changing tray is attached to one side",
+    "computed": true,
+    "iou": 0.909,
+    "edgeRatio": 0.032
+  },
+  "crib-mattress": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "the mattress label is visible text",
+    "computed": true,
+    "iou": 0.548,
+    "edgeRatio": -0.234,
+    "override": true
+  },
+  "darlington": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.823,
+    "edgeRatio": -0.043
+  },
+  "french-country-3-drawer-dresser-with-door": {
+    "facing": "left",
+    "mirrorable": false,
+    "reason": "a door hinges on one side",
+    "computed": true,
+    "iou": 0.843,
+    "edgeRatio": 0.042
+  },
+  "french-country-3-drawer-dresser-with-door-and-changing-table": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "changing tray is attached to one side",
+    "computed": true,
+    "iou": 0.844,
+    "edgeRatio": -0.009
+  },
+  "french-country-3-drawer-nightstand": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.884,
+    "edgeRatio": -0.006,
+    "override": true
+  },
+  "french-country-34-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.793,
+    "edgeRatio": -0.007
+  },
+  "french-country-4-drawer-dresser": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "front view is not symmetric (luma correlation 0.21)",
+    "computed": true,
+    "iou": 0.922,
+    "edgeRatio": 0.021
+  },
+  "french-country-4-drawer-dresser-with-changing-table": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "changing tray is attached to one side",
+    "computed": true,
+    "iou": 0.916,
+    "edgeRatio": 0.002
+  },
+  "french-country-6-drawer-dresser": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.863,
+    "edgeRatio": 0.055,
+    "override": true
+  },
+  "french-country-6-drawer-dresser-with-changing-table": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "changing tray is attached to one side",
+    "computed": true,
+    "iou": 0.853,
+    "edgeRatio": -0.002
+  },
+  "french-country-6-drawer-dresser-with-hutch-top": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "hutch top may be one-sided",
+    "computed": true,
+    "iou": 0.877,
+    "edgeRatio": -0.015
+  },
+  "french-country-7-drawer-dresser-with-changing-table": {
+    "facing": "left",
+    "mirrorable": false,
+    "reason": "changing tray is attached to one side",
+    "computed": true,
+    "iou": 0.817,
+    "edgeRatio": 0.023
+  },
+  "french-country-7-drawer-dresser-with-top-mirror": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.673,
+    "edgeRatio": -0.107
+  },
+  "french-country-chest": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "front view is not symmetric (luma correlation 0.14)",
+    "computed": true,
+    "iou": 0.925,
+    "edgeRatio": 0.024
+  },
+  "french-country-crib-panel-style-front": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: back rail sits left of the front rail",
+    "computed": true,
+    "iou": 0.852,
+    "edgeRatio": -0.011,
+    "override": true
+  },
+  "french-country-crib-slat-style-front": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.851,
+    "edgeRatio": -0.017
+  },
+  "full-bed-rail-kit": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.615,
+    "edgeRatio": -0.207
+  },
+  "full-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.918,
+    "edgeRatio": 0.014
+  },
+  "guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.918,
+    "edgeRatio": 0.014
+  },
+  "hudson": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.756,
+    "edgeRatio": -0.035
+  },
+  "mackenzie-34-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.793,
+    "edgeRatio": -0.007
+  },
+  "mackenzie-6-drawer-dresser": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": null,
+    "computed": true,
+    "iou": 0.916,
+    "edgeRatio": 0.028
+  },
+  "mackenzie-7-drawer-dresser": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": null,
+    "computed": true,
+    "iou": 0.913,
+    "edgeRatio": 0.032
+  },
+  "mackenzie-chest": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "front view is not symmetric (luma correlation 0.52)",
+    "computed": true,
+    "iou": 0.952,
+    "edgeRatio": 0.009
+  },
+  "mackenzie-crib-panel-back": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.86,
+    "edgeRatio": -0.014
+  },
+  "mackenzie-crib-slat-back": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: back rail sits left of the front rail",
+    "computed": true,
+    "iou": 0.818,
+    "edgeRatio": -0.011,
+    "override": true
+  },
+  "mackenzie-full-bed-rail-kit": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.714,
+    "edgeRatio": -0.103
+  },
+  "mackenzie-full-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.918,
+    "edgeRatio": 0.014
+  },
+  "mackenzie-nightstand": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.894,
+    "edgeRatio": 0.001,
+    "override": true
+  },
+  "mackenzie-toddler-bed": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.831,
+    "edgeRatio": -0.011
+  },
+  "mini-newport-with-mattress": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": null,
+    "computed": true,
+    "iou": 0.875,
+    "edgeRatio": -0.011
+  },
+  "mission": {
+    "facing": "left",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.823,
+    "edgeRatio": 0.022
+  },
+  "moyerton": {
+    "facing": "left",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.769,
+    "edgeRatio": 0.065
+  },
+  "newport-34-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.793,
+    "edgeRatio": -0.007
+  },
+  "newport-4-drawer-chest": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "front view is not symmetric (luma correlation 0.29)",
+    "computed": true,
+    "iou": 0.951,
+    "edgeRatio": 0.018
+  },
+  "newport-7-drawer-dresser": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.827,
+    "edgeRatio": -0.035
+  },
+  "newport-crib": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: back rail sits left of the front rail",
+    "computed": true,
+    "iou": 0.835,
+    "edgeRatio": 0.079,
+    "override": true
+  },
+  "newport-full-bed-rail-kit": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.742,
+    "edgeRatio": -0.1
+  },
+  "newport-full-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.918,
+    "edgeRatio": 0.014
+  },
+  "newport-nightstand": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "front view is not symmetric (luma correlation 0.39)",
+    "computed": true,
+    "iou": 0.925,
+    "edgeRatio": -0.001
+  },
+  "newport-toddler-bed": {
+    "facing": "left",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.702,
+    "edgeRatio": 0.079
+  },
+  "nightstand-2-drawer": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.886,
+    "edgeRatio": 0.009,
+    "override": true
+  },
+  "princeton": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.856,
+    "edgeRatio": -0.047
+  },
+  "toddler-conversion-rail": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.723,
+    "edgeRatio": -0.025
+  },
+  "west-lake-3-drawer-nightstand": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.887,
+    "edgeRatio": 0.008,
+    "override": true
+  },
+  "west-lake-34-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.793,
+    "edgeRatio": -0.007
+  },
+  "west-lake-4-drawer-dresser": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.883,
+    "edgeRatio": 0.033,
+    "override": true
+  },
+  "west-lake-6-drawer-dresser": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.896,
+    "edgeRatio": 0.041,
+    "override": true
+  },
+  "west-lake-7-drawer-dresser": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": "checked by eye: side panel shows on the left",
+    "computed": true,
+    "iou": 0.817,
+    "edgeRatio": 0.074,
+    "override": true
+  },
+  "west-lake-chest": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "front view is not symmetric (luma correlation 0.19)",
+    "computed": true,
+    "iou": 0.94,
+    "edgeRatio": 0.014
+  },
+  "west-lake-crib": {
+    "facing": "right",
+    "mirrorable": true,
+    "reason": null,
+    "computed": true,
+    "iou": 0.804,
+    "edgeRatio": -0.014
+  },
+  "west-lake-full-bed-rail-kit": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.5,
+    "edgeRatio": -0.155
+  },
+  "west-lake-full-guard-rail": {
+    "facing": "straight",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.918,
+    "edgeRatio": 0.014
+  },
+  "west-lake-toddler-bed": {
+    "facing": "right",
+    "mirrorable": false,
+    "reason": "rail attaches to one specific side of the crib",
+    "computed": true,
+    "iou": 0.744,
+    "edgeRatio": -0.018
+  }
+}

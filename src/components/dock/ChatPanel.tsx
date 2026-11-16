@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { HOURS_LABEL, PHONE_DISPLAY, PHONE_HREF, openState } from '@/lib/hours';
+import { PHONE_DISPLAY, PHONE_HREF, openState } from '@/lib/hours';
 
 interface Message {
   mine: boolean;
@@ -25,8 +25,11 @@ export default function ChatPanel({
   const [messages, setMessages] = useState<Message[]>([]);
   const [draft, setDraft] = useState('');
   const [attachPiece, setAttachPiece] = useState(Boolean(pieceName));
-  const [attachCart, setAttachCart] = useState(false);
-  const [callback, setCallback] = useState(false);
+  const [lastPiece, setLastPiece] = useState(pieceName);
+  if (pieceName !== lastPiece) {
+    setLastPiece(pieceName);
+    setAttachPiece(Boolean(pieceName));
+  }
   const log = useRef<HTMLDivElement>(null);
   const hours = openState(new Date());
 
@@ -38,7 +41,7 @@ export default function ChatPanel({
     e.preventDefault();
     const text = draft.trim();
     if (!text) return;
-    const context = [attachPiece ? pieceName : null, attachCart ? cartSummary : null].filter(Boolean).join(' · ') || undefined;
+    const context = [attachPiece ? pieceName : null, cartSummary].filter(Boolean).join(' · ') || undefined;
     setMessages(m => [
       ...m,
       { mine: true, text, context },
@@ -49,20 +52,15 @@ export default function ChatPanel({
     ]);
     setDraft('');
     setAttachPiece(false);
-    setAttachCart(false);
   };
 
   return (
     <div className="chat">
-      <div className="panel-head">
-        <h2>Talk to someone</h2>
+      <div className="panel-head chat-head">
+        <h2>Chat</h2>
+        <a href={PHONE_HREF} className="chat-phone">{PHONE_DISPLAY}</a>
         <button type="button" className="panel-close" aria-label="Close" onClick={onClose}>×</button>
       </div>
-      <p className="chat-hours">
-        {HOURS_LABEL}{hours.open ? ' · We’re here now' : ''}<br />
-        <a href={PHONE_HREF} className="link">Call {PHONE_DISPLAY}</a>
-      </p>
-      {!hours.open && <p className="chat-closed">We’re closed right now. Leave a message and someone will reply {hours.next}.</p>}
       <div className="chat-log" ref={log}>
         <p className="bubble">How can I help you?</p>
         {messages.map((m, i) => (
@@ -72,36 +70,19 @@ export default function ChatPanel({
           </p>
         ))}
       </div>
-      <div className="chat-attach">
-        {pieceName && (
-          <button type="button" className="link" aria-pressed={attachPiece} onClick={() => setAttachPiece(v => !v)}>This {pieceName}</button>
-        )}
-        {cartSummary && (
-          <button type="button" className="link" aria-pressed={attachCart} onClick={() => setAttachCart(v => !v)}>My cart</button>
-        )}
-        <button type="button" className="link" aria-expanded={callback} onClick={() => setCallback(v => !v)}>Have someone call me</button>
-      </div>
-      {callback && (
-        <form
-          className="chat-callback"
-          onSubmit={e => {
-            e.preventDefault();
-            setCallback(false);
-            setMessages(m => [...m, { mine: false, text: `Preview only, so we didn’t get that. For now, call ${PHONE_DISPLAY}.` }]);
-          }}
-        >
-          <label>Name<input name="name" required autoComplete="name" /></label>
-          <label>Phone<input name="phone" required inputMode="tel" autoComplete="tel" /></label>
-          <label>Best time<input name="time" /></label>
-          <button type="submit" className="btn btn--line">Request a call</button>
-        </form>
+      {pieceName && (
+        <div className="chat-attach">
+          <button type="button" className="link" aria-pressed={attachPiece} onClick={() => setAttachPiece(v => !v)}>
+            {attachPiece ? `Re: ${pieceName} ×` : `Ask about ${pieceName}`}
+          </button>
+        </div>
       )}
       <form className="composer" onSubmit={send}>
         <input
           value={draft}
           onChange={e => setDraft(e.target.value)}
           aria-label="Your message"
-          placeholder={hours.open ? 'Type a message' : 'Leave a message'}
+          placeholder="Ask a question…"
           autoComplete="off"
         />
         <button type="submit">Send</button>

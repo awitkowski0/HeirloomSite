@@ -35,8 +35,8 @@ const PRODUCT_INPUT_KEYS = new Set([
 ]);
 const VARIANT_INPUT_KEYS = new Set(['variant', 'label', 'stains', 'basePrice', 'sku', 'dimensions', 'weight', 'unavailableStains']);
 const BUILDER_INPUT_KEYS = new Set([
-  'id', 'name', 'order', 'based', 'background', 'intro', 'leadTime', 'leadWeeksMax', 'buildFeatures',
-  'listed', 'sku', 'construction', 'setup', 'safety',
+  'id', 'name', 'order', 'based', 'background', 'intro', 'story', 'leadTime', 'leadWeeksMax', 'buildFeatures',
+  'listed', 'banner', 'sku', 'construction', 'setup', 'safety',
 ]);
 
 const TEMPLATES = {
@@ -64,9 +64,11 @@ const TEMPLATES = {
     based: 'City, State',
     background: "<what a builder document shows, in Heirloom's voice>",
     intro: { text: "<the builder's words, verbatim>", source: '<named document>' },
+    story: [{ text: "<the builder's words, verbatim>", source: '<named document>' }],
     leadTime: 'About 8 weeks',
     leadWeeksMax: 8,
     listed: true,
+    banner: { image: '/data/products/<Product%20Dir>/<real_catalog_photo>.jpg', alt: "<what the photo shows, naming no wood>" },
     sku: { prefix: 'ABC', brand: '<brand for the feed>', handlingDays: { min: 40, max: 56 }, baseMaterial: null },
     construction: null,
     setup: null,
@@ -294,11 +296,12 @@ function commandAddBuilder(positional, flags) {
     based: input.based,
     background: input.background,
     intro: input.intro,
+    ...(input.story ? { story: input.story } : {}),
     leadTime: input.leadTime,
     leadWeeksMax: input.leadWeeksMax,
     buildFeatures: input.buildFeatures ?? { crib: [], caseGoods: [] },
     listed: input.listed ?? false,
-    bespokePage: false,
+    ...(input.banner ? { banner: input.banner } : {}),
     sku: input.sku,
     construction: input.construction ?? null,
     setup: input.setup ?? null,
@@ -306,9 +309,9 @@ function commandAddBuilder(positional, flags) {
   };
   catalog.builders.push({ fileId: id, record });
   const errors = report(validateCatalog(catalog));
-  console.log(`\nPlan: data/builders/${id}.json, page /builders/${id} (generated route), order ${record.order}`);
+  console.log(`\nPlan: data/builders/${id}.json, store /builders/${id} (generated), order ${record.order}`);
   for (const [field, quote] of [['construction', record.construction], ['setup', record.setup], ['safety.crib', record.safety.crib], ['safety.caseGoods', record.safety.caseGoods]]) {
-    console.log(`  ${field}: ${quote ? `"${quote.text.slice(0, 60)}..." (${quote.source})` : 'null, the site shows the gap'}`);
+    console.log(`  ${field}: ${quote ? `"${quote.text.slice(0, 60)}..." (${quote.source})` : 'null, the store leaves this out'}`);
   }
   if (errors > 0) return refuse('fix the errors above. Nothing was written.');
   if (flags.has('--dry-run')) {

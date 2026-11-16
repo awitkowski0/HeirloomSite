@@ -24,11 +24,16 @@ npm run catalog:add-builder -- /tmp/builder.json
 
 Ask for: legal or trading name, `City, State`, a one-line factual `background`, an `intro` quote, lead time and its top in weeks, SKU prefix (the first token of its SKUs), feed brand and handling days.
 
-Every statement is `{ "text": <the builder's words, exact>, "source": <named document> }` or `null`. Scaffolding creates the record and the generated page at `/builders/<id>`. No TSX is needed.
+Every statement is `{ "text": <the builder's words, exact>, "source": <named document> }` or `null`. Scaffolding creates the record and its store at `/builders/<id>`, with a page for each collection or piece type at `/builders/<id>/<section>`, all generated from the record and its products. No TSX is needed, and a folder under `src/app/builders/` is refused because it would shadow the store.
 
-- **Safety, construction and setup are verbatim or null.** If the user gives no document, leave `null` and the site shows the gap. Never write one yourself, paraphrase, or infer from marketing copy.
+`story` is optional: a list of statements in the same `{ text, source, sourceUrl?, retrievedOn? }` shape, verbatim from a named document, shown under "Their story" and credited "From <name>". No sentences of your own and no safety, health, origin or Amish wording; the rules refuse those here. Leave the key out when there is no document.
+
+`banner` is optional: `{ "image": <a real catalog photo under /data/products/ or /images/builders/, spaces as %20>, "alt": <what the photo shows, naming no wood> }`. Without it the banner is the name and quote alone. Use a case good or a converted bed: no loose bedding, bumpers, pillows or toys in a crib, and no room scene that looks generated. Never make up a photo.
+
+- **Safety, construction and setup are verbatim or null.** If the user gives no document, leave `null` and the store leaves that section out. Never write one yourself, paraphrase, or infer from marketing copy.
 - A web page counts only if recorded: `source` names it and add `sourceUrl` plus `retrievedOn` (YYYY-MM-DD). If you read the page, copy exact words only.
 - `features` chips may use only words already in the quote.
+- The store credits these as "From <name>", shows nothing for a `null`, and never adds words of its own. `listed: false` keeps the store out of the sitemap.
 
 Footer links and prose naming builders (About, Shipping, Timeline, FAQ, How Conversion Works) are hand-written and do not update themselves. Tell the user which of them now need a line.
 

@@ -5,6 +5,7 @@ import { productAddedToCart, productViewed, variantConfigured } from '@/lib/anal
 import { useCart } from '@/context/useCart';
 import { cartItemId } from '@/context/CartContext';
 import ProductGallery from './ProductGallery';
+import LeadStrip from './LeadStrip';
 import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import PurchaseAssurances from './PurchaseAssurances';
@@ -23,6 +24,7 @@ import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
 import { stainLabel } from '@/lib/stainColors';
 import { variantHref } from '@/lib/variants';
 import { useDelistedProducts } from '@/lib/useDelistedProducts';
+import type { RoomImage } from '@/lib/room-images';
 import type { InventoryItem, Stain, VariantType } from '@/types';
 
 /**
@@ -73,6 +75,8 @@ interface Props {
   details?: ReactNode;
   /** Absent for the unlisted kits and mattress. */
   shopItem?: ShopItem;
+  /** Approved room photos, shown after the catalog photos. Display only. */
+  rooms?: readonly RoomImage[];
   description: ReactNode;
   /** Resolved on the server from the URL path, so the correct configuration is
       in the initial HTML rather than applied after hydration. */
@@ -90,6 +94,7 @@ export default function ProductConfigurator({
   photoNote,
   details,
   shopItem,
+  rooms,
   description,
   initialWood,
   initialStain,
@@ -97,6 +102,7 @@ export default function ProductConfigurator({
   const { addToCart } = useCart();
   const [userWood, setUserWood] = useState<string | null>(initialWood);
   const [userStain, setUserStain] = useState<string | null>(initialStain);
+  const [galleryResetKey, setGalleryResetKey] = useState(0);
   const addButton = useRef<HTMLButtonElement>(null);
   const [addOffScreen, setAddOffScreen] = useState(false);
   const [registryState, setRegistryState] = useState<{ key: string; result: 'sent' | 'unavailable' } | null>(null);
@@ -260,13 +266,14 @@ export default function ProductConfigurator({
    * than walking eleven finishes.
    */
   const syncUrl = (wood: string, stain: string | null) => {
-    window.history.replaceState(null, '', variantHref(slug, wood, stain));
+    window.history.replaceState({ ...window.history.state, __NA: true }, '', variantHref(slug, wood, stain));
   };
 
   // Funnel step 2. Fires on interaction rather than on render, so it measures
   // intent - a visitor who touched a control - not merely arriving on a page.
   const handleStainChange = (stain: string) => {
     setUserStain(stain);
+    setGalleryResetKey(k => k + 1);
     syncUrl(selection.wood, stain);
     recordInterest({ kind: 'finish_chosen', slug, finish: stain });
     variantConfigured({
@@ -282,6 +289,7 @@ export default function ProductConfigurator({
     const nextStain = firstInStock(configurations.find(c => c.wood === wood)) || null;
     setUserWood(wood);
     setUserStain(nextStain);
+    setGalleryResetKey(k => k + 1);
     syncUrl(wood, nextStain);
     if (variantType === 'finish') recordInterest({ kind: 'finish_chosen', slug, finish: wood });
   };
@@ -325,6 +333,7 @@ export default function ProductConfigurator({
       price: totalPrice,
       image: galleryImages[0] || '',
       quantity: 1,
+      ...(shopItem?.builder && shopItem.builderHref ? { builder: { name: shopItem.builder, href: shopItem.builderHref } } : {}),
       /*
        * Carried so the cart can show the whole order - the conversion rails and
        * the guard rail arrive with the crib and a buyer should see that before
@@ -403,7 +412,7 @@ export default function ProductConfigurator({
     <>
       <div className="pdp">
         <div className="pdp-media">
-          <ProductGallery images={galleryImages} productName={productName} priority />
+          <ProductGallery images={galleryImages} rooms={rooms} productName={productName} priority morph={slug} resetKey={galleryResetKey} />
           {photoNote ? <p className="small pdp-caption">{photoNote}</p> : null}
         </div>
 
@@ -414,6 +423,7 @@ export default function ProductConfigurator({
             {finishForShopper ? <span className="small"> in {finishForShopper}</span> : null}
           </p>
           {byline}
+          {shopItem?.builder && shopItem.leadWeeksMax ? <LeadStrip leadWeeksMax={shopItem.leadWeeksMax} /> : null}
 
           <p role="status" aria-live="polite" className="visually-hidden">
             {selection.stain ? `${finishName ? `Selected: ${finishName}. ` : ''}${formatPrice(totalPrice)}.` : ''}
@@ -466,11 +476,11 @@ export default function ProductConfigurator({
           {showDeliveryMessage && <PurchaseAssurances />}
           <p className="pdp-help"><TalkToPerson piece={currentConfig.productName} label="Talk to someone about this" /></p>
         </div>
+      </div>
 
-        <div className="pdp-below">
-          {description}
-          {details}
-        </div>
+      <div className="pdp-below">
+        {description}
+        {details}
       </div>
 
       {addOffScreen && (

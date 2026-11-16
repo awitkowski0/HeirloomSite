@@ -8,6 +8,20 @@
     "text": "Having been in business for 21 years, we can offer you the quality cribs and dressers you expect and deserve.",
     "source": "Old Town Oak, 2026 catalog"
   },
+  "story": [
+    {
+      "text": "Specializing in Baby Furniture.",
+      "source": "Old Town Oak catalog cover"
+    },
+    {
+      "text": "every piece is signed by the artisan, Marlin Miller.",
+      "source": "Old Town Oak catalog"
+    },
+    {
+      "text": "Each crib is designed with a unique three stage system that adjusts with the age or size of your child. Use one piece of furniture for your child from newborn into adulthood.",
+      "source": "Old Town Oak, 2026 catalog"
+    }
+  ],
   "leadTime": "About 6 to 8 weeks",
   "leadWeeksMax": 8,
   "buildFeatures": {
@@ -21,7 +35,10 @@
     ]
   },
   "listed": true,
-  "bespokePage": true,
+  "banner": {
+    "image": "/data/products/French%20Country%206%20Drawer%20Dresser/french_country_6_drawer_dresser_0.jpg",
+    "alt": "French Country six-drawer dresser with a scalloped base and curved feet"
+  },
   "sku": {
     "prefix": "OTO",
     "brand": "Old Town Oak",

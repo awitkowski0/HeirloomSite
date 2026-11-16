@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
+import { shortBuilderName } from '@/lib/names';
 import { useCart } from '@/context/useCart';
 import { orphanedKits, stepFor } from '@/lib/cart-lines';
 import {
@@ -705,6 +706,7 @@ export default function CheckoutClient({ recommendations }: Props) {
                         {variantLabel(item.wood, item.stainName)}
                       </p>
                     )}
+                    {item.builder ? <p className="small"><Link href={item.builder.href} className="builder-name">{shortBuilderName(item.builder.name)}</Link></p> : null}
                     <p className="body-md">{formatPrice(chargedUnit[idx])}</p>
                     {/*
                       What arrives with this line, already inside its price.

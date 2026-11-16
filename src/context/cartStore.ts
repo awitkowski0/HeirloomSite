@@ -88,6 +88,12 @@ function isCartAddon(value: unknown): value is CartAddon {
  * "cart.reduce is not a function" - and with no error boundary in the app that
  * white-screened every page until the user cleared site data.
  */
+function isCartBuilder(v: unknown): v is { name: string; href: string } {
+  if (typeof v !== 'object' || v === null) return false;
+  const b = v as Record<string, unknown>;
+  return typeof b.name === 'string' && typeof b.href === 'string' && b.href.startsWith('/builders/');
+}
+
 export function parseStoredCart(raw: string | null): CartItem[] {
   if (!raw) return [];
   let parsed: unknown;
@@ -131,6 +137,7 @@ export function parseStoredCart(raw: string | null): CartItem[] {
       image: typeof e.image === 'string' ? e.image : '',
       includes,
       ...(typeof e.slug === 'string' && e.slug ? { slug: e.slug } : {}),
+      ...(isCartBuilder(e.builder) ? { builder: { name: e.builder.name, href: e.builder.href } } : {}),
       ...(typeof e.listPrice === 'number' && Number.isFinite(e.listPrice) && e.listPrice >= 0
         ? { listPrice: e.listPrice }
         : {}),

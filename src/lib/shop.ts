@@ -33,6 +33,10 @@ export interface ShopItem {
   safetyFeatures: string[];
   buildFeatures: string[];
   safetyOnFile: boolean;
+  /** Which way a grid may turn this photo; null means it stays as photographed. */
+  facing: 'left' | 'right' | null;
+  /** An optional second listing image, shown on hover once one is approved. */
+  hoverImage: string | null;
   uses: string[];
   usesNote: string | null;
   converts: string | null;
@@ -127,6 +131,8 @@ export function toShopItems(products: ProductIndexItem[]): ShopItem[] {
       safetyFeatures: features.safety,
       buildFeatures: features.build,
       safetyOnFile: builder ? safetyAnswerFor(builder, p.category).kind === 'statement' : false,
+      facing: p.facing ?? null,
+      hoverImage: p.hoverImage ?? null,
       uses: p.uses ?? [],
       usesNote: usesNoteFor(p),
       converts: convertsFor(p.category, rows),

@@ -27,7 +27,7 @@ function LookCard({ item, finish, note }: { item: ShopItem; finish: string | nul
       <h3>{item.name}</h3>
       <p className="small">
         {formatPriceApprox(item.price)}
-        {item.builder ? ` · ${shortBuilderName(item.builder)}` : ''}
+        {item.builder && item.builderHref ? <> · <Link href={item.builderHref} className="builder-name">{shortBuilderName(item.builder)}</Link></> : ''}
         {item.finishImages.length > 1 && finish ? ` · ${finish}` : ''}
         {note ? <><br />{note}</> : null}
       </p>
@@ -40,7 +40,7 @@ function YourLook({ items }: { items: readonly ShopItem[] }) {
   const { run } = useSelections();
   const look = useMemo(() => buildLook(run.picks, items), [run.picks, items]);
   const words = tasteWords(look.prefs);
-  const summary = words.length > 0 ? `${words[0][0].toUpperCase()}${words.join(', ').slice(1)}` : 'You skipped them all. Here’s where we’d start.';
+  const summary = words.length > 0 ? `${words[0][0].toUpperCase()}${words.join(', ').slice(1)}` : 'You skipped every question. Here are a few places to start.';
   const topTwo = look.cribs.slice(0, 2);
 
   return (
@@ -54,7 +54,6 @@ function YourLook({ items }: { items: readonly ShopItem[] }) {
         {look.cribs.map(c => <LookCard key={c.item.slug} item={c.item} finish={c.finish} note={c.note} />)}
         {look.storage.map(item => <LookCard key={item.slug} item={item} finish={null} note={null} />)}
       </div>
-      <p className="small page-intro">Colors are digital previews of one photo.</p>
       <p className="page-intro look-actions">
         {topTwo.length > 1 && (
           <Link
@@ -114,7 +113,7 @@ export default function PickRun({ items }: { items: ShopItem[] }) {
   const choose = (side: Side) => {
     if (swiped.current) return;
     setFlash(side);
-    setNote(side === 'skip' ? 'Skipped. Back undoes it.' : '');
+    setNote(side === 'skip' ? 'Skipped. Press Back to undo.' : '');
     if (side !== 'skip') {
       const chosen = pair[side];
       const other = pair[side === 'a' ? 'b' : 'a'];
@@ -197,7 +196,7 @@ export default function PickRun({ items }: { items: ShopItem[] }) {
         <Slide key={pair.id} pair={pair} onPick={choose} picked={flash} />
       </div>
       <p className="run-teach">
-        <b>Good to know</b> {pair.teach}{pair.preview ? ' Colors are digital previews of one photo.' : ''}
+        <b>Good to know</b> {pair.teach}
       </p>
     </div>
   );

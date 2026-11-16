@@ -1,7 +1,7 @@
 'use client';
 
 import type { SearchResult } from '@/lib/search';
-import { formatPrice } from '@/lib/format';
+import { formatPriceApprox } from '@/lib/format';
 import { humanizeWood } from '@/lib/labels';
 
 interface SearchResultItemProps {
@@ -71,7 +71,7 @@ export default function SearchResultItem({
           {r.category ? <> &bull; {r.category}</> : null}
         </span>
         <span className="search-result-price">
-          {r.variantCount > 1 ? `From ${formatPrice(r.basePrice)}` : formatPrice(r.basePrice)}
+          {r.variantCount > 1 ? `From ${formatPriceApprox(r.basePrice)}` : formatPriceApprox(r.basePrice)}
         </span>
       </span>
     </button>

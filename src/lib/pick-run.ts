@@ -20,8 +20,6 @@ export interface Pair {
   id: string;
   question: string;
   teach: string;
-  /** Both sides are one photo, recolored. */
-  preview?: boolean;
   a: PairOption;
   b: PairOption;
 }
@@ -47,22 +45,21 @@ export function pairsFor(picks: Picks, find: ItemLookup): Pair[] {
     {
       id: 'top',
       question: 'Curved across the top, or straight?',
-      teach: 'A curve softens a plain wall. A straight rail tucks neatly under a window or shelf.',
+      teach: 'A curved top looks more traditional. A straight top fits more easily under a window or shelf.',
       a: { label: 'Curved', image: '/images/picks/top-arched.jpg', slug: 'arched-top' },
       b: { label: 'Straight', image: '/images/picks/top-flat.jpg', slug: 'mission' },
     },
     {
       id: 'front',
       question: 'Open slats or a solid front?',
-      teach: 'Slats let you see in from across the room. A solid front hides the mattress and reads more like furniture.',
+      teach: 'With slats you can see the baby from across the room. A solid front hides the mattress.',
       a: { label: 'Open slats', image: '/images/picks/front-slats.jpg', slug: 'newport-crib' },
       b: { label: 'Solid front', image: '/images/picks/front-solid.jpg', slug: 'bloomington' },
     },
     {
       id: 'tone',
       question: 'Pale wood or dark?',
-      preview: true,
-      teach: 'Same crib, two stains. Pale shows the grain. Dark hides scuffs better and anchors a light room.',
+      teach: 'The same crib in two stains. Lighter stains show more of the grain. Darker stains hide scuffs better.',
       a: finishOption(find, 'bloomington', 'Natural'),
       b: finishOption(find, 'bloomington', 'Antique Slate'),
     },
@@ -70,23 +67,21 @@ export function pairsFor(picks: Picks, find: ItemLookup): Pair[] {
       ? {
           id: 'warm',
           question: 'Warm or cooler?',
-          preview: true,
-          teach: 'Warm leans honey. Cool leans gray, and pairs well with white walls.',
+          teach: 'Warm stains have a honey tone. Cool stains are grayer and go well with white walls.',
           a: finishOption(find, 'bloomington', 'Natural'),
           b: finishOption(find, 'bloomington', 'Driftwood'),
         }
       : {
           id: 'warm',
           question: 'Warm or cooler?',
-          preview: true,
-          teach: 'Warm leans brown and red. Cool leans charcoal, and looks more modern next to white.',
+          teach: 'Warm dark stains are brown or reddish. Cool dark stains are closer to charcoal.',
           a: finishOption(find, 'bloomington', 'Harvest'),
           b: finishOption(find, 'bloomington', 'Antique Slate'),
         },
     {
       id: 'foot',
       question: 'Which legs?',
-      teach: 'Tapered legs show more floor, so a small room feels bigger. Straight posts look sturdier.',
+      teach: 'Tapered legs leave more floor showing, which helps in a small room. Straight posts look heavier.',
       a: { label: 'Tapered', image: '/images/picks/foot-tapered.jpg', slug: 'newport-crib' },
       b: { label: 'Straight posts', image: '/images/picks/foot-post.jpg', slug: 'bloomington' },
     },
@@ -100,7 +95,7 @@ export function pairsFor(picks: Picks, find: ItemLookup): Pair[] {
     {
       id: 'store',
       question: 'Tall chest or wide dresser?',
-      teach: 'A chest takes less floor. A wide dresser gives you a flat top to work on.',
+      teach: 'A tall chest takes up less floor space. A wide dresser has a bigger top.',
       a: { label: 'Tall chest', image: photoOf(find, 'newport-4-drawer-chest'), slug: 'newport-4-drawer-chest' },
       b: { label: 'Wide dresser', image: '/images/picks/wide-dresser.jpg', slug: 'newport-7-drawer-dresser' },
     },

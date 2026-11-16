@@ -227,7 +227,7 @@ export default function EmailCapturePopup() {
           <p className="email-popup-text">
             {couponActive
               ? "Thank you. We've emailed you a welcome discount code, plus first look at new pieces going forward."
-              : 'Thank you. Exclusive offers and first look at new pieces will come straight to your inbox.'}
+              : 'Thanks. We’ll email you about discounts and new pieces.'}
           </p>
           <button type="button" className="button-primary email-popup-submit" onClick={close}>
             Continue browsing
@@ -240,8 +240,8 @@ export default function EmailCapturePopup() {
           </h3>
           <p className="email-popup-text">
             {couponActive
-              ? "Sign up and we'll email you a welcome discount code today, good through October 31, plus first look at new pieces. No more than a few emails a year, and you can leave whenever you like."
-              : 'Join our list for subscriber-only discounts and first look at new pieces. No more than a few emails a year, and you can leave whenever you like.'}
+              ? "Sign up and we'll email you a welcome discount code today, good through October 31, and we’ll tell you about new pieces. A few emails a year, and you can unsubscribe any time."
+              : 'Get subscriber discounts and hear about new pieces first. A few emails a year, and you can unsubscribe any time.'}
           </p>
           <form onSubmit={onSubmit} className="email-popup-form">
             <label htmlFor="email-popup-input" className="visually-hidden">

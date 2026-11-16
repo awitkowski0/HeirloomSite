@@ -30,6 +30,8 @@ const ITEM_DEFAULTS: Omit<ShopItem, 'slug' | 'name' | 'price'> = {
   top: null,
   front: null,
   style: null,
+  facing: null,
+  hoverImage: null,
   finishes: 0,
   dimensions: null,
   safetyFeatures: [],

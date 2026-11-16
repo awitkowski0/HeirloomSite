@@ -3,21 +3,19 @@ import Link from 'next/link';
 import BuilderDirectory from '@/components/builders/BuilderDirectory';
 import { BUILDERS, missingStatementCopy, type BuilderQuote } from '@/lib/builders';
 
-const TITLE = 'Compare the Builders | Heirloom Cribs & More';
+const TITLE = 'Shop by Builder | Heirloom Cribs & More';
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },
   description:
-    'Heirloom does not build furniture. Compare the independent workshops that do: where they are, how they build, and what each one says in its own words.',
+    'A store for each builder in our catalog: its collections, its story and how long each piece takes.',
   alternates: { canonical: '/builders' },
   openGraph: { title: TITLE, url: '/builders' },
   twitter: { title: TITLE },
 };
 
-const NOT_ON_FILE = 'Nothing on file yet';
-
 function QuoteOrGap({ quote }: { quote: BuilderQuote | null }) {
-  if (!quote) return <span className="builder-compare__gap">{NOT_ON_FILE}</span>;
+  if (!quote) return <span className="builder-compare__gap">Ask us</span>;
   return <>&ldquo;{quote.text}&rdquo;</>;
 }
 
@@ -41,12 +39,8 @@ export default function BuildersPage() {
   return (
     <div className="container builders-index">
       <header className="builders-index__intro">
-        <p className="label-caps text-on-surface-variant">The builders</p>
-        <h1 className="headline-xl">The Builders in the Catalog</h1>
-        <p className="body-lg">
-          Heirloom Cribs &amp; More does not build furniture. This catalog gathers the work of
-          independent workshops, and we handle everything between you and them.
-        </p>
+        <h1 className="headline-xl">Shop by builder</h1>
+        <p className="body-lg">Each builder has a store here, with its collections and its story.</p>
       </header>
 
       <BuilderDirectory />
@@ -60,7 +54,7 @@ export default function BuildersPage() {
                 <td />
                 {BUILDERS.map(b => (
                   <th key={b.id} scope="col">
-                    <Link href={b.href}>{b.name}</Link>
+                    <Link href={b.href} className="builder-name">{b.name}</Link>
                   </th>
                 ))}
               </tr>
@@ -94,13 +88,13 @@ export default function BuildersPage() {
       <section aria-labelledby="safety-heading">
         <h2 id="safety-heading" className="headline-md" style={{ scrollMarginTop: 'calc(var(--header-h) + 16px)' }}>Safety, builder by builder</h2>
         <p>
-          Heirloom makes no safety claims of its own. Each statement below is the builder&rsquo;s,
+          Each statement below is the builder&rsquo;s,
           quoted from its own materials, and each product page shows the one that applies to it.
         </p>
         <div className="builder-statements">
           {BUILDERS.map(b => (
             <article key={b.id} className="builder-statement-group">
-              <h3 className="builder-entry__name">{b.name}</h3>
+              <h3 className="builder-entry__name"><Link href={b.href} className="builder-name">{b.name}</Link></h3>
               <Statement heading="Cribs" quote={b.safety.crib} name={b.name} />
               <Statement heading="Dressers and chests" quote={b.safety.caseGoods} name={b.name} />
             </article>

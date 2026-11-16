@@ -96,8 +96,8 @@ export default function ShippingPage() {
         <h2 className="headline-md">Lead times</h2>
         <p>Every piece is made to order. Lead times are estimates, confirmed at order time:</p>
         <ul className="doc-list">
-          <li>Old Town Oak: about 6–8 weeks</li>
-          <li>Fisher&rsquo;s: 10–14 weeks</li>
+          <li><Link href="/builders/old-town-oak" className="builder-name">Old Town Oak</Link>: about 6–8 weeks</li>
+          <li><Link href="/builders/fishers-quality-products" className="builder-name">Fisher&rsquo;s</Link>: 10–14 weeks</li>
         </ul>
         <p>
           Your build starts when we receive your deposit (see{' '}

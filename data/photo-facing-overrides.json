@@ -1,0 +1,19 @@
+{
+  "crib-mattress": { "mirrorable": false, "reason": "the mattress label is visible text" },
+  "addison-3-drawer-nightstand": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "addison-7-drawer-dresser": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "addison-6-drawer-dresser": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "addison-chest-dresser": { "facing": "straight", "mirrorable": false, "reason": "head-on view, and a decorative item on top" },
+  "addison-crib-with-raised-panel-headboard": { "facing": "right", "mirrorable": true, "reason": "checked by eye: back rail sits left of the front rail" },
+  "french-country-3-drawer-nightstand": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "french-country-6-drawer-dresser": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "french-country-crib-panel-style-front": { "facing": "right", "mirrorable": true, "reason": "checked by eye: back rail sits left of the front rail" },
+  "mackenzie-crib-slat-back": { "facing": "right", "mirrorable": true, "reason": "checked by eye: back rail sits left of the front rail" },
+  "mackenzie-nightstand": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "newport-crib": { "facing": "right", "mirrorable": true, "reason": "checked by eye: back rail sits left of the front rail" },
+  "nightstand-2-drawer": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "west-lake-3-drawer-nightstand": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "west-lake-4-drawer-dresser": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "west-lake-6-drawer-dresser": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" },
+  "west-lake-7-drawer-dresser": { "facing": "right", "mirrorable": true, "reason": "checked by eye: side panel shows on the left" }
+}

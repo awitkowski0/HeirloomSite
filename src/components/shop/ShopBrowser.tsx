@@ -42,10 +42,13 @@ export default function ShopBrowser({
   items,
   priorityCount = 0,
   heading,
+  hideBuilder,
 }: {
   items: ShopItem[];
   priorityCount?: number;
   heading?: boolean;
+  /** Inside a builder's store, where every card would repeat the same name. */
+  hideBuilder?: boolean;
 }) {
   const { isDelisted } = useDelistedProducts();
   const hash = useSyncExternalStore(subscribeHash, readHash, serverHash);
@@ -73,7 +76,7 @@ export default function ShopBrowser({
 
   return (
     <div className="browser">
-      {heading && <h1 className="browser-title">{active.length > 0 ? 'Here’s what fits' : 'Everything we carry'}</h1>}
+      {heading && <h1 className="browser-title">{active.length > 0 ? 'Matching pieces' : 'All furniture'}</h1>}
       {filters.q && active.length > 0 ? <p className="small">For “{filters.q}”</p> : null}
       <div className="filters" role="group" aria-label="Filter">
         {active.map(key => (
@@ -107,11 +110,10 @@ export default function ShopBrowser({
       ) : (
         <div className="grid">
           {visible.map((item, i) => (
-            <PieceLink key={item.slug} item={item} finish={finishForTone(item, filters.tone)} priority={i < priorityCount} />
+            <PieceLink key={item.slug} item={item} finish={finishForTone(item, filters.tone)} priority={i < priorityCount} hideBuilder={hideBuilder} morph />
           ))}
         </div>
       )}
-      <p className="small page-note">Colors are digital previews of one photo.</p>
     </div>
   );
 }

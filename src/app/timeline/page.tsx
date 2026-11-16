@@ -23,13 +23,13 @@ export default function TimelinePage() {
       <section>
         <h2 className="headline-md">Made to order vs. in stock</h2>
         <p>
-          Each crib we offer is made to order by independent builders. Heirloom Cribs &amp; More is the reseller, not the factory. Nothing is pulled from a finished-goods warehouse for your configuration.
+          Each crib we offer is made to order by independent builders. Nothing is pulled from a finished-goods warehouse for your configuration.
         </p>
         <p>
           Because each piece is built after Confirm Order and deposit, timing depends on the
           builder and your finish choices. Lead times are estimates we confirm at order time, per
-          builder: Old Town Oak about <strong>6–8 weeks</strong>, Kids Comfort about{' '}
-          <strong>8 weeks</strong>, Fisher&rsquo;s <strong>10–14 weeks</strong>. See{' '}
+          builder: <Link href="/builders/old-town-oak" className="builder-name">Old Town Oak</Link> about <strong>6–8 weeks</strong>, <Link href="/builders/kids-comfort" className="builder-name">Kids Comfort</Link> about{' '}
+          <strong>8 weeks</strong>, <Link href="/builders/fishers-quality-products" className="builder-name">Fisher&rsquo;s</Link> <strong>10–14 weeks</strong>. See{' '}
           <Link href="/shipping" className="doc-link">Delivery</Link> for areas, options and
           charges.
         </p>

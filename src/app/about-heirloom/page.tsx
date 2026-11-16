@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { ORIGIN_LINE } from '@/lib/origin';
 import { SUPPORT_INBOX } from '@/lib/email';
 
 // Display the shared support inbox in lowercase, matching every other page.
@@ -48,6 +49,7 @@ export default function AboutHeirloomPage() {
           <p className="body-lg builder-header__sub">
             {`Heirloom Cribs & More sells cribs and nursery furniture made to order by ${Q.q8Sub}. We take your order, answer your calls, send your invoice, schedule your delivery, and sort out any damage with the builder and the carrier.`}
           </p>
+          <p className="origin-line">{ORIGIN_LINE}</p>
           <Link href="/contact" className="button-primary">Get Personal Assistance</Link>
           <p className="builder-header__contact">
             <a href="tel:+14842931840">(484) 293-1840</a>
@@ -89,7 +91,7 @@ export default function AboutHeirloomPage() {
           <h2 className="headline-md">Who we are</h2>
           <p>{Q.q1}</p>
           <p>
-            {`We don't build furniture. Old Town Oak, Fisher's Quality Products and Kids Comfort do, and we resell their work. Everything between you and the workshop is ours: the questions before you order, the confirmation call, the invoice, the delivery and any damage claim after your furniture arrives.`}
+            {`We sell furniture from Old Town Oak, Fisher's Quality Products and Kids Comfort. From your first question to delivery day, you deal with us: the confirmation call, the invoice, the delivery and any damage claim after your furniture arrives.`}
           </p>
           {Q.q3WomanOwned ? <p>{Q.q3WomanOwned}</p> : null}
         </section>
@@ -168,15 +170,15 @@ export default function AboutHeirloomPage() {
           <p>{`Each builder runs its own shop.`}</p>
           <ul>
             <li>
-              <Link href="/builders/old-town-oak" className="doc-link">Old Town Oak</Link>
+              <Link href="/builders/old-town-oak" className="builder-name">Old Town Oak</Link>
               {` says in its 2026 catalog that it has been in business for 21 years. The catalog describes cribs with mortise and tenon joints and steel inserts and dressers with dovetail drawer boxes, and says "every piece is signed by the artisan, Marlin Miller."`}
             </li>
             <li>
-              <Link href="/builders/fishers-quality-products" className="doc-link">Fisher's Quality Products</Link>
+              <Link href="/builders/fishers-quality-products" className="builder-name">Fisher's Quality Products</Link>
               {` describes itself as family-owned. It "started very small out of our home shop, manufacturing just one line of cribs in 2010," and now makes convertible cribs, changing tables, chests and nightstands.`}
             </li>
             <li>
-              <Link href="/builders/kids-comfort" className="doc-link">Kids Comfort</Link>
+              <Link href="/builders/kids-comfort" className="builder-name">Kids Comfort</Link>
               {` is Joe Troyer's shop in Sugarcreek, Ohio. ${Q.q8KidsComfort}`}
             </li>
           </ul>
@@ -197,11 +199,11 @@ export default function AboutHeirloomPage() {
               <span className="label-caps">Old Town Oak</span>
             </Link>
             <div className="builder-tile builder-tile--filled">
-              <Link href="/builders/fishers-quality-products" className="doc-link"><strong>Fisher's Quality Products</strong></Link>
+              <Link href="/builders/fishers-quality-products" className="builder-name"><strong>Fisher's Quality Products</strong></Link>
               <p className="builder-tile__meta">{`Describes itself as family-owned`}</p>
             </div>
             <div className="builder-tile builder-tile--filled">
-              <Link href="/builders/kids-comfort" className="doc-link"><strong>Kids Comfort</strong></Link>
+              <Link href="/builders/kids-comfort" className="builder-name"><strong>Kids Comfort</strong></Link>
               <p className="builder-tile__meta">{`Available on request`}</p>
             </div>
           </div>

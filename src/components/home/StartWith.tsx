@@ -42,7 +42,7 @@ export default function StartWith({
 
   return (
     <div className={`grid ${INTEREST_PRIVATE_CLASS}`}>
-      {picks.map(p => <PieceLink key={p.item.slug} item={p.item} reason={p.reason} />)}
+      {picks.map(p => <PieceLink key={p.item.slug} item={p.item} reason={p.reason} morph />)}
     </div>
   );
 }

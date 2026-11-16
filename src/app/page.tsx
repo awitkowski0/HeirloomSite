@@ -9,6 +9,8 @@ import { getBrowsableProducts } from '@/lib/content';
 import { getInterestCatalog } from '@/lib/interest/catalog-server';
 import { organizationJsonLd, webSiteJsonLd, jsonLdScript } from '@/lib/seo';
 import { toShopItems } from '@/lib/shop';
+import { roomImagesFor } from '@/lib/room-images';
+import RoomRow from '@/components/marketing/RoomRow';
 import { SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
 
 export const metadata: Metadata = {
@@ -21,6 +23,7 @@ const STARTERS = ['bloomington', 'mini-newport-with-mattress', 'newport-7-drawer
 /* Statically prerendered. The prompt and the four pieces are client islands. */
 export default function HomePage() {
   const items = toShopItems(getBrowsableProducts());
+  const rooms = items.flatMap(item => roomImagesFor(item.slug).slice(0, 1).map(room => ({ ...room, href: `/product/${item.slug}`, name: item.name })));
 
   return (
     <>
@@ -41,18 +44,25 @@ export default function HomePage() {
             <Link href="/products" className="link">See everything</Link>
           </div>
           <StartWith items={items} starters={STARTERS} catalog={getInterestCatalog()} />
-          <p className="section-more"><Link href="/pick" className="link">Not sure? Pick between two photos, seven times</Link></p>
+          <p className="section-more"><Link href="/pick" className="link">Not sure what you like? Let us help you choose</Link></p>
         </section>
+
+        {rooms.length > 1 && (
+          <section className="section">
+            <div className="section-head"><h2>In the room</h2></div>
+            <RoomRow items={rooms} label="Pieces in a room" />
+          </section>
+        )}
 
         <section className="section section--two">
           <div>
             <h2>Why does a crib cost over $2,000?</h2>
-            <p>Fair question. A shop builds this one after you order, in solid brown maple. It also keeps going after the baby years, when you add the conversion kits.</p>
+            <p>It’s built by hand after you order, in solid brown maple. With the conversion kits it becomes a toddler bed and later a full-size bed.</p>
             <p className="section-more"><Link href={`/product/${OPENING}#why`} className="link">See how one adds up</Link></p>
           </div>
           <div>
-            <h2>Solid wood cribs from shops we can name.</h2>
-            <p>We started Heirloom after a hard search for a solid wood crib for our first grandchild. Everything here is built to order by an independent shop.</p>
+            <h2>Who builds our furniture</h2>
+            <p>We started Heirloom when we couldn’t find a solid wood crib for our first grandchild. Every piece is built to order by a small independent shop.</p>
             <p className="section-more"><Link href="/about-heirloom" className="link">Our story</Link> <Link href="/builders" className="link">The builders</Link></p>
           </div>
         </section>

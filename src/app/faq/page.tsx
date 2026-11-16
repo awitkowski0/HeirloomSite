@@ -69,7 +69,7 @@ const SECTIONS: Section[] = [
         question: 'Where are the cribs made?',
         answer: (
           <p>
-            Every piece is made to order by an independent builder. Old Town Oak describes its furniture as “American handcrafted,” and Fisher&rsquo;s pieces are made in Pennsylvania. You buy through us. Heirloom Cribs &amp; More is a woman-owned shop in the Nazareth / Lehigh Valley, Pennsylvania area. We are the reseller, not the factory.
+            Every piece is made to order by an independent builder. Old Town Oak describes its furniture as “American handcrafted,” and Fisher&rsquo;s pieces are made in Pennsylvania. You buy through us. Heirloom Cribs &amp; More is a woman-owned shop in the Nazareth / Lehigh Valley, Pennsylvania area.
           </p>
         ),
       },

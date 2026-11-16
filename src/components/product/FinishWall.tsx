@@ -49,7 +49,6 @@ export default function FinishWall({
           </ul>
         </div>
       ))}
-      <p className="finish-fine">Digital preview. Colors are a guide, so ask us about your finish.</p>
     </section>
   );
 }

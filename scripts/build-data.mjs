@@ -127,6 +127,14 @@ if (ruleErrors.length > 0) {
 }
 
 const inventory = [];
+// Approved room photos (scripts/import-room-images.mjs). The first is a listing's
+// hover image; none of them enter inventory, so no feed or schema can see them.
+const roomImagesPath = join(root, "src", "data", "room-images.json");
+const roomImages = existsSync(roomImagesPath) ? JSON.parse(readFileSync(roomImagesPath, "utf8")) : {};
+
+const photoFacingPath = join(root, "data", "photo-facing.json");
+const photoFacing = existsSync(photoFacingPath) ? JSON.parse(readFileSync(photoFacingPath, "utf8")) : {};
+
 const productIndex = [];
 const allImages = [];
 const declaredRelations = [];
@@ -291,6 +299,12 @@ for (const dirName of productDirs) {
     usesCredit: meta.usesCredit ?? null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,
+    // The way the listing photo faces, and whether a grid may mirror it. Generated
+    // by scripts/build-facing.mjs; grids only, never a product page or a feed.
+    facing: photoFacing[meta.slug]?.mirrorable ? photoFacing[meta.slug].facing : null,
+    // An optional second listing image, shown on hover once one is approved. The
+    // listing's own photo always comes first. Null until a product declares one.
+    hoverImage: roomImages[meta.slug]?.[0]?.src ?? (meta.hoverImage ? imageBase + meta.hoverImage : null),
   });
 
   /*
@@ -607,6 +621,11 @@ for (const item of inventory) {
     unavailableStains: item.stains.filter(s => !s.inStock).map(s => s.name),
     description: (item.description || "").slice(0, 300),
     basePrice: item.basePrice,
+    // Tag search: filtered on directly, never matched as free text.
+    uses: productIndex.find(p => p.productName === item.productName)?.uses ?? [],
+    style: productIndex.find(p => p.productName === item.productName)?.style ?? null,
+    builder: productIndex.find(p => p.productName === item.productName)?.builder ?? null,
+    collection: item.collection || null,
     stainImages: Object.fromEntries(item.stains.map(s => [s.name, s.image || ""])),
   });
 }

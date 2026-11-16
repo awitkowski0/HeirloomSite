@@ -44,6 +44,10 @@ export interface ProductIndexItem {
   style: string | null;
   minPrice: number;
   defaultImage: string | null;
+  /** Which way a grid may turn this photo. Null: never flip it. See build-facing.mjs. */
+  facing?: 'left' | 'right' | null;
+  /** Optional second listing image, for the hover crossfade. */
+  hoverImage?: string | null;
 }
 
 function readData<T>(name: string): T {

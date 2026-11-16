@@ -5,13 +5,19 @@ import { execSync } from 'node:child_process';
 import { sizeOf } from './helpers/image-size.mjs';
 
 const ABOUT = 'src/app/about-heirloom/page.tsx';
+const STORE_HOME = 'src/app/builders/[builder]/page.tsx';
 const PAGES = {
   about: 'src/app/about-heirloom/page.tsx',
-  oto: 'src/app/builders/old-town-oak/page.tsx',
-  fqp: 'src/app/builders/fishers-quality-products/page.tsx',
-  kc: 'src/app/builders/kids-comfort/page.tsx',
   woods: 'src/app/woods-and-finishes/page.tsx',
 };
+// Stores are generated from data/builders/*.json; tests/builder-stores.test.ts holds their route and data checks.
+const STORE_FILES = {
+  home: STORE_HOME,
+  section: 'src/app/builders/[builder]/[section]/page.tsx',
+  layout: 'src/app/builders/[builder]/layout.tsx',
+  banner: 'src/components/builders/StoreBanner.tsx',
+};
+const COPY_PAGES = { ...PAGES, ...STORE_FILES };
 
 function src(p: string): string {
   return readFileSync(p, 'utf8');
@@ -26,21 +32,21 @@ const FORBIDDEN_ROUTES = [
   '/why-hardwood', '/how-conversion-works', '/safe-sleep', '/faq',
 ];
 
-test('(a) all five pages export a default component and metadata with a canonical', () => {
+test('(a) both static pages export a default component and metadata with a canonical', () => {
   for (const [name, p] of Object.entries(PAGES)) {
     const s = src(p);
     assert.match(s, /export default function \w+\(\)/, `${name} has no default component`);
     assert.match(s, /export const metadata:\s*Metadata/, `${name} has no metadata`);
     assert.match(s, /alternates:\s*\{\s*canonical:/, `${name} has no canonical`);
   }
+  const home = src(STORE_FILES.home);
+  assert.match(home, /export async function generateMetadata/, 'store home has no generateMetadata');
+  assert.match(home, /alternates:\s*\{\s*canonical: builder\.href\s*\}/, 'store canonical is not the builder URL');
 });
 
 test('(b) canonical uses relative brand paths (never a vercel.app host)', () => {
   const expected: Record<string, string> = {
     about: '/about-heirloom',
-    oto: '/builders/old-town-oak',
-    fqp: '/builders/fishers-quality-products',
-    kc: '/builders/kids-comfort',
     woods: '/woods-and-finishes',
   };
   for (const [name, p] of Object.entries(PAGES)) {
@@ -50,14 +56,14 @@ test('(b) canonical uses relative brand paths (never a vercel.app host)', () => 
   }
 });
 
-test('(c) forbidden phrases never appear on the five pages', () => {
+test('(c) forbidden phrases never appear on the pages or the store template', () => {
   const banned = [
     /exceeds?\s+all\s+safety\s+standards/i,
     /delivery included/i,
     /free shipping/i,
     /vercel\.app/i,
   ];
-  for (const [name, p] of Object.entries(PAGES)) {
+  for (const [name, p] of Object.entries(COPY_PAGES)) {
     const r = rendered(p);
     for (const re of banned) {
       assert.ok(!re.test(r), `${name} contains forbidden phrase ${re}`);
@@ -65,8 +71,8 @@ test('(c) forbidden phrases never appear on the five pages', () => {
   }
 });
 
-test('(d) no links to deliberately-excluded routes on any of the five pages', () => {
-  for (const [name, p] of Object.entries(PAGES)) {
+test('(d) no links to deliberately-excluded routes on the pages or the store template', () => {
+  for (const [name, p] of Object.entries(COPY_PAGES)) {
     const s = src(p);
     for (const route of FORBIDDEN_ROUTES) {
       const re = new RegExp(`href="${route}(\\b|[/"#])`);
@@ -79,10 +85,8 @@ test('(e) About page keeps id="how-an-order-works" so builder deep-links resolve
   assert.ok(src(ABOUT).includes('id="how-an-order-works"'), 'About anchor id missing');
 });
 
-test('(e2) builder pages deep-link /about-heirloom#how-an-order-works', () => {
-  for (const name of ['oto', 'fqp', 'kc'] as const) {
-    assert.ok(src(PAGES[name]).includes('/about-heirloom#how-an-order-works'), `${name} missing About deep-link`);
-  }
+test('(e2) the store home deep-links /about-heirloom#how-an-order-works', () => {
+  assert.ok(src(STORE_FILES.home).includes('/about-heirloom#how-an-order-works'), 'store home missing About deep-link');
 });
 
 test('(f) Q3 woman-owned line: ON on About only, driven from the Q constants, after Who we are p2', () => {
@@ -90,12 +94,12 @@ test('(f) Q3 woman-owned line: ON on About only, driven from the Q constants, af
   assert.ok(r.includes("q3WomanOwned: `Heirloom Cribs & More is a woman-owned business.`"), 'Q3 constant missing');
   assert.ok(r.includes('{Q.q3WomanOwned ? <p>{Q.q3WomanOwned}</p> : null}'), 'Q3 not rendered from Q constant');
   const who = r.indexOf('>Who we are</h2>');
-  const p2 = r.indexOf("We don't build furniture.");
+  const p2 = r.indexOf('We sell furniture from Old Town Oak');
   const q3 = r.indexOf('{Q.q3WomanOwned ?');
   const next = r.indexOf('id="how-an-order-works"');
   assert.ok(who > 0 && who < p2 && p2 < q3 && q3 < next, 'Q3 line not after the Who we are second paragraph');
   assert.equal((r.match(/woman-owned/gi) || []).length, 1, 'woman-owned should appear exactly once on About');
-  for (const [name, p] of Object.entries(PAGES)) {
+  for (const [name, p] of Object.entries(COPY_PAGES)) {
     if (name !== 'about') assert.ok(!/woman-owned/i.test(rendered(p)), `${name} renders a woman-owned line`);
     assert.ok(!/women-owned/i.test(rendered(p)), `${name} renders a women-owned line`);
   }
@@ -104,7 +108,7 @@ test('(f) Q3 woman-owned line: ON on About only, driven from the Q constants, af
 test('(f2) no "certified" with woman-owned / on About, and no Instagram link on any page', () => {
   // Builder pages quote builders' own "certified to CPSIA/ASTM" and "Ohio Certified Stains" lines; those stay.
   assert.ok(!/certified/i.test(src(ABOUT)), 'About contains "certified"');
-  for (const [name, p] of Object.entries(PAGES)) {
+  for (const [name, p] of Object.entries(COPY_PAGES)) {
     assert.ok(!/(certified[^\n]{0,40}wom[ae]n-owned|wom[ae]n-owned[^\n]{0,40}certified)/i.test(src(p)), `${name} pairs certified with woman-owned`);
     assert.ok(!/instagram/i.test(rendered(p)), `${name} renders Instagram`);
     assert.ok(!/instagram\.com|@heirloomcribs\b/i.test(src(p)), `${name} links Instagram`);
@@ -136,7 +140,7 @@ test('(f3) Our story: H2 after the sub-headline and before Who we are, five para
 });
 
 test('(g) no raw [[DEFAULT-Q#: ]] marker syntax leaks into any page', () => {
-  for (const [name, p] of Object.entries(PAGES)) {
+  for (const [name, p] of Object.entries(COPY_PAGES)) {
     assert.ok(!/\[\[DEFAULT-Q/i.test(src(p)), `${name} still has a raw DEFAULT-Q marker`);
   }
 });
@@ -156,11 +160,7 @@ test('(h) every <img> declares a width no larger than its native pixel width', (
   }
 });
 
-test('(i) PHIL-LOOK health-claim comment stays in the Kids Comfort source', () => {
-  assert.ok(src(PAGES.kc).includes('PHIL-LOOK: health claim'), 'KC PHIL-LOOK comment missing');
-});
-
-test('(j) all five routes build (prerendered in the Next build manifest)', () => {
+test('(j) the routes build (prerendered in the Next build manifest)', () => {
   // Confirms the routes compile and are emitted; relies on a prior `next build`.
   const manifest = '.next/app-path-routes-manifest.json';
   let out: string;
@@ -170,7 +170,7 @@ test('(j) all five routes build (prerendered in the Next build manifest)', () =>
     // Build not run in this context; skip rather than false-fail.
     return;
   }
-  for (const route of ['/about-heirloom', '/builders/old-town-oak', '/builders/fishers-quality-products', '/builders/kids-comfort', '/woods-and-finishes']) {
+  for (const route of ['/about-heirloom', '/builders/[builder]', '/builders/[builder]/[section]', '/woods-and-finishes']) {
     assert.ok(out.includes(route), `route ${route} not in build manifest`);
   }
   void execSync;
@@ -185,7 +185,7 @@ test('(k) every page uses the primary button for Get Personal Assistance', () =>
 });
 
 test('(l) image header pages serve a responsive <picture> with a downscaled mobile crop', () => {
-  const imagePages = { oto: PAGES.oto, woods: PAGES.woods };
+  const imagePages = { woods: PAGES.woods };
   for (const [name, p] of Object.entries(imagePages)) {
     const s = src(p);
     assert.ok(s.includes('<picture>'), `${name} has no <picture>`);
@@ -215,16 +215,10 @@ test('(m) no builder image is upscaled: declared widths (img + source) never exc
   }
 });
 
-test('(n) Old Town Oak sub-headline matches the revised copy', () => {
-  assert.ok(src(PAGES.oto).includes('A furniture business in Topeka, Indiana, that specializes in baby furniture. Its 2026 catalog says it has been in business for 21 years.'), 'OTO sub-headline not updated');
-});
-
-test('(o) Kids Comfort shows the Joe Troyer quote once (header panel only, not repeated in the body)', () => {
-  const s = src(PAGES.kc);
-  const count = (s.match(/We are real people that answer our phone/g) || []).length;
-  assert.equal(count, 1, `KC quote appears ${count} times, expected 1`);
-  assert.ok(s.includes('Joe Troyer, Kids Comfort catalog, January 2023'), 'KC header attribution missing');
-  assert.ok(s.includes('PHIL-LOOK: health claim'), 'KC PHIL-LOOK comment missing');
+test('(o) the store shows a builder\'s intro quote once, in the banner, credited From <builder>', () => {
+  const banner = src(STORE_FILES.banner);
+  assert.ok(banner.includes('intro.text') && banner.includes('From {name}'), 'banner intro credit missing');
+  assert.ok(!src(STORE_FILES.home).includes('intro.text'), 'store home repeats the intro quote');
 });
 
 test('(p) About contact card is a finished card pulling email from the shared source', () => {
@@ -242,9 +236,6 @@ test('(p) About contact card is a finished card pulling email from the shared so
 test('(q) each page sets an absolute title matching its source meta title (no doubled site suffix)', () => {
   const expected: Record<string, string> = {
     about: 'About Heirloom Cribs & More | How We Work',
-    oto: 'Old Town Oak Cribs & Dressers | Heirloom Cribs & More',
-    fqp: "Fisher's Quality Products Cribs | Heirloom Cribs & More",
-    kc: 'Kids Comfort Cribs & Furniture | Heirloom Cribs & More',
     woods: 'Woods and Finishes | Heirloom Cribs & More',
   };
   for (const [name, p] of Object.entries(PAGES)) {
@@ -273,7 +264,7 @@ test('(r) About builder tile and delivery line use the Brand wording', () => {
 });
 
 test('(s) every email shown as text on About and builder pages has <wbr /> before @; mailto unchanged', () => {
-  for (const name of ['about', 'oto', 'fqp', 'kc'] as const) {
+  for (const name of ['about'] as const) {
     const s = src(PAGES[name]);
     const bare = s.replace(/mailto:heirloomcribs\.care@heirloomcribsandmore\.com/g, '');
     assert.ok(!/heirloomcribs\.care@heirloomcribsandmore\.com/i.test(bare), `${name} shows an email without <wbr /> before @`);

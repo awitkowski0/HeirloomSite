@@ -23,7 +23,6 @@ const COLUMNS: readonly { heading: string; links: readonly { href: string; label
       { href: '/woods-and-finishes', label: 'Woods and stains' },
       { href: '/safe-sleep', label: 'Safe sleep' },
       { href: '/timeline', label: 'Timeline' },
-      { href: '/faq', label: 'FAQ' },
     ],
   },
   {
@@ -38,6 +37,8 @@ const COLUMNS: readonly { heading: string; links: readonly { href: string; label
   {
     heading: 'Help',
     links: [
+      { href: '/faq', label: 'FAQ' },
+      { href: '/about-heirloom#how-an-order-works', label: 'How an order works' },
       { href: '/care', label: 'Care' },
       { href: '/shipping', label: 'Delivery' },
       { href: '/returns', label: 'Returns and cancellations' },
@@ -64,7 +65,7 @@ export default function Footer() {
       <p className="foot-note">
         <a href={PHONE_HREF}>{PHONE_DISPLAY}</a> · {HOURS_LABEL} · <CookieSettingsLink />
       </p>
-      <p className="foot-note">© {new Date().getFullYear()} Heirloom Cribs &amp; More. We don’t build the furniture. We take the order, answer the phone, and handle delivery.</p>
+      <p className="foot-note">© {new Date().getFullYear()} Heirloom Cribs &amp; More.</p>
     </footer>
   );
 }

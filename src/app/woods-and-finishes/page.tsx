@@ -66,11 +66,11 @@ export default function WoodsAndFinishesPage() {
         <section>
           <h2 className="headline-md">Stains you can pick on our site</h2>
           <p>
-            <strong>Old Town Oak cribs, in brown maple:</strong>
+            <strong><Link href="/builders/old-town-oak" className="builder-name">Old Town Oak</Link> cribs, in brown maple:</strong>
             {` Natural, Almond, Asbury Brown, Carbon, Earthtone, Ebony, Harvest, Manchester, Michaels Cherry, Sandstone.`}
           </p>
           <p>
-            <strong>Fisher's cribs, in brown maple:</strong>
+            <strong><Link href="/builders/fishers-quality-products" className="builder-name">Fisher's</Link> cribs, in brown maple:</strong>
             {` Antique Slate, Driftwood, Frost, Fruitwood, Harvest, MX, Natural, Provincial, Seely, Smoke, Washington.`}
           </p>
           <p>{`Most dressers, chests and nightstands are listed in the finish shown on their page.`}</p>

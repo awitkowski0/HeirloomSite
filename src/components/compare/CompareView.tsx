@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, type CSSProperties } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCart } from '@/context/useCart';
@@ -18,7 +18,6 @@ const groupOf = (item: ShopItem) => (item.category === 'Cribs' || item.category 
 export default function CompareView({ catalog }: { catalog: ShopItem[] }) {
   const { compare, finishes } = useSelections();
   const { addToCart } = useCart();
-  const [forward, setForward] = useState<number | null>(null);
 
   const items = useMemo(
     () => compare.map(slug => catalog.find(i => i.slug === slug)).filter((i): i is ShopItem => Boolean(i)),
@@ -36,8 +35,8 @@ export default function CompareView({ catalog }: { catalog: ShopItem[] }) {
       <div className="page">
         <header className="page-intro">
           <h1>Pick two to compare</h1>
-          <p>Tap Compare on any piece and it lands here.</p>
-          <p className="look-actions"><Link href="/products" className="btn">Find some</Link></p>
+          <p>Add at least two pieces to compare them side by side.</p>
+          <p className="look-actions"><Link href="/products" className="btn">Browse furniture</Link></p>
         </header>
       </div>
     );
@@ -65,13 +64,11 @@ export default function CompareView({ catalog }: { catalog: ShopItem[] }) {
     const pool = catalog.filter(c => groupOf(c) === groupOf(current) && (c.slug === current.slug || !compare.includes(c.slug)));
     const next = pool[(pool.findIndex(c => c.slug === current.slug) + direction + pool.length) % pool.length];
     if (next && next.slug !== current.slug) replaceCompare(current.slug, next, shown[index].finish);
-    setForward(null);
   };
 
-  const columns = forward === null ? undefined : shown.map((_, i) => (i === forward ? 'minmax(58vw, 1.7fr)' : 'minmax(30vw, 1fr)')).join(' ');
   const rows: { label: string; value: (s: (typeof shown)[number]) => React.ReactNode }[] = [
     { label: 'Price', value: s => `${s.item.priceVaries ? 'From ' : ''}${formatPriceApprox(s.item.price)}` },
-    { label: 'Who makes it', value: s => (s.item.builder && s.item.builderHref ? <Link href={s.item.builderHref}>{shortBuilderName(s.item.builder)}</Link> : 'Ask us') },
+    { label: 'Who makes it', value: s => (s.item.builder && s.item.builderHref ? <Link href={s.item.builderHref} className="builder-name">{shortBuilderName(s.item.builder)}</Link> : 'Ask us') },
     { label: 'Lead time', value: s => s.item.leadTime ?? 'Ask us' },
     { label: 'What it becomes', value: s => s.item.converts ?? (s.item.category === 'Mini Cribs' ? 'Stays a mini crib' : 'Stays as it is') },
     {
@@ -84,7 +81,7 @@ export default function CompareView({ catalog }: { catalog: ShopItem[] }) {
         s.item.safetyFeatures.length > 0
           ? s.item.safetyFeatures.map(f => <span key={f} className="cell-line">{f}</span>)
           : s.item.builder
-            ? `We can request ${possessive(shortBuilderName(s.item.builder))} written statement for you. Just ask.`
+            ? `We can request ${possessive(shortBuilderName(s.item.builder))} written statement for you.`
             : 'Ask us.',
     },
   ];
@@ -106,14 +103,14 @@ export default function CompareView({ catalog }: { catalog: ShopItem[] }) {
           })}
         </div>
       )}
-      {sameFinish && crossBuilder ? <p className="small page-note">Same stain name, different look. Each shop mixes its own, and these are digital previews.</p> : null}
+      {sameFinish && crossBuilder ? <p className="small page-note">Each builder mixes its own stains, so the same name can look different from shop to shop.</p> : null}
       <div className="compare-scroll">
-        <div className="compare-table" style={{ '--n': shown.length, ...(columns ? { gridTemplateColumns: columns } : {}) } as CSSProperties}>
+        <div className="compare-table" style={{ '--n': shown.length } as CSSProperties}>
           {shown.map((s, i) => (
             <div key={s.item.slug} className="compare-col">
-              <button type="button" className="compare-photo" aria-label={`Bring ${s.item.name} forward`} onClick={() => setForward(f => (f === i ? null : i))}>
+              <Link href={`/product/${s.item.slug}`} className="compare-photo" aria-label={s.item.name}>
                 {s.image ? <Image src={s.image} alt={s.item.name} fill sizes="(max-width: 859px) 46vw, 340px" /> : null}
-              </button>
+              </Link>
               <p className="compare-tools">
                 <button type="button" aria-label="Previous piece" onClick={() => swap(i, -1)}>‹</button>
                 <button type="button" aria-label="Next piece" onClick={() => swap(i, 1)}>›</button>
@@ -126,14 +123,13 @@ export default function CompareView({ catalog }: { catalog: ShopItem[] }) {
           {rows.map(row => (
             <div key={row.label} className="compare-row">
               <p className="compare-label">{row.label}</p>
-              <div className="compare-cells" style={columns ? { gridTemplateColumns: columns } : undefined}>
+              <div className="compare-cells">
                 {shown.map(s => <div key={s.item.slug}>{row.value(s)}</div>)}
               </div>
             </div>
           ))}
         </div>
       </div>
-      <p className="small page-note">Colors are digital previews of one photo.</p>
       <div className="compare-add">
         {shown.map(s => (
           <button

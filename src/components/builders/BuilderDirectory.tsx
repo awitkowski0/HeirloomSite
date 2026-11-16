@@ -1,33 +1,36 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { BUILDERS, builderForProduct } from '@/lib/builders';
-import { getBrowsableProducts } from '@/lib/content';
+import { BUILDERS } from '@/lib/builders';
+import { storeProducts } from '@/lib/builder-stores';
+import { formatPriceApprox } from '@/lib/format';
 
-/* One card per builder: where it is, its own words, and the way in. */
+/* The list of stores. A row per builder, generated from its record. */
 export default function BuilderDirectory() {
-  const products = getBrowsableProducts();
-
   return (
-    <ul className="builder-directory">
+    <ul className="store-list">
       {BUILDERS.map(builder => {
-        const count = products.filter(p => builderForProduct(p)?.id === builder.id).length;
+        const products = storeProducts(builder);
+        const from = products.length > 0 ? Math.min(...products.map(p => p.minPrice)) : null;
         return (
-          <li key={builder.id} className="builder-entry">
-            <p className="label-caps builder-entry__place">{builder.based}</p>
-            <h3 className="builder-entry__name">
-              <Link href={builder.href}>{builder.name}</Link>
-            </h3>
-            <blockquote className="builder-entry__quote">
-              <p>&ldquo;{builder.intro.text}&rdquo;</p>
-              <cite>{builder.intro.source}</cite>
-            </blockquote>
-            <p className="builder-entry__meta">
-              {builder.listed ? `${count} pieces to browse` : 'Available on request'}
-              {' · '}
-              {builder.leadTime}
-            </p>
-            <Link href={builder.listed ? `${builder.href}#pieces` : builder.href} className="button-secondary">
-              {builder.listed ? `Shop ${builder.name}` : `Ask about ${builder.name}`}
-            </Link>
+          <li key={builder.id} className={builder.banner ? 'store-entry' : 'store-entry store-entry--plain'}>
+            {builder.banner ? (
+              <Link href={builder.href} className="store-entry__photo" tabIndex={-1} aria-hidden="true">
+                <Image src={builder.banner.image} alt="" fill sizes="(max-width: 859px) 92vw, 420px" />
+              </Link>
+            ) : null}
+            <div className="store-entry__body">
+              <h2><Link href={builder.href} className="builder-name">{builder.name}</Link></h2>
+              <blockquote>
+                <p>&ldquo;{builder.intro.text}&rdquo;</p>
+                <cite>From {builder.name}</cite>
+              </blockquote>
+              <p className="small">
+                {from === null ? 'Available on request' : `${products.length} pieces · From ${formatPriceApprox(from)}`}
+                {' · '}
+                {builder.leadTime}
+              </p>
+              <p><Link href={builder.href} className="link">Visit the store</Link></p>
+            </div>
           </li>
         );
       })}

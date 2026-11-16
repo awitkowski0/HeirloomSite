@@ -19,7 +19,9 @@ import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
+import { roomImagesFor } from '@/lib/room-images';
 import { shortBuilderName } from '@/lib/names';
+import { ORIGIN_LINE } from '@/lib/origin';
 import { softItemNote } from '@/lib/photo-notes';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import type { ReactNode } from 'react';
@@ -338,15 +340,19 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           <h1 className="product-title">{product.productName}</h1>
         }
         byline={
-          builder ? (
-            <p className="byline">
-              By <Link href={builder.href}>{shortBuilderName(builder.name)}</Link>. {builder.leadTime}, confirmed when you order.
-            </p>
-          ) : null
+          <>
+            {builder ? (
+              <p className="byline">
+                By <Link href={builder.href} className="builder-name">{shortBuilderName(builder.name)}</Link>
+              </p>
+            ) : null}
+            <p className="byline">{ORIGIN_LINE}</p>
+          </>
         }
         tags={shopItem ? <UseTags uses={shopItem.uses} note={shopItem.usesNote} /> : null}
         photoNote={softItemNote(slug)}
         shopItem={shopItem}
+        rooms={roomImagesFor(slug)}
         description={primary.description ? <div className="product-description">{renderProductDescription(primary.description)}</div> : null}
         details={<PieceDetails builder={builder} category={indexEntry?.category ?? null} price={Number(primary.basePrice) || 0} bundle={primary.bundle ?? []} />}
         initialWood={resolved.wood ?? data.config.wood}

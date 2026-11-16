@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { missingStatementCopy, safetyAnswerFor, type Builder } from '@/lib/builders';
 import { formatPriceApprox } from '@/lib/format';
 import { shortBuilderName } from '@/lib/names';
@@ -30,7 +31,7 @@ export default function PieceDetails({
           <h2>Why {formatPriceApprox(price)}?</h2>
           <ul>
             {builder && <li>{short} builds it after you order. {builder.leadTime}, and we confirm that when you order.</li>}
-            {hasWood && <li>It’s solid brown maple, never veneer over particle board.</li>}
+            {hasWood && <li>Solid brown maple, with no veneer or particle board.</li>}
             {builder?.construction ? (
               <li>
                 <blockquote>“{builder.construction.text}”<cite>{builder.construction.source}</cite></blockquote>
@@ -38,7 +39,7 @@ export default function PieceDetails({
             ) : builder ? (
               <li>Ask us how {short} builds this, and we’ll find out.</li>
             ) : null}
-            <li>We don’t have good close-ups of the joints to show you yet.</li>
+            <li>We don’t have close-up photos of the joints yet.</li>
           </ul>
           {toddler && full && (
             <dl className="sum">
@@ -55,7 +56,7 @@ export default function PieceDetails({
         <section className="detail">
           <h2>Who makes it</h2>
           <blockquote>“{builder.intro.text}”<cite>{builder.intro.source}</cite></blockquote>
-          <p className="small">{builder.name}, {builder.based}. <a href={builder.href}>More about this shop</a></p>
+          <p className="small"><Link href={builder.href} className="builder-name">{builder.name}</Link>, {builder.based}.</p>
         </section>
       )}
 

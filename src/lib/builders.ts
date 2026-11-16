@@ -8,12 +8,14 @@ import { possessive } from '@/lib/names';
  * here needs editing. A record's `text` fields are the builder's own words,
  * copied verbatim from a named document. Never add a line in Heirloom's voice.
  *
- * `null` means nothing is on file, and the UI says so rather than filling the
- * gap. Add a statement only from a document the builder has actually given you.
+ * `null` means nothing is on file, and the store leaves that part out rather
+ * than filling the gap. Add a statement only from a document the builder has
+ * actually given you.
  *
  * Deliberately absent: any statement about where materials come from. "Made in
  * USA" and "American materials" are FTC-regulated claims (16 CFR 323). `based`
- * is where a shop is, which is all the record shows.
+ * is where a shop is, which is all the record shows. The site's one origin line
+ * lives in src/lib/origin.ts and does not belong on a record.
  */
 
 import records from '@/data/builders.json';
@@ -40,14 +42,16 @@ export interface Builder {
   based: string;
   background: string;
   intro: BuilderQuote;
+  /** Verbatim statements for the store's "Their story", each from a named document. */
+  story?: BuilderQuote[];
   leadTime: string;
   leadWeeksMax: number;
   /** Short chips by piece type. Every word must appear in `construction` or be empty. */
   buildFeatures: { crib: string[]; caseGoods: string[] };
   /** False while its pieces are available on request rather than in the catalogue. */
   listed: boolean;
-  /** True when src/app/builders/<id>/ holds a hand-written page. */
-  bespokePage: boolean;
+  /** A real catalog photo for the store banner. Absent: the banner is the name and quote alone. */
+  banner?: { image: string; alt: string };
   /** SKU prefix, Merchant feed brand and handling window (business days). */
   sku: {
     prefix: string;
@@ -125,5 +129,5 @@ export function featuresFor(
 }
 
 export function missingStatementCopy(builderName: string): string {
-  return `We can request ${possessive(builderName)} written safety statement for you. Just ask.`;
+  return `We can request ${possessive(builderName)} written safety statement for you.`;
 }

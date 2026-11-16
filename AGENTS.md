@@ -87,6 +87,18 @@ then `npm run catalog:add-product -- <input.json> [--dry-run]` or
 with a generated page at `/builders/<id>`. `scripts/lib/catalog-rules.mjs` holds
 the rules; the data build enforces them too, so a violation fails the deploy.
 
+## Approved room photographs
+
+`node scripts/import-room-images.mjs [--from <folder>]` reads the image lab's
+`approved/manifest.jsonl` and copies every owner-approved room image's web file
+to `public/data/rooms/<slug>/`, writing `src/data/room-images.json`. Run
+`node scripts/build-data.mjs` after it so listings get their hover image. It
+imports only `mode: edit-room` rows with an approved decision and no failed QA;
+re-running adds new approvals and removes withdrawn ones. Product pages show the
+real catalog photo first, always. These images are never added to the Merchant
+feed, Product JSON-LD or og:image; `tests/room-images-exclusion.test.ts` holds
+that line.
+
 ## Hiding a product
 
 Two mechanisms, and they are not interchangeable.
@@ -318,7 +330,7 @@ where posthog is already loaded.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 

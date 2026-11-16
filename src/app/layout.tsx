@@ -2,11 +2,13 @@ import type { Metadata, Viewport } from 'next';
 import { GFS_Didot, Open_Sans } from 'next/font/google';
 import './globals.css';
 import '@/styles/site.css';
+import '@/styles/motion.css';
 import { Providers } from './providers';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import Dock from '@/components/dock/Dock';
 import Toaster from '@/components/ui/Toaster';
+import MotionRoot from '@/components/motion/MotionRoot';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
 /*
@@ -120,6 +122,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <Dock />
           <Toaster />
+          <MotionRoot />
         </Providers>
       </body>
     </html>
