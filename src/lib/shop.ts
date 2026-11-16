@@ -1,6 +1,7 @@
 import { getInventory, type ProductIndexItem } from '@/lib/content';
 import { toneOf, type Tone } from '@/lib/finish-tones';
-import { skuBuilderCode, type BuilderCode } from '@/lib/seo';
+import { builderByCode } from '@/lib/builders';
+import { skuBuilderCode } from '@/lib/seo';
 import type { InventoryItem } from '@/types';
 
 /*
@@ -21,18 +22,6 @@ export interface ShopItem {
   /** Every buyable finish, with its photo and measured tone. */
   finishes: { name: string; image: string; tone: Tone | null; wood: string; stainName: string }[];
 }
-
-/*
- * The builder tag under each card. Keyed by SKU prefix, the same key the
- * merchant feed's g:brand reads (BUILDERS in src/lib/seo.ts); the label here
- * is the shop-facing one ("Fisher's", as the builder page calls itself), not
- * the feed brand.
- */
-const BUILDER_TAGS: Readonly<Record<BuilderCode, { name: string; href: string }>> = {
-  OTO: { name: 'Old Town Oak', href: '/builders/old-town-oak' },
-  FQP: { name: "Fisher's", href: '/builders/fishers-quality-products' },
-  KC: { name: 'Kids Comfort', href: '/builders/kids-comfort' },
-};
 
 function finishesFor(rows: InventoryItem[]): ShopItem['finishes'] {
   const first = rows[0];
@@ -60,7 +49,8 @@ export function toShopItems(products: ProductIndexItem[]): ShopItem[] {
   const inventory = getInventory();
   return products.map(p => {
     const rows = inventory.filter(i => i.slug === p.slug);
-    const code = skuBuilderCode(rows.find(r => r.sku)?.sku);
+    // The builder tag under each card: SKU prefix -> src/lib/builders.ts.
+    const builder = builderByCode(skuBuilderCode(rows.find(r => r.sku)?.sku));
     return {
       slug: p.slug,
       productName: p.productName,
@@ -68,7 +58,7 @@ export function toShopItems(products: ProductIndexItem[]): ShopItem[] {
       minPrice: p.minPrice,
       defaultImage: p.defaultImage,
       priceVaries: new Set(pricesFor(rows)).size > 1,
-      builder: code ? BUILDER_TAGS[code] : null,
+      builder: builder ? { name: builder.tag, href: builder.href } : null,
       finishes: finishesFor(rows),
     };
   });

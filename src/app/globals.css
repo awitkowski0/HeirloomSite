@@ -2451,6 +2451,7 @@ main {
  * a laptop screen down the page.
  */
 .products-page,
+.builders-page,
 .checkout-page,
 .contact-page,
 .product-page {
@@ -4713,6 +4714,273 @@ a.product-inline-link:focus-visible {
   .piece-builder {
     transition: none;
   }
+}
+
+/*
+ * Builder stores (src/app/builders/[builder]/) and the /builders directory.
+ * The store home keeps the old page's .builder-header banner; under it a
+ * sticky menu (Home, each collection, a store search), then tiles per
+ * collection and the old page body. Sections reuse the listing grid.
+ */
+.store-bar {
+  display: flex;
+  align-items: center;
+  min-height: 52px;
+  margin: 16px 0 0;
+  font-size: 15px;
+}
+.store-menu {
+  position: sticky;
+  top: var(--header-h);
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0 0;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 767px) {
+  /* The phone header is static, so the menu sticks to the top of the window. */
+  .store-menu {
+    top: 0;
+  }
+}
+.store-menu__rail {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.store-menu__rail::-webkit-scrollbar {
+  display: none;
+}
+.store-menu__rail ul {
+  display: flex;
+  gap: 24px;
+  width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.store-menu__rail a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 14px;
+  color: var(--ink-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.store-menu__rail a:hover,
+.store-menu__rail a[aria-current='page'] {
+  color: var(--ink);
+}
+.store-menu__rail a[aria-current='page'] {
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+
+.store-search {
+  position: relative;
+  flex: 0 0 120px;
+}
+.store-search:focus-within {
+  flex-basis: 55%;
+}
+@media (min-width: 768px) {
+  .store-search,
+  .store-search:focus-within {
+    flex-basis: 240px;
+  }
+}
+.store-search input {
+  display: block;
+  width: 100%;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  box-shadow: inset 0 -1px 0 var(--rule-strong);
+  -webkit-appearance: none;
+  appearance: none;
+}
+@media (min-width: 768px) {
+  .store-search input {
+    font-size: 14px;
+  }
+}
+.store-search input::placeholder {
+  color: var(--ink-muted);
+  opacity: 1;
+}
+.store-search input:focus {
+  outline: 0;
+  box-shadow: inset 0 -2px 0 var(--ink);
+}
+.store-search__panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: min(380px, calc(100vw - 32px));
+  max-height: min(60dvh, 420px);
+  overflow-y: auto;
+  padding: 4px 0;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: 0;
+  z-index: 40;
+}
+.store-search__panel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.store-search__panel a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 4px 12px;
+  font-size: 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.store-search__panel a:hover,
+.store-search__panel a:focus-visible {
+  background: var(--rule);
+  outline: 0;
+}
+.store-search__panel img,
+.store-search__thumb {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.store-search__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.3;
+}
+.store-search__price {
+  flex: none;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.store-search__none {
+  margin: 0;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.store-block {
+  padding: 28px 0 8px;
+}
+.store-tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 16px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 1024px) {
+  .store-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 36px 28px;
+  }
+}
+.store-tile {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+.store-tile__photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 1.45;
+}
+.store-tile__photo img {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: brightness(1.06);
+}
+.store-tile__name {
+  display: block;
+  margin-top: 8px;
+  font-size: 17px;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.store-tile:hover .store-tile__name {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.store-tile__meta {
+  display: block;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.store-section {
+  padding: 24px 0 8px;
+}
+.store-section__meta {
+  margin: 4px 0 18px;
+}
+
+.builder-rows {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.builder-row {
+  display: grid;
+  gap: 14px;
+  padding: 24px 0;
+  border-top: 1px solid var(--rule);
+}
+@media (min-width: 768px) {
+  .builder-row {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+  }
+  .builder-row--plain {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.builder-row__photo {
+  position: relative;
+  display: block;
+  height: 220px;
+}
+.builder-row__photo img {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: brightness(1.06);
+}
+.builder-row__text h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 400;
+}
+.builder-row__name {
+  font-size: inherit;
+}
+.builder-row__text p {
+  margin: 0 0 8px;
+  max-width: 62ch;
+}
+.builder-row__facts {
+  font-size: 13.5px;
+  color: var(--ink-muted);
 }
 
 /*
