@@ -16,13 +16,15 @@ import {
   EMPTY_SELECTIONS,
   MAX_COMPARE,
   parseSelections,
+  MAX_SAVED,
   type RunState,
+  type SavedPiece,
   type Selections,
   type Side,
 } from './selectionsParse';
 
 export { EMPTY_SELECTIONS, MAX_COMPARE, parseSelections };
-export type { RunState, Selections, Side };
+export type { RunState, SavedPiece, Selections, Side };
 
 const STORAGE_KEY = 'heirloom_selections';
 const EVENT = 'heirloom_selections_change';
@@ -68,6 +70,22 @@ const serverSnapshot = () => EMPTY_SELECTIONS;
 
 export function useSelections(): Selections {
   return useSyncExternalStore(subscribe, read, serverSnapshot);
+}
+
+/** Saving keeps a piece. It does not fill the cart. Returns true if now saved. */
+export function toggleSaved(piece: SavedPiece): boolean {
+  const state = read();
+  if (state.saved.some(p => p.slug === piece.slug)) {
+    write({ ...state, saved: state.saved.filter(p => p.slug !== piece.slug) });
+    return false;
+  }
+  write({ ...state, saved: [piece, ...state.saved].slice(0, MAX_SAVED) });
+  return true;
+}
+
+export function removeSaved(slug: string) {
+  const state = read();
+  write({ ...state, saved: state.saved.filter(p => p.slug !== slug) });
 }
 
 export type CompareResult = 'added' | 'removed' | 'full';

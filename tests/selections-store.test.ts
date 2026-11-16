@@ -61,3 +61,20 @@ test('buildLook narrows to tagged cribs matching the picks', () => {
     assert.equal(PICK_CRIBS[c.item.slug].front, 'panel');
   }
 });
+
+test('saved pieces are validated: site-relative links only, deduped by slug', () => {
+  const s = parseSelections(
+    JSON.stringify({
+      saved: [
+        { slug: 'mission', name: 'Mission', image: '/a.jpg', href: '/product/mission', price: 2000, finish: 'Natural' },
+        { slug: 'mission', name: 'Mission again', image: '/b.jpg', href: '/product/mission', price: 1, finish: null },
+        { slug: 'evil', name: 'Evil', image: 'https://x.test/a.jpg', href: 'https://x.test', price: 1 },
+        { slug: 'proto', name: 'Proto', image: '//x.test/a.jpg', href: '//x.test', price: 1 },
+        { slug: 'neg', name: 'Neg', image: '/n.jpg', href: '/product/neg', price: -5 },
+      ],
+    }),
+  );
+  assert.deepEqual(s.saved, [
+    { slug: 'mission', name: 'Mission', image: '/a.jpg', href: '/product/mission', price: 2000, finish: 'Natural' },
+  ]);
+});

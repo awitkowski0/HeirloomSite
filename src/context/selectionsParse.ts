@@ -13,15 +13,59 @@ export interface RunState {
   at: number;
 }
 
+/**
+ * A saved piece, kept with what the side rail needs to draw it and what
+ * Babylist needs to list it, so neither has to load the catalogue. The price
+ * is display only: an order is always priced by src/lib/pricing.ts.
+ */
+export interface SavedPiece {
+  slug: string;
+  name: string;
+  /** Site-relative photo of the saved finish. */
+  image: string;
+  /** Site-relative link to the exact wood-and-finish page. */
+  href: string;
+  price: number;
+  finish: string | null;
+}
+
+export const MAX_SAVED = 40;
+
 export interface Selections {
+  saved: SavedPiece[];
   compare: string[];
   finishes: Record<string, string>;
   run: RunState;
 }
 
-export const EMPTY_SELECTIONS: Selections = { compare: [], finishes: {}, run: { picks: {}, at: 0 } };
-
 const isString = (v: unknown): v is string => typeof v === 'string' && v.length > 0 && v.length < 200;
+
+export const EMPTY_SELECTIONS: Selections = { saved: [], compare: [], finishes: {}, run: { picks: {}, at: 0 } };
+
+const isPath = (v: unknown): v is string => isString(v) && v.startsWith('/') && !v.startsWith('//');
+
+function parseSaved(v: unknown): SavedPiece[] {
+  if (!Array.isArray(v)) return [];
+  const seen = new Set<string>();
+  const out: SavedPiece[] = [];
+  for (const e of v) {
+    if (typeof e !== 'object' || e === null) continue;
+    const r = e as Record<string, unknown>;
+    if (!isString(r.slug) || seen.has(r.slug) || !isString(r.name) || !isPath(r.href)) continue;
+    if (typeof r.price !== 'number' || !Number.isFinite(r.price) || r.price < 0) continue;
+    seen.add(r.slug);
+    out.push({
+      slug: r.slug,
+      name: r.name,
+      image: isPath(r.image) ? r.image : '',
+      href: r.href,
+      price: r.price,
+      finish: isString(r.finish) ? r.finish : null,
+    });
+  }
+  return out.slice(0, MAX_SAVED);
+}
+
 
 /**
  * Anything stored is untrusted: an old version, another tab mid-write, or a
@@ -54,6 +98,6 @@ export function parseSelections(raw: string | null): Selections {
     }
     if (typeof r.at === 'number' && Number.isInteger(r.at) && r.at >= 0 && r.at < 50) run.at = r.at;
   }
-  return { compare, finishes, run };
+  return { saved: parseSaved(d.saved), compare, finishes, run };
 }
 

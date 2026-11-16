@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import CompareButton from '@/components/compare/CompareButton';
+import SaveButton from '@/components/selections/SaveButton';
 import { pickRun, resetRun, setCompare, undoPick, useSelections, type Side } from '@/context/selectionsStore';
 import { formatPriceApprox } from '@/lib/format';
 import { buildLook, pairsFor, prefsFrom, tasteWords, type Pair } from '@/lib/pick-run';
@@ -42,6 +43,9 @@ function LookCard({ item, finish, note }: { item: ShopItem; finish: string | nul
         </Link>
       ) : null}
       <p className="look-actions-card">
+        <SaveButton
+          piece={{ slug: item.slug, name: item.productName, image: image ?? '', href, price: item.minPrice, finish }}
+        />{' '}
         <CompareButton slug={item.slug} finish={finish} seeLink={false} />
       </p>
     </article>

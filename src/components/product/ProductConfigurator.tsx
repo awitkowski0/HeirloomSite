@@ -10,6 +10,8 @@ import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import InvoiceModelNote from '@/components/checkout/InvoiceModelNote';
 import CompareButton from '@/components/compare/CompareButton';
+import SaveButton from '@/components/selections/SaveButton';
+import { preloadBabylist, sendToBabylist } from '@/lib/babylist';
 import PurchaseAssurances from './PurchaseAssurances';
 import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import {
@@ -82,6 +84,7 @@ export default function ProductConfigurator({
   const { addToCart } = useCart();
   const [userWood, setUserWood] = useState<string | null>(initialWood);
   const [userStain, setUserStain] = useState<string | null>(initialStain);
+  const [babylistUnavailable, setBabylistUnavailable] = useState(false);
   const [showCartPopup, setShowCartPopup] = useState(false);
 
   /*
@@ -492,6 +495,18 @@ export default function ProductConfigurator({
                 bundle panel). The finish name is the one the listing grid and
                 Compare use: the wood for a finish-variant product, else the stain. */}
             <p className="product-compare">
+              <SaveButton
+                piece={{
+                  slug,
+                  name: currentConfig.productName,
+                  image: galleryImages[0] || '',
+                  href: formatVariant(selection.wood, selection.stain)
+                    ? variantHref(slug, selection.wood, selection.stain)
+                    : `/product/${slug}`,
+                  price: totalPrice,
+                  finish: formatVariant(selection.wood, selection.stain) || null,
+                }}
+              />
               <CompareButton
                 slug={slug}
                 finish={(configurations[0]?.variantType === 'finish' ? selection.wood : selection.stain) || null}
@@ -501,22 +516,29 @@ export default function ProductConfigurator({
             <button
               type="button"
               className="babylist-btn button-secondary"
+              /* add.js loads on first hover or focus, not on every page view
+                 (src/lib/babylist.ts). sendToBabylist makes the image and the
+                 link absolute, which Babylist needs. */
+              onPointerEnter={() => void preloadBabylist()}
+              onFocus={() => void preloadBabylist()}
               onClick={() => {
-                const bl = (
-                  window as typeof window & {
-                    bl?: { addToRegistry: (d: Record<string, string>) => void };
-                  }
-                ).bl;
-                bl?.addToRegistry?.({
-                  images: galleryImages[0] || '',
-                  price: String(totalPrice),
-                  title: currentConfig.productName,
-                  url: window.location.href,
-                });
+                const finish = formatVariant(selection.wood, selection.stain) || null;
+                void sendToBabylist({
+                  key: slug,
+                  title: finish ? `${currentConfig.productName}, ${finish}` : currentConfig.productName,
+                  image: galleryImages[0] || '',
+                  href: window.location.pathname,
+                  price: totalPrice,
+                }).then(result => setBabylistUnavailable(result === 'unavailable'));
               }}
             >
               Add to Babylist
             </button>
+            {babylistUnavailable && (
+              <p className="registry-note" role="status">
+                Babylist’s button isn’t available in this browser. Copy this page’s address and add it on Babylist.
+              </p>
+            )}
 
             {/* Replaces a single "Expected delivery: 6-8 weeks" line. That
                 answered the least important of the four questions a first-time
