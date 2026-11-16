@@ -41,8 +41,7 @@ export default function PrivacyPage() {
         <h2 className="headline-md">What we collect</h2>
         <ul className="doc-list">
           <li>
-            <strong>What you tell us.</strong> When you request a quote we collect your name,
-            email address, shipping address and phone number, along with the items you configured.
+            <strong>What you tell us.</strong> When you place an order, we collect your name, email address, shipping address and phone number, along with the items you configured.
             When you subscribe to our list we collect your email address and nothing else.
           </li>
           <li>
@@ -77,8 +76,7 @@ export default function PrivacyPage() {
             read what you type into form fields.
           </li>
           <li>
-            <strong>Meta (Facebook) Pixel</strong> — tells us which of our ads led to a quote, and
-            lets Meta show our ads to people who have visited. This is the one on this list that
+            <strong>Meta (Facebook) Pixel</strong> — tells us which of our ads led to an order and lets Meta show our ads to people who have visited. This is the one on this list that
             is genuinely advertising rather than operations, and it is the reason the consent
             banner exists.
           </li>
@@ -91,7 +89,7 @@ export default function PrivacyPage() {
             <strong>Resend</strong> — order emails, and the mailing list if you subscribe.
           </li>
           <li>
-            <strong>Cloudflare Turnstile</strong> — checks that quote requests and list signups
+            <strong>Cloudflare Turnstile</strong> — checks that checkout submissions and list signups
             come from a person rather than a script.
           </li>
           <li>

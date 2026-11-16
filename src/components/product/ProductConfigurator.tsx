@@ -8,6 +8,7 @@ import ProductGallery, { type FeedItem } from './ProductGallery';
 import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
+import InvoiceModelNote from '@/components/checkout/InvoiceModelNote';
 import PurchaseAssurances from './PurchaseAssurances';
 import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import {
@@ -16,6 +17,7 @@ import {
 } from '@/lib/mini-newport-conversion';
 import BundleBuilder from './BundleBuilder';
 import { formatPrice } from '@/lib/format';
+import { addToCartButtonLabel, initialBundleSelectedSlugs } from '@/lib/bundle-selection';
 import { humanizeWood, variantLabel as formatVariant } from '@/lib/labels';
 import { stainLabel } from '@/lib/stainColors';
 import { variantHref } from '@/lib/variants';
@@ -82,10 +84,11 @@ export default function ProductConfigurator({
   const [showCartPopup, setShowCartPopup] = useState(false);
 
   /*
-   * Bundle items start ticked, so this is seeded from the catalogue rather
-   * than empty. Keyed on slug because that is what the toggle and the cart
-   * line both need, and it is stable across a wood or finish change - the
-   * conversion kits do not depend on the crib's finish.
+   * Add-on rows start unchecked so the main button shows the listed product
+   * price until the shopper selects add-ons (Pricing App #59 cause 4). Keyed
+   * on slug because that is what the toggle and the cart line both need, and
+   * it is stable across a wood or finish change - the conversion kits do not
+   * depend on the crib's finish.
    */
   const { isDelisted } = useDelistedProducts();
   // A de-listed kit must not be offered as a tickbox, and a de-listed dresser
@@ -93,11 +96,11 @@ export default function ProductConfigurator({
   const bundleItems = (configurations[0]?.bundle ?? []).filter(b => !isDelisted(b.slug));
   // Display only - already inside the crib's price, never added to the cart.
   const includedItems = (configurations[0]?.includes ?? []).filter(i => !isDelisted(i.slug));
-  // Every row starts ticked except those the product marks bundleUnchecked
-  // (OTO: the full guard rail). A ticked optional rail adds its own price on
-  // top of the package; it is never part of the package itself.
+  // Included-with-crib rows (includes) stay display-only and already sit
+  // inside the listed price. Optional add-ons start unchecked; a ticked
+  // optional rail adds its own price on top of the package.
   const [bundleSelected, setBundleSelected] = useState<Set<string>>(
-    () => new Set(bundleItems.filter(i => !i.startsUnchecked).map(i => i.slug))
+    () => initialBundleSelectedSlugs()
   );
   /*
    * What pressing Add to Cart will actually put in the cart. Derived rather
@@ -222,7 +225,6 @@ export default function ProductConfigurator({
   const totalPrice = basePrice + addition;
 
   // What the Add to Cart button will add, and what it will come to.
-  const addedCount = 1 + selectedBundleItems.length;
   const cartTotal = totalPrice + selectedBundleItems.reduce((sum, i) => sum + i.price, 0);
   const hasBundle = includedItems.length > 0 || bundleItems.length > 0;
 
@@ -374,18 +376,22 @@ export default function ProductConfigurator({
    * never say one thing in one place and something else in the other.
    */
   const addToCartButton = (
-    <button
-      type="button"
-      className="add-to-cart"
-      disabled={!selection.stain}
-      onClick={handleAddToCart}
-    >
-      {!selection.stain
-        ? 'OUT OF STOCK'
-        : addedCount > 1
-          ? `ADD ${addedCount} ITEMS — ${formatPrice(cartTotal)}`
-          : 'ADD TO CART'}
-    </button>
+    <>
+      <button
+        type="button"
+        className="add-to-cart"
+        disabled={!selection.stain}
+        onClick={handleAddToCart}
+      >
+        {addToCartButtonLabel({
+          stainSelected: Boolean(selection.stain),
+          listedPrice: totalPrice,
+          selectedAddOnCount: selectedBundleItems.length,
+          cartTotal,
+        })}
+      </button>
+      <InvoiceModelNote />
+    </>
   );
 
   return (

@@ -65,8 +65,7 @@ export default function TimelinePage() {
             White Glove (into your home, with unpacking, assembly and placement). White Glove
             includes up to 3 flights of stairs. We deliver in{' '}
             <strong>Pennsylvania, New Jersey and Maryland</strong>. Delivery to some Newark, NJ ZIP
-            codes is quoted individually. Other areas may be available on request, so contact us
-            for a quote. See{' '}
+            codes is quoted individually. See{' '}
             <Link href="/shipping" className="doc-link">Delivery</Link>.
           </li>
         </ol>

@@ -166,9 +166,18 @@ test('Addison Natural and Hudson match the product-page price, URL, brand, shipp
   assert.equal(tags(addisonItem, 'g:min_handling_time')[0], '30');
   assert.equal(tags(addisonItem, 'g:max_handling_time')[0], '40');
   const addisonShip = merchantPrice(deliveryChargeFor(toCents(addison.basePrice), 'threshold'));
-  assert.deepEqual(tags(addisonItem, 'g:region'), [...SHIPPABLE_STATE_CODES]);
+  const addisonWhiteGlove = merchantPrice(deliveryChargeFor(toCents(addison.basePrice), 'white_glove'));
+  assert.deepEqual(tags(addisonItem, 'g:region'), [...SHIPPABLE_STATE_CODES, ...SHIPPABLE_STATE_CODES]);
   assert.equal(tags(addisonItem, 'g:country').every(c => c === 'US'), true);
+  assert.deepEqual(tags(addisonItem, 'g:service'), [
+    ...SHIPPABLE_STATE_CODES.map(() => 'Curbside'),
+    ...SHIPPABLE_STATE_CODES.map(() => 'White Glove'),
+  ]);
   assert.equal(tags(addisonItem, 'g:price').filter(p => p === addisonShip).length, SHIPPABLE_STATE_CODES.length);
+  assert.equal(
+    tags(addisonItem, 'g:price').filter(p => p === addisonWhiteGlove).length,
+    SHIPPABLE_STATE_CODES.length,
+  );
 
   const hudson = inventory.find(i => i.sku === 'FQP-301');
   assert.ok(hudson?.slug);
@@ -183,6 +192,15 @@ test('Addison Natural and Hudson match the product-page price, URL, brand, shipp
       .length,
     SHIPPABLE_STATE_CODES.length
   );
+  assert.equal(
+    tags(hudsonItem, 'g:price').filter(p => p === merchantPrice(deliveryChargeFor(195_000, 'white_glove')))
+      .length,
+    SHIPPABLE_STATE_CODES.length
+  );
+  assert.deepEqual(tags(hudsonItem, 'g:service'), [
+    ...SHIPPABLE_STATE_CODES.map(() => 'Curbside'),
+    ...SHIPPABLE_STATE_CODES.map(() => 'White Glove'),
+  ]);
 });
 
 test('Kids Comfort items pick up brand and handling from the builder table', () => {

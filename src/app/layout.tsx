@@ -6,7 +6,7 @@ import { Providers } from './providers';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
-import { SITE_NAME, SITE_URL } from '@/lib/seo';
+import { SITE_NAME, SITE_URL, organizationJsonLd, jsonLdScript } from '@/lib/seo';
 
 /*
  * GFS Didot is the classical Didone serif the editorial look is built on now:
@@ -108,6 +108,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdScript(organizationJsonLd()) }}
+        />
         <Providers>
           {/* Keyboard users previously had to tab the entire header and nav on
               every page to reach content. */}
