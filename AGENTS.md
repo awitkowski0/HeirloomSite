@@ -239,6 +239,13 @@ this customer still owe".
 - `SIGNUP_NOTIFICATION_EMAIL` — server only, comma-separated, optional. Extra
   recipients of the "new mailing list signup" alert; the support inbox always
   gets it. Personal addresses go here, not in code: the repo is public.
+- `NEXT_PUBLIC_CRISP_WEBSITE_ID` — Crisp live chat in the desktop side rail.
+  Unset, the rail links to the `/contact` form instead and nothing loads from
+  Crisp. Set, the widget still loads only when a visitor presses "Chat with
+  us": it is ~100KB and sets a cookie, and a click is the visitor asking for
+  the service, which is why it is not behind the analytics consent gate. Read
+  at build time; redeploy after setting it. The Crisp origins are in the CSP
+  unconditionally. See `src/lib/live-chat.ts`.
 - `RESEND_AUDIENCE_ID` — server only; the audience the email-capture popup
   writes to. Without it `/api/subscribe` answers 503 rather than accepting an
   address it has nowhere to put. Note the deliberate contrast with the order

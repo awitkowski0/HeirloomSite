@@ -4580,3 +4580,155 @@ a.product-inline-link:focus-visible {
   margin: 0.25rem 0 0;
   color: var(--on-surface-muted);
 }
+
+/*
+ * Side rail: the cart and "Questions?" in a fixed right-hand column on wide
+ * screens (src/components/rail/SideRail.tsx). Hidden below 1200px, where
+ * there is no room beside the content and the bottom nav / header cart cover
+ * it. From 1200px up everything else - header, content, footer, the consent
+ * banner - gives up --rail-w on the right, so the rail runs the full height
+ * of the window and never sits on top of anything, and the header's centred
+ * container lines up with the content under it.
+ */
+.side-rail {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  body {
+    --rail-w: 300px;
+  }
+  main,
+  .site-footer {
+    margin-right: var(--rail-w);
+  }
+  .app-header,
+  .consent-banner {
+    right: var(--rail-w);
+  }
+
+  .side-rail {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    width: var(--rail-w);
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    border-left: 1px solid var(--rule);
+  }
+
+  .side-rail-cart {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 24px 20px 16px;
+  }
+
+  .side-rail-help {
+    flex: none;
+    padding: 16px 20px 20px;
+    border-top: 1px solid var(--rule);
+  }
+  /* On /checkout the cart half is dropped, so help sits at the top. */
+  .side-rail > .side-rail-help:first-child {
+    padding-top: 24px;
+    border-top: 0;
+  }
+
+  .side-rail-title {
+    margin: 0 0 12px;
+    font-family: var(--font-caps);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+
+  .side-rail-empty {
+    margin: 0;
+  }
+
+  .side-rail-lines {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .side-rail-line {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .side-rail-thumb {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--rule);
+  }
+  .side-rail-thumb img {
+    object-fit: cover;
+  }
+  .side-rail-line-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    font-size: 13px;
+  }
+  .side-rail-line-name {
+    color: var(--ink);
+  }
+  .side-rail-line-meta {
+    color: var(--on-surface-variant);
+  }
+  .side-rail-remove {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .side-rail-remove:hover {
+    color: var(--primary);
+  }
+
+  .side-rail-total {
+    display: flex;
+    justify-content: space-between;
+    margin: 14px 0 12px;
+    font-size: 15px;
+    color: var(--ink);
+  }
+
+  .side-rail-checkout,
+  .side-rail-chat {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .side-rail-note,
+  .side-rail-contact {
+    margin: 10px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+  .side-rail-contact a {
+    color: inherit;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .side-rail-contact a:hover {
+    color: var(--primary);
+  }
+}
