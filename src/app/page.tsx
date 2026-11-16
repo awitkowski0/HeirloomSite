@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getShowroom, getInventory } from '@/lib/content';
+import { getBrowsableProducts, getShowroom, getInventory } from '@/lib/content';
 import { variantHref } from '@/lib/variants';
 import { webSiteJsonLd, jsonLdScript } from '@/lib/seo';
 import { resolveFeature, indexByProductName } from '@/lib/showroom';
@@ -8,6 +8,8 @@ import HomeHero from '@/components/home/HomeHero';
 import ProvenanceBand from '@/components/home/ProvenanceBand';
 import StyleCards from '@/components/home/StyleCards';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
+import RoomSection from '@/components/marketing/RoomSection';
+import { roomImagesFor } from '@/lib/room-images';
 import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
 import BrandSketch from '@/components/marketing/BrandSketch';
@@ -83,6 +85,16 @@ export default function HomePage() {
           lead="Pick the silhouette first; the hardwood and the finish follow. Conversion kits for the toddler bed and full-size bed are listed on each product page."
         >
           <FeaturedProducts />
+          {/* One room photo per piece that has one, linking to the piece. */}
+          <RoomSection
+            id="home-rooms-heading"
+            label="Pieces in a room"
+            items={getBrowsableProducts().flatMap(p =>
+              roomImagesFor(p.slug)
+                .slice(0, 1)
+                .map(room => ({ ...room, href: `/product/${p.slug}`, name: p.productName })),
+            )}
+          />
           <StyleCards inventory={inventory} />
           <div className="journey-sketches">
             <BrandSketch

@@ -5313,6 +5313,88 @@ a.product-inline-link:focus-visible {
 }
 
 /*
+ * "In the room" (src/components/marketing/RoomRow.tsx): owner-approved room
+ * photographs in a sideways row. Full-bleed photos, unlike the catalogue
+ * shots, so no multiply blend.
+ */
+.room-section {
+  padding: 32px 0 8px;
+}
+.room-section-heading {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.room-row {
+  position: relative;
+}
+.room-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.room-rail::-webkit-scrollbar {
+  display: none;
+}
+.room-card {
+  flex: 0 0 min(72vw, 320px);
+  scroll-snap-align: start;
+  color: inherit;
+  text-decoration: none;
+}
+.room-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--rule);
+}
+.room-photo img {
+  object-fit: cover;
+}
+.room-name {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink);
+}
+a.room-card:hover .room-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.room-arrow {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .room-arrow {
+    position: absolute;
+    top: calc((min(72vw, 320px) * 0.75) / 2 - 20px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .room-arrow--prev {
+    left: 8px;
+  }
+  .room-arrow--next {
+    right: 8px;
+  }
+}
+
+/*
  * Side rail: the cart and "Questions?" in a fixed right-hand column on wide
  * screens (src/components/rail/SideRail.tsx). Hidden below 1200px, where
  * there is no room beside the content and the bottom nav / header cart cover
