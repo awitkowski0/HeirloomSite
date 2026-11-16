@@ -6,6 +6,7 @@ import { Providers } from './providers';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
+import SideRail from '@/components/rail/SideRail';
 import { SITE_NAME, SITE_URL, organizationJsonLd, jsonLdScript } from '@/lib/seo';
 
 /*
@@ -120,6 +121,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </a>
           <Header />
           <main id="main-content">{children}</main>
+          <SideRail />
           <BottomNav />
           <Footer />
         </Providers>

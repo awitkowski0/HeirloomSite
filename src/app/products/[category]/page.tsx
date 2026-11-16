@@ -7,14 +7,12 @@ import {
   getTaxonomyNodes,
   getTaxonomyNodeBySlug,
   getProductsForNode,
-  getInventory,
 } from '@/lib/content';
-import { buildGalleryProducts } from '@/lib/gallery';
-import GalleryBrowser from '@/components/gallery/GalleryBrowser';
 import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
-import { TAXONOMY, sourcesFor } from '@/lib/taxonomy';
+import { TAXONOMY } from '@/lib/taxonomy';
 import CategoryPills from '@/components/products/CategoryPills';
-import VisibleProductGrid from '@/components/products/VisibleProductGrid';
+import ShopBrowser from '@/components/shop/ShopBrowser';
+import { toShopItems } from '@/lib/shop';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 export const dynamicParams = false;
@@ -66,26 +64,6 @@ export default async function CategoryPage({
   const products = getProductsForNode(slug);
   const categories = getCategories();
   const parent = parentOf(slug);
-
-  /*
-   * The finish browser, on any node whose products are cribs.
-   *
-   * It used to be keyed on the literal slug 'cribs'. That breaks the moment
-   * cribs live under a parent and a Mini Cribs child, so it now asks what the
-   * node actually contains. Only cribs, because only cribs have a finish worth
-   * filtering on - the products with `variantType: "none"` have a single
-   * "Default" finish, and a filter with one option that matches everything is
-   * furniture.
-   */
-  const nodeSources = new Set(sourcesFor(node));
-  const showFinishBrowser = nodeSources.has('Cribs');
-  // Built from the node's OWN sources, not the literal 'Cribs' category, so the
-  // Cribs parent browses all sixteen and does not advertise a count its grid
-  // then contradicts by one. Mini Cribs alone falls through to the plain grid:
-  // one product with a single finish is not something to filter.
-  const cribFinishes = showFinishBrowser
-    ? buildGalleryProducts(getInventory().filter(i => i.category && nodeSources.has(i.category)))
-    : [];
 
   const crumbs = [
     { name: 'Home', path: '/' },
@@ -144,15 +122,13 @@ export default async function CategoryPage({
         </nav>
       )}
 
-      <section
-        aria-label={`${node.name} products`}
-        className={showFinishBrowser ? 'finish-browser' : undefined}
-      >
-        {showFinishBrowser ? (
-          <GalleryBrowser products={cribFinishes} />
-        ) : (
-          <VisibleProductGrid products={products} />
-        )}
+      {/*
+        The same grid on every node. The cribs used to get the finish browser
+        (GalleryBrowser, one tile per finish); the grid's light / dark wood
+        filter now does that job, and swaps each card to a finish of that tone.
+      */}
+      <section aria-label={`${node.name} products`}>
+        <ShopBrowser items={toShopItems(products)} priorityCount={3} />
         <ListingAnalytics />
       </section>
     </div>

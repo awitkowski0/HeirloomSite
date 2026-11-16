@@ -7,7 +7,8 @@ import {
   resolveLegacyCollectionSlug,
 } from '@/lib/collections';
 import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
-import VisibleProductGrid from '@/components/products/VisibleProductGrid';
+import ShopBrowser from '@/components/shop/ShopBrowser';
+import { toShopItems } from '@/lib/shop';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 // Not false: a slug outside generateStaticParams still needs to run through
@@ -89,7 +90,7 @@ export default async function CollectionPage({
       </header>
 
       <section aria-label={`${collection.name} products`}>
-        <VisibleProductGrid products={products} />
+        <ShopBrowser items={toShopItems(products)} />
         <ListingAnalytics />
       </section>
     </div>

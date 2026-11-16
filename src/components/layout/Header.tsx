@@ -20,16 +20,22 @@ import HelpMenu from './HelpMenu';
  * with 369px of air on one side and 32px on the other. Splitting the bars
  * removes the constraint that caused it rather than tuning around it.
  *
- * The mark is text, not the logo PNG it replaced. That removes an image
- * request from every page in the site and lets the mark inherit colour;
- * logo-wide.png is still the og:image and stays in place.
+ * The mark is the brand logo: crib and "Heirloom" from 768px up, the
+ * wordmark alone below that, where the bar is 52px tall and the crib would
+ * shrink to an unreadable smudge. Both are transparent PNGs sized at 128px
+ * tall so they stay sharp at 2x. /logo-wide.png (the older brown artwork)
+ * is still the og:image and is not used here.
  */
 export default function Header() {
   return (
     <header className="app-header">
       <div className="header-inner">
         <Link href="/" className="wordmark" aria-label="Heirloom Cribs & More, home">
-          Heirloom
+          {/* <picture> switches artwork by width, which next/image cannot do. */}
+          <picture>
+            <source media="(min-width: 768px)" srcSet="/brand/logo-wide.png" width={562} height={128} />
+            <img src="/brand/logo-text.png" alt="" width={452} height={128} />
+          </picture>
         </Link>
 
         {/* The middle column, and the widest thing in the bar. On a catalogue
