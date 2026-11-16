@@ -38,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/about-heirloom`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/builders`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${SITE_URL}/pick`, changeFrequency: 'monthly', priority: 0.4 },
     ...BUILDERS.flatMap(b => [
       { url: `${SITE_URL}${b.href}`, changeFrequency: 'yearly' as const, priority: 0.4 },
       // Each store shelf (a collection or piece type), from the catalogue.

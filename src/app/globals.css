@@ -4984,6 +4984,313 @@ a.product-inline-link:focus-visible {
 }
 
 /*
+ * Compare (src/components/compare/) and Help me pick (src/components/pick/).
+ * Photos sit on the paper like the listing grid's.
+ */
+.compare-action {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+}
+.compare-replace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  flex-basis: 100%;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+.product-compare {
+  margin: 10px 0 0;
+}
+
+.compare-photo,
+.look-photo,
+.half-photo,
+.swatch-photo {
+  position: relative;
+  display: block;
+}
+.compare-photo img,
+.look-photo img,
+.half-photo img,
+.swatch-photo img {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: brightness(1.06);
+}
+
+.swatch-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 0 0 8px;
+  scrollbar-width: none;
+}
+.swatch {
+  flex: 0 0 60px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+}
+.swatch-photo {
+  width: 44px;
+  height: 36px;
+  margin: 0 auto 4px;
+}
+.swatch[aria-pressed='true'] {
+  color: var(--ink);
+  font-weight: 600;
+}
+.compare-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-top: 8px;
+}
+.compare-table,
+.compare-cells {
+  display: grid;
+  grid-template-columns: repeat(var(--n), minmax(42vw, 1fr));
+  gap: 0 16px;
+}
+@media (min-width: 768px) {
+  .compare-table,
+  .compare-cells {
+    grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+    gap: 0 32px;
+  }
+}
+.compare-col {
+  min-width: 0;
+}
+.compare-photo {
+  width: 100%;
+  height: clamp(160px, 30vh, 340px);
+  border-bottom: 1px solid var(--rule);
+}
+.compare-photo img {
+  object-position: center bottom;
+}
+.compare-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 0 -12px;
+}
+.compare-tools > button:not(.filter-link) {
+  width: 36px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+.compare-col h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+.compare-col h2 a {
+  color: inherit;
+  text-decoration: none;
+}
+.compare-finish {
+  min-height: 20px;
+  margin: 2px 0 10px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.compare-choose {
+  display: inline-flex;
+}
+.compare-row {
+  grid-column: 1 / -1;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+}
+.compare-label {
+  position: sticky;
+  left: 0;
+  width: max-content;
+  margin: 0 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.compare-cells {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.run {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - var(--header-h) - 120px);
+}
+.run-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.run-bar button,
+.run-bar a {
+  display: inline-flex;
+  align-items: center;
+  min-width: 36px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: none;
+  cursor: pointer;
+}
+.run-progress {
+  flex: 1;
+  display: flex;
+  gap: 3px;
+}
+.run-progress i {
+  flex: 1;
+  height: 2px;
+  background: var(--rule);
+}
+.run-progress i.on {
+  background: var(--ink);
+}
+.run-taste {
+  min-height: 22px;
+  margin: 4px 0 0;
+}
+.run-stage {
+  flex: 1;
+  display: flex;
+  min-height: 360px;
+  touch-action: pan-y;
+}
+.halves {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 0;
+}
+@media (min-width: 768px) {
+  .halves {
+    flex-direction: row;
+    gap: 32px;
+  }
+}
+.half {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+}
+.half-photo {
+  flex: 1;
+  min-height: 160px;
+}
+@media (min-width: 768px) {
+  .half-photo {
+    min-height: 340px;
+  }
+}
+.half-photo img {
+  object-position: center bottom;
+}
+.half-label {
+  padding: 6px 0 2px;
+  font-size: 15px;
+  text-underline-offset: 3px;
+}
+.half:hover .half-label,
+.half--picked .half-label {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+.half--picked .half-label {
+  font-weight: 600;
+}
+.run-teach {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-muted);
+}
+.run-teach b {
+  margin-right: 4px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.look-rail {
+  display: flex;
+  gap: 22px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 8px 0 12px;
+  scrollbar-width: thin;
+}
+.look-card {
+  flex: 0 0 min(70vw, 260px);
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+}
+.look-photo {
+  height: clamp(160px, 28vh, 240px);
+}
+.look-card h3 {
+  margin: 8px 0 0;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+.look-card h3 a {
+  color: inherit;
+  text-decoration: none;
+}
+.look-meta {
+  margin: 2px 0 4px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.look-actions-card {
+  margin: 6px 0 0;
+}
+.look-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 20px;
+  margin: 16px 0 0;
+}
+
+/*
  * Side rail: the cart and "Questions?" in a fixed right-hand column on wide
  * screens (src/components/rail/SideRail.tsx). Hidden below 1200px, where
  * there is no room beside the content and the bottom nav / header cart cover

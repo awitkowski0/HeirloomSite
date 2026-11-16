@@ -9,6 +9,7 @@ import WoodSelector from './WoodSelector';
 import StainSelector from './StainSelector';
 import CartPopup from './CartPopup';
 import InvoiceModelNote from '@/components/checkout/InvoiceModelNote';
+import CompareButton from '@/components/compare/CompareButton';
 import PurchaseAssurances from './PurchaseAssurances';
 import { showsPurchaseAssurances } from '@/lib/delivery-line';
 import {
@@ -486,6 +487,16 @@ export default function ProductConfigurator({
               the truth about its own consequences.
             */}
             {addToCartButton}
+
+            {/* Once, here, not inside addToCartButton (which also renders in the
+                bundle panel). The finish name is the one the listing grid and
+                Compare use: the wood for a finish-variant product, else the stain. */}
+            <p className="product-compare">
+              <CompareButton
+                slug={slug}
+                finish={(configurations[0]?.variantType === 'finish' ? selection.wood : selection.stain) || null}
+              />
+            </p>
 
             <button
               type="button"
