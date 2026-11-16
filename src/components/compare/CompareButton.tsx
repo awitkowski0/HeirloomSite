@@ -7,7 +7,8 @@ import { MAX_COMPARE, replaceCompare, toggleCompare, useSelections } from '@/con
 /**
  * "Compare" on a piece. A full comparison asks which piece to replace; it
  * never quietly evicts one. Once two or more are picked, a link to /compare
- * appears beside it.
+ * appears beside it, unless `seeLink` is off: a list of cards with its own
+ * way to /compare would otherwise repeat that link on every card.
  *
  * `names` resolves compared slugs to names for the replace prompt; pass what
  * the page already has (a product page passes its related products' names).
@@ -16,10 +17,12 @@ export default function CompareButton({
   slug,
   finish,
   names = {},
+  seeLink = true,
 }: {
   slug: string;
   finish: string | null;
   names?: Readonly<Record<string, string>>;
+  seeLink?: boolean;
 }) {
   const { compare } = useSelections();
   const [full, setFull] = useState(false);
@@ -38,7 +41,7 @@ export default function CompareButton({
       >
         {comparing ? 'Comparing' : 'Compare'}
       </button>
-      {compare.length >= 2 && (
+      {seeLink && compare.length >= 2 && (
         <Link href="/compare" className="filter-link">
           See {compare.length} side by side
         </Link>

@@ -42,7 +42,7 @@ function LookCard({ item, finish, note }: { item: ShopItem; finish: string | nul
         </Link>
       ) : null}
       <p className="look-actions-card">
-        <CompareButton slug={item.slug} finish={finish} />
+        <CompareButton slug={item.slug} finish={finish} seeLink={false} />
       </p>
     </article>
   );
