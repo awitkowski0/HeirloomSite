@@ -42,6 +42,26 @@ const SafetyLink = (
   </Link>
 );
 
+/*
+ * Builder-quote tags stay in this file for check-copy (Pricing App #25,
+ * CoS option A). They are not rendered on the page or in FAQ JSON-LD.
+ * The visitor sees the builder name, quotation marks, and a short visible
+ * source instead. The tag strings and the visible sources are the signed
+ * wording from Pricing App #25.
+ */
+const BUILDER_QUOTE = {
+  oto2026p3: '[builder-quote: OTO, 2026 Catalog p. 3]',
+  kcCatalogP7Jan2023: '[builder-quote: KC, catalog p. 7, January 2023]',
+  fqp202425CribSpreads: '[builder-quote: FQP, 2024/25 catalog crib spreads]',
+} as const;
+
+/** Present in source for check-copy; renders nothing. */
+function BuilderQuoteTag({ tag }: { tag: string }) {
+  void tag;
+  return null;
+}
+
+
 const SECTIONS: Section[] = [
   {
     heading: 'Materials and construction',
@@ -50,7 +70,13 @@ const SECTIONS: Section[] = [
         question: 'Are your cribs solid hardwood?',
         answer: (
           <p>
-            Each builder describes its own materials. Old Town Oak states: “solid, American handcrafted baby furniture.” Kids Comfort states: “All cribs are completely solid wood including the mattress support.” Where a product page states “no particle board / no MDF / no veneer,” that language is intentional and specific to that piece.
+            Each builder describes its own materials. Old Town Oak states: “solid, American
+            handcrafted baby furniture.” <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
+            (2026 catalog, p. 3) Kids Comfort states: “All cribs are completely solid wood
+            including the mattress support.”{' '}
+            <BuilderQuoteTag tag={BUILDER_QUOTE.kcCatalogP7Jan2023} />
+            (catalog, p. 7, January 2023) Where a product page states “no particle board / no
+            MDF / no veneer,” that language is intentional and specific to that piece.
           </p>
         ),
       },
@@ -69,7 +95,11 @@ const SECTIONS: Section[] = [
         question: 'Where are the cribs made?',
         answer: (
           <p>
-            Every piece is made to order by an independent builder. Old Town Oak describes its furniture as “American handcrafted,” and Fisher&rsquo;s pieces are made in Pennsylvania. You buy through us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley, Pennsylvania area. We are the reseller, not the factory.
+            Every piece is made to order by an independent builder. Old Town Oak states: “solid,
+            American handcrafted baby furniture.” <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
+            (2026 catalog, p. 3) Fisher&rsquo;s pieces are made in Pennsylvania. You buy through
+            us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley,
+            Pennsylvania area. We are the reseller, not the factory.
           </p>
         ),
       },
@@ -117,9 +147,12 @@ const SECTIONS: Section[] = [
             It is the common name for a crib that converts to a toddler bed, a day bed, and a
             full-size bed. Old Town Oak describes three stages (crib, toddler bed, and double bed) and
             notes that its toddler bed can be used as a day bed: &ldquo;Use as a day bed for toddlers
-            to preschoolers.&rdquo; Fisher&rsquo;s conversion kit makes a toddler bed or a day bed,
+            to preschoolers.&rdquo; <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
+            (2026 catalog, p. 3) Fisher&rsquo;s conversion kit makes a toddler bed or a day bed,
             described in its catalog as a &ldquo;Toddler Bed/Day Bed Conversion Kit: Includes day bed
-            frame, toddler bed rail, and hardware.&rdquo; Check the product page for the stages and
+            frame, toddler bed rail, and hardware.&rdquo;{' '}
+            <BuilderQuoteTag tag={BUILDER_QUOTE.fqp202425CribSpreads} />
+            (2024/25 catalog crib spreads) Check the product page for the stages and
             kits that apply to your model. See{' '}
             <Link href="/how-conversion-works" className="doc-link">
               How Our 4-in-1 Conversion Works
@@ -412,6 +445,7 @@ const SECTIONS: Section[] = [
     ],
   },
 ];
+
 
 export default function FaqPage() {
   const entries = SECTIONS.flatMap(s => s.entries);
