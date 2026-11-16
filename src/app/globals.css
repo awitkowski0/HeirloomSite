@@ -19,6 +19,9 @@
   --accent-on: #f7f2e7;
   --rule: #e9dfd4;
   --rule-strong: #837770;
+  /* The builder tag under each listing card, and its hover. */
+  --store-green: #9dbe9e;
+  --builder-highlight: rgba(157, 190, 158, 0.5);
   /* Muted cream for copy on the dark band. 6.77:1 on --ink. */
   --on-ink-muted: #d6c6ba;
 
@@ -4579,6 +4582,137 @@ a.product-inline-link:focus-visible {
 .deeplink-summary-price {
   margin: 0.25rem 0 0;
   color: var(--on-surface-muted);
+}
+
+/*
+ * Listing grid (src/components/shop/ShopBrowser.tsx + PieceLink.tsx): the
+ * new design's unboxed cards. A photo on the paper with no frame, then the
+ * name, the price, and the builder as a small green tag. Two columns on
+ * phones, three on tablets, four from 1024px. The home page's featured row
+ * and a product page's "Complete the set" keep .featured-card.
+ */
+.browser {
+  padding-top: 4px;
+}
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  margin: 0 0 20px;
+}
+.filter,
+.filter-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.filter span {
+  color: var(--ink-muted);
+}
+.filter-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+}
+.filter-link:hover {
+  text-decoration-color: var(--ink);
+}
+.browser-empty {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.piece-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 16px;
+}
+@media (min-width: 768px) {
+  .piece-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 34px 22px;
+  }
+}
+@media (min-width: 1024px) {
+  .piece-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 38px 26px;
+  }
+}
+
+.piece {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.piece-link {
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+.piece-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 1.15;
+  overflow: hidden;
+}
+/* Catalogue photos are shot on white; multiply lets them sit on the paper. */
+.piece-photo img {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: brightness(1.06);
+}
+.piece-name {
+  padding-top: 10px;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+.piece-meta {
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+@media (hover: hover) and (pointer: fine) {
+  .piece-link:hover .piece-name {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+}
+.piece-builder {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 12.5px;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--builder-highlight);
+  transition: background-color 180ms ease;
+}
+.piece-builder:hover {
+  background: var(--store-green);
+}
+.piece-builder:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .piece-builder {
+    transition: none;
+  }
 }
 
 /*
