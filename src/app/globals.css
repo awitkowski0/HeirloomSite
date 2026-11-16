@@ -649,6 +649,19 @@ body {
   margin: 0 auto;
   padding: 64px 24px 0;
 }
+.home-featured-intro--row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.home-featured-intro--row > .filter-link {
+  flex: none;
+  white-space: nowrap;
+}
+.home-featured-more {
+  margin: 20px 0 0;
+}
 .home-featured-intro {
   margin-bottom: 32px;
 }
