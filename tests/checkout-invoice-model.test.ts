@@ -47,19 +47,21 @@ test('InvoiceModelNote renders only the published notice', () => {
   assert.ok(!src.includes('openingHours'));
 });
 
-test('CheckoutClient shows the invoice-model note at cart, form, submit, and confirmation', () => {
+test('CheckoutClient shows the invoice-model note once per checkout state', () => {
   const src = read('src/components/checkout/CheckoutClient.tsx');
+  // Loading, empty cart, checkout form (beside Place order), confirmation.
+  // The form and the order summary render together, so the note appears
+  // once there, by the submit button, not repeated on one screen.
   assert.equal(
     (src.match(/<InvoiceModelNote/g) ?? []).length,
-    6,
-    'expected InvoiceModelNote at loading, empty cart, form, submit, confirmation, and order summary',
+    4,
+    'expected InvoiceModelNote at loading, empty cart, submit, and confirmation',
   );
   assert.match(src, /Loading your cart[\s\S]*?<InvoiceModelNote/);
   assert.match(src, /Your cart is empty[\s\S]*?<InvoiceModelNote/);
-  assert.match(src, /No payment taken today[\s\S]*?<InvoiceModelNote/);
   assert.match(src, /<InvoiceModelNote \/>\s*<button\s+type="submit"/);
   assert.match(src, /Nothing has been charged[\s\S]*?<InvoiceModelNote/);
-  assert.match(src, /Order Summary[\s\S]*?<InvoiceModelNote/);
+  assert.doesNotMatch(src, /Order Summary<\/h2>\s*<InvoiceModelNote/);
 });
 
 test('the same invoice-model notice sits beside Add to cart and under Added to cart', () => {

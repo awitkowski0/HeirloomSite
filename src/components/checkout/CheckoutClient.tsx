@@ -477,7 +477,6 @@ export default function CheckoutClient({ recommendations }: Props) {
             <span className="label-caps text-on-surface-variant">No payment taken today</span>
             <span className="material-symbols-outlined text-secondary" aria-hidden="true">lock</span>
           </div>
-          <InvoiceModelNote />
 
           <form onSubmit={handleSubmitDetails} noValidate>
             <ShippingForm
@@ -697,7 +696,6 @@ export default function CheckoutClient({ recommendations }: Props) {
         <div className="configuration-panel">
           <div className="order-summary">
             <h2 className="headline-md">Order Summary</h2>
-            <InvoiceModelNote />
             <ul className="order-summary-items">
               {cart.map((item, idx) => (
                 <li key={item.id}>

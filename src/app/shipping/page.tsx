@@ -148,8 +148,8 @@ export default function ShippingPage() {
         <p>
           <a href="tel:+14842931840" className="doc-link">
             (484) 293-1840
-          </a> 
-          · 
+          </a>{' '}
+          ·{' '}
           <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
             heirloomcribs.care@heirloomcribsandmore.com
           </a>
