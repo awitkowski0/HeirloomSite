@@ -2,7 +2,7 @@ import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
 import { SHIPPABLE_STATE_CODES, deliveryChargeFor, type ShippingMethodId } from './order-terms';
 import { fromCents, toCents } from './format';
-import { MAIL_OFFICE_LINE, PUBLISHED_EMAIL, PUBLISHED_PHONE } from './published-contact';
+import { PUBLISHED_EMAIL, PUBLISHED_PHONE } from './published-contact';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
@@ -119,12 +119,10 @@ export function organizationJsonLd(): JsonLd {
     email: PUBLISHED_EMAIL,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '421 Manor Dr',
       addressLocality: 'Nazareth',
       addressRegion: 'PA',
       postalCode: '18064',
       addressCountry: 'US',
-      description: MAIL_OFFICE_LINE,
     },
     areaServed: [
       { '@type': 'State', name: 'Pennsylvania' },
