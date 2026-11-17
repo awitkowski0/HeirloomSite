@@ -3,8 +3,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BUILDER_CONTENT } from '@/components/builders/content';
+import RoomSection from '@/components/marketing/RoomSection';
+import { roomImagesFor } from '@/lib/room-images';
 import { builderById, type Builder } from '@/lib/builders';
-import { storeSections, type StoreSection } from '@/lib/builder-stores';
+import { storeProducts, storeSections, type StoreSection } from '@/lib/builder-stores';
 import { formatPriceApprox } from '@/lib/format';
 import { breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
 
@@ -73,6 +75,17 @@ export default async function StoreHome({ params }: { params: Promise<Params> })
           </ul>
         </section>
       )}
+
+      <RoomSection
+        id="store-rooms-heading"
+        label={`${builder.name} pieces in a room`}
+        items={storeProducts(builder).flatMap(p =>
+          // One per piece, so the row shows the range rather than four of one crib.
+          roomImagesFor(p.slug)
+            .slice(0, 1)
+            .map(room => ({ ...room, href: `/product/${p.slug}`, name: p.productName })),
+        )}
+      />
 
       <Story />
     </div>

@@ -51,6 +51,9 @@ import {
   subscribeShipping,
 } from './shippingStorage';
 import AlsoLike, { type Recommendation } from './AlsoLike';
+import CheckoutChatHelp from './CheckoutChatHelp';
+import { decodeFillHash } from '@/lib/checkout-fill';
+import { capture } from '@/lib/posthog-client';
 
 interface Props {
   /** productName -> its bundle items, from the build-time catalogue. */
@@ -109,6 +112,29 @@ export default function CheckoutClient({ recommendations }: Props) {
 
   const abortRef = useRef<AbortController | null>(null);
   useEffect(() => () => abortRef.current?.abort(), []);
+
+  /*
+   * A fill link from a chat with us (/checkout#fill=..., see
+   * src/lib/checkout-fill.ts): fill the contact and delivery fields, the
+   * delivery service and the payment option, say so, and take the payload
+   * out of the address bar. The terms box is deliberately left alone and
+   * nothing is submitted: the customer reviews and places the order.
+   */
+  const [filledFromChat, setFilledFromChat] = useState(false);
+  useEffect(() => {
+    const fill = decodeFillHash(window.location.hash);
+    if (!fill) return;
+    setShippingValues({ ...getShippingSnapshot(), ...fill.shipping });
+    // Reacting, once, to the URL the page was opened with: the hash is only
+    // readable after hydration, and there is no external system to subscribe to.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (fill.method) setShippingMethod(fill.method);
+    if (fill.payment) setPaymentChoice(fill.payment);
+    setFilledFromChat(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
+    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    capture('checkout_filled_from_chat', { fields: Object.keys(fill.shipping).length });
+  }, []);
 
   /* Turnstile tokens are single-use and /api/quotes spends one before it prices
      the cart, so every rejection leaves us holding a dead token. See the catch
@@ -477,6 +503,14 @@ export default function CheckoutClient({ recommendations }: Props) {
             <span className="label-caps text-on-surface-variant">No payment taken today</span>
             <span className="material-symbols-outlined text-secondary" aria-hidden="true">lock</span>
           </div>
+
+          {filledFromChat ? (
+            <p className="checkout-filled" role="status">
+              We filled this in from our conversation. Check every detail, tick the terms and press Place order.
+            </p>
+          ) : (
+            <CheckoutChatHelp />
+          )}
 
           <form onSubmit={handleSubmitDetails} noValidate>
             <ShippingForm

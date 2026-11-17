@@ -16,6 +16,8 @@ import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
+import RoomSection from '@/components/marketing/RoomSection';
+import { roomImagesFor } from '@/lib/room-images';
 import type { ReactNode } from 'react';
 
 // Unknown slugs - and unknown wood/finish segments - 404 instead of rendering
@@ -332,6 +334,17 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         }
         initialWood={resolved.wood ?? data.config.wood}
         initialStain={resolved.stain}
+      />
+
+      {/*
+        Room photos of this piece, below the configurator and never in the
+        gallery, the JSON-LD or og:image (see src/lib/room-images.ts). They do
+        not link anywhere: this is already the piece's page.
+      */}
+      <RoomSection
+        id="product-rooms-heading"
+        label={`${product.productName} in a room`}
+        items={roomImagesFor(slug).map(room => ({ ...room, name: '' }))}
       />
 
       {/*

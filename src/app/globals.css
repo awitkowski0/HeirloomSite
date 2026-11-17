@@ -649,6 +649,19 @@ body {
   margin: 0 auto;
   padding: 64px 24px 0;
 }
+.home-featured-intro--row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.home-featured-intro--row > .filter-link {
+  flex: none;
+  white-space: nowrap;
+}
+.home-featured-more {
+  margin: 20px 0 0;
+}
 .home-featured-intro {
   margin-bottom: 32px;
 }
@@ -5297,6 +5310,171 @@ a.product-inline-link:focus-visible {
   align-items: center;
   gap: 10px 20px;
   margin: 16px 0 0;
+}
+
+/*
+ * "In the room" (src/components/marketing/RoomRow.tsx): owner-approved room
+ * photographs in a sideways row. Full-bleed photos, unlike the catalogue
+ * shots, so no multiply blend.
+ */
+.room-section {
+  padding: 32px 0 8px;
+}
+.room-section-heading {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.room-row {
+  position: relative;
+}
+.room-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.room-rail::-webkit-scrollbar {
+  display: none;
+}
+.room-card {
+  flex: 0 0 min(72vw, 320px);
+  scroll-snap-align: start;
+  color: inherit;
+  text-decoration: none;
+}
+.room-photo {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--rule);
+}
+.room-photo img {
+  object-fit: cover;
+}
+.room-name {
+  display: block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--ink);
+}
+a.room-card:hover .room-name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.room-arrow {
+  display: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .room-arrow {
+    position: absolute;
+    top: calc((min(72vw, 320px) * 0.75) / 2 - 20px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 50%;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .room-arrow--prev {
+    left: 8px;
+  }
+  .room-arrow--next {
+    right: 8px;
+  }
+}
+
+/*
+ * Checkout chat (src/components/checkout/CheckoutChatHelp.tsx), the "filled
+ * from our conversation" notice, and the staff fill-link page.
+ */
+.checkout-chat {
+  margin: 16px 0 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  background: var(--surface-container-lowest, var(--paper));
+}
+.checkout-chat-title {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.checkout-chat-copy {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+.checkout-chat-copy:last-child {
+  margin-bottom: 0;
+}
+.checkout-filled {
+  margin: 16px 0 24px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--store-green);
+  background: var(--builder-highlight);
+  font-size: 14px;
+  color: var(--ink);
+}
+.fill-intro {
+  max-width: 62ch;
+  margin: 8px 0 24px;
+}
+.fill-builder {
+  max-width: 720px;
+}
+.fill-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+.fill-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.fill-field input,
+.fill-field select,
+.fill-output input {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+}
+.fill-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+  font-size: 15px;
+}
+.fill-choices legend {
+  margin-bottom: 8px;
+}
+.fill-output {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}
+.fill-output input {
+  flex: 1;
+  min-width: 0;
 }
 
 /*
