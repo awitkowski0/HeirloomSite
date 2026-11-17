@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next';
 import { GFS_Didot, Open_Sans } from 'next/font/google';
-import Script from 'next/script';
 import './globals.css';
 import { Providers } from './providers';
 import Header from '@/components/layout/Header';
@@ -125,11 +124,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <BottomNav />
           <Footer />
         </Providers>
-
-        <Script id="babylist-partner" strategy="afterInteractive">
-          {`window._bl = { partner: window.location.hostname };`}
-        </Script>
-        <Script src="https://babylist.com/add.js" strategy="afterInteractive" />
+        {/* Babylist's add.js is no longer loaded on every page. It loads the
+            first time someone hovers or focuses an Add to Babylist button
+            (src/lib/babylist.ts): a third-party script can read localStorage,
+            and most visits never use it. */}
       </body>
     </html>
   );
