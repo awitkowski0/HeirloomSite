@@ -3542,6 +3542,17 @@ a.product-inline-link:focus-visible {
   text-underline-offset: 3px;
 }
 
+/* Hero on long-form owner guides: a full-width finish close-up under the H1. */
+.doc-hero {
+  margin: 20px 0 8px;
+}
+
+.doc-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .doc-table-wrap {
   overflow-x: auto;
   margin: 0 0 16px;

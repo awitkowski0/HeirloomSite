@@ -21,6 +21,8 @@ const stripComments = (s: string) =>
 const ALLOW = new Set([
   'src/app/builders/old-town-oak/page.tsx',
   'src/app/builders/kids-comfort/page.tsx',
+  // Brand #51 v2: two attributed builder quotes use the builders' word "non-toxic".
+  'src/app/guides/how-to-clean-a-wooden-crib/page.tsx',
 ]);
 
 const SITE_PHRASES: [RegExp, string][] = [
