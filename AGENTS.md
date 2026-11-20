@@ -51,6 +51,20 @@ slug-less product list. Every product is statically prerendered at
 already-indexed URLs. `MIN_EXPECTED_PRODUCTS` is a deliberate tripwire — if you
 intentionally remove a product, lower it.
 
+## Product pages (photos, hero, carousel)
+
+To add a product or change a page's photos, follow **`docs/product-pages.md`**.
+It says where every file is, how the carousel orders photos, and the
+check → preview loop. In short:
+`npm run product -- show <product>` to see it,
+`set-hero` / `add-photos` / `remove-photo` / `new` (or edit the JSON) to
+change it, `check` to validate it the way the build will, and
+`preview <product> --screenshot` to rebuild, serve and screenshot it (PNGs in
+`.preview/`). `product.json`'s optional `page` block holds `hero` and the
+shared `gallery`; `scripts/lib/product-page.mjs` is the one place that turns
+`page` + `media.json` into the photo list, used by the build and the CLI alike,
+and the build fails on a photo reference that is not on disk.
+
 ## Rules worth knowing
 - **Never read `searchParams` in a page**, and never call `useSearchParams()`
   outside a `<Suspense>` boundary. Either one opts the route out of static
@@ -308,7 +322,7 @@ where posthog is already loaded.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 

@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { checkPageMedia, defaultMediaKey, mediaKey, photosFor } from "./lib/product-page.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -76,6 +77,7 @@ const hiddenProblems = [];
 const hiddenVariants = [];
 const hiddenProducts = [];
 const relationProblems = [];
+const mediaProblems = [];
 const relationNotices = [];
 function checkVariantType(dirName, declared, names) {
   if (!declared) {
@@ -206,6 +208,12 @@ for (const dirName of productDirs) {
   if (visibleVariants.length > 0) {
     checkVariantType(dirName, meta.variantType, visibleVariants.map(v => v.variant));
   }
+  // Hero, shared gallery photos and every media.json reference must name a
+  // file that exists: a typo would otherwise ship a broken image, and these
+  // are the fields an assistant edits most. See scripts/lib/product-page.mjs.
+  mediaProblems.push(...checkPageMedia(dir, dirName, meta, media));
+  const landingKey = defaultMediaKey(visibleVariants);
+
   const imageBase = `/data/products/${encodeURIComponent(dirName)}/`;
   let minPrice = Infinity;
 
@@ -237,8 +245,8 @@ for (const dirName of productDirs) {
     }
 
     const stains = (v.stains || []).map(stainName => {
-      const mediaKey = `${v.variant}||${stainName}`;
-      const images = media[mediaKey] || [];
+      const key = mediaKey(v.variant, stainName);
+      const images = photosFor(meta, media, key, key === landingKey);
       const firstImage = images[0] ? imageBase + images[0] : null;
       const gallery = images.slice(1).map(url => ({ url: imageBase + url }));
 
@@ -285,9 +293,8 @@ for (const dirName of productDirs) {
     });
   }
 
-  const firstStain = visibleVariants[0]?.stains?.[0];
-  const defaultKey = firstStain ? `${visibleVariants[0].variant}||${firstStain}` : null;
-  const defaultImage = defaultKey && media[defaultKey]?.[0] ? imageBase + media[defaultKey][0] : null;
+  const landingPhoto = photosFor(meta, media, landingKey, true)[0];
+  const defaultImage = landingPhoto ? imageBase + landingPhoto : null;
 
   productIndex.push({
     productName,
@@ -542,6 +549,10 @@ if (parsedProducts < MIN_EXPECTED_PRODUCTS) {
     `only ${parsedProducts} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
       `    If a product was removed on purpose, lower MIN_EXPECTED_PRODUCTS in this file.`
   );
+}
+
+if (mediaProblems.length > 0) {
+  fail(`photos do not match the files on disk:\n` + mediaProblems.map(p => `    - ${p}`).join("\n"));
 }
 
 if (hiddenProblems.length > 0) {

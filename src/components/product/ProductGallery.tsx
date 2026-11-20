@@ -40,7 +40,18 @@ function subscribePhone(onChange: () => void) {
 }
 
 export default function ProductGallery({ images, productName, priority = false, feed }: Props) {
-  const [index, setIndex] = useState(0);
+  /*
+   * The slide index belongs to one photo list. Choosing another finish swaps
+   * the list and remounts the carousel at its first photo (it is keyed on
+   * imagesKey below), so the index has to start over with it - tracked here
+   * by key rather than reset in an effect, which would render one frame
+   * pointing at the old position.
+   */
+  const imagesKey = images.join('|');
+  const [position, setPosition] = useState({ key: imagesKey, index: 0 });
+  const index = position.key === imagesKey ? position.index : 0;
+  const setIndex = (i: number) => setPosition({ key: imagesKey, index: i });
+  const slidesRef = useRef<HTMLDivElement>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   /*
@@ -158,40 +169,114 @@ export default function ProductGallery({ images, productName, priority = false, 
     );
   }
 
-  const safeIndex = Math.min(index, images.length - 1);
-  const prev = () => setIndex(i => (i - 1 + images.length) % images.length);
-  const next = () => setIndex(i => (i + 1) % images.length);
+  const count = images.length;
+  const safeIndex = Math.min(index, count - 1);
 
+  /*
+   * Move the carousel to slide `i`. The carousel is a native scroll-snap
+   * container, so this scrolls it and lets onSlidesScroll report the index
+   * back; setting it here too keeps the thumbnails in step on browsers that
+   * coalesce scroll events. `instant` is for moves made while the lightbox
+   * covers the carousel - nobody is there to watch it glide.
+   */
+  const goTo = (i: number, behavior: ScrollBehavior = 'smooth') => {
+    const target = Math.max(0, Math.min(i, count - 1));
+    setIndex(target);
+    const track = slidesRef.current;
+    if (!track) return;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    track.scrollTo({ left: target * track.clientWidth, behavior: reduceMotion ? 'instant' : behavior });
+  };
+  const onSlidesScroll = () => {
+    const track = slidesRef.current;
+    if (!track || track.clientWidth === 0) return;
+    const i = Math.round(track.scrollLeft / track.clientWidth);
+    if (i !== index && i >= 0 && i < count) setIndex(i);
+  };
+  const prev = () => goTo((safeIndex - 1 + count) % count, 'instant');
+  const next = () => goTo((safeIndex + 1) % count, 'instant');
+
+  /*
+   * The photograph is a carousel: every photo is a slide in one horizontal
+   * scroll-snap track. Swipe on a phone, arrows on a pointer device, and the
+   * thumbnails below jump. It is one DOM tree in every viewport - CSS hides
+   * the arrows where there is no hover - and only the first slide is a
+   * priority (LCP) image; the rest load lazily as they near the viewport.
+   *
+   * The old single photo had no arrows on purpose: they duplicated the
+   * thumbnails while only ever showing one image at a time. A carousel is the
+   * other way round - swiping is the main way through it on a phone, where
+   * the thumbnails are below the fold during the finish preview.
+   */
   const photo = (
     <div className={`image-container product-image${preview !== null ? ' is-previewing' : ''}`}>
-      <button
-        type="button"
-        onClick={() => setLightboxOpen(true)}
-        aria-label={`Open fullscreen view of ${productName}`}
-        className="product-image-trigger"
+      <div
+        key={imagesKey}
+        ref={slidesRef}
+        className="product-slides"
+        onScroll={count > 1 ? onSlidesScroll : undefined}
+        role={count > 1 ? 'region' : undefined}
+        aria-roledescription={count > 1 ? 'carousel' : undefined}
+        aria-label={count > 1 ? `${productName} photos` : undefined}
       >
-        <Image
-          src={images[safeIndex]}
-          alt={productName}
-          fill
-          priority={priority}
-          /* The grid does not split until 1024px, but this claimed 55vw from
-            769px up - so every tablet was told to fetch roughly half the
-            pixels it actually renders. Pre-existing, unrelated to the
-            layout change. */
-          sizes="(max-width: 1023px) 100vw, 50vw"
-          style={{ objectFit: 'contain' }}
-        />
-      </button>
+        {images.map((src, i) => (
+          <button
+            key={src}
+            type="button"
+            onClick={() => {
+              setIndex(i);
+              setLightboxOpen(true);
+            }}
+            aria-label={
+              count > 1
+                ? `Open fullscreen view of ${productName}, photo ${i + 1} of ${count}`
+                : `Open fullscreen view of ${productName}`
+            }
+            // Only the visible slide is in the tab order; the arrows and
+            // thumbnails are how a keyboard moves between them.
+            tabIndex={i === safeIndex ? 0 : -1}
+            className="product-slide product-image-trigger"
+          >
+            <Image
+              src={src}
+              alt={i === 0 ? productName : `${productName}, photo ${i + 1}`}
+              fill
+              priority={priority && i === 0}
+              /* The grid does not split until 1024px, but this claimed 55vw
+                from 769px up - so every tablet was told to fetch roughly half
+                the pixels it actually renders. */
+              sizes="(max-width: 1023px) 100vw, 50vw"
+              style={{ objectFit: 'contain' }}
+            />
+          </button>
+        ))}
+      </div>
 
-      {/*
-        The arrows over the main image and a dot `tablist` beneath it used
-        to live here, giving this component four ways to change image -
-        arrows, dots, thumbnails, and the lightbox's own arrows - three of
-        which did exactly the same thing. The thumbnails are strictly better
-        than the dots (they show what you are selecting) and the lightbox
-        keeps its arrows, so both of these went.
-      */}
+      {count > 1 && (
+        <>
+          <button
+            type="button"
+            className="product-slides-nav product-slides-prev"
+            onClick={() => goTo(safeIndex - 1)}
+            disabled={safeIndex === 0}
+            aria-label="Previous photo"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          </button>
+          <button
+            type="button"
+            className="product-slides-nav product-slides-next"
+            onClick={() => goTo(safeIndex + 1)}
+            disabled={safeIndex === count - 1}
+            aria-label="Next photo"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+          </button>
+          <p className="product-slides-count" aria-hidden="true">
+            {safeIndex + 1} / {count}
+          </p>
+        </>
+      )}
 
       {/* The preview's finish photographs, stacked over the selected one and
           faded in one at a time. Decorative: the swatch radiogroup above is
@@ -276,7 +361,7 @@ export default function ProductGallery({ images, productName, priority = false, 
               role="tab"
               aria-selected={i === safeIndex}
               aria-label={`View image ${i + 1} of ${images.length}`}
-              onClick={() => setIndex(i)}
+              onClick={() => goTo(i)}
               className={`gallery-thumb ${i === safeIndex ? 'active' : ''}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- 72px
