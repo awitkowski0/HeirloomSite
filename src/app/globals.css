@@ -1805,79 +1805,202 @@ main {
   }
 }
 
+/*
+ * Product lightbox (ProductLightbox). The page, enlarged: paper, ink and
+ * hairline rules rather than a black overlay, so the photographs sit on the
+ * same ground as everywhere else and their white plate multiplies away.
+ * Three rows - title bar, photo stage, thumbnail rail - filling the viewport.
+ */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.9);
-  z-index: 2000;
+  /* Above the site header (3000) and its menus (3100). */
+  z-index: 4000;
+  background-color: var(--background);
+  animation: lightbox-in 180ms ease-out;
+}
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+  }
+}
+.lightbox {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100%;
+  height: 100dvh;
+  outline: none;
+}
+.lightbox-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  gap: var(--spacing-md);
+  padding: 12px var(--spacing-gutter);
+  border-bottom: 1px solid var(--rule);
 }
-
-/*
- * A real target, not a bare glyph.
- *
- * This was `background: none; border: none; color: white` in a corner - a thin
- * white outline on a near-black backdrop, with no boundary to aim at. The
- * overlay does close on a backdrop click, but .lightbox-img-wrap covers
- * 90vw x 80vh, so there was barely any backdrop left to hit and the practical
- * way out was Escape, which is not an affordance anyone can see.
- */
-.lightbox-close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 1;
-  display: flex;
+.lightbox-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-headline-md);
+  font-weight: 400;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lightbox-count {
+  margin: 0;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.lightbox-close {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: white;
-  cursor: pointer;
-}
-.lightbox-close-btn:hover {
-  background: rgba(0, 0, 0, 0.85);
-  border-color: white;
-}
-.lightbox-close-btn .material-symbols-outlined {
-  font-size: 26px;
-}
-
-.lightbox-img {
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain;
-}
-
-.lightbox-nav-btn {
-  position: absolute;
-  /* Above the dismiss surface, or the arrows would close instead of paginate. */
-  z-index: 1;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
   border-radius: 0;
-  width: 48px;
-  height: 48px;
+  background: transparent;
+  color: var(--ink);
   cursor: pointer;
-  color: white;
+}
+.lightbox-close .material-symbols-outlined {
+  font-size: 20px;
+}
+.lightbox-close:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.lightbox-stage {
+  position: relative;
+  min-height: 0;
+}
+.lightbox-track {
+  position: absolute;
+  inset: 0;
   display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  background-color: var(--background);
+}
+.lightbox-track::-webkit-scrollbar {
+  display: none;
+}
+/* Zoomed, the photo pans with the cursor; the track must not scroll under it. */
+.lightbox-track.is-zoomed {
+  overflow: hidden;
+}
+.lightbox-slide {
+  position: relative;
+  flex: 0 0 100%;
+  overflow: hidden;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+.lightbox-slide img {
+  mix-blend-mode: multiply;
+  padding: var(--spacing-md) var(--spacing-lg);
+  transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+  transition: transform 220ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lightbox-slide {
+    cursor: zoom-in;
+  }
+  .lightbox-track.is-zoomed .lightbox-slide {
+    cursor: zoom-out;
+  }
+}
+.lightbox-track.is-zoomed .lightbox-slide img {
+  transform: scale(2.5);
+}
+.lightbox-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: none;
   align-items: center;
   justify-content: center;
+  width: 48px;
+  height: 48px;
+  transform: translateY(-50%);
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  background: var(--background);
+  color: var(--ink);
+  cursor: pointer;
 }
-
-.lightbox-nav-prev {
-  left: 24px;
+.lightbox-arrow:hover {
+  background: var(--ink);
+  color: var(--paper);
 }
-
-.lightbox-nav-next {
-  right: 24px;
+.lightbox-arrow-prev {
+  left: var(--spacing-gutter);
+}
+.lightbox-arrow-next {
+  right: var(--spacing-gutter);
+}
+/* A phone swipes; arrows there would only cover the photograph. */
+@media (hover: hover) and (pointer: fine) {
+  .lightbox-arrow {
+    display: flex;
+  }
+}
+.lightbox-thumbs {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px var(--spacing-gutter) max(12px, env(safe-area-inset-bottom));
+  overflow-x: auto;
+  border-top: 1px solid var(--rule);
+}
+.lightbox-thumb {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 160ms ease, border-color 160ms ease;
+}
+.lightbox-thumb:hover {
+  opacity: 0.85;
+}
+.lightbox-thumb.is-active {
+  border-color: var(--ink);
+  opacity: 1;
+}
+.lightbox-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+@media (max-width: 767px) {
+  .lightbox-slide img {
+    padding: var(--spacing-sm);
+  }
+  /* Overflowing rails start at the left edge rather than clipping both ends. */
+  .lightbox-thumbs {
+    justify-content: flex-start;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox-overlay {
+    animation: none;
+  }
+  .lightbox-slide img {
+    transition: none;
+  }
 }
 
 .cart-popup-overlay {
@@ -2925,8 +3048,8 @@ a.product-inline-link:focus-visible {
   width: 40px;
   height: 40px;
   transform: translateY(-50%);
-  border: 1px solid var(--outline-variant);
-  border-radius: 999px;
+  border: 1px solid var(--ink);
+  border-radius: 0;
   background: var(--background);
   color: var(--ink);
   cursor: pointer;
@@ -2958,7 +3081,6 @@ a.product-inline-link:focus-visible {
   bottom: 12px;
   margin: 0;
   padding: 2px 8px;
-  border-radius: 999px;
   background: var(--background);
   font-family: var(--font-label);
   font-size: 12px;
@@ -3071,35 +3193,6 @@ a.product-inline-link:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.lightbox-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* Sits behind everything and fills the dialog, so a click anywhere that is not
-   the photograph or a control dismisses. `zoom-out` because the image was
-   opened with `zoom-in`. */
-.lightbox-dismiss {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: zoom-out;
-}
-
-.lightbox-img-wrap {
-  position: relative;
-  z-index: 1;
-  width: 86vw;
-  height: 78vh;
 }
 
 .gallery-carousel-content {

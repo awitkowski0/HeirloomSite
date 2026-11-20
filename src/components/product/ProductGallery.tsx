@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import Image from 'next/image';
-import Modal from '@/components/ui/Modal';
+import ProductLightbox from './ProductLightbox';
 
 /** One finish in the scroll preview: its key, what to call it, and its photograph. */
 export interface FeedItem {
@@ -193,8 +193,6 @@ export default function ProductGallery({ images, productName, priority = false, 
     const i = Math.round(track.scrollLeft / track.clientWidth);
     if (i !== index && i >= 0 && i < count) setIndex(i);
   };
-  const prev = () => goTo((safeIndex - 1 + count) % count, 'instant');
-  const next = () => goTo((safeIndex + 1) % count, 'instant');
 
   /*
    * The photograph is a carousel: every photo is a slide in one horizontal
@@ -373,67 +371,16 @@ export default function ProductGallery({ images, productName, priority = false, 
         </div>
       )}
 
-      <Modal
+      <ProductLightbox
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
-        title={`${productName}, image ${safeIndex + 1} of ${images.length}`}
-        overlayClassName="lightbox-overlay"
-        className="lightbox-content"
-      >
-        {/*
-          A real dismiss surface behind the photograph.
-
-          Modal closes when the overlay is clicked directly, but
-          .lightbox-content is width:100%/height:100% and covers the whole
-          overlay, so the click never landed on the overlay itself and
-          click-outside-to-close silently did nothing. With that gone and the
-          close button drawn as a bare white glyph, Escape was the only exit
-          anyone could find.
-
-          A button rather than a div with a handler: it is a control, it should
-          be reachable and announced as one.
-        */}
-        <button
-          type="button"
-          onClick={() => setLightboxOpen(false)}
-          className="lightbox-dismiss"
-          aria-label="Close fullscreen view"
-          tabIndex={-1}
-        />
-
-        <button
-          type="button"
-          onClick={() => setLightboxOpen(false)}
-          className="lightbox-close-btn"
-          aria-label="Close fullscreen view"
-        >
-          <span className="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-
-        <div className="lightbox-img-wrap">
-          <Image
-            src={images[safeIndex]}
-            alt={productName}
-            fill
-            sizes="100vw"
-            style={{ objectFit: 'contain' }}
-          />
-        </div>
-
-        {images.length > 1 && (
-          <>
-            <button type="button" onClick={prev} className="lightbox-nav-btn lightbox-nav-prev" aria-label="Previous image">
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
-            </button>
-            <button type="button" onClick={next} className="lightbox-nav-btn lightbox-nav-next" aria-label="Next image">
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-            </button>
-            <p role="status" aria-live="polite" className="visually-hidden">
-              Image {safeIndex + 1} of {images.length}
-            </p>
-          </>
-        )}
-      </Modal>
+        images={images}
+        productName={productName}
+        index={safeIndex}
+        // Keep the page carousel on the same photo, so closing lands where
+        // the visitor left off. It is hidden behind the lightbox, so no glide.
+        onIndexChange={i => goTo(i, 'instant')}
+      />
     </>
   );
 }
