@@ -117,13 +117,6 @@ export default function HowToCleanAWoodenCribPage() {
       </section>
       <hr className="doc-rule" />
       <section>
-        <h2 className="headline-md">If you ever refinish</h2>
-        <p>
-        Refinishing is a bigger job than cleaning, and here the builder's exact words matter. Old Town Oak's care item and Fisher's crib warning list each include this line: “If refinishing, use a non-toxic finish specified for children’s products.” Kids Comfort's Maintenance and Cleaning section has its own refinishing line, so read the one in your crib's instructions. Our <Link href="/why-hardwood" className="doc-link">Why Solid Hardwood Matters</Link> page, under Can the finish be refreshed later?, asks you to talk to us before you attempt any refinishing.
-        </p>
-      </section>
-      <hr className="doc-rule" />
-      <section>
         <h2 className="headline-md">Where to go next</h2>
         <p>
         For safety statements, see the Safety and compliance section on the <Link href="/builders/old-town-oak" className="doc-link">Old Town Oak page</Link> and on the <Link href="/builders/kids-comfort" className="doc-link">Kids Comfort page</Link>, each in that builder's own words. For finish questions, our <Link href="/finishes" className="doc-link">Finishes & Nursery Air Quality</Link> page, under Are the finishes safe for a nursery?, explains that finishes vary by builder. Tell us the model and finish you have, and we'll point you to that builder's own documentation.

@@ -22,9 +22,6 @@ const FQP_QUOTE =
   '“When cleaning your furniture, use a non-toxic, non-abrasive cleaner. Mix a solution of water with a small amount of mild dishwashing liquid. Apply to crib surface with a soft damp cloth, lightly dampened in solution. After cleaning, dry completely with a soft dry cloth.”';
 const KC_QUOTE =
   '“Your crib may be cleaned using a damp cloth with mild soap or a soft dry cloth. Avoid using furniture polish or cleaning agents that may be hazardous to children.”';
-const REFINISH_QUOTE =
-  '“If refinishing, use a non-toxic finish specified for children’s products.”';
-
 function jpegDimensions(buf: Buffer): { width: number; height: number } {
   let i = 2;
   while (i < buf.length) {
@@ -78,7 +75,6 @@ test('Brand v2 copy is present verbatim, without [builder-quote] tags', () => {
   assert.ok(src.includes(OTO_QUOTE));
   assert.ok(src.includes(FQP_QUOTE));
   assert.ok(src.includes(KC_QUOTE));
-  assert.ok(src.includes(REFINISH_QUOTE));
   assert.ok(
     src.includes(
       "That is the cleaning step in the crib instructions we keep from Old Town Oak, Fisher's and Kids Comfort, which name mild soap or mild dishwashing liquid.",
@@ -97,16 +93,16 @@ test('Brand v2 copy is present verbatim, without [builder-quote] tags', () => {
     "What Fisher's Quality Products' instructions say",
     "What Kids Comfort's instructions say",
     "While you're cleaning, check the bolts",
-    'If you ever refinish',
     'Where to go next',
   ];
   for (const h of h2s) {
     assert.ok(src.includes(h), `missing H2: ${h}`);
   }
-  assert.equal([...src.matchAll(/<h2 className="headline-md">/g)].length, 8);
+  assert.equal([...src.matchAll(/<h2 className="headline-md">/g)].length, 7);
+  assert.doesNotMatch(src, /refinish/i);
 });
 
-test('the ten Brand links point at the seven live paths', () => {
+test('the nine remaining Brand links point at the six live paths', () => {
   const src = read(PAGE);
   const hrefs = [...src.matchAll(/<Link href="([^"]+)" className="doc-link">/g)].map(m => m[1]);
   assert.deepEqual(hrefs, [
@@ -116,7 +112,6 @@ test('the ten Brand links point at the seven live paths', () => {
     '/builders/fishers-quality-products',
     '/builders/kids-comfort',
     '/contact',
-    '/why-hardwood',
     '/builders/old-town-oak',
     '/builders/kids-comfort',
     '/finishes',
@@ -131,8 +126,8 @@ test('house rules: no Manor address, Shopify, nationwide, certified/WBE, or unat
   assert.doesNotMatch(src, /\bWBE\b/);
   assert.doesNotMatch(src, /certified/i);
   assert.doesNotMatch(src, /handcrafted/i);
-  // "non-toxic" only inside the two Brand-signed builder quotes
-  const withoutQuotes = src.split(FQP_QUOTE).join(' ').split(REFINISH_QUOTE).join(' ');
+  // "non-toxic" only inside the remaining Brand-signed Fisher's cleaning quote
+  const withoutQuotes = src.split(FQP_QUOTE).join(' ');
   assert.doesNotMatch(withoutQuotes, /non-toxic/i);
   assert.equal(SITE_NAME, 'Heirloom Cribs & More');
   assert.ok(src.includes('Heirloom Cribs & More does not build furniture'));
