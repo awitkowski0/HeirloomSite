@@ -2079,14 +2079,28 @@ main {
   align-items: start;
 }
 .footer-brand {
-  display: block;
+  display: inline-flex;
+  align-items: center;
   margin-bottom: 16px;
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 400;
-  letter-spacing: 0.26em;
+  text-decoration: none;
+}
+.footer-brand picture {
+  display: block;
+}
+.footer-brand img {
+  display: block;
+  width: auto;
+  height: 36px;
+}
+@media (min-width: 768px) {
+  .footer-brand img {
+    height: 44px;
+  }
+}
+.price-starting-at {
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink);
+  color: var(--on-surface-variant);
 }
 .footer-tagline {
   max-width: 300px;

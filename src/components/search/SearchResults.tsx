@@ -50,7 +50,7 @@ export default function SearchResults() {
                   <span className="product-card-category">{r.category || 'Crib'}</span>
                   <h2>{r.productName}</h2>
                   <p className="price">
-                    {formatPriceApprox(r.basePrice)}
+                    Starting at {formatPriceApprox(r.basePrice)}
                     <span className="search-result-wood"> · {humanizeWood(r.wood)}</span>
                   </p>
                 </div>

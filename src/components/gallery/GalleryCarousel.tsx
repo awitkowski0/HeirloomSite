@@ -69,7 +69,7 @@ export default function GalleryCarousel({ product, onClose }: Props) {
 
       <div className="gallery-carousel-controls">
         <p className="headline-md text-primary">{product.name}</p>
-        <p className="body-lg gallery-carousel-price">{formatPriceApprox(price)}</p>
+        <p className="body-lg gallery-carousel-price">Starting at {formatPriceApprox(price)}</p>
 
         {finishes.length > 1 && (
           <div className="gallery-carousel-group">
@@ -102,7 +102,7 @@ export default function GalleryCarousel({ product, onClose }: Props) {
         )}
 
         <p role="status" aria-live="polite" className="visually-hidden">
-          {active ? `${stainLabel(active.name)}, ${formatPriceApprox(price)}` : ''}
+          {active ? `${stainLabel(active.name)}, Starting at ${formatPriceApprox(price)}` : ''}
         </p>
 
         <Link

@@ -49,7 +49,7 @@ export default function ProductCard({ slug, name, category, minPrice, img, prior
         <div className="featured-card-body">
           <span className="product-card-category">{category || 'Crib'}</span>
           <h3>{name}</h3>
-          <p className="price">From {formatPriceApprox(minPrice)}</p>
+          <p className="price">Starting at {formatPriceApprox(minPrice)}</p>
         </div>
       </article>
     </Link>

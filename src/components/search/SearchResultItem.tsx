@@ -71,7 +71,7 @@ export default function SearchResultItem({
           {r.category ? <> &bull; {r.category}</> : null}
         </span>
         <span className="search-result-price">
-          {r.variantCount > 1 ? `From ${formatPrice(r.basePrice)}` : formatPrice(r.basePrice)}
+          {`Starting at ${formatPrice(r.basePrice)}`}
         </span>
       </span>
     </button>

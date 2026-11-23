@@ -446,11 +446,12 @@ export default function ProductConfigurator({
         <div className="configuration-panel">
           <section className="pricing-section">
             <div className="price-row">
+              <span className="label-caps price-starting-at">Starting at</span>
               <span className="headline-lg price-current">{formatPrice(totalPrice)}</span>
             </div>
             <p role="status" aria-live="polite" className="visually-hidden">
               {selection.stain
-                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. ${formatPrice(totalPrice)}.`
+                ? `Selected: ${formatVariant(selection.wood, selection.stain)}. Starting at ${formatPrice(totalPrice)}.`
                 : ''}
             </p>
           </section>
