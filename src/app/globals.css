@@ -2120,6 +2120,17 @@ main {
   margin-bottom: 16px;
   font-size: 12px;
 }
+.footer-heading a {
+  text-decoration: none;
+  color: inherit;
+}
+.footer-heading a:hover {
+  color: var(--primary);
+}
+.footer-subheading {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
 .footer-links {
   list-style: none;
   padding: 0;

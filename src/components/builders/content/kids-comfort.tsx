@@ -140,7 +140,7 @@ export function Story() {
           {`Our `}
           <Link href="/shipping" className="doc-link">Delivery</Link>
           {` page lists Kids Comfort's lead time as about 8 weeks, confirmed when you order. From there, it works like every order with us: a confirmation call, a Stripe invoice for the 50% deposit, the build, then delivery. Shipping is charged by cart subtotal, and only White Glove includes assembly. The steps are on `}
-          <Link href="/about-heirloom#how-an-order-works" className="doc-link">About Heirloom</Link>
+          <Link href="/about-heirloom#how-an-order-works" className="doc-link">About Us</Link>
           {`.`}
         </p>
         <p>

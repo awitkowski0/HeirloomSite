@@ -133,7 +133,7 @@ export function Story() {
         </ul>
         <p>
           {`The full order steps are on `}
-          <Link href="/about-heirloom#how-an-order-works" className="doc-link">About Heirloom</Link>
+          <Link href="/about-heirloom#how-an-order-works" className="doc-link">About Us</Link>
           {`.`}
         </p>
         <p>

@@ -36,7 +36,7 @@ export default function AboutHeirloomPage() {
     <div className="container">
       <header className="builder-header">
         <div className="builder-header__text">
-          <p className="label-caps text-on-surface-variant">About Heirloom Cribs &amp; More</p>
+          <p className="label-caps text-on-surface-variant">About Us</p>
           <h1 className="headline-xl">One team from your first question to delivery day</h1>
           <p className="body-lg builder-header__sub">
             {`Heirloom Cribs & More sells cribs and nursery furniture made to order by independent builders, made in the U.S. by craftspeople. We take your order, answer your calls, send your invoice, schedule your delivery and sort out any damage with the builder and the carrier.`}
