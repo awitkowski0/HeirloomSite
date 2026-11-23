@@ -112,16 +112,14 @@ export function organizationJsonLd(): JsonLd {
     url: SITE_URL,
     logo: absoluteUrl('/logo-wide.png'),
     description:
-      'Heirloom Cribs & More sells solid hardwood nursery furniture made to order by our ' +
-      'builders and designed to grow with your child. Delivery is charged separately, with Curbside ' +
-      'and White Glove options.',
+      'Online retailer of hardwood nursery furniture. The Bethlehem location is a warehouse and fulfillment site and is not open to the public. No showroom or walk-in shopping. We deliver in Pennsylvania, New Jersey, and Maryland.',
     telephone: PUBLISHED_PHONE,
     email: PUBLISHED_EMAIL,
     address: {
       '@type': 'PostalAddress',
-      addressLocality: 'Nazareth',
+      addressLocality: 'Bethlehem',
       addressRegion: 'PA',
-      postalCode: '18064',
+      postalCode: '18020',
       addressCountry: 'US',
     },
     areaServed: [

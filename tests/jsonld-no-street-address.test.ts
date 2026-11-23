@@ -15,9 +15,8 @@ import {
 } from '../src/lib/seo';
 
 /*
- * Pricing App #63 / Nov 15 decision: 421 Manor Dr is mail-only and must
- * never appear in JSON-LD. PostalAddress may keep locality, region,
- * postal code and country. Visible page copy is unchanged.
+ * Pricing App #63 / #243 / ADDR-1: Organization JSON-LD has no street
+ * and no LocalBusiness. PostalAddress is Bethlehem, PA 18020.
  */
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -25,22 +24,23 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 function assertNoStreetInJsonLd(label: string, data: unknown) {
   const raw = jsonLdScript(data);
   assert.ok(!/"streetAddress"/.test(raw), `${label}: streetAddress key in JSON-LD`);
-  assert.ok(!/421 Manor/i.test(raw), `${label}: "421 Manor" in JSON-LD`);
+  assert.ok(!/"LocalBusiness"/.test(raw), `${label}: LocalBusiness in JSON-LD`);
 }
 
 test('Organization JSON-LD keeps city/region/postal/country and has no street', () => {
   const ld = organizationJsonLd();
   const address = ld.address as Record<string, unknown>;
   assert.equal(address['@type'], 'PostalAddress');
-  assert.equal(address.addressLocality, 'Nazareth');
+  assert.equal(address.addressLocality, 'Bethlehem');
   assert.equal(address.addressRegion, 'PA');
-  assert.equal(address.postalCode, '18064');
+  assert.equal(address.postalCode, '18020');
   assert.equal(address.addressCountry, 'US');
   assert.equal(address.streetAddress, undefined);
+  assert.equal(ld['@type'], 'Organization');
   assertNoStreetInJsonLd('organizationJsonLd', ld);
 });
 
-test('every JSON-LD builder omits streetAddress and "421 Manor"', () => {
+test('every JSON-LD builder omits streetAddress and LocalBusiness', () => {
   assertNoStreetInJsonLd('organizationJsonLd', organizationJsonLd());
   assertNoStreetInJsonLd('webSiteJsonLd', webSiteJsonLd());
   assertNoStreetInJsonLd('merchantReturnPolicyJsonLd', merchantReturnPolicyJsonLd());
@@ -76,7 +76,7 @@ test('every JSON-LD builder omits streetAddress and "421 Manor"', () => {
   );
 });
 
-test('built HTML ld+json blocks have no streetAddress or "421 Manor" (when .next exists)', () => {
+test('built HTML ld+json blocks have no streetAddress or LocalBusiness (when .next exists)', () => {
   const built = resolve(root, '.next/server/app');
   if (!existsSync(built)) {
     // npm test runs before next build; the builder tests above still guard the source.
@@ -102,7 +102,7 @@ test('built HTML ld+json blocks have no streetAddress or "421 Manor" (when .next
       blocks += 1;
       const body = m[1];
       assert.ok(!/"streetAddress"/.test(body), `${file}: streetAddress in ld+json`);
-      assert.ok(!/421 Manor/i.test(body), `${file}: "421 Manor" in ld+json`);
+      assert.ok(!/"LocalBusiness"/.test(body), `${file}: LocalBusiness in ld+json`);
     }
   }
   assert.ok(blocks > 0, 'expected at least one ld+json block in built HTML');

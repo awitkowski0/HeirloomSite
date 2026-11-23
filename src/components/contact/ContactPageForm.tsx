@@ -112,7 +112,7 @@ export default function ContactPageForm({ email: supportEmail }: { email: string
   }
 
   return (
-    <form onSubmit={handleSubmit} className="contact-form">
+    <form id="contact-us-form" onSubmit={handleSubmit} className="contact-form">
       <div className="field">
         <label htmlFor="contact-name" className="label-caps">Full name</label>
         <input
