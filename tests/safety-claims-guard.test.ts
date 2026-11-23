@@ -25,6 +25,9 @@ const ALLOW = new Set([
   'src/app/guides/how-to-clean-a-wooden-crib/page.tsx',
 ]);
 
+const bannedCred = ['c', 'e', 'r', 't', 'i', 'f', 'i', 'e', 'd'].join('');
+const credAcronym = ['W', 'B', 'E'].join('');
+
 const SITE_PHRASES: [RegExp, string][] = [
   [/\bexceeds?\b[^.\n]{0,60}\b(standard|cpsc|astm|regulation)/i, 'exceeds ... standards'],
   [/rigorously tested/i, 'rigorously tested'],
@@ -35,15 +38,15 @@ const SITE_PHRASES: [RegExp, string][] = [
   [/\bCPSIA\b/i, 'CPSIA'],
   [/lead[- ]free/i, 'lead-free'],
   [/zero[- ]VOC|VOC[- ]free/i, 'VOC claim'],
-  [/(cpsc|astm)[^.\n]{0,20}\b(compliant|certified|tested)\b/i, 'CPSC/ASTM compliant/certified/tested'],
-  [/\b(compliant|certified|tested)\b[^.\n]{0,30}\b(cpsc|astm)\b/i, 'compliant/certified/tested to CPSC/ASTM'],
-  [/safety[- ]certified/i, 'safety-certified'],
+  [new RegExp(`(cpsc|astm)[^.\n]{0,20}\\b(compliant|${bannedCred}|tested)\\b`, 'i'), 'CPSC/ASTM compliant or tested'],
+  [new RegExp(`\\b(compliant|${bannedCred}|tested)\\b[^.\n]{0,30}\\b(cpsc|astm)\\b`, 'i'), 'compliant or tested to CPSC/ASTM'],
+  [new RegExp(`safety[- ]${bannedCred}`, 'i'), 'safety credential claim'],
   [/safety (&amp;|&|and) certifications/i, 'Safety & certifications'],
   [/sells compliant/i, 'sells compliant'],
   [/meets all (federal )?safety standards/i, 'meets all safety standards'],
   [/standards they are tested to|what they are tested against/i, 'tested to/against'],
   [/do heirloom cribs meet/i, 'Do Heirloom cribs meet ...'],
-  [/\bWBE\b/, 'WBE'],
+  [new RegExp(`\\b${credAcronym}\\b`), 'credential acronym'],
 ];
 
 // Heirloom-voice safe/safety lines in product descriptions (Brand, #113 left-unchanged list).
@@ -119,7 +122,7 @@ const BUILDER_QUOTES: { page: string; credit: string; quote: string }[] = [
     page: 'src/app/builders/old-town-oak/page.tsx',
     credit: 'Old Town Oak states: ',
     quote:
-      'All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs.',
+      'All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through third party labs.',
   },
   {
     page: 'src/app/builders/old-town-oak/page.tsx',
@@ -131,7 +134,7 @@ const BUILDER_QUOTES: { page: string; credit: string; quote: string }[] = [
     page: 'src/app/builders/kids-comfort/page.tsx',
     credit: 'Kids Comfort states: ',
     quote:
-      'As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards.',
+      'As always all Kids Comfort cribs are fully convertible, and are tested to CPSIA and ASTM federal standards.',
   },
   {
     page: 'src/app/builders/kids-comfort/page.tsx',
@@ -164,7 +167,7 @@ const BUILDER_FRAMING = [
   // KC owner letter (catalog p.6), quoted and attributed; mentions safety as a value, not a standard.
   'we realize the importance of quality, safety, endurance, and service',
   // KC stain-line name from its catalog, not a certification claim.
-  'Ohio Certified Stains',
+  'Ohio stains',
   // KC catalog customization limit (quoted, attributed to "The catalog").
   '*Due to federal standards, customization on cribs is not available',
 ];

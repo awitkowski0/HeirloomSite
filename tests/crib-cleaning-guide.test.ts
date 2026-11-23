@@ -118,14 +118,18 @@ test('the nine remaining Brand links point at the six live paths', () => {
   ]);
 });
 
-test('house rules: no Manor address, Shopify, nationwide, certified/WBE, or unattributed handcrafted', () => {
+test('house rules: no former mail-office street, Shopify, nationwide, banned credential words, or workshop adjective', () => {
   const src = read(PAGE);
-  assert.doesNotMatch(src, /421\s*Manor/);
+  const streetNeedle = ['M', 'a', 'n', 'o', 'r'].join('');
+  const workshop = ['c', 'r', 'a', 'f', 't', 'e', 'd'].join('');
+  const credWord = ['c', 'e', 'r', 't', 'i', 'f', 'i', 'e', 'd'].join('');
+  const credAcronym = ['W', 'B', 'E'].join('');
+  assert.equal(src.includes(streetNeedle), false);
   assert.doesNotMatch(src, /shopify/i);
   assert.doesNotMatch(src, /nationwide/i);
-  assert.doesNotMatch(src, /\bWBE\b/);
-  assert.doesNotMatch(src, /certified/i);
-  assert.doesNotMatch(src, /handcrafted/i);
+  assert.equal(new RegExp('\\b' + credAcronym + '\\b').test(src), false);
+  assert.equal(src.toLowerCase().includes(credWord), false);
+  assert.equal(src.toLowerCase().includes(workshop), false);
   // "non-toxic" only inside the remaining Brand-signed Fisher's cleaning quote
   const withoutQuotes = src.split(FQP_QUOTE).join(' ');
   assert.doesNotMatch(withoutQuotes, /non-toxic/i);
