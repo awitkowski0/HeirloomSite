@@ -45,8 +45,7 @@ export default function PieceLink({
         </span>
         <span className="piece-name">{item.productName}</span>
         <span className="piece-meta">
-          {item.priceVaries ? 'From ' : ''}
-          {formatPriceApprox(item.minPrice)}
+          {`Starting at ${formatPriceApprox(item.minPrice)}`}
         </span>
       </Link>
       {item.builder ? (

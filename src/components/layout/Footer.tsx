@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
+import BrandLogo from './BrandLogo';
 import {
-  MAIL_OFFICE_LINE,
+  FOOTER_FAMILY_OWNED_LINE,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
   PUBLISHED_PHONE_TEL,
-  SERVICE_AREA_LINE,
+  WAREHOUSE_FOOTER_LINE,
 } from '@/lib/published-contact';
 
 export default function Footer() {
@@ -14,17 +15,17 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <span className="footer-brand">Heirloom Cribs &amp; More</span>
+            <BrandLogo className="footer-brand" />
             <p className="body-md text-on-surface-variant footer-tagline">
               Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.
             </p>
+            <p className="body-md text-on-surface-variant footer-tagline">{FOOTER_FAMILY_OWNED_LINE}</p>
             <p className="body-md text-on-surface-variant footer-contact">
               <a href={`tel:${PUBLISHED_PHONE_TEL}`}>{PUBLISHED_PHONE}</a>
               {' · '}
               <a href={`mailto:${PUBLISHED_EMAIL}`}>{PUBLISHED_EMAIL}</a>
             </p>
-            <p className="body-md text-on-surface-variant footer-contact">{MAIL_OFFICE_LINE}</p>
-            <p className="body-md text-on-surface-variant footer-contact">{SERVICE_AREA_LINE}</p>
+            <p className="body-md text-on-surface-variant footer-contact">{WAREHOUSE_FOOTER_LINE}</p>
           </div>
           <div>
             <h2 className="label-caps text-primary footer-heading">Shop</h2>

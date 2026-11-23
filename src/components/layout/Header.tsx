@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BrandLogo from './BrandLogo';
 import SearchBar from '@/components/search/SearchBar';
 import CartBadge from './CartBadge';
 import CategoryBar from './CategoryBar';
@@ -30,13 +30,7 @@ export default function Header() {
   return (
     <header className="app-header">
       <div className="header-inner">
-        <Link href="/" className="wordmark" aria-label="Heirloom Cribs & More, home">
-          {/* <picture> switches artwork by width, which next/image cannot do. */}
-          <picture>
-            <source media="(min-width: 768px)" srcSet="/brand/logo-wide.png" width={562} height={128} />
-            <img src="/brand/logo-text.png" alt="" width={452} height={128} />
-          </picture>
-        </Link>
+        <BrandLogo className="wordmark" />
 
         {/* The middle column, and the widest thing in the bar. On a catalogue
             this size, search is how someone who knows what they want gets

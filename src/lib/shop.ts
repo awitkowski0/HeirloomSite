@@ -16,7 +16,7 @@ export interface ShopItem {
   /** The lowest buyable price, in dollars. */
   minPrice: number;
   defaultImage: string | null;
-  /** True when finishes cost different amounts, so the price needs a "From". */
+  /** True when finishes cost different amounts, so the price still shows the lowest figure after "Starting at". */
   priceVaries: boolean;
   builder: { name: string; href: string } | null;
   /** The builder's usual lead time (src/lib/builders.ts), for Compare. */

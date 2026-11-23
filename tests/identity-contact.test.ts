@@ -4,10 +4,12 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  FOOTER_FAMILY_OWNED_LINE,
   MAIL_OFFICE_LINE,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
   SERVICE_AREA_LINE,
+  WAREHOUSE_FOOTER_LINE,
 } from '../src/lib/published-contact';
 import { organizationJsonLd } from '../src/lib/seo';
 
@@ -38,23 +40,41 @@ test('published contact values match the live /contact phone and email', () => {
   );
 });
 
-test('footer and /contact include phone, email, and the mail-only office line', () => {
-  const footer = read('src/components/layout/Footer.tsx');
+test('/contact includes phone, email, and the existing mail-office and service-area lines', () => {
   const contact = read('src/app/contact/page.tsx');
-  for (const [name, src] of [['footer', footer], ['/contact', contact]] as const) {
-    assert.ok(src.includes('PUBLISHED_PHONE') || src.includes(PUBLISHED_PHONE), `${name} missing phone`);
-    assert.ok(
-      src.includes('SUPPORT_INBOX') || src.includes('PUBLISHED_EMAIL') || src.includes(PUBLISHED_EMAIL),
-      `${name} missing email`,
-    );
-    assert.ok(src.includes('MAIL_OFFICE_LINE') || src.includes(MAIL_OFFICE_LINE), `${name} missing mail-office line`);
-    assert.ok(
-      src.includes('SERVICE_AREA_LINE') || src.includes(SERVICE_AREA_LINE),
-      `${name} missing service-area line`,
-    );
-    assert.doesNotMatch(src, /Hanoverville|4651/);
-    assert.doesNotMatch(src, /openingHours|Monday|hours:/i);
-  }
+  assert.ok(contact.includes('PUBLISHED_PHONE') || contact.includes(PUBLISHED_PHONE), '/contact missing phone');
+  assert.ok(
+    contact.includes('SUPPORT_INBOX') || contact.includes('PUBLISHED_EMAIL') || contact.includes(PUBLISHED_EMAIL),
+    '/contact missing email',
+  );
+  assert.ok(contact.includes('MAIL_OFFICE_LINE') || contact.includes(MAIL_OFFICE_LINE), '/contact missing mail-office line');
+  assert.ok(contact.includes('SERVICE_AREA_LINE') || contact.includes(SERVICE_AREA_LINE), '/contact missing service-area line');
+  assert.doesNotMatch(contact, /openingHours|Monday|hours:/i);
+});
+
+test('footer includes phone, email, the warehouse line, and the family-owned line', () => {
+  const footer = read('src/components/layout/Footer.tsx');
+  assert.ok(footer.includes('PUBLISHED_PHONE') || footer.includes(PUBLISHED_PHONE), 'footer missing phone');
+  assert.ok(
+    footer.includes('PUBLISHED_EMAIL') || footer.includes(PUBLISHED_EMAIL),
+    'footer missing email',
+  );
+  assert.ok(footer.includes('WAREHOUSE_FOOTER_LINE'), 'footer missing warehouse line');
+  assert.ok(footer.includes('FOOTER_FAMILY_OWNED_LINE'), 'footer missing family-owned line');
+  assert.equal(
+    WAREHOUSE_FOOTER_LINE,
+    "Warehouse: 4651 A Hanoverville Rd, Bethlehem, PA 18020. This is our warehouse, not a showroom, and we don't offer walk-in shopping or pickup. We deliver in Pennsylvania, New Jersey, and Maryland.",
+  );
+  assert.equal(
+    FOOTER_FAMILY_OWNED_LINE,
+    'Heirloom Cribs & More is a family-owned, women-owned shop.',
+  );
+  assert.ok(
+    footer.includes('Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.'),
+    'existing footer tagline was dropped',
+  );
+  assert.doesNotMatch(footer, /MAIL_OFFICE_LINE/);
+  assert.doesNotMatch(footer, /openingHours|Monday|hours:/i);
 });
 
 test('Organization JSON-LD has telephone, email, and a Nazareth PostalAddress', () => {
@@ -75,10 +95,16 @@ test('Organization JSON-LD has telephone, email, and a Nazareth PostalAddress', 
   assert.doesNotMatch(src, /Hanoverville|4651/);
 });
 
-test('footer identity heading is Heirloom Cribs & More', () => {
+test('header and footer use the updated logo with the full company name as the accessible label', () => {
+  const header = read('src/components/layout/Header.tsx');
   const footer = read('src/components/layout/Footer.tsx');
-  assert.match(footer, /footer-brand">Heirloom Cribs &(?:amp;)? More</);
-  assert.doesNotMatch(footer, /footer-brand">Heirloom</);
+  const logo = read('src/components/layout/BrandLogo.tsx');
+  assert.ok(header.includes('<BrandLogo className="wordmark"'), 'header missing BrandLogo');
+  assert.ok(footer.includes('<BrandLogo className="footer-brand"'), 'footer missing BrandLogo');
+  assert.ok(logo.includes('/brand/logo-wide.png'), 'desktop logo path missing');
+  assert.ok(logo.includes('/brand/logo-text.png'), 'phone logo path missing');
+  assert.ok(logo.includes('aria-label="Heirloom Cribs & More, home"'), 'accessible name must be the full company name');
+  assert.doesNotMatch(logo, /aria-label="Heirloom"/);
 });
 
 test('Organization JSON-LD lists areaServed for PA, NJ and MD and is injected site-wide once', () => {
