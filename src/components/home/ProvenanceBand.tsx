@@ -57,7 +57,7 @@ export default function ProvenanceBand() {
   return (
     <section className="home-band">
       <p className="label-caps home-band-line">
-        Not vintage. Newly crafted to current standards.
+        Not vintage. Newly built to current standards.
       </p>
 
       <ul className="home-band-cols">

@@ -221,7 +221,11 @@ export default function PrivacyPage() {
           <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
             heirloomcribs.care@heirloomcribsandmore.com
           </a>
-          , or write to us at 421 Manor Dr, Nazareth, PA 18064, United States.
+          , or write to us using our{' '}
+          <Link href="/contact#contact-us-form" className="doc-link">
+            Contact Us
+          </Link>{' '}
+          form.
         </p>
       </section>
     </div>

@@ -17,7 +17,7 @@ const Q: Record<string, string> = {
 const OUR_STORY = [
   `When we found out we were going to become grandparents, we began searching for a crib for our first grandchild. We wanted something special: beautiful, well-made, and built to last for generations.`,
   `Twenty-eight years ago, when we were expecting our own daughter, we found a solid wood crib that became a cherished part of our family's story. As we searched for that same quality for our grandson, we realized how difficult it was to find heirloom-quality nursery furniture in the Lehigh Valley.`,
-  `That realization inspired us to create a place where families can find beautifully crafted, solid wood cribs designed to become part of their family's story.`,
+  `That realization inspired us to create a place where families can find beautifully made, solid wood cribs designed to become part of their family's story.`,
   `Because we believe a crib is more than just furniture. It's where memories begin, and we hope the pieces we offer will be treasured for generations to come.`,
   `Thank you for letting us be a small part of your family's story.`,
 ];
@@ -125,7 +125,7 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">Delivery</h2>
           <p>
-            {`Orders ship from our warehouse in Bethlehem, Pennsylvania, with our professional furniture delivery partner, blanket-wrapped and strapped in transit. The warehouse has no showroom, and our Nazareth office accepts mail only. We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.`}
+            {`Orders ship from our warehouse in Bethlehem, Pennsylvania, with our professional furniture delivery partner, blanket-wrapped and strapped in transit. The warehouse has no showroom, and we don't offer walk-in visits. We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.`}
           </p>
           <p>{`You choose one of two services:`}</p>
           <div className="builder-cards">

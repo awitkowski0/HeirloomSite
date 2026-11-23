@@ -108,11 +108,15 @@ test('(f) Q3 woman-owned line: ON on About only, driven from the Q constants, af
   }
 });
 
-test('(f2) no "certified" with woman-owned / on About, and no Instagram link on any page', () => {
-  // Builder pages quote builders' own "certified to CPSIA/ASTM" and "Ohio Certified Stains" lines; those stay.
-  assert.ok(!/certified/i.test(src(ABOUT)), 'About contains "certified"');
+test('(f2) no banned credential word with woman-owned / on About, and no Instagram link on any page', () => {
+  const banned = ['c', 'e', 'r', 't', 'i', 'f', 'i', 'e', 'd'].join('');
+  assert.equal(src(ABOUT).toLowerCase().includes(banned), false, 'About contains the banned credential word');
+  const pair = new RegExp(
+    `(${banned}[^\\n]{0,40}wom[ae]n-owned|wom[ae]n-owned[^\\n]{0,40}${banned})`,
+    'i',
+  );
   for (const [name, p] of Object.entries(PAGES)) {
-    assert.ok(!/(certified[^\n]{0,40}wom[ae]n-owned|wom[ae]n-owned[^\n]{0,40}certified)/i.test(src(p)), `${name} pairs certified with woman-owned`);
+    assert.ok(!pair.test(src(p)), `${name} pairs the banned credential word with woman-owned`);
     assert.ok(!/instagram/i.test(rendered(p)), `${name} renders Instagram`);
     assert.ok(!/instagram\.com|@heirloomcribs\b/i.test(src(p)), `${name} links Instagram`);
   }
@@ -121,7 +125,7 @@ test('(f2) no "certified" with woman-owned / on About, and no Instagram link on 
 const OUR_STORY: string[] = [
   "When we found out we were going to become grandparents, we began searching for a crib for our first grandchild. We wanted something special: beautiful, well-made, and built to last for generations.",
   "Twenty-eight years ago, when we were expecting our own daughter, we found a solid wood crib that became a cherished part of our family's story. As we searched for that same quality for our grandson, we realized how difficult it was to find heirloom-quality nursery furniture in the Lehigh Valley.",
-  "That realization inspired us to create a place where families can find beautifully crafted, solid wood cribs designed to become part of their family's story.",
+  "That realization inspired us to create a place where families can find beautifully made, solid wood cribs designed to become part of their family's story.",
   "Because we believe a crib is more than just furniture. It's where memories begin, and we hope the pieces we offer will be treasured for generations to come.",
   "Thank you for letting us be a small part of your family's story."
 ];

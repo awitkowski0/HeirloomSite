@@ -113,7 +113,7 @@ export default function WoodsAndFinishesPage() {
             {` its catalog says the Haven style "is popular in brown maple wood but also available in any other native wood species."`}
           </p>
           <p>
-            <strong>Stains, from the January 2023 catalog (26 Ohio Certified Stains):</strong>
+            <strong>Stains, from the January 2023 catalog (26 Ohio stains):</strong>
             {` `}
             {KC_STAINS}
           </p>
