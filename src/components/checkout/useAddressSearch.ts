@@ -30,7 +30,7 @@ const MIN_QUERY = 4;
 export interface AddressSuggestion {
   /** What the customer sees in the dropdown. */
   label: string;
-  /** Street line only - "12 Main Street". */
+  /** Street line only, for example "12 Main Street". */
   address: string;
   city: string;
   /** Two-letter code, matching the values in the state select. */

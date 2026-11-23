@@ -98,6 +98,9 @@ test('Organization JSON-LD has telephone, email, a Bethlehem PostalAddress, and 
   assert.equal(ld.openingHoursSpecification, undefined);
   assert.equal(ld.geo, undefined);
   assert.equal(ld.hasMap, undefined);
+  const raw = JSON.stringify(ld);
+  assert.ok(!/"streetAddress"/.test(raw), 'street key must not appear in Organization JSON-LD');
+  assert.ok(!/"LocalBusiness"/.test(raw), 'LocalBusiness must not appear in Organization JSON-LD');
 });
 
 test('header and footer use the updated logo with the full company name as the accessible label', () => {
