@@ -13,12 +13,12 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel: string) => readFileSync(resolve(root, rel), 'utf8');
 
 const ADDRESS_LINE =
-  '421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom). Orders ship from our warehouse in Bethlehem, Pennsylvania.';
+  'Orders ship from our warehouse in Bethlehem, Pennsylvania.';
 
 const ABOUT_LOCATION_1 =
   'Orders ship from our warehouse in Bethlehem, Pennsylvania, with our professional furniture delivery partner, blanket-wrapped and strapped in transit.';
 const ABOUT_LOCATION_2 =
-  'The warehouse has no showroom, and our Nazareth office accepts mail only.';
+  "The warehouse has no showroom, and we don't offer walk-in visits.";
 
 const META_DESCRIPTION =
   'Heirloom Cribs & More sells nursery furniture made to order by independent builders, made in the U.S. by craftspeople. See how ordering works.';
@@ -26,7 +26,7 @@ const META_DESCRIPTION =
 const Q10_A = 'made to order by independent builders';
 const Q10_B = 'made in the U.S. by craftspeople';
 
-test('/shipping and /returns contain the identical #59 address line', () => {
+test('/shipping and /returns contain the identical city-only ship-from sentence', () => {
   const shipping = read('src/app/shipping/page.tsx');
   const returns = read('src/app/returns/page.tsx');
   assert.ok(shipping.includes(ADDRESS_LINE), 'missing identical address line on /shipping');
