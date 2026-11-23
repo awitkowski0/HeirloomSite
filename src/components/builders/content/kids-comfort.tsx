@@ -80,7 +80,7 @@ export function Story() {
         <p>
           {`The statements below are Kids Comfort's own, quoted from its January 2023 catalog. Heirloom Cribs & More does not build furniture and makes no safety claims of its own.`}
         </p>
-        <p>{`Kids Comfort states: "As always all Kids Comfort cribs are fully convertible, and are tested and certified to CPSIA and ASTM federal standards."`}</p>
+        <p>{`Kids Comfort states: "As always all Kids Comfort cribs are fully convertible, and are tested to CPSIA and ASTM federal standards."`}</p>
         <p>{`Kids Comfort states: "All furniture pieces come with a wall anchor to prevent tipping hazards in your nursery."`}</p>
         <p>{`Kids Comfort states: "All our standard products are created with child safe varnishes and meet ASTM standards and consumer safety product standards."`}</p>
       </section>
@@ -112,7 +112,7 @@ export function Story() {
         </p>
         <p>
           <strong>Stains.</strong>
-          {` The stain sample pages in the January 2023 catalog show 26 Ohio Certified Stains:`}
+          {` The stain sample pages in the January 2023 catalog show 26 Ohio stains:`}
         </p>
         <p>{KC_STAINS}</p>
         <p>

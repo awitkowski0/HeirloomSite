@@ -105,7 +105,7 @@ export function Story() {
           {`The statements below are Old Town Oak's own, quoted from its 2026 catalog (PDF pages 3 and 4). Heirloom Cribs & More does not build furniture and makes no safety claims of its own.`}
         </p>
         <p>
-          {`Old Town Oak states: "All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through certified third party labs."`}
+          {`Old Town Oak states: "All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through third party labs."`}
         </p>
         <p>
           {`Old Town Oak states: "For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species."`}
