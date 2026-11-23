@@ -1,6 +1,6 @@
 # Heirloom Cribs
 
-Handcrafted nursery furniture storefront. Next.js App Router + TypeScript,
+Made-to-order nursery furniture storefront. Next.js App Router + TypeScript,
 deployed on Vercel.
 
 ## Architecture

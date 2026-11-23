@@ -1,17 +1,17 @@
 /**
- * Contact values already published on the live /contact page (phone, email)
- * and the Brand-signed mail-office line from Pricing App #59 comment 6871041828.
- * Reuse these exact strings in the footer, /contact, and Organization JSON-LD.
- * No hours: none are published.
+ * Published phone, email, and the ADDR-1 warehouse footer line from
+ * Pricing App #269 comment 7064181111 (Director PROOF-2 7064327144;
+ * Phil t2095u / CONTACT-1). The warehouse street is shown only in the
+ * footer.  The service-area sentence is reused on /contact (no street).
  */
 export const PUBLISHED_PHONE = '(484) 293-1840';
 export const PUBLISHED_PHONE_TEL = '+14842931840';
 export const PUBLISHED_EMAIL = 'HeirloomCribs.Care@HeirloomCribsandMore.com';
 
-/** Mail-only office line. City-only for the warehouse lives on /shipping, /returns and About. */
-export const MAIL_OFFICE_LINE =
-  '421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom)';
+/** Approved footer replacement (#269 / 7064327144). Includes the delivery sentence. */
+export const WAREHOUSE_FOOTER_LINE =
+  "Warehouse: 4651 A Hanoverville Rd, Bethlehem, PA 18020. This is our warehouse, not a showroom, and we don't offer walk-in shopping or pickup. We deliver in Pennsylvania, New Jersey, and Maryland.";
 
-/** Live /shipping service-area sentence. Brand picked this for footer and /contact. */
+/** Existing /shipping service-area sentence (no street). Kept for /contact. */
 export const SERVICE_AREA_LINE =
   'We deliver in Pennsylvania, New Jersey and Maryland.';
