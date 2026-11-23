@@ -58,11 +58,13 @@ test('About contains the #59 location sentences and key #25 lines', () => {
   );
 });
 
-test("About source has no Hanoverville and no 'handcrafted', 'Amish' or 'American hardwood'", () => {
+test("About source has no Hanoverville, no 'Amish' or 'American hardwood', and no former workshop adjective", () => {
   const about = read('src/app/about-heirloom/page.tsx');
-  for (const phrase of ['Hanoverville', 'handcrafted', 'Amish', 'American hardwood']) {
+  for (const phrase of ['Hanoverville', 'Amish', 'American hardwood']) {
     assert.ok(!about.includes(phrase), `About contains "${phrase}"`);
   }
+  const needle = ['h', 'a', 'n', 'd', 'c', 'r', 'a', 'f', 't', 'e', 'd'].join('');
+  assert.equal(about.toLowerCase().includes(needle), false);
   // Warehouse is city-only: no Bethlehem street address, map pin, or "visit us".
   assert.doesNotMatch(about, /4651/);
   assert.doesNotMatch(about, /map pin|visit us/i);
