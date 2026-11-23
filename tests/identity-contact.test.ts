@@ -4,21 +4,28 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  MAIL_OFFICE_LINE,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
   SERVICE_AREA_LINE,
+  WAREHOUSE_FOOTER_LINE,
 } from '../src/lib/published-contact';
 import { organizationJsonLd } from '../src/lib/seo';
 
 /*
- * Pricing App #59 Merchant cause 2: footer, /contact, and Organization
- * JSON-LD use the live /contact phone and email and the Brand-signed
- * Nazareth mail-office line. No hours. No Bethlehem street address.
+ * Pricing App #243 / #269 / CONTACT-1 / ADDR-1: footer shows the approved
+ * warehouse line; /contact has phone, email, the service-area sentence and
+ * the Contact Us form, and no mailing address. Organization JSON-LD is a
+ * Bethlehem PostalAddress with no street and the approved description.
  */
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel: string) => readFileSync(resolve(root, rel), 'utf8');
+
+const WAREHOUSE_FOOTER =
+  "Warehouse: 4651 A Hanoverville Rd, Bethlehem, PA 18020. This is our warehouse, not a showroom, and we don't offer walk-in shopping or pickup. We deliver in Pennsylvania, New Jersey, and Maryland.";
+
+const JSON_LD_DESCRIPTION =
+  'Online retailer of hardwood nursery furniture. The Bethlehem location is a warehouse and fulfillment site and is not open to the public. No showroom or walk-in shopping. We deliver in Pennsylvania, New Jersey, and Maryland.';
 
 test('published contact values match the live /contact phone and email', () => {
   assert.equal(PUBLISHED_PHONE, '(484) 293-1840');
@@ -28,51 +35,61 @@ test('published contact values match the live /contact phone and email', () => {
     emailSrc.includes(`export const SUPPORT_INBOX = '${PUBLISHED_EMAIL}'`),
     'PUBLISHED_EMAIL must match SUPPORT_INBOX exactly',
   );
-  assert.equal(
-    MAIL_OFFICE_LINE,
-    '421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom)',
-  );
+  assert.equal(WAREHOUSE_FOOTER_LINE, WAREHOUSE_FOOTER);
   assert.equal(
     SERVICE_AREA_LINE,
     'We deliver in Pennsylvania, New Jersey and Maryland.',
   );
 });
 
-test('footer and /contact include phone, email, and the mail-only office line', () => {
+test('footer has phone, email, and the warehouse line; /contact has no mailing address and links to the form', () => {
   const footer = read('src/components/layout/Footer.tsx');
   const contact = read('src/app/contact/page.tsx');
-  for (const [name, src] of [['footer', footer], ['/contact', contact]] as const) {
-    assert.ok(src.includes('PUBLISHED_PHONE') || src.includes(PUBLISHED_PHONE), `${name} missing phone`);
-    assert.ok(
-      src.includes('SUPPORT_INBOX') || src.includes('PUBLISHED_EMAIL') || src.includes(PUBLISHED_EMAIL),
-      `${name} missing email`,
-    );
-    assert.ok(src.includes('MAIL_OFFICE_LINE') || src.includes(MAIL_OFFICE_LINE), `${name} missing mail-office line`);
-    assert.ok(
-      src.includes('SERVICE_AREA_LINE') || src.includes(SERVICE_AREA_LINE),
-      `${name} missing service-area line`,
-    );
-    assert.doesNotMatch(src, /Hanoverville|4651/);
-    assert.doesNotMatch(src, /openingHours|Monday|hours:/i);
-  }
+
+  assert.ok(footer.includes('PUBLISHED_PHONE') || footer.includes(PUBLISHED_PHONE), 'footer missing phone');
+  assert.ok(
+    footer.includes('PUBLISHED_EMAIL') || footer.includes(PUBLISHED_EMAIL),
+    'footer missing email',
+  );
+  assert.ok(footer.includes('WAREHOUSE_FOOTER_LINE'), 'footer missing warehouse line');
+  assert.doesNotMatch(footer, /openingHours|Monday|hours:/i);
+
+  assert.ok(contact.includes('PUBLISHED_PHONE') || contact.includes(PUBLISHED_PHONE), '/contact missing phone');
+  assert.ok(
+    contact.includes('SUPPORT_INBOX') || contact.includes('PUBLISHED_EMAIL') || contact.includes(PUBLISHED_EMAIL),
+    '/contact missing email',
+  );
+  assert.ok(contact.includes('SERVICE_AREA_LINE'), '/contact missing service-area line');
+  assert.ok(contact.includes('href="#contact-us-form"'), '/contact missing link to the Contact Us form');
+  assert.ok(contact.includes('<ContactPageForm'), '/contact missing the Contact Us form');
+  assert.doesNotMatch(contact, /WAREHOUSE_FOOTER_LINE|4651|Hanoverville/);
+  assert.doesNotMatch(contact, /openingHours|Monday|hours:/i);
+  assert.doesNotMatch(footer, /openingHours|Monday|hours:/i);
 });
 
-test('Organization JSON-LD has telephone, email, and a Nazareth PostalAddress', () => {
+test('Organization JSON-LD has telephone, email, a Bethlehem PostalAddress, and no street', () => {
   const ld = organizationJsonLd();
   assert.equal(ld.telephone, PUBLISHED_PHONE);
   assert.equal(ld.email, PUBLISHED_EMAIL);
-  const address = ld.address as Record<string, string>;
+  assert.equal(ld['@type'], 'Organization');
+  assert.notEqual(ld['@type'], 'LocalBusiness');
+  assert.equal(ld.description, JSON_LD_DESCRIPTION);
+  const address = ld.address as Record<string, unknown>;
   assert.equal(address['@type'], 'PostalAddress');
-  assert.equal(address.streetAddress, '421 Manor Dr');
-  assert.equal(address.addressLocality, 'Nazareth');
+  assert.equal(address.streetAddress, undefined);
+  assert.equal(address.addressLocality, 'Bethlehem');
   assert.equal(address.addressRegion, 'PA');
-  assert.equal(address.postalCode, '18064');
+  assert.equal(address.postalCode, '18020');
   assert.equal(address.addressCountry, 'US');
-  assert.equal(address.description, MAIL_OFFICE_LINE);
+  assert.equal(address.description, undefined);
+  assert.ok(!Object.prototype.hasOwnProperty.call(address, 'streetAddress'));
   assert.equal(ld.openingHours, undefined);
   assert.equal(ld.openingHoursSpecification, undefined);
-  const src = read('src/lib/seo.ts');
-  assert.doesNotMatch(src, /Hanoverville|4651/);
+  assert.equal(ld.geo, undefined);
+  assert.equal(ld.hasMap, undefined);
+  const raw = JSON.stringify(ld);
+  assert.ok(!/"streetAddress"/.test(raw), 'street key must not appear in Organization JSON-LD');
+  assert.ok(!/"LocalBusiness"/.test(raw), 'LocalBusiness must not appear in Organization JSON-LD');
 });
 
 test('footer identity heading is Heirloom Cribs & More', () => {
