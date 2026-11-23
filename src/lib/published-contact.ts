@@ -1,18 +1,15 @@
 /**
- * Published phone, email, and footer lines. /contact on this branch still
- * uses the older mail-office and service-area constants; the footer follows
- * ADDR-1 (warehouse street only, in the footer) plus the family-owned line
- * requested for HeirloomSite #158 (Phil t2095u).
+ * Published phone, email, and footer lines (Pricing App #243 / #269,
+ * ADDR-1 / CONTACT-1 / Phil t2095u). The warehouse street is shown only in
+ * the footer. /contact uses phone, email, the service-area sentence, and
+ * the Contact Us form, with no mailing address. The family-owned line stays
+ * in the footer on this branch.
  */
 export const PUBLISHED_PHONE = '(484) 293-1840';
 export const PUBLISHED_PHONE_TEL = '+14842931840';
 export const PUBLISHED_EMAIL = 'HeirloomCribs.Care@HeirloomCribsandMore.com';
 
-/** Mail-only office line still referenced by /contact on this branch. */
-export const MAIL_OFFICE_LINE =
-  '421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom)';
-
-/** Live /shipping service-area sentence. Kept for /contact. */
+/** Existing /shipping service-area sentence (no street). Kept for /contact. */
 export const SERVICE_AREA_LINE =
   'We deliver in Pennsylvania, New Jersey and Maryland.';
 

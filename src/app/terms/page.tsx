@@ -87,7 +87,11 @@ export default function TermsPage() {
       <section>
         <h2 className="headline-md">Contact</h2>
         <p>
-          Heirloom Cribs &amp; More · 421 Manor Dr, Nazareth, PA 18064 (mail only, no showroom) ·{' '}
+          Heirloom Cribs &amp; More ·{' '}
+          <Link href="/contact#contact-us-form" className="doc-link">
+            Contact Us
+          </Link>{' '}
+          ·{' '}
           <a href="tel:+14842931840" className="doc-link">
             (484) 293-1840
           </a>{' '}
