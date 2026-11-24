@@ -22,7 +22,7 @@ const BODY = [
     id: '8b',
     file: 'Full Bed Rail Kit',
     field: 'description' as const,
-    text: 'It is crafted from solid wood for the French Country crib.',
+    text: 'It is made from solid wood for the French Country crib.',
   },
   {
     id: '8d',
@@ -52,7 +52,7 @@ const BODY = [
     id: '8k',
     file: 'Toddler Conversion Rail',
     field: 'description' as const,
-    text: 'Designed specifically for French Country cribs, this rail replaces the front of the crib to create a toddler bed. It is crafted from solid wood for the French Country crib.',
+    text: 'Designed specifically for French Country cribs, this rail replaces the front of the crib to create a toddler bed. It is made from solid wood for the French Country crib.',
   },
   {
     id: '8r',
@@ -136,7 +136,7 @@ const ROW1_32: { id: string; file: string; field: "description" | "metaDescripti
     id: '1b',
     file: 'French Country 3 Drawer Nightstand',
     field: 'description',
-    after: 'The dovetailed drawers have full-extension glides. The nightstand measures 24 inches wide, 28 inches high and 19 inches deep, and it is crafted from solid wood with the signature French Country detailing.',
+    after: 'The dovetailed drawers have full-extension glides. The nightstand measures 24 inches wide, 28 inches high and 19 inches deep, and it is made from solid wood with the signature French Country detailing.',
     before: 'The dovetailed drawers have full-extension glides. The nightstand measures 24 inches wide, 28 inches high, and 19 inches deep, and it is crafted from solid wood with the signature French Country detailing.',
   },
   {
@@ -150,7 +150,7 @@ const ROW1_32: { id: string; file: string; field: "description" | "metaDescripti
     id: '2b',
     file: 'French Country 7 Drawer Dresser with Top Mirror',
     field: 'description',
-    after: 'Seven dovetailed drawers with full-extension glides provide storage for clothing, blankets and nursery supplies. The dresser measures 60 inches wide, 33½ inches high and 21½ inches deep, and it is crafted from solid wood with the signature French Country detailing.',
+    after: 'Seven dovetailed drawers with full-extension glides provide storage for clothing, blankets and nursery supplies. The dresser measures 60 inches wide, 33½ inches high and 21½ inches deep, and it is made from solid wood with the signature French Country detailing.',
     before: 'Seven dovetailed drawers with full-extension glides provide storage for clothing, blankets, and nursery supplies. The dresser measures 60 inches wide, 33½ inches high, and 21½ inches deep, and it is crafted from solid wood with the signature French Country detailing.',
   },
   {
@@ -178,7 +178,7 @@ const ROW1_32: { id: string; file: string; field: "description" | "metaDescripti
     id: '4b',
     file: 'French Country 4 Drawer Dresser',
     field: 'description',
-    after: 'It measures 41 inches wide, 37 inches high and 22 inches deep, and it is crafted from solid wood with the signature French Country detailing.',
+    after: 'It measures 41 inches wide, 37 inches high and 22 inches deep, and it is made from solid wood with the signature French Country detailing.',
     before: 'It measures 41 inches wide, 37 inches high, and 22 inches deep, and it is crafted from solid wood with the signature French Country detailing.',
   },
   {
@@ -234,7 +234,7 @@ const ROW1_32: { id: string; file: string; field: "description" | "metaDescripti
     id: '10b',
     file: 'French Country 4 Drawer Dresser with Changing Table',
     field: 'description',
-    after: 'The dovetailed drawers have full-extension glides and hold clothing, blankets and nursery supplies. It is crafted from solid wood with the signature French Country detailing.',
+    after: 'The dovetailed drawers have full-extension glides and hold clothing, blankets and nursery supplies. It is made from solid wood with the signature French Country detailing.',
     before: 'The dovetailed drawers have full-extension glides and hold clothing, blankets, and nursery supplies. It is crafted from solid wood with the signature French Country detailing.',
   },
   {
@@ -283,7 +283,7 @@ const ROW1_32: { id: string; file: string; field: "description" | "metaDescripti
     id: '13b',
     file: 'French Country 6 Drawer Dresser',
     field: 'description',
-    after: 'It measures 55 inches wide, 33 inches high and 22 inches deep, and it is crafted from solid wood with the signature French Country detailing.',
+    after: 'It measures 55 inches wide, 33 inches high and 22 inches deep, and it is made from solid wood with the signature French Country detailing.',
     before: 'It measures 55 inches wide, 33 inches high, and 22 inches deep, and it is crafted from solid wood with the signature French Country detailing.',
   },
   {
