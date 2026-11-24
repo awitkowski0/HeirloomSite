@@ -63,23 +63,32 @@ test('return policy: made-to-order goods cannot be returned (MerchantReturnNotPe
   assert.match(String(policy.merchantReturnLink), /\/returns$/);
 });
 
-test('shipping details are kept: Curbside rate for the page price, PA/NJ/MD, builder handling window', () => {
-  const ship = ld({ priceDollars: 2500 }).offers.shippingDetails as {
+test('shipping details list Curbside and White Glove rates for the page price, PA/NJ/MD, builder handling window', () => {
+  type Ship = {
+    name: string;
     shippingRate: { value: number; currency: string };
     shippingDestination: { addressRegion: string[] };
     deliveryTime: { handlingTime: { minValue: number; maxValue: number }; transitTime?: unknown };
   };
-  assert.equal(ship.shippingRate.value, 325);
-  assert.equal(ship.shippingRate.currency, 'USD');
-  assert.deepEqual(ship.shippingDestination.addressRegion, ['PA', 'NJ', 'MD']);
+  const ships = ld({ priceDollars: 2500 }).offers.shippingDetails as Ship[];
+  assert.equal(ships.length, 2);
+  assert.equal(ships[0].name, 'Curbside');
+  assert.equal(ships[0].shippingRate.value, 325);
+  assert.equal(ships[0].shippingRate.currency, 'USD');
+  assert.equal(ships[1].name, 'White Glove');
+  assert.equal(ships[1].shippingRate.value, 425);
+  assert.deepEqual(ships[0].shippingDestination.addressRegion, ['PA', 'NJ', 'MD']);
+  assert.deepEqual(ships[1].shippingDestination.addressRegion, ['PA', 'NJ', 'MD']);
   assert.deepEqual(
-    [ship.deliveryTime.handlingTime.minValue, ship.deliveryTime.handlingTime.maxValue],
+    [ships[0].deliveryTime.handlingTime.minValue, ships[0].deliveryTime.handlingTime.maxValue],
     [30, 40]
   );
-  assert.equal(ship.deliveryTime.transitTime, undefined);
-  const fisher = ld({ sku: 'FQP-101', priceDollars: 2000 }).offers.shippingDetails as typeof ship;
+  assert.equal(ships[0].deliveryTime.transitTime, undefined);
+  const fisher = ld({ sku: 'FQP-101', priceDollars: 2000 }).offers.shippingDetails as Ship[];
+  assert.equal(fisher[0].shippingRate.value, 175);
+  assert.equal(fisher[1].shippingRate.value, 299);
   assert.deepEqual(
-    [fisher.deliveryTime.handlingTime.minValue, fisher.deliveryTime.handlingTime.maxValue],
+    [fisher[0].deliveryTime.handlingTime.minValue, fisher[0].deliveryTime.handlingTime.maxValue],
     [50, 70]
   );
 });

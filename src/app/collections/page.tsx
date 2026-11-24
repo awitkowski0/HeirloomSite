@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   description:
     'Browse each Heirloom collection as a range — crib, dresser, nightstand and chest designed together in one design language.',
   alternates: { canonical: '/collections' },
+  openGraph: { url: '/collections' },
 };
 
 /**

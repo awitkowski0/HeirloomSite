@@ -85,17 +85,19 @@ export function looksLikeEmail(value: unknown): value is string {
  * All recipients go in `to`, not `bcc` - these are colleagues, and seeing who
  * else was notified is useful rather than a disclosure.
  */
-function notificationRecipients(): string[] {
-  const raw = process.env.ORDER_NOTIFICATION_EMAIL;
-  if (!raw) return [];
+function notificationRecipients(
+  envVar = 'ORDER_NOTIFICATION_EMAIL',
+  always: string[] = []
+): string[] {
+  const raw = process.env[envVar] ?? '';
 
   const seen = new Set<string>();
   const recipients: string[] = [];
-  for (const part of raw.split(',')) {
+  for (const part of [...always, ...raw.split(',')]) {
     const address = part.trim();
     if (!address) continue;
     if (!LOOKS_LIKE_EMAIL.test(address)) {
-      console.error(`ORDER_NOTIFICATION_EMAIL: skipping malformed address "${address}".`);
+      console.error(`${envVar}: skipping malformed address "${address}".`);
       continue;
     }
     const key = address.toLowerCase();
@@ -106,7 +108,7 @@ function notificationRecipients(): string[] {
 
   if (recipients.length > MAX_RECIPIENTS) {
     console.error(
-      `ORDER_NOTIFICATION_EMAIL lists ${recipients.length} addresses; Resend accepts ` +
+      `${envVar} lists ${recipients.length} addresses; Resend accepts ` +
         `${MAX_RECIPIENTS} per send. The rest will not be notified.`
     );
     return recipients.slice(0, MAX_RECIPIENTS);
@@ -532,6 +534,27 @@ export function sendWelcomeCoupon(
     another one, but this is the only one we can promise right now.</p>
   `;
   return send(email, 'A welcome gift for your nursery', html);
+}
+
+/**
+ * Tells the shop someone joined the mailing list. Called from /api/subscribe
+ * after addToAudience() succeeds.
+ *
+ * Always goes to SUPPORT_INBOX, plus anyone in SIGNUP_NOTIFICATION_EMAIL
+ * (comma-separated, same parsing as ORDER_NOTIFICATION_EMAIL). Extra
+ * recipients live in the env var rather than here because this repo is
+ * public and they are personal addresses.
+ *
+ * Fails soft: the contact is already durable in the audience, so a missed
+ * alert loses nothing and must not turn a real signup into an error.
+ */
+export function sendSubscribeAlert(email: string): Promise<boolean> {
+  const to = notificationRecipients('SIGNUP_NOTIFICATION_EMAIL', [SUPPORT_INBOX]);
+  const html = `
+    <p><strong>New mailing list signup</strong></p>
+    <p>${esc(email.trim().toLowerCase())} was added to the audience.</p>
+  `;
+  return send(to, `New subscriber: ${email.trim().toLowerCase()}`, html);
 }
 
 // ---------------------------------------------------------------------------

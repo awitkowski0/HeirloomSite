@@ -30,7 +30,7 @@ function seoTitle(name) {
 
 function categoryDescription(category) {
   const map = {
-    "Cribs": "handcrafted solid wood crib",
+    "Cribs": "solid wood crib",
     "Dressers": "solid wood dresser",
     "Chests": "solid wood chest",
     "Nightstands": "solid wood nightstand",
@@ -40,7 +40,7 @@ function categoryDescription(category) {
     "Accessories": "nursery accessory",
     "Guard Rails & Conversions": "crib conversion rail",
   };
-  return map[category] || "handcrafted nursery product";
+  return map[category] || "nursery product";
 }
 
 const drifted = [];
@@ -78,7 +78,7 @@ for (const dirName of getProductDirs()) {
     metaDescription:
       meta.metaDescription ||
       meta.description ||
-      `Shop our ${desc} ${name.toLowerCase()}. Handcrafted in the USA from premium solid hardwoods.`,
+      `Shop our ${desc} ${name.toLowerCase()}. Made in the USA from premium solid hardwoods.`,
     category: cat,
   };
 
