@@ -8,7 +8,10 @@ import {
   FEED_HEADERS,
   BUILDER_BASE_MATERIAL,
   FEED_TITLE_NAMES,
+  FEED_PRODUCT_TYPE_COLLECTION,
   GOOGLE_PRODUCT_CATEGORY,
+  SHARED_PRODUCT_HIGHLIGHTS,
+  EXTRA_PRODUCT_HIGHLIGHTS,
   additionalImages,
   feedItems,
   itemColor,
@@ -248,6 +251,20 @@ test('every feed title names the product type; Fisher cribs lead with the builde
   assert.match(itemWithId(xml, 'FQP-101'), /<g:title>Fisher Mission Crib in Brown Maple<\/g:title>/);
   assert.match(itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon'), /<g:title>Newport Crib in Carbon<\/g:title>/);
   assert.equal(FEED_TITLE_NAMES['arched-top'], 'Fisher Arched Top Crib');
+  assert.match(
+    itemWithId(xml, 'FQP 107 Madison Changing Table 6 Drawer'),
+    /<g:title>Fisher Changing Table - 6 Drawer<\/g:title>/,
+  );
+  assert.match(
+    itemWithId(xml, 'FQP 112 Madison Nightstand 2 Drawer'),
+    /<g:title>Fisher Nightstand - 2 Drawer<\/g:title>/,
+  );
+  assert.deepEqual(tags(itemWithId(xml, 'FQP 107 Madison Changing Table 6 Drawer'), 'g:title'), [
+    'Fisher Changing Table - 6 Drawer',
+  ]);
+  assert.deepEqual(tags(itemWithId(xml, 'FQP 112 Madison Nightstand 2 Drawer'), 'g:title'), [
+    'Fisher Nightstand - 2 Drawer',
+  ]);
 });
 
 test('color only for single-finish items; material from the builder price book base column; no mpn / age_group', () => {
@@ -288,4 +305,84 @@ test('additional images: other real photos of the same wood item only, max 10, n
   assert.deepEqual(tags(itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon'), 'g:additional_image_link'), []);
   assert.deepEqual(tags(itemWithId(xml, 'OTO-1303'), 'g:additional_image_link'), []);
   assert.deepEqual(additionalImages(configuration()), []);
+});
+
+test('Fisher crib product_type is three levels; the two Fisher case goods stay at two levels', () => {
+  const xml = merchantFeedXml(getInventory());
+  const expected = {
+    'FQP-201-BrownMaple_OCS_100_Seely': 'Nursery Furniture &gt; Cribs &gt; Arched Top',
+    'FQP-601': 'Nursery Furniture &gt; Cribs &gt; Bloomington',
+    'FQP-501': 'Nursery Furniture &gt; Cribs &gt; Darlington',
+    'FQP-301': 'Nursery Furniture &gt; Cribs &gt; Hudson',
+    'FQP-101': 'Nursery Furniture &gt; Cribs &gt; Mission',
+    'FQP-701': 'Nursery Furniture &gt; Cribs &gt; Moyerton',
+    'FQP-401': 'Nursery Furniture &gt; Cribs &gt; Princeton',
+  };
+  for (const [id, type] of Object.entries(expected)) {
+    assert.deepEqual(tags(itemWithId(xml, id), 'g:product_type'), [type]);
+  }
+  assert.deepEqual(
+    tags(itemWithId(xml, 'FQP 107 Madison Changing Table 6 Drawer'), 'g:product_type'),
+    ['Nursery Furniture &gt; Changing Tables'],
+  );
+  assert.deepEqual(
+    tags(itemWithId(xml, 'FQP 112 Madison Nightstand 2 Drawer'), 'g:product_type'),
+    ['Nursery Furniture &gt; Nightstands'],
+  );
+  assert.equal(FEED_PRODUCT_TYPE_COLLECTION['arched-top'], 'Arched Top');
+  assert.equal(FEED_PRODUCT_TYPE_COLLECTION['changing-table-6-drawer'], undefined);
+});
+
+test('every item has the four shared product highlights; only the two Fisher case goods add extras', () => {
+  const xml = merchantFeedXml(getInventory());
+  const shared = [...SHARED_PRODUCT_HIGHLIGHTS].map(xmlEscape);
+  const changingExtra = [...EXTRA_PRODUCT_HIGHLIGHTS['changing-table-6-drawer']].map(xmlEscape);
+  const nightExtra = [...EXTRA_PRODUCT_HIGHLIGHTS['nightstand-2-drawer']].map(xmlEscape);
+  const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
+  assert.ok(items.length >= 40);
+  for (const item of items) {
+    const bullets = tags(item, 'g:product_highlight');
+    assert.deepEqual(bullets.slice(0, 4), shared);
+    const id = tags(item, 'g:id')[0];
+    if (id === 'FQP 107 Madison Changing Table 6 Drawer') {
+      assert.deepEqual(bullets, [...shared, ...changingExtra]);
+    } else if (id === 'FQP 112 Madison Nightstand 2 Drawer') {
+      assert.deepEqual(bullets, [...shared, ...nightExtra]);
+    } else {
+      assert.deepEqual(bullets, shared);
+    }
+  }
+  assert.match(SHARED_PRODUCT_HIGHLIGHTS[0], /Pennsylvania, New Jersey and Maryland/);
+  assert.match(SHARED_PRODUCT_HIGHLIGHTS[1], /Shipping is charged/);
+  assert.match(SHARED_PRODUCT_HIGHLIGHTS[2], /Assembly comes only with White Glove/);
+  assert.match(SHARED_PRODUCT_HIGHLIGHTS[3], /Made to order/);
+});
+
+test('feed channel, item links and images stay on the brand host; identifiers stay blank', () => {
+  const xml = merchantFeedXml(getInventory());
+  assert.match(xml, /<link>https:\/\/heirloomcribsandmore\.com<\/link>/);
+  for (const name of ['g:link', 'g:image_link', 'g:additional_image_link']) {
+    for (const url of tags(xml, name)) {
+      assert.match(url, /^https:\/\/heirloomcribsandmore\.com/);
+      assert.doesNotMatch(url, /vercel\.app/i);
+    }
+  }
+  const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
+  for (const item of items) {
+    assert.deepEqual(tags(item, 'g:identifier_exists'), ['no']);
+  }
+  assert.doesNotMatch(xml, /<g:mpn>|<g:gtin>/);
+});
+
+test('feed xml has no former mail-office street, workshop adjective, or banned credential wording', () => {
+  const xml = merchantFeedXml(getInventory()).toLowerCase();
+  const street = ['m', 'a', 'n', 'o', 'r'].join('');
+  const workshop = ['c', 'r', 'a', 'f', 't', 'e', 'd'].join('');
+  const cred = ['c', 'e', 'r', 't', 'i', 'f', 'i', 'e', 'd'].join('');
+  const acronym = ['w', 'b', 'e'].join('');
+  assert.equal(xml.includes(street), false);
+  assert.equal(xml.includes(workshop), false);
+  assert.equal(xml.includes(cred), false);
+  assert.equal(new RegExp('\\b' + acronym + '\\b').test(xml), false);
+  assert.doesNotMatch(xml, /nationwide/i);
 });
