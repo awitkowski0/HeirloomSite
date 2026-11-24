@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   description:
     'What we collect, who we share it with, and how to change your tracking choices.',
   alternates: { canonical: '/privacy' },
+  openGraph: { url: '/privacy' },
 };
 
 export default function PrivacyPage() {

@@ -102,10 +102,19 @@ export function variantPathsFor(configurations: InventoryItem[]): string[][] {
   return paths;
 }
 
-/** The canonical path for a product, optionally at a wood and finish. */
+/** The landing-page path for a product, optionally at a wood and finish. */
 export function variantHref(slug: string, wood?: string | null, stainName?: string | null): string {
   if (!wood) return `/product/${slug}`;
   const woodSeg = variantSlug(wood);
   if (!stainName || !stainIsDistinct(wood, stainName)) return `/product/${slug}/${woodSeg}`;
   return `/product/${slug}/${woodSeg}/${variantSlug(stainLabel(stainName))}`;
 }
+
+/**
+ * Search-index URL for a product (`rel=canonical` and `og:url`). Variant
+ * finish pages share this base path; the landing URL stays `variantHref()`.
+ */
+export function productCanonicalPath(slug: string): string {
+  return `/product/${slug}`;
+}
+

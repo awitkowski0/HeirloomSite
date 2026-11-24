@@ -13,7 +13,7 @@ import {
 } from '@/lib/seo';
 import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
-import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
+import { resolveVariant, variantPathsFor, variantHref, productCanonicalPath } from '@/lib/variants';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import type { ReactNode } from 'react';
@@ -160,7 +160,9 @@ export async function generateMetadata({
       )
     : truncate(primary.metaDescription || primary.description, 155);
 
-  const canonical = variantHref(slug, resolved.wood, resolved.stain);
+  // Search-index URL is the base product (Merchant GO 7118897871 guard 6).
+  // Variant title, description and images stay specific to this finish.
+  const canonical = productCanonicalPath(slug);
   const images = resolved.wood
     ? [stain?.gallery?.[0]?.url || stain?.image].filter((u): u is string => Boolean(u))
     : galleryImagesFor(product.configurations).slice(0, 4);
@@ -229,8 +231,10 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
    * renders, at the price ProductConfigurator shows on first paint (the
    * resolved wood, the resolved finish when it is in stock, otherwise the
    * first in-stock finish - the same fallback the configurator applies), at
-   * this page's own canonical URL. A colour page names its colour and carries
-   * that colour's SKU, which is the feed's g:id for the same URL.
+   * this landing-page URL (the pre-selected variant). A colour page names its
+   * colour and carries that colour's SKU, which is the feed's g:id for the
+   * same URL. HTML rel=canonical may point at the base product; JSON-LD url
+   * and offers.url stay on this variant URL (Merchant GO 7118897871 guard 5).
    */
   const offer = (() => {
     const config = data.config;

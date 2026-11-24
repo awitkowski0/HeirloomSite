@@ -276,7 +276,8 @@ export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
  * sells rather than the whole product family. A colour page is its own
  * product: its name carries the colour, `sku` is that colour's SKU (the same
  * value the Merchant Center feed sends as `g:id`) and `url` / `offers.url`
- * are the page's own canonical URL.
+ * are this landing-page URL (the pre-selected variant), which may differ
+ * from the HTML rel=canonical Search-index URL.
  *
  * `brand` is the furniture builder, from the same BUILDERS table the feed's
  * `g:brand` reads; Heirloom is the seller, not the manufacturer. A SKU with no
