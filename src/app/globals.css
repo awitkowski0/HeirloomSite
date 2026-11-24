@@ -2426,6 +2426,13 @@ main {
   max-width: 60ch;
 }
 
+.page-header .collection-intro .body-lg + .body-lg {
+  margin-top: 1em;
+}
+.page-header .collection-intro-links {
+  margin-top: 16px;
+}
+
 .section-heading {
   text-align: center;
   margin-bottom: 48px;
