@@ -24,12 +24,15 @@ import {
   photosFor,
   unusedPhotos,
 } from "./lib/product-page.mjs";
+import { placeholderProblems, variantTypeProblem } from "./lib/product-checks.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PRODUCTS = join(root, "public", "data", "products");
+const TEMPLATES = join(root, "templates", "products");
 const PREVIEW_DIR = join(root, ".preview");
 const PORT = Number(process.env.PORT) || 3000;
 const BASE_URL = `http://localhost:${PORT}`;
+const INDEX_URL = `${BASE_URL}/dev/products`;
 
 // ---------------------------------------------------------------------------
 // Small helpers
@@ -84,15 +87,20 @@ function slugify(text) {
     .substring(0, 80);
 }
 
+/** The categories kept out of the nav, grids and search (the kits, the mattress). */
+function unlistedCategories() {
+  const src = readFileSync(join(root, "src", "lib", "taxonomy.ts"), "utf-8");
+  const unlisted = src.match(/UNLISTED_CATEGORIES[^=]*=\s*\[([^\]]*)\]/);
+  return [...(unlisted?.[1].matchAll(/'([^']+)'/g) ?? [])].map(q => q[1]);
+}
+
 /** The categories the taxonomy claims, read from its source. */
 function knownCategories() {
   const src = readFileSync(join(root, "src", "lib", "taxonomy.ts"), "utf-8");
-  const names = new Set();
+  const names = new Set(unlistedCategories());
   for (const m of src.matchAll(/sources:\s*\[([^\]]*)\]/g)) {
     for (const q of m[1].matchAll(/'([^']+)'/g)) names.add(q[1]);
   }
-  const unlisted = src.match(/UNLISTED_CATEGORIES[^=]*=\s*\[([^\]]*)\]/);
-  for (const q of unlisted?.[1].matchAll(/'([^']+)'/g) ?? []) names.add(q[1]);
   return [...names].sort();
 }
 
@@ -195,11 +203,149 @@ function pageUrl(p, key) {
 // Commands
 // ---------------------------------------------------------------------------
 
-function cmdList() {
-  for (const d of productDirs()) {
-    const p = load(d);
+/** live, draft, hidden, or unlisted (live, but only reachable by link). */
+function statusOf(p, unlisted) {
+  if (p.meta.hidden === true) return "hidden";
+  if (p.meta.draft === true) return "draft";
+  return unlisted.includes(p.meta.category) ? "unlisted" : "live";
+}
+
+/**
+ * Everything `check` knows about one product.
+ *
+ *   errors    what the build refuses
+ *   todo      what a draft still has to fill in before `publish` (template
+ *             placeholders). On a product that is not a draft these are errors.
+ *   warnings  what the build would quietly ship
+ */
+function inspect(p, ctx) {
+  const errors = checkPageMedia(p.dir, p.dirName, p.meta, p.media);
+  const todo = [];
+  const warnings = [];
+  const visible = p.variants.filter(v => v.hidden !== true);
+
+  if (p.meta.draft !== undefined && typeof p.meta.draft !== "boolean") {
+    errors.push(`product.json: "draft" must be true or absent, got ${JSON.stringify(p.meta.draft)}`);
+  }
+  if (!p.meta.productName) errors.push("product.json: no productName");
+  if (!p.meta.slug) errors.push("product.json: no slug");
+  else if ((ctx.slugs.get(p.meta.slug) || []).length > 1) {
+    errors.push(`slug "${p.meta.slug}" is shared with ${ctx.slugs.get(p.meta.slug).filter(d => d !== p.dirName).join(", ")}`);
+  }
+  if (!ctx.categories.includes(p.meta.category)) {
+    errors.push(`category "${p.meta.category}" is not one the taxonomy claims (src/lib/taxonomy.ts)`);
+  }
+  if (visible.length === 0) errors.push("variants.json has no visible variant, so there would be no page");
+  else {
+    const problem = variantTypeProblem(p.dirName, p.meta.variantType, visible.map(v => v.variant));
+    if (problem) errors.push(problem);
+  }
+  for (const field of ["includes", "bundle", "related"]) {
+    for (const slug of p.meta[field] || []) {
+      const target = ctx.status.get(slug);
+      if (!target) errors.push(`${field} names "${slug}", which is not a product slug`);
+      else if (target === "hidden") warnings.push(`${field} names "${slug}", which is hidden: the row is dropped`);
+      else if (target === "draft" && p.meta.draft !== true) {
+        warnings.push(`${field} names "${slug}", which is a draft: the row is dropped until it is published`);
+      }
+    }
+  }
+  (p.meta.draft === true ? todo : errors).push(...placeholderProblems(p.meta, p.variants));
+
+  const keys = finishKeys(p);
+  const allKeys = new Set(p.variants.flatMap(v => (v.stains || []).map(s => mediaKey(v.variant, s))));
+  for (const k of Object.keys(p.media)) {
+    if (!allKeys.has(k)) warnings.push(`media.json key "${k}" matches no finish in variants.json`);
+  }
+  const landing = defaultMediaKey(visible);
+  if (!photosFor(p.meta, p.media, landing, true).length) warnings.push("no photo at all: the page shows \"Photography coming soon\"");
+  const bare = keys.filter(k => !(p.media[k] || []).length);
+  if (bare.length && bare.length < keys.length) warnings.push(`${bare.length} finish(es) have no photo of their own: ${bare.slice(0, 3).join(", ")}${bare.length > 3 ? ", ..." : ""}`);
+  // Stains are chosen with the finish selector, not swiped through. The shared
+  // gallery is for room shots and other angles; a photo of one stain there
+  // shows that stain under every other finish's name.
+  const finishPhotos = new Map();
+  for (const [k, list] of Object.entries(p.media)) for (const f of list) finishPhotos.set(f, k);
+  for (const g of p.meta.page?.gallery || []) {
+    if (finishPhotos.has(g)) warnings.push(`gallery photo ${g} is the "${finishPhotos.get(g)}" finish photo: the shared carousel is for rooms and angles, so it would show that stain on every finish`);
+  }
+  const hero = p.meta.page?.hero;
+  if (hero && finishPhotos.has(hero) && finishPhotos.get(hero) !== landing) {
+    warnings.push(`hero ${hero} is the "${finishPhotos.get(hero)}" finish photo, but visitors land on "${landing}"`);
+  }
+  if (!p.meta.description) warnings.push("description is empty");
+  const unused = unusedPhotos(p.dir, p.meta, p.media);
+  if (unused.length) warnings.push(`${unused.length} unused photo(s) in the folder: ${unused.slice(0, 4).join(", ")}${unused.length > 4 ? ", ..." : ""}`);
+
+  return { errors, todo, warnings, unused };
+}
+
+/** What `inspect` needs to know about the rest of the catalogue. */
+function catalogueContext(all = productDirs().map(load)) {
+  const unlisted = unlistedCategories();
+  const slugs = new Map();
+  const status = new Map();
+  for (const p of all) {
+    if (!p.meta.slug) continue;
+    slugs.set(p.meta.slug, [...(slugs.get(p.meta.slug) || []), p.dirName]);
+    status.set(p.meta.slug, statusOf(p, unlisted));
+  }
+  return { all, unlisted, slugs, status, categories: knownCategories() };
+}
+
+/**
+ * Ask the build itself. Runs every guard in scripts/build-data.mjs without
+ * writing anything, so the answer is the build's and not this file's opinion
+ * of it. Returns null when it passes, otherwise the build's own message.
+ */
+function buildWouldRefuse({ drafts }) {
+  const res = spawnSync(
+    process.execPath,
+    [join(root, "scripts", "build-data.mjs"), "--dry-run", ...(drafts ? ["--include-drafts"] : [])],
+    { encoding: "utf-8" }
+  );
+  return res.status === 0 ? null : (res.stderr || res.stdout || "build-data failed").trim();
+}
+
+function cmdList(args) {
+  const ctx = catalogueContext();
+  if (args.flags.json) {
+    // Read by the dev-only index page, src/app/dev/products/page.tsx.
+    const rows = ctx.all.map(p => {
+      const status = statusOf(p, ctx.unlisted);
+      const visible = p.variants.filter(v => v.hidden !== true);
+      const lead = photosFor(p.meta, p.media, defaultMediaKey(visible), true)[0] || null;
+      const used = new Set([
+        ...finishKeys(p).flatMap(k => p.media[k] || []),
+        ...(p.meta.page?.hero ? [p.meta.page.hero] : []),
+        ...(p.meta.page?.gallery || []),
+      ]);
+      // A hidden product is not built, so nothing about it is checked.
+      const report = status === "hidden" ? { errors: [], todo: [], warnings: [], unused: unusedPhotos(p.dir, p.meta, p.media) } : inspect(p, ctx);
+      return {
+        folder: p.dirName,
+        productName: p.meta.productName || p.dirName,
+        slug: p.meta.slug || null,
+        category: p.meta.category || null,
+        collection: p.meta.collection || null,
+        variantType: p.meta.variantType || null,
+        status,
+        image: lead ? `/data/products/${encodeURIComponent(p.dirName)}/${lead}` : null,
+        finishes: finishKeys(p).length,
+        photos: used.size,
+        unusedPhotos: report.unused.length,
+        errors: report.errors,
+        todo: report.todo,
+        warnings: report.warnings,
+      };
+    });
+    console.log(JSON.stringify(rows));
+    return;
+  }
+  for (const p of ctx.all) {
+    const status = statusOf(p, ctx.unlisted);
     const flags = [
-      p.meta.hidden ? "hidden" : null,
+      status === "live" ? null : status,
       p.meta.page?.hero ? "hero" : null,
       p.meta.page?.gallery?.length ? `+${p.meta.page.gallery.length} shared` : null,
     ].filter(Boolean);
@@ -219,6 +365,7 @@ function describe(p) {
     productName: p.meta.productName,
     slug: p.meta.slug,
     category: p.meta.category,
+    status: statusOf(p, unlistedCategories()),
     url: pageUrl(p),
     folder: relative(root, p.dir) + "/",
     files: {
@@ -242,6 +389,8 @@ function cmdShow(args) {
     return;
   }
   console.log(`\n${info.productName}   ${info.url}`);
+  if (info.status === "draft") console.log(`  status    DRAFT - on localhost only until: npm run product -- publish ${info.slug}`);
+  else if (info.status !== "live") console.log(`  status    ${info.status}`);
   console.log(`  folder    ${info.folder}`);
   for (const [f, what] of Object.entries(info.files)) console.log(`  ${f.padEnd(14)}${what}`);
   console.log(`\n  hero      ${info.page.hero ? info.page.hero : `(not set - uses ${info.leadPhoto || "nothing: no photos"})`}`);
@@ -325,18 +474,71 @@ function cmdRemovePhoto(args) {
   console.log(`  ${file} removed from ${hits} place(s); the file is still in the folder`);
 }
 
+// --- templates and new products ----------------------------------------------
+
+function templateNames() {
+  if (!existsSync(TEMPLATES)) return [];
+  return readdirSync(TEMPLATES)
+    .filter(d => existsSync(join(TEMPLATES, d, "product.json")))
+    .sort();
+}
+
+function loadTemplate(name) {
+  const dir = join(TEMPLATES, name);
+  if (!existsSync(join(dir, "product.json"))) {
+    die(`No template "${name}". Templates:\n` + templateNames().map(t => `      ${t}`).join("\n"));
+  }
+  return {
+    about: readJSON(join(dir, "template.json"), {}),
+    meta: readJSON(join(dir, "product.json"), {}),
+    variants: readJSON(join(dir, "variants.json"), []),
+  };
+}
+
+function cmdTemplates() {
+  console.log("");
+  for (const name of templateNames()) {
+    const t = loadTemplate(name);
+    const finishes = t.variants.reduce((n, v) => n + (v.stains || []).length, 0);
+    console.log(`  ${name.padEnd(16)} ${t.about.summary || ""}`);
+    console.log(`  ${"".padEnd(16)} ${t.meta.category}, variantType ${t.meta.variantType}, ${finishes} finish(es)${t.meta.bundle?.length ? `, bundle: ${t.meta.bundle.join(", ")}` : ""}`);
+  }
+  console.log(`\n  use one:   npm run product -- new "<Name>" --template <name>`);
+  console.log(`  or clone:  npm run product -- new "<Name>" --like "<existing product>"`);
+  console.log(`  They live in ${relative(root, TEMPLATES)}/ - edit them like any product folder.\n`);
+}
+
+/** product.json in the catalogue's usual key order, with `draft` up top. */
+function draftMeta(name, slug, rest) {
+  const { productName: _n, slug: _s, title: _t, draft: _d, hidden: _h, category, ...others } = rest;
+  const out = { productName: name, category, draft: true };
+  for (const [k, v] of Object.entries(others)) {
+    out[k] = v;
+    // slug and title sit after defaultVariant in every existing file.
+    if (k === "defaultVariant") Object.assign(out, { slug, title: name });
+  }
+  if (!out.slug) Object.assign(out, { slug, title: name });
+  return out;
+}
+
 function cmdNew(args) {
   const name = args.positional[0];
-  if (!name) {
-    die('Usage: new "<Product Name>" --category <Category> --price <dollars> [--sku X] [--description "..."] [--collection X] [--photos a.jpg,b.jpg]');
-  }
+  const usage =
+    'Usage: new "<Product Name>" --category <Category> --price <dollars>\n' +
+    '          or  new "<Product Name>" --template <name>      (npm run product -- templates)\n' +
+    '          or  new "<Product Name>" --like "<existing product>"\n' +
+    '    optional: [--category C] [--price N] [--sku X] [--description "..."] [--collection X] [--photos a.jpg,b.jpg]';
+  if (!name) die(usage);
+  const flag = k => (typeof args.flags[k] === "string" ? args.flags[k] : null);
+  if (flag("template") && flag("like")) die("--template and --like are two ways to start: pick one");
+
   const categories = knownCategories();
-  const category = args.flags.category;
-  if (!category || !categories.includes(category)) {
+  const category = flag("category");
+  if (category && !categories.includes(category)) {
     die(`--category must be one of:\n` + categories.map(c => `      ${c}`).join("\n"));
   }
-  const price = Number(args.flags.price);
-  if (!Number.isFinite(price) || price <= 0) die("--price is required: whole dollars, e.g. --price 1299");
+  const price = args.flags.price === undefined ? null : Number(args.flags.price);
+  if (price !== null && !(Number.isFinite(price) && price > 0)) die("--price is whole dollars, e.g. --price 1299");
 
   const slug = slugify(name);
   const dirName = name.replace(/\//g, "-");
@@ -345,90 +547,191 @@ function cmdNew(args) {
   const clash = productDirs().map(load).find(p => p.meta.slug === slug);
   if (clash) die(`slug ${slug} is already used by ${clash.dirName}`);
 
+  const description = flag("description");
+  let meta;
+  let variants;
+  let notes = [];
+
+  if (flag("like")) {
+    // The structure of an existing product, and none of its identity: no
+    // photos, SKUs, slug or copy. Hidden variants are not carried over.
+    const src = find(flag("like"));
+    const { page: _page, ...rest } = src.meta;
+    meta = draftMeta(name, slug, {
+      ...rest,
+      description: `TODO: describe the ${name}.`,
+      extendedDescription: null,
+      metaDescription: "TODO: one sentence for search results, under 155 characters.",
+    });
+    variants = src.variants
+      .filter(v => v.hidden !== true)
+      .map(v => ({
+        variant: v.variant,
+        label: v.label,
+        stains: [...(v.stains || [])],
+        basePrice: v.basePrice,
+        sku: "TODO",
+        dimensions: null,
+        weight: null,
+      }));
+    notes = [
+      `structure copied from ${src.meta.productName}: category, finishes, bundle and related`,
+      price === null ? `prices were copied too (${[...new Set(variants.map(v => "$" + v.basePrice))].join(", ")}) - confirm them, or pass --price` : null,
+    ].filter(Boolean);
+  } else if (flag("template")) {
+    const t = loadTemplate(flag("template"));
+    meta = draftMeta(name, slug, t.meta);
+    variants = t.variants;
+    notes = t.about.notes || [];
+  } else {
+    if (!category) die(`${usage}\n\n    --category must be one of:\n` + categories.map(c => `      ${c}`).join("\n"));
+    if (price === null) die("--price is required: whole dollars, e.g. --price 1299");
+    meta = draftMeta(name, slug, {
+      category,
+      variantType: "none",
+      description: "",
+      extendedDescription: null,
+      tags: [],
+      addons: [],
+      defaultVariant: "Default Title",
+      metaDescription: "",
+      related: [],
+      collection: null,
+    });
+    variants = [
+      { variant: "Default Title", label: "Default Title", stains: ["Default"], basePrice: price, sku: null, dimensions: null, weight: null },
+    ];
+  }
+
+  // Flags win over whatever the template or the cloned product carried.
+  if (category) meta.category = category;
+  if (flag("collection")) meta.collection = flag("collection");
+  if (description) {
+    meta.description = description;
+    meta.metaDescription = description.split(/(?<=\.)\s/)[0]?.slice(0, 155) || "";
+  }
+  if (price !== null) for (const v of variants) v.basePrice = price;
+  if (flag("sku")) for (const v of variants) v.sku = flag("sku");
+
   mkdirSync(dir);
-  const description = typeof args.flags.description === "string" ? args.flags.description : "";
-  const meta = {
-    productName: name,
-    category,
-    variantType: "none",
-    description,
-    extendedDescription: null,
-    tags: [],
-    addons: [],
-    defaultVariant: "Default Title",
-    slug,
-    title: name,
-    metaDescription: description.split(/(?<=\.)\s/)[0]?.slice(0, 155) || "",
-    related: [],
-    collection: typeof args.flags.collection === "string" ? args.flags.collection : null,
-  };
-  const variants = [
-    {
-      variant: "Default Title",
-      label: "Default Title",
-      stains: ["Default"],
-      basePrice: price,
-      sku: typeof args.flags.sku === "string" ? args.flags.sku : null,
-      dimensions: null,
-      weight: null,
-    },
-  ];
   const p = { dirName, dir, meta, variants, media: {} };
   writeJSON(join(dir, "variants.json"), variants);
 
-  const photos = typeof args.flags.photos === "string" ? args.flags.photos.split(",").filter(Boolean) : [];
+  const photos = flag("photos") ? flag("photos").split(",").filter(Boolean) : [];
   const names = photos.map(f => adopt(p, f.trim()));
   if (names.length) {
-    p.media[mediaKey("Default Title", "Default")] = names;
+    p.media[defaultMediaKey(variants)] = names;
     p.meta.page = { hero: names[0] };
   }
   save(p);
 
-  console.log(`\n  created ${relative(root, dir)}/  →  /product/${slug}`);
-  if (!description) console.log(`  ! no --description yet: fill "description" in product.json before shipping`);
-  console.log(`  next:  npm run product -- check ${slug}   then   npm run product -- preview ${slug}\n`);
+  console.log(`\n  created ${relative(root, dir)}/  →  /product/${slug}   (a DRAFT: on localhost only)`);
+  for (const n of notes) console.log(`  · ${n}`);
+  const report = inspect(p, catalogueContext());
+  for (const e of report.errors) console.log(`  ✗ ${e}`);
+  for (const t of report.todo) console.log(`  □ ${t}`);
+  if (!meta.description) console.log(`  ! no description yet: fill "description" in product.json`);
+  console.log(`\n  next:  npm run product -- preview ${slug}     look at it, and at ${INDEX_URL}`);
+  console.log(`         npm run product -- check ${slug}       what is left to do`);
+  console.log(`         npm run product -- publish ${slug}     when it is ready to go live\n`);
+}
+
+/**
+ * Take a draft live: remove `"draft": true`, but only once `check` is clean
+ * and the build itself would accept the result.
+ */
+function cmdPublish(args) {
+  const p = find(args.positional[0]);
+  if (p.meta.hidden === true) die(`${p.meta.slug} is hidden, not a draft. Remove "hidden" by hand if that is what you mean.`);
+  if (p.meta.draft !== true) {
+    console.log(`\n  ${p.meta.slug} is not a draft - it is already live.\n`);
+    return;
+  }
+  const report = inspect(p, catalogueContext());
+  const blocking = [...report.errors, ...report.todo];
+  if (blocking.length) {
+    console.error(`\n  ✗ ${p.meta.slug} is not ready to publish:`);
+    for (const e of report.errors) console.error(`      ✗ ${e}`);
+    for (const t of report.todo) console.error(`      □ ${t}`);
+    console.error(`\n    Fix these, then publish again. It is still a draft.\n`);
+    process.exit(1);
+  }
+
+  // Written first so the build can be asked about the product as it will
+  // ship, and put back if the build says no.
+  const before = readFileSync(join(p.dir, "product.json"), "utf-8");
+  delete p.meta.draft;
+  writeJSON(join(p.dir, "product.json"), p.meta);
+  const refusal = buildWouldRefuse({ drafts: false });
+  if (refusal) {
+    writeFileSync(join(p.dir, "product.json"), before);
+    console.error(`\n  ✗ ${p.meta.slug} passes check, but the build refuses it:\n`);
+    console.error(refusal.split("\n").map(l => `    ${l}`).join("\n"));
+    console.error(`\n    It is still a draft.\n`);
+    process.exit(1);
+  }
+
+  console.log(`\n  published ${p.meta.slug}: "draft" removed from ${relative(root, join(p.dir, "product.json"))}`);
+  for (const w of report.warnings) console.log(`  ! ${w}`);
+  console.log(`  It goes live with the next deploy - ship it through the feature workflow in AGENTS.md`);
+  console.log(`  (npm run lint && npm run typecheck && npm run build, then the PR).\n`);
 }
 
 /**
  * Report everything the build would fail on (errors), plus what it would
  * quietly ship (warnings). Exits 1 only on errors.
+ *
+ * Drafts are checked like everything else. What a draft has left to fill in
+ * (template placeholders) is listed as "to do" rather than as an error: the
+ * build leaves a draft out, so it is not a failure yet - but `publish` will
+ * refuse until the list is empty.
  */
 function cmdCheck(args) {
-  const targets = args.positional[0] ? [find(args.positional[0])] : productDirs().map(load);
+  const ctx = catalogueContext();
+  const targets = args.positional[0] ? [find(args.positional[0])] : ctx.all;
   let errors = 0;
+  let todos = 0;
   let warnings = 0;
   let unusedTotal = 0;
+  let drafts = 0;
+  const ready = [];
   const quiet = !args.positional[0] && !args.flags.verbose;
 
   for (const p of targets) {
     if (p.meta.hidden) continue;
-    const problems = checkPageMedia(p.dir, p.dirName, p.meta, p.media);
-    const warns = [];
-    const keys = finishKeys(p);
-    const allKeys = new Set(p.variants.flatMap(v => (v.stains || []).map(s => mediaKey(v.variant, s))));
-    for (const k of Object.keys(p.media)) {
-      if (!allKeys.has(k)) warns.push(`media.json key "${k}" matches no finish in variants.json`);
-    }
-    const landing = defaultMediaKey(p.variants.filter(v => v.hidden !== true));
-    if (!photosFor(p.meta, p.media, landing, true).length) warns.push("no photo at all: the page shows \"Photography coming soon\"");
-    const bare = keys.filter(k => !(p.media[k] || []).length);
-    if (bare.length && bare.length < keys.length) warns.push(`${bare.length} finish(es) have no photo of their own: ${bare.slice(0, 3).join(", ")}${bare.length > 3 ? ", ..." : ""}`);
-    if (!p.meta.description) warns.push("description is empty");
-    const unused = unusedPhotos(p.dir, p.meta, p.media);
-    unusedTotal += unused.length;
-    if (unused.length) warns.push(`${unused.length} unused photo(s) in the folder: ${unused.slice(0, 4).join(", ")}${unused.length > 4 ? ", ..." : ""}`);
-
-    errors += problems.length;
-    warnings += warns.length;
-    if (problems.length || (!quiet && warns.length)) {
-      console.log(`\n${p.meta.slug || p.dirName}`);
-      for (const e of problems) console.log(`  ✗ ${e}`);
-      if (!quiet) for (const w of warns) console.log(`  ! ${w}`);
+    const isDraft = p.meta.draft === true;
+    if (isDraft) drafts++;
+    const report = inspect(p, ctx);
+    unusedTotal += report.unused.length;
+    errors += report.errors.length;
+    todos += report.todo.length;
+    warnings += report.warnings.length;
+    if (report.errors.length || report.todo.length || (!quiet && report.warnings.length) || (isDraft && !quiet)) {
+      console.log(`\n${p.meta.slug || p.dirName}${isDraft ? "   (draft)" : ""}`);
+      for (const e of report.errors) console.log(`  ✗ ${e}`);
+      for (const t of report.todo) console.log(`  □ ${t}`);
+      if (!quiet) for (const w of report.warnings) console.log(`  ! ${w}`);
+      if (isDraft && !report.errors.length && !report.todo.length) ready.push(p.meta.slug);
     }
   }
 
+  // The build has guards this file does not repeat (bundle targets must be
+  // single-configuration, unavailableStains must exist, ...). Ask it directly,
+  // drafts included, once everything above is clean.
+  if (!errors) {
+    const refusal = buildWouldRefuse({ drafts: true });
+    if (refusal) {
+      errors++;
+      console.log(`\n  ✗ the build would refuse this catalogue:\n`);
+      console.log(refusal.split("\n").map(l => `    ${l}`).join("\n"));
+    }
+  }
+
+  if (!errors) for (const slug of ready) console.log(`\n  ${slug} is ready:  npm run product -- publish ${slug}`);
+
   console.log(
     `\n  ${targets.length} product(s): ${errors} error(s), ${warnings} warning(s)` +
+      (drafts ? `, ${drafts} draft(s)${todos ? ` with ${todos} thing(s) to do before publish` : ""}` : "") +
       (unusedTotal ? `, ${unusedTotal} unused photo(s) on disk` : "") +
       (quiet && warnings ? "  (add --verbose, or name one product, to list warnings)" : "") +
       "\n"
@@ -551,12 +854,15 @@ async function cmdPreview(args) {
   if (key && !finishKeys(p).includes(key)) die(`"${key}" is not a finish of ${p.meta.slug}`);
 
   // 1. Regenerate the data the dev server reads, failing loudly like the build.
-  const build = spawnSync(process.execPath, [join(root, "scripts", "build-data.mjs")], { encoding: "utf-8" });
+  // Drafts included: that is what makes a draft's page exist on localhost.
+  // build-data ignores the flag under NODE_ENV=production, on Vercel and in CI.
+  const build = spawnSync(process.execPath, [join(root, "scripts", "build-data.mjs"), "--include-drafts"], { encoding: "utf-8" });
   if (build.status !== 0) {
     process.stderr.write(build.stderr || build.stdout);
     die("build-data failed - fix the above, then preview again");
   }
-  console.log("  data rebuilt");
+  console.log(`  data rebuilt${p.meta.draft === true ? " (drafts included - dev only)" : ""}`);
+  if (p.meta.hidden === true) die(`${p.meta.slug} is hidden, so it has no page to preview`);
 
   // 2. A dev server: reuse one on :PORT, otherwise start one in the background.
   const url = pageUrl(p, key);
@@ -579,8 +885,14 @@ async function cmdPreview(args) {
   }
   // Request the page once so the route is compiled before anyone looks at it.
   const pageStatus = await serverUp(url);
-  if (pageStatus !== 200) die(`${url} answered ${pageStatus || "nothing"}`);
-  console.log(`\n  preview  ${url}\n`);
+  if (pageStatus !== 200) {
+    die(
+      `${url} answered ${pageStatus || "nothing"}` +
+        (p.meta.draft === true ? `\n    Drafts only build outside production: check NODE_ENV and CI are not set in this shell.` : "")
+    );
+  }
+  console.log(`\n  preview  ${url}${p.meta.draft === true ? "   (draft - not live)" : ""}`);
+  console.log(`  index    ${INDEX_URL}   every product, drafts and hidden included\n`);
 
   // 3. Screenshots, so an assistant without a browser can see the result too.
   if (args.flags.screenshot) {
@@ -614,20 +926,25 @@ async function cmdPreview(args) {
 const HELP = `
   Product page setup  -  playbook: docs/product-pages.md
 
-  npm run product -- list                                 every product, its category and page settings
+  npm run product -- list [--json]                        every product, its category, status and page settings
   npm run product -- show <product> [--json]              where its files are, its finishes and carousel order, unused photos
-  npm run product -- new "<Name>" --category C --price N  scaffold a single-finish product
-        [--sku X] [--description "..."] [--collection X] [--photos a.jpg,b.jpg]
+  npm run product -- templates                            the starting points for a new product
+  npm run product -- new "<Name>" --template <name>       start a DRAFT from a template
+  npm run product -- new "<Name>" --like "<product>"      ...or with an existing product's finishes, bundle and related
+  npm run product -- new "<Name>" --category C --price N  ...or as a bare single-finish product
+        [--category C] [--price N] [--sku X] [--description "..."] [--collection X] [--photos a.jpg,b.jpg]
   npm run product -- set-hero <product> <photo>           lead photo: first slide, grid card, share image  (--clear to unset)
   npm run product -- add-photos <product> <photo...>      add carousel photos shown on every finish
         [--finish "<variant>||<stain>" | --finish default] ...or to one finish only
   npm run product -- remove-photo <product> <photo>       take a photo off the page (file stays on disk)
-  npm run product -- check [<product>] [--verbose]        what the build would reject, and what it would quietly ship
-  npm run product -- preview <product> [--finish K]       rebuild data, start/reuse next dev, open the page
+  npm run product -- check [<product>] [--verbose]        what the build would reject, what a draft still needs, what would quietly ship
+  npm run product -- preview <product> [--finish K]       rebuild data (drafts included), start/reuse next dev, open the page
         [--screenshot] [--no-open]                        ...and save desktop + phone PNGs to .preview/
+  npm run product -- publish <product>                    take a draft live: removes "draft" once check and the build pass
 
   <product> is a slug (addison-crib), folder name, or product name; a unique partial match works.
   <photo> is a file already in the product folder, or a path anywhere, which is copied in.
+  A draft ("draft": true in product.json) exists on localhost only. Every product: ${INDEX_URL}
 `;
 
 const [command, ...rest] = process.argv.slice(2);
@@ -635,7 +952,9 @@ const args = parseArgs(rest);
 const commands = {
   list: cmdList,
   show: cmdShow,
+  templates: cmdTemplates,
   new: cmdNew,
+  publish: cmdPublish,
   "set-hero": cmdSetHero,
   "add-photos": cmdAddPhotos,
   "remove-photo": cmdRemovePhoto,

@@ -1,0 +1,112 @@
+[
+  {
+    "variant": "Natural",
+    "label": "Natural",
+    "stains": [
+      "Natural"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Almond",
+    "label": "Almond",
+    "stains": [
+      "Almond"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Asbury Brown",
+    "label": "Asbury Brown",
+    "stains": [
+      "Asbury Brown"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Carbon",
+    "label": "Carbon",
+    "stains": [
+      "Carbon"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Earthtone",
+    "label": "Earthtone",
+    "stains": [
+      "Earthtone"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Ebony",
+    "label": "Ebony",
+    "stains": [
+      "Ebony"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Harvest",
+    "label": "Harvest",
+    "stains": [
+      "Harvest"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Manchester",
+    "label": "Manchester",
+    "stains": [
+      "Manchester"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Michaels Cherry",
+    "label": "Michaels Cherry",
+    "stains": [
+      "Michaels Cherry"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  },
+  {
+    "variant": "Sandstone",
+    "label": "Sandstone",
+    "stains": [
+      "Sandstone"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  }
+]

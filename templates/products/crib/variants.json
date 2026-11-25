@@ -1,0 +1,23 @@
+[
+  {
+    "variant": "BrownMaple",
+    "label": "Brown Maple",
+    "stains": [
+      "Antique Slate",
+      "Driftwood",
+      "Frost",
+      "Fruitwood",
+      "Harvest",
+      "Mx",
+      "Natural",
+      "Provincial",
+      "Seely",
+      "Smoke",
+      "Washington"
+    ],
+    "basePrice": 0,
+    "sku": "TODO",
+    "dimensions": null,
+    "weight": null
+  }
+]

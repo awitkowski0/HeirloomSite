@@ -37,6 +37,8 @@ export interface ProductIndexItem {
   collection: string | null;
   minPrice: number;
   defaultImage: string | null;
+  /** Dev data only - a draft never reaches a production artifact. */
+  draft?: true;
 }
 
 function readData<T>(name: string): T {
@@ -53,8 +55,31 @@ function readData<T>(name: string): T {
   }
 }
 
-export const getInventory = cache((): InventoryItem[] => readData<InventoryItem[]>('inventory'));
-export const getProductIndex = cache((): ProductIndexItem[] => readData<ProductIndexItem[]>('products'));
+/**
+ * The last line of defence for drafts.
+ *
+ * `npm run dev` and `npm run product -- preview` generate data that INCLUDES
+ * draft products so their pages can be looked at locally. `npm run build`
+ * regenerates it without them, so this never fires on the normal path. It is
+ * here for the abnormal one: a bare `next build` run on top of data a dev
+ * session left behind would otherwise prerender and ship a half-made product.
+ */
+function refuseDrafts<T extends { draft?: true }>(rows: T[]): T[] {
+  if (process.env.NODE_ENV === 'production' && rows.some(r => r.draft)) {
+    throw new Error(
+      'The generated product data contains draft products. Build with `npm run build`, ' +
+        'which regenerates it without them (or run `npm run data:build` first).'
+    );
+  }
+  return rows;
+}
+
+export const getInventory = cache((): InventoryItem[] =>
+  refuseDrafts(readData<InventoryItem[]>('inventory'))
+);
+export const getProductIndex = cache((): ProductIndexItem[] =>
+  refuseDrafts(readData<ProductIndexItem[]>('products'))
+);
 export const getImages = cache((): ImageRecord[] => readData<ImageRecord[]>('images'));
 export const getShowroom = cache((): ShowroomData => readData<ShowroomData>('showroom'));
 

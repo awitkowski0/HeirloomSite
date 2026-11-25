@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import Image from 'next/image';
+import PhotoThumbs from './PhotoThumbs';
 import ProductLightbox from './ProductLightbox';
+import { useSlideTrack } from './useSlideTrack';
 
 /** One finish in the scroll preview: its key, what to call it, and its photograph. */
 export interface FeedItem {
@@ -51,7 +53,17 @@ export default function ProductGallery({ images, productName, priority = false, 
   const [position, setPosition] = useState({ key: imagesKey, index: 0 });
   const index = position.key === imagesKey ? position.index : 0;
   const setIndex = (i: number) => setPosition({ key: imagesKey, index: i });
-  const slidesRef = useRef<HTMLDivElement>(null);
+  const count = images.length;
+  const safeIndex = Math.min(index, Math.max(0, count - 1));
+  /*
+   * The carousel is a native scroll-snap track; useSlideTrack keeps the index
+   * and its scroll position in step. Lightbox moves pass 'instant' - the
+   * carousel is behind the lightbox then, and nobody is there to watch it
+   * glide.
+   */
+  const { trackRef: slidesRef, goTo, onScroll, onScrollEnd } = useSlideTrack(count, safeIndex, setIndex);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   /*
@@ -169,29 +181,26 @@ export default function ProductGallery({ images, productName, priority = false, 
     );
   }
 
-  const count = images.length;
-  const safeIndex = Math.min(index, count - 1);
+  /*
+   * An arrow at the end of its run is disabled, and a disabled button drops
+   * focus onto <body> - which would send a keyboard back to the top of the
+   * page. Hand focus to the arrow that still works instead.
+   */
+  const stepTo = (target: number) => {
+    goTo(target);
+    if (target <= 0) nextRef.current?.focus();
+    else if (target >= count - 1) prevRef.current?.focus();
+  };
 
   /*
-   * Move the carousel to slide `i`. The carousel is a native scroll-snap
-   * container, so this scrolls it and lets onSlidesScroll report the index
-   * back; setting it here too keeps the thumbnails in step on browsers that
-   * coalesce scroll events. `instant` is for moves made while the lightbox
-   * covers the carousel - nobody is there to watch it glide.
+   * The dialog hands focus back to whichever slide opened it, but the visitor
+   * may have moved on since and that slide is now off screen and out of the
+   * tab order. Put focus on the photo they are looking at, without letting the
+   * focus scroll the carousel.
    */
-  const goTo = (i: number, behavior: ScrollBehavior = 'smooth') => {
-    const target = Math.max(0, Math.min(i, count - 1));
-    setIndex(target);
-    const track = slidesRef.current;
-    if (!track) return;
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    track.scrollTo({ left: target * track.clientWidth, behavior: reduceMotion ? 'instant' : behavior });
-  };
-  const onSlidesScroll = () => {
-    const track = slidesRef.current;
-    if (!track || track.clientWidth === 0) return;
-    const i = Math.round(track.scrollLeft / track.clientWidth);
-    if (i !== index && i >= 0 && i < count) setIndex(i);
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    (slidesRef.current?.children[safeIndex] as HTMLElement | undefined)?.focus({ preventScroll: true });
   };
 
   /*
@@ -208,11 +217,36 @@ export default function ProductGallery({ images, productName, priority = false, 
    */
   const photo = (
     <div className={`image-container product-image${preview !== null ? ' is-previewing' : ''}`}>
+      {count > 1 && (
+        <>
+          <button
+            ref={prevRef}
+            type="button"
+            className="slide-nav slide-nav-prev"
+            onClick={() => stepTo(safeIndex - 1)}
+            disabled={safeIndex === 0}
+            aria-label="Previous photo"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          </button>
+          <button
+            ref={nextRef}
+            type="button"
+            className="slide-nav slide-nav-next"
+            onClick={() => stepTo(safeIndex + 1)}
+            disabled={safeIndex === count - 1}
+            aria-label="Next photo"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+          </button>
+        </>
+      )}
       <div
         key={imagesKey}
         ref={slidesRef}
-        className="product-slides"
-        onScroll={count > 1 ? onSlidesScroll : undefined}
+        onScroll={onScroll}
+        onScrollEnd={onScrollEnd}
+        className="slide-track product-slides"
         role={count > 1 ? 'region' : undefined}
         aria-roledescription={count > 1 ? 'carousel' : undefined}
         aria-label={count > 1 ? `${productName} photos` : undefined}
@@ -233,13 +267,17 @@ export default function ProductGallery({ images, productName, priority = false, 
             // Only the visible slide is in the tab order; the arrows and
             // thumbnails are how a keyboard moves between them.
             tabIndex={i === safeIndex ? 0 : -1}
-            className="product-slide product-image-trigger"
+            className="product-slide"
           >
             <Image
               src={src}
               alt={i === 0 ? productName : `${productName}, photo ${i + 1}`}
               fill
-              priority={priority && i === 0}
+              /* The first photo is the page's LCP image: fetch it eagerly
+                and at high priority. `priority` is deprecated in Next 16 and
+                no longer raises the fetch priority; the rest stay lazy. */
+              loading={priority && i === 0 ? 'eager' : undefined}
+              fetchPriority={priority && i === 0 ? 'high' : undefined}
               /* The grid does not split until 1024px, but this claimed 55vw
                 from 769px up - so every tablet was told to fetch roughly half
                 the pixels it actually renders. */
@@ -251,29 +289,19 @@ export default function ProductGallery({ images, productName, priority = false, 
       </div>
 
       {count > 1 && (
-        <>
-          <button
-            type="button"
-            className="product-slides-nav product-slides-prev"
-            onClick={() => goTo(safeIndex - 1)}
-            disabled={safeIndex === 0}
-            aria-label="Previous photo"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
-          </button>
-          <button
-            type="button"
-            className="product-slides-nav product-slides-next"
-            onClick={() => goTo(safeIndex + 1)}
-            disabled={safeIndex === count - 1}
-            aria-label="Next photo"
-          >
-            <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-          </button>
-          <p className="product-slides-count" aria-hidden="true">
+        <div className="product-slides-status">
+          <span className="product-slides-progress" aria-hidden="true">
+            {images.map((src, i) => (
+              <span key={src} className={i === safeIndex ? 'is-current' : undefined} />
+            ))}
+          </span>
+          <span className="product-slides-count" aria-hidden="true">
             {safeIndex + 1} / {count}
-          </p>
-        </>
+          </span>
+          <span className="visually-hidden" role="status">
+            Photo {safeIndex + 1} of {count}
+          </span>
+        </div>
       )}
 
       {/* The preview's finish photographs, stacked over the selected one and
@@ -301,19 +329,20 @@ export default function ProductGallery({ images, productName, priority = false, 
     <>
       {hasFeed ? (
         /* The track is the scroll distance the preview runs over; the pin
-           sticks inside it. Both are inert from 768px. */
+           sticks inside it. Both are inert from 768px.
+
+           The length and the panel are in the server HTML rather than added
+           once the phone query resolves: CSS only reads them at phone width,
+           and adding ~900px of page under the photograph after hydration
+           shoved the bundle and price down the screen (CLS 0.13-0.21). */
         <div
           ref={trackRef}
           className="stain-scrub"
-          style={
-            scrubOn
-              ? ({ '--scrub-length': `${(itemCount + 1) * SCRUB_STEP_PX}px` } as CSSProperties)
-              : undefined
-          }
+          style={{ '--scrub-length': `${(itemCount + 1) * SCRUB_STEP_PX}px` } as CSSProperties}
         >
           <div className="stain-scrub-pin">
             {photo}
-            {scrubOn && (
+            {hasFeed && (
               <div className="stain-scrub-panel">
                 <p className="stain-scrub-name">
                   {feed.items[preview ?? feed.activeIndex]?.label ?? ''}
@@ -350,35 +379,24 @@ export default function ProductGallery({ images, productName, priority = false, 
         photo
       )}
 
-      {images.length > 1 && (
-        <div className="gallery-thumbs" role="tablist" aria-label="Image thumbnails">
-          {images.map((url, i) => (
-            <button
-              key={url}
-              type="button"
-              role="tab"
-              aria-selected={i === safeIndex}
-              aria-label={`View image ${i + 1} of ${images.length}`}
-              onClick={() => goTo(i)}
-              className={`gallery-thumb ${i === safeIndex ? 'active' : ''}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- 72px
-                  thumbnail strip; optimizing these would multiply Vercel image
-                  transformations by every image on every product. */}
-              <img src={url} alt="" loading="lazy" />
-            </button>
-          ))}
-        </div>
+      {count > 1 && (
+        <PhotoThumbs
+          images={images}
+          index={safeIndex}
+          onSelect={goTo}
+          label={`${productName} photos`}
+          className="gallery-thumbs"
+        />
       )}
 
       <ProductLightbox
         open={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
+        onClose={closeLightbox}
         images={images}
         productName={productName}
         index={safeIndex}
         // Keep the page carousel on the same photo, so closing lands where
-        // the visitor left off. It is hidden behind the lightbox, so no glide.
+        // the visitor left off.
         onIndexChange={i => goTo(i, 'instant')}
       />
     </>

@@ -65,6 +65,19 @@ shared `gallery`; `scripts/lib/product-page.mjs` is the one place that turns
 `page` + `media.json` into the photo list, used by the build and the CLI alike,
 and the build fails on a photo reference that is not on disk.
 
+A new product starts as a **draft** (`"draft": true` in `product.json`):
+`npm run product -- templates` lists the skeletons in `templates/products/`,
+`new "<Name>" --template <name>` or `--like "<product>"` creates one, and
+`publish <product>` removes `draft` once `check` and the build both pass.
+A draft is built only when `scripts/build-data.mjs` is given
+`--include-drafts`, which only the `dev` npm script and `preview` do; the flag
+is ignored under `NODE_ENV=production`, on Vercel and in CI. `npm run build`,
+`npm test` and `npm run data:build` never include one, and
+`src/lib/content.ts` refuses a production build whose data contains one.
+`/dev/products` lists every product with its status and check results; it is
+a static 404 in a production build. Do not give it `searchParams`, a sitemap
+entry or `dynamic = 'force-dynamic'`.
+
 ## Rules worth knowing
 - **Never read `searchParams` in a page**, and never call `useSearchParams()`
   outside a `<Suspense>` boundary. Either one opts the route out of static
@@ -117,6 +130,10 @@ arrive, so it flashes.
 
 Use the flag for a soft launch or a quick de-list. Use `hidden` when it must
 not be sellable. See `src/lib/useDelistedProducts.ts`.
+
+`"draft": true` is neither: it is for a product that has never been live. It is
+left out of production exactly as `hidden` is, but is built on localhost so the
+page can be previewed. Never put it on a live product - use `hidden` for that.
 
 ## Browse taxonomy
 

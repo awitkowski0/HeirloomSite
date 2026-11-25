@@ -32,6 +32,36 @@ export function anyModalOpen(): boolean {
   return openCount > 0;
 }
 
+/**
+ * Take a share of the page scroll lock, and get back the function that gives
+ * it up. Compensates for the scrollbar so the page does not jump.
+ *
+ * Exported for ProductLightbox, which is a native <dialog> rather than a Modal
+ * but must count as an open dialog all the same - both for the refcount above
+ * and for anyModalOpen(), so the email popup does not open underneath it.
+ */
+export function lockPageScroll(): () => void {
+  const { body, documentElement } = document;
+  openCount += 1;
+  if (openCount === 1) {
+    const scrollBarWidth = window.innerWidth - documentElement.clientWidth;
+    savedOverflow = body.style.overflow;
+    savedPaddingRight = body.style.paddingRight;
+    body.style.overflow = 'hidden';
+    if (scrollBarWidth > 0) body.style.paddingRight = `${scrollBarWidth}px`;
+  }
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    openCount = Math.max(0, openCount - 1);
+    if (openCount === 0) {
+      body.style.overflow = savedOverflow;
+      body.style.paddingRight = savedPaddingRight;
+    }
+  };
+}
+
 const FOCUSABLE = [
   'a[href]',
   'button:not([disabled])',
@@ -57,7 +87,7 @@ interface ModalProps {
  * Accessible dialog.
  *
  * Replaces four hand-rolled overlays (cart popup, gallery carousel, mobile
- * search, product lightbox) that between them had no role="dialog", no
+ * search, product lightbox - since moved to a native <dialog>) that between them had no role="dialog", no
  * aria-modal, no accessible name, no focus trap, no focus restore, no Escape
  * handling and no scroll lock. A screen-reader user pressing "Add to cart" saw
  * the popup appear visually while focus and the virtual cursor stayed on the
@@ -86,17 +116,8 @@ export default function Modal({
     const first = node?.querySelector<HTMLElement>(FOCUSABLE);
     (first ?? node)?.focus();
 
-    // Scroll lock, compensating for the scrollbar so the page does not jump.
     // Refcounted - only the outermost dialog touches the body; see openCount.
-    const { body, documentElement } = document;
-    openCount += 1;
-    if (openCount === 1) {
-      const scrollBarWidth = window.innerWidth - documentElement.clientWidth;
-      savedOverflow = body.style.overflow;
-      savedPaddingRight = body.style.paddingRight;
-      body.style.overflow = 'hidden';
-      if (scrollBarWidth > 0) body.style.paddingRight = `${scrollBarWidth}px`;
-    }
+    const unlockScroll = lockPageScroll();
 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
@@ -127,11 +148,7 @@ export default function Modal({
     document.addEventListener('keydown', onKeyDown, true);
     return () => {
       document.removeEventListener('keydown', onKeyDown, true);
-      openCount = Math.max(0, openCount - 1);
-      if (openCount === 0) {
-        body.style.overflow = savedOverflow;
-        body.style.paddingRight = savedPaddingRight;
-      }
+      unlockScroll();
       // Return focus to whatever opened the dialog.
       previouslyFocused.current?.focus?.();
     };

@@ -100,6 +100,12 @@ export interface InventoryItem {
   includes: RelatedProduct[];
   bundle: RelatedProduct[];
   related: RelatedProduct[];
+  /**
+   * Set only on a draft, and so only in dev data: scripts/build-data.mjs
+   * leaves drafts out of every production artifact. See "draft" in
+   * docs/product-pages.md.
+   */
+  draft?: true;
   stains: Stain[];
 }
 
