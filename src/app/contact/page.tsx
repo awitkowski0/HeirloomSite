@@ -2,20 +2,35 @@ import type { Metadata } from 'next';
 import ContactPageForm from '@/components/contact/ContactPageForm';
 import { SUPPORT_INBOX } from '@/lib/email';
 import { PUBLISHED_PHONE, SERVICE_AREA_LINE } from '@/lib/published-contact';
+import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_URL } from '@/lib/seo';
+import { utmFromSearchParams } from '@/lib/utm';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
   description:
     'Reach Heirloom Cribs & More by email or phone about an order, a repair, or a question about our furniture.',
   alternates: { canonical: '/contact' },
-  openGraph: { url: '/contact' },
+  openGraph: {
+    url: '/contact',
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: [DEFAULT_OG_IMAGE_URL],
+  },
 };
 
 /* The same address /api/inquiry delivers to - one literal, two readers. */
 const EMAIL = SUPPORT_INBOX;
 const PHONE = PUBLISHED_PHONE;
 
-export default function ContactPage() {
+export default async function ContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const utm = utmFromSearchParams(await searchParams);
+
   return (
     <div className="container contact-page">
       <header className="page-header">
@@ -51,7 +66,7 @@ export default function ContactPage() {
         {' — use the form below to send us a message.'}
       </p>
 
-      <ContactPageForm email={EMAIL} />
+      <ContactPageForm email={EMAIL} utm={utm} />
     </div>
   );
 }

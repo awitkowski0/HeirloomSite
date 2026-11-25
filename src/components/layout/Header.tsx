@@ -21,8 +21,8 @@ import HelpMenu from './HelpMenu';
  * removes the constraint that caused it rather than tuning around it.
  *
  * The mark is text, not the logo PNG it replaced. That removes an image
- * request from every page in the site and lets the mark inherit colour;
- * logo-wide.png is still the og:image and stays in place.
+ * request from every page in the site and lets the mark inherit colour.
+ * The site-wide default og:image is the 1200x630 product photo in seo.ts.
  */
 export default function Header() {
   return (
