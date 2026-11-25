@@ -20,7 +20,7 @@ export default function HardwoodPage() {
         generation.
       </p>
       <p>
-        The cribs we offer are made to order by independent builders, and each builder describes its own materials. Old Town Oak states: “solid, American handcrafted baby furniture.” Kids Comfort states: “All cribs are completely solid wood including the mattress support.” Heirloom Cribs &amp; More is the <strong>reseller</strong>, not the factory.
+        The cribs we offer are made to order by independent builders, and each builder describes its own materials. Old Town Oak states: “solid, American-made baby furniture.” Kids Comfort states: “All cribs are completely solid wood including the mattress support.” Heirloom Cribs &amp; More is the <strong>reseller</strong>, not the factory.
       </p>
 
       <section>
@@ -87,7 +87,7 @@ export default function HardwoodPage() {
       <section>
         <h2 className="headline-md">Reseller, not factory</h2>
         <p>
-          The cribs we sell are made to order by independent builders. Fisher&rsquo;s pieces are made in Pennsylvania, and Old Town Oak describes its furniture as “American handcrafted.” Heirloom Cribs &amp; More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley). We offer and support these pieces; we are not the factory.
+          The cribs we sell are made to order by independent builders. Fisher&rsquo;s pieces are made in Pennsylvania, and Old Town Oak describes its furniture as “American-made.” Heirloom Cribs &amp; More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley). We offer and support these pieces; we are not the factory.
         </p>
       </section>
       <hr className="doc-rule" />

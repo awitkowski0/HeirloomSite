@@ -15,7 +15,7 @@ import ListingAnalytics from '@/components/products/ListingAnalytics';
  * appears here, with no edit to this file.
  *
  * The dearest piece in each category, deliberately: this sits directly under
- * "Newly crafted to current standards", so it is the showcase shelf rather than
+ * "Newly built to current standards", so it is the showcase shelf rather than
  * a bargain rail, and the flagship is the piece that argues for the claim.
  *
  * Cribs lead it. They were skipped at first on the grounds that StyleCards
