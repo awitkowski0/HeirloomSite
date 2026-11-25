@@ -87,7 +87,7 @@ export default function HardwoodPage() {
       <section>
         <h2 className="headline-md">Reseller, not factory</h2>
         <p>
-          The cribs we sell are made to order by independent builders. Fisher&rsquo;s pieces are made in Pennsylvania, and Old Town Oak describes its furniture as “American-made.” Heirloom Cribs &amp; More is a women-owned business based in Nazareth, Pennsylvania (Lehigh Valley). We offer and support these pieces; we are not the factory.
+          The cribs we sell are made to order by independent builders. Fisher&rsquo;s pieces are made in Pennsylvania, and Old Town Oak describes its furniture as “American-made.” Heirloom Cribs &amp; More is a woman-owned business. We offer and support these pieces; we are not the factory.
         </p>
       </section>
       <hr className="doc-rule" />

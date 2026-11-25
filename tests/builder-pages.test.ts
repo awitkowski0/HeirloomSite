@@ -268,7 +268,7 @@ test('(r) About builder tile and delivery line use the Brand wording', () => {
   assert.ok(s.includes('Describes itself as family-owned'), 'Fisher tile wording not updated');
   assert.ok(!/\{`Family-owned`\}/.test(s), 'old Family-owned tile text still present');
   assert.ok(
-    s.includes('We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.'),
+    s.includes('We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually.'),
     'delivery line not updated',
   );
   assert.ok(!s.includes('except some ZIP codes in Newark'), 'old "except some ZIP codes in Newark" still present');

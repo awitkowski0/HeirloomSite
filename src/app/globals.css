@@ -2764,6 +2764,22 @@ a.product-inline-link:focus-visible {
   color: var(--ink-muted);
 }
 
+.product-fact-block {
+  margin-top: 40px;
+  max-width: 65ch;
+}
+.product-fact-line {
+  margin: 0 0 0.4em;
+  font-family: var(--font-label);
+  font-size: var(--text-body-md);
+  line-height: 1.6;
+  color: var(--ink);
+}
+.product-fact-line:last-child {
+  margin-bottom: 0;
+}
+
+
 .product-image {
   position: relative;
   min-height: 420px;
