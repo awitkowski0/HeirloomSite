@@ -14,6 +14,7 @@ import {
 import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
+import { productTitleName } from '@/lib/product-title';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import type { ReactNode } from 'react';
@@ -140,10 +141,11 @@ export async function generateMetadata({
 
   const { product, resolved, stain } = data;
   const primary = product.configurations[0];
+  const displayName = productTitleName(slug, product.productName);
 
   // Stored titles already end in "— Heirloom Cribs and More" (all 73 of them),
   // so the layout's "%s | Heirloom Cribs & More" template would double it.
-  const baseTitle = stripSiteSuffix(primary.title || product.productName);
+  const baseTitle = stripSiteSuffix(primary.title || displayName);
   // Each variant gets its own title and description. Without that, 800 pages
   // would carry 73 distinct titles and read as duplicates.
   // variantLabel joins with a bullet for on-page display; a title tag reads
@@ -151,11 +153,11 @@ export async function generateMetadata({
   const variantName = resolved.wood
     ? variantLabel(resolved.wood, resolved.stain ?? '').replace(' • ', ', ')
     : '';
-  const title = variantName ? `${product.productName} in ${variantName}` : baseTitle;
+  const title = variantName ? `${displayName} in ${variantName}` : baseTitle;
 
   const description = resolved.wood
     ? truncate(
-        `${product.productName} in ${variantName}. ${primary.metaDescription || primary.description || ''}`,
+        `${displayName} in ${variantName}. ${primary.metaDescription || primary.description || ''}`,
         155
       )
     : truncate(primary.metaDescription || primary.description, 155);
@@ -194,12 +196,13 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   const primary = product.configurations[0];
   const images = galleryImagesFor(product.configurations);
   const category = primary.category;
+  const displayName = productTitleName(slug, product.productName);
 
   const breadcrumb = [
     { name: 'Home', path: '/' },
     { name: 'Products', path: '/products' },
     ...(category ? [{ name: category, path: `/products/${categoryToSlug(category)}` }] : []),
-    { name: product.productName, path: `/product/${slug}` },
+    { name: displayName, path: `/product/${slug}` },
     ...(resolved.wood
       ? [
           {
@@ -248,7 +251,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         ]
       : [];
     return {
-      name: variantName ? `${product.productName} in ${variantName}` : product.productName,
+      name: variantName ? `${displayName} in ${variantName}` : displayName,
       path: variantHref(slug, resolved.wood, resolved.stain),
       sku: config.sku ?? primary.sku,
       priceDollars: (Number(config.basePrice) || 0) + (Number(stain?.priceAddition) || 0),
@@ -314,14 +317,14 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         below, and that work stays in the server component this way.
       */}
       <ProductConfigurator
-        productName={product.productName}
+        productName={displayName}
         configurations={product.configurations}
         slug={slug}
         title={
           /* The page's h1. It was previously an <h2 className="headline-xl">
              with no h1 anywhere on the page, so the visual hierarchy
              contradicted the semantic one. */
-          <h1 className="product-title">{product.productName}</h1>
+          <h1 className="product-title">{displayName}</h1>
         }
         description={
           primary.description ? (

@@ -239,15 +239,15 @@ test('google_product_category uses exact Google taxonomy strings, one per site c
   );
 });
 
-test('every feed title names the product type; Fisher cribs lead with the builder', () => {
+test('every feed title names the product type and follows the OTO pattern (no builder prefix)', () => {
   const xml = merchantFeedXml(getInventory());
   for (const title of tags(xml, 'g:title')) {
     assert.match(title, /crib|dresser|chest|nightstand|changing table/i, title);
   }
-  assert.match(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), /<g:title>Fisher Arched Top Crib in Seely<\/g:title>/);
-  assert.match(itemWithId(xml, 'FQP-101'), /<g:title>Fisher Mission Crib in Brown Maple<\/g:title>/);
+  assert.match(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), /<g:title>Arched Top Crib in Seely<\/g:title>/);
+  assert.match(itemWithId(xml, 'FQP-101'), /<g:title>Mission Crib in Brown Maple<\/g:title>/);
   assert.match(itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon'), /<g:title>Newport Crib in Carbon<\/g:title>/);
-  assert.equal(FEED_TITLE_NAMES['arched-top'], 'Fisher Arched Top Crib');
+  assert.equal(FEED_TITLE_NAMES['arched-top'], 'Arched Top Crib');
 });
 
 test('color only for single-finish items; material from the builder price book base column; no mpn / age_group', () => {
