@@ -8,6 +8,7 @@ import TurnstileWidget, {
   type TurnstileStatus,
 } from '@/components/checkout/TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
+import { UTM_KEYS, emptyUtm, presentUtm, type UtmFields } from '@/lib/utm';
 
 /**
  * The /contact form.
@@ -28,7 +29,13 @@ import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
  * auto-response asks for exactly those and a required ZIP would gate a visitor
  * who has not chosen a nursery location yet.
  */
-export default function ContactPageForm({ email: supportEmail }: { email: string }) {
+export default function ContactPageForm({
+  email: supportEmail,
+  utm = emptyUtm(),
+}: {
+  email: string;
+  utm?: UtmFields;
+}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -55,7 +62,17 @@ export default function ContactPageForm({ email: supportEmail }: { email: string
     setError(null);
 
     try {
-      const result = await submitInquiry({ name, email, message, phone, zip, interest, timing, turnstileToken });
+      const result = await submitInquiry({
+        name,
+        email,
+        message,
+        phone,
+        zip,
+        interest,
+        timing,
+        turnstileToken,
+        ...presentUtm(utm),
+      });
       // Marked only after the server confirmed delivery - this event must keep
       // meaning "a contact attempt exists", which it did not under mailto.
       contactMessageSubmitted();
@@ -203,6 +220,9 @@ export default function ContactPageForm({ email: supportEmail }: { email: string
           required
         />
       </div>
+      {UTM_KEYS.map(key => (
+        <input key={key} type="hidden" name={key} value={utm[key]} />
+      ))}
       {/*
         interaction-only, so Cloudflare renders nothing unless it actually wants
         a challenge. The visitor navigated here deliberately, but a visible
