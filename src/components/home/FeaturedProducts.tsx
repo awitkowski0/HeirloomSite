@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { getBrowsableProducts, getTaxonomy } from '@/lib/content';
 import { sourcesFor } from '@/lib/taxonomy';
-import ProductCard from '@/components/products/ProductCard';
+import PieceRow from '@/components/shop/PieceRow';
+import { toShopItems } from '@/lib/shop';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 /**
@@ -22,62 +23,57 @@ import ListingAnalytics from '@/components/products/ListingAnalytics';
  * covers them below - but this is the first product anyone sees on the page,
  * and a range display that opens on a dresser buries what the shop is actually
  * known for. StyleCards sells the SHAPE of a crib; this sells the piece.
+ *
+ * Drawn with the listing grid's cards (src/components/shop/PieceLink.tsx), the
+ * new design's style: photo on the paper, name, price, builder tag. The row is
+ * four wide, so with fewer live categories than that the remaining places go
+ * to the next-dearest cribs, still derived, never a hand-kept list.
  */
+const SHOWN = 4;
 
 export default function FeaturedProducts() {
   const products = getBrowsableProducts();
+  const byPrice = (a: { minPrice: number; productName: string }, b: { minPrice: number; productName: string }) =>
+    b.minPrice - a.minPrice || a.productName.localeCompare(b.productName);
 
-  const featured = getTaxonomy()
+  const nodes = getTaxonomy()
     .map(node => {
       const sources = new Set(sourcesFor(node));
-      const inNode = products.filter(p => p.category && sources.has(p.category));
-      if (inNode.length === 0) return null;
       // Deterministic: highest price, then name, so the homepage does not
       // reshuffle between builds over a price tie.
-      const pick = [...inNode].sort(
-        (a, b) => b.minPrice - a.minPrice || a.productName.localeCompare(b.productName)
-      )[0];
-      return { node, product: pick };
+      return [...products.filter(p => p.category && sources.has(p.category))].sort(byPrice);
     })
-    .filter((f): f is NonNullable<typeof f> => f !== null);
+    .filter(inNode => inNode.length > 0);
+  if (nodes.length === 0) return null;
 
-  if (featured.length === 0) return null;
+  // The flagship of each category, cribs first. Any places left go to the
+  // next-dearest cribs, placed beside the first so the cribs read together.
+  const spare = Math.max(0, SHOWN - nodes.length);
+  const picks = [...nodes[0].slice(0, 1 + spare), ...nodes.slice(1).map(inNode => inNode[0])];
 
   return (
     <section className="home-featured" aria-labelledby="home-featured-heading">
-      <div className="home-featured-intro">
-        <h2 id="home-featured-heading" className="home-styles-heading">
-          Across the nursery
-        </h2>
-        <p className="home-styles-copy">
-          The same hardwoods and the same joinery, from the crib outward.
-        </p>
+      <div className="home-featured-intro home-featured-intro--row">
+        <div>
+          <h2 id="home-featured-heading" className="home-styles-heading">
+            Across the nursery
+          </h2>
+          <p className="home-styles-copy">
+            The same hardwoods and the same joinery, from the crib outward.
+          </p>
+        </div>
+        <Link href="/products" className="filter-link">
+          See everything
+        </Link>
       </div>
 
-      <div className="featured-grid">
-        {featured.map(({ node, product }) => (
-          <div key={node.slug} className="home-featured-item">
-            <p className="label-caps text-on-surface-variant home-featured-label">
-              <Link href={`/products/${node.slug}`}>{node.name}</Link>
-            </p>
-            {/*
-              category={null} because the label above already names this
-              group. The card's own line printed the raw catalogue category
-              underneath it - "Dressers & Changing Tables" then "Dressers" -
-              which is the same fact twice in two different vocabularies.
-              ListingAnalytics still attributes the click; ProductCard falls
-              back to 'Crib' only for its data attribute.
-            */}
-            <ProductCard
-              slug={product.slug}
-              name={product.productName}
-              category={null}
-              minPrice={product.minPrice}
-              img={product.defaultImage}
-            />
-          </div>
-        ))}
-      </div>
+      <PieceRow items={toShopItems(picks.slice(0, SHOWN))} />
+
+      <p className="home-featured-more">
+        <Link href="/pick" className="filter-link">
+          Help me pick
+        </Link>
+      </p>
 
       {/* One delegated listener for the tiles above, as on every other grid. */}
       <ListingAnalytics />

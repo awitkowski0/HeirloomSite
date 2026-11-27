@@ -37,11 +37,23 @@ const SCRIPT_SRC = 'https://client.crisp.chat/l.js';
 
 export const liveChatEnabled = Boolean(WEBSITE_ID);
 
+export interface ChatContext {
+  /** Typed into the visitor's message box, for them to edit or send. */
+  message?: string;
+  /**
+   * Shown to staff beside the conversation (Crisp "session data"). Keys must
+   * be lowercase letters, digits, - or _; values are strings or numbers.
+   */
+  data?: Readonly<Record<string, string | number>>;
+}
+
 /**
  * Load the widget if needed and open the chat window. Returns false when live
  * chat is not configured, so the caller can fall back to the contact page.
+ * With a context, the staff side sees `data` next to the conversation and the
+ * visitor's box starts with `message`.
  */
-export function openLiveChat(): boolean {
+export function openLiveChat(context?: ChatContext): boolean {
   if (!WEBSITE_ID || typeof window === 'undefined') return false;
 
   if (!window.$crisp) {
@@ -56,6 +68,11 @@ export function openLiveChat(): boolean {
     document.head.appendChild(script);
   }
 
+  if (context?.data) {
+    const entries = Object.entries(context.data).filter(([k]) => /^[a-z0-9_-]+$/.test(k));
+    if (entries.length > 0) window.$crisp.push(['set', 'session:data', [entries]]);
+  }
+  if (context?.message) window.$crisp.push(['set', 'message:text', [context.message]]);
   window.$crisp.push(['do', 'chat:show']);
   window.$crisp.push(['do', 'chat:open']);
   return true;

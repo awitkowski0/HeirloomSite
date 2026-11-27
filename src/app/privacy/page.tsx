@@ -109,7 +109,8 @@ export default function PrivacyPage() {
           <li>
             <strong>Crisp</strong> — live chat. It loads only when you press &ldquo;Chat with
             us&rdquo;, and then keeps your conversation with us and a cookie so the chat
-            remembers you on your next visit. What you type goes to us through Crisp.
+            remembers you on your next visit. What you type goes to us through Crisp, and if you
+            start the chat from checkout, so does the list of what is in your cart.
           </li>
           <li>
             <strong>Radar</strong> — address autocomplete on the checkout street field.
