@@ -104,7 +104,7 @@ export default function ReturnsPage() {
           </a>{' '}
           ·{' '}
           <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
-            heirloomcribs.care@heirloomcribsandmore.com
+            HeirloomCribs.Care@HeirloomCribsandMore.com
           </a>
         </p>
         <p>Orders ship from our warehouse in Bethlehem, Pennsylvania.</p>

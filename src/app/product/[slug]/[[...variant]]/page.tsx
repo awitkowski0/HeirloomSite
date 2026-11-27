@@ -16,6 +16,8 @@ import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref, productCanonicalPath } from '@/lib/variants';
 import { TYPED_TITLE_NAMES, productTitleName } from '@/lib/product-title';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
+import ProductFactBlock from '@/components/product/ProductFactBlock';
+import { productFactLines } from '@/lib/product-fact-block';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import type { ReactNode } from 'react';
 
@@ -204,6 +206,8 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
   const category = primary.category;
   const displayName = productTitleName(slug, product.productName);
 
+  const factLines = productFactLines(product, data.config);
+
   const breadcrumb = [
     { name: 'Home', path: '/' },
     { name: 'Products', path: '/products' },
@@ -344,6 +348,8 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         initialWood={resolved.wood ?? data.config.wood}
         initialStain={resolved.stain}
       />
+
+      <ProductFactBlock lines={factLines} />
 
       {/*
         "Complete the set" - the matching family, rendered here rather than

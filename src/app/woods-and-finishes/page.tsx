@@ -36,7 +36,7 @@ export default function WoodsAndFinishesPage() {
           <p className="builder-header__contact">
             <a href="tel:+14842931840">(484) 293-1840</a>
             {` · `}
-            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">heirloomcribs.care@heirloomcribsandmore.com</a>
+            <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com">HeirloomCribs.Care@HeirloomCribsandMore.com</a>
           </p>
         </div>
         <figure className="builder-header__media">
@@ -160,7 +160,7 @@ export default function WoodsAndFinishesPage() {
           {` · `}
           <a href="tel:+14842931840" className="doc-link">(484) 293-1840</a>
           {` · `}
-          <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">heirloomcribs.care@heirloomcribsandmore.com</a>
+          <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">HeirloomCribs.Care@HeirloomCribsandMore.com</a>
         </p>
       </div>
     </div>

@@ -98,8 +98,7 @@ const SECTIONS: Section[] = [
             Every piece is made to order by an independent builder. Old Town Oak states: “solid,
             American-made baby furniture.” <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
             (2026 catalog, p. 3) Fisher&rsquo;s pieces are made in Pennsylvania. You buy through
-            us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley,
-            Pennsylvania area. We are the reseller, not the factory.
+            us. Heirloom Cribs &amp; More is a woman-owned business. We are the reseller, not the factory.
           </p>
         ),
       },

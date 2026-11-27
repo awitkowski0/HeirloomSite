@@ -125,7 +125,7 @@ export default function AboutHeirloomPage() {
         <section>
           <h2 className="headline-md">Delivery</h2>
           <p>
-            {`Orders ship from our warehouse in Bethlehem, Pennsylvania, with our professional furniture delivery partner, blanket-wrapped and strapped in transit. The warehouse has no showroom, and we don't offer walk-in visits. We deliver in Pennsylvania, New Jersey and Maryland; delivery to some ZIP codes in Newark is quoted individually.`}
+            {`Orders ship from our warehouse in Bethlehem, Pennsylvania, with our professional furniture delivery partner, blanket-wrapped and strapped in transit. The warehouse has no showroom, and we don't offer walk-in visits. We deliver in Pennsylvania, New Jersey and Maryland. Delivery to some Newark, NJ ZIP codes is quoted individually.`}
           </p>
           <p>{`You choose one of two services:`}</p>
           <div className="builder-cards">
