@@ -119,7 +119,8 @@ export default function PrivacyPage() {
             which is how we know whether to ask for consent before anything above loads.
           </li>
           <li>
-            <strong>Babylist</strong> — lets our products be added to a Babylist registry.
+            <strong>Babylist</strong> — lets our products be added to a Babylist registry. Its
+            script loads only when you use an Add to Babylist button.
           </li>
           <li>
             <strong>Google Fonts</strong> — typefaces, served to your browser.

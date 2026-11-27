@@ -19,8 +19,8 @@ const stripComments = (s: string) =>
 
 // Builder pages carry verbatim, attributed builder quotes (OTO 2026 catalog, KC Jan 2023 catalog).
 const ALLOW = new Set([
-  'src/app/builders/old-town-oak/page.tsx',
-  'src/app/builders/kids-comfort/page.tsx',
+  'src/components/builders/content/old-town-oak.tsx',
+  'src/components/builders/content/kids-comfort.tsx',
 ]);
 
 const bannedCred = ['c', 'e', 'r', 't', 'i', 'f', 'i', 'e', 'd'].join('');
@@ -117,37 +117,37 @@ test('no Heirloom-voice safety claim in any product.json copy field', () => {
  */
 const BUILDER_QUOTES: { page: string; credit: string; quote: string }[] = [
   {
-    page: 'src/app/builders/old-town-oak/page.tsx',
+    page: 'src/components/builders/content/old-town-oak.tsx',
     credit: 'Old Town Oak states: ',
     quote:
       'All cribs conform to Consumer Product Safety Commission (CPSC) 16CFR1219 and ASTM F1169-19 standards and are up to date with all regulations tested through third party labs.',
   },
   {
-    page: 'src/app/builders/old-town-oak/page.tsx',
+    page: 'src/components/builders/content/old-town-oak.tsx',
     credit: 'Old Town Oak states: ',
     quote:
       'For the compliancy and safety sake for our customers and each and every one of us, we chose to use a rear mount interlock system along with counterweights as needed to be fully compliant while still maintaining a full extension drawer. Warning and extension labels are applied as needed. A General Certificate of Conformity is filed as we test each style per wood species.',
   },
   {
-    page: 'src/app/builders/kids-comfort/page.tsx',
+    page: 'src/components/builders/content/kids-comfort.tsx',
     credit: 'Kids Comfort states: ',
     quote:
       'As always all Kids Comfort cribs are fully convertible, and are tested to CPSIA and ASTM federal standards.',
   },
   {
-    page: 'src/app/builders/kids-comfort/page.tsx',
+    page: 'src/components/builders/content/kids-comfort.tsx',
     credit: 'Kids Comfort states: ',
     quote: 'All furniture pieces come with a wall anchor to prevent tipping hazards in your nursery.',
   },
   {
-    page: 'src/app/builders/kids-comfort/page.tsx',
+    page: 'src/components/builders/content/kids-comfort.tsx',
     credit: 'Kids Comfort states: ',
     quote:
       'All our standard products are created with child safe varnishes and meet ASTM standards and consumer safety product standards.',
   },
   {
     // Organic finish, shown as a blockquote under the catalog credit line, always with the glue disclosure.
-    page: 'src/app/builders/kids-comfort/page.tsx',
+    page: 'src/components/builders/content/kids-comfort.tsx',
     credit: "Kids Comfort's January 2023 catalog describes the finish this way:",
     quote:
       'Our Organic finish is a linseed oil derived from natural flaxseed. This product is non toxic, 100% VOC free, has no chemical driers, is non flammable, compostable, and environmentally & food safe. Two applications of this organic finish is hand rubbed onto raw wood, preserving the natural beauty and appearance of your furniture.',
@@ -195,7 +195,7 @@ test('builder pages: the six builder safety lines are verbatim and credited', ()
       assert.ok(src.indexOf(credit) < src.indexOf(`"${quote}"`), `${page}: credit must come before the quote`);
     }
   }
-  const kc = readFileSync(resolve(root, 'src/app/builders/kids-comfort/page.tsx'), 'utf8');
+  const kc = readFileSync(resolve(root, 'src/components/builders/content/kids-comfort.tsx'), 'utf8');
   assert.ok(kc.includes(`"${KC_GLUE}"`), 'KC glue disclosure must stay with the organic finish quote');
 });
 

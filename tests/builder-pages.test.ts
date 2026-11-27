@@ -7,9 +7,9 @@ import { sizeOf } from './helpers/image-size.mjs';
 const ABOUT = 'src/app/about-heirloom/page.tsx';
 const PAGES = {
   about: 'src/app/about-heirloom/page.tsx',
-  oto: 'src/app/builders/old-town-oak/page.tsx',
-  fqp: 'src/app/builders/fishers-quality-products/page.tsx',
-  kc: 'src/app/builders/kids-comfort/page.tsx',
+  oto: 'src/components/builders/content/old-town-oak.tsx',
+  fqp: 'src/components/builders/content/fishers-quality-products.tsx',
+  kc: 'src/components/builders/content/kids-comfort.tsx',
   woods: 'src/app/woods-and-finishes/page.tsx',
 };
 
@@ -29,7 +29,14 @@ const FORBIDDEN_ROUTES = [
 test('(a) all five pages export a default component and metadata with a canonical', () => {
   for (const [name, p] of Object.entries(PAGES)) {
     const s = src(p);
-    assert.match(s, /export default function \w+\(\)/, `${name} has no default component`);
+    // The builder pages are stores now (src/app/builders/[builder]/); their copy
+    // lives in content modules that export the page's Banner and Story.
+    if (p.startsWith('src/components/builders/content/')) {
+      assert.match(s, /export function Banner\(\)/, `${name} has no Banner`);
+      assert.match(s, /export function Story\(\)/, `${name} has no Story`);
+    } else {
+      assert.match(s, /export default function \w+\(\)/, `${name} has no default component`);
+    }
     assert.match(s, /export const metadata:\s*Metadata/, `${name} has no metadata`);
     assert.match(s, /alternates:\s*\{\s*canonical:/, `${name} has no canonical`);
   }
@@ -166,7 +173,9 @@ test('(i) PHIL-LOOK health-claim comment stays in the Kids Comfort source', () =
 
 test('(j) all five routes build (prerendered in the Next build manifest)', () => {
   // Confirms the routes compile and are emitted; relies on a prior `next build`.
-  const manifest = '.next/app-path-routes-manifest.json';
+  // The prerender manifest lists each built URL, including the three builder
+  // stores generated from the dynamic /builders/[builder] route.
+  const manifest = '.next/prerender-manifest.json';
   let out: string;
   try {
     out = readFileSync(manifest, 'utf8');

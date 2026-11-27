@@ -52,6 +52,12 @@ export default function Footer() {
               <li>
                 <Link href="/products/cribs">Cribs</Link>
               </li>
+              <li>
+                <Link href="/products/dressers-changing-tables">Changing tables</Link>
+              </li>
+              <li>
+                <Link href="/products/nightstands-storage">Night stands</Link>
+              </li>
             </ul>
           </div>
           {/*
@@ -89,11 +95,11 @@ export default function Footer() {
             internal link is crawled once and then treated as an orphan.
           */}
           <div>
-            <h2 className="label-caps text-primary footer-heading">Our builders</h2>
+            <h2 className="label-caps text-primary footer-heading">
+              <Link href="/about-heirloom">About Us</Link>
+            </h2>
+            <p className="label-caps text-primary footer-subheading">About our builder</p>
             <ul className="footer-links">
-              <li>
-                <Link href="/about-heirloom">About Heirloom</Link>
-              </li>
               <li>
                 <Link href="/builders/old-town-oak">Old Town Oak</Link>
               </li>

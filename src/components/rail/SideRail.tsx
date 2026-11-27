@@ -1,13 +1,16 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import InvoiceModelNote from '@/components/checkout/InvoiceModelNote';
+import RegistryActions from '@/components/selections/RegistryActions';
+import { removeSaved, useSelections } from '@/context/selectionsStore';
 import { useCart } from '@/context/useCart';
 import { hasBundlePrice } from '@/lib/bundle-prices';
 import { chargedUnitPrices } from '@/lib/cart-pricing';
+import type { RegistryLine } from '@/lib/babylist';
 import { formatPrice } from '@/lib/format';
 import { variantLabel } from '@/lib/labels';
 import { liveChatEnabled, openLiveChat } from '@/lib/live-chat';
@@ -30,7 +33,13 @@ import { PUBLISHED_EMAIL, PUBLISHED_PHONE, PUBLISHED_PHONE_TEL } from '@/lib/pub
  * Line prices come from chargedUnitPrices, the same figures checkout shows,
  * so a kit whose crib has left the cart reads at its list price here too. The
  * server still prices the order itself; nothing here is sent anywhere.
+ *
+ * Tabs: Cart, Saved (pieces kept with Save, src/context/selectionsStore.ts)
+ * and Babylist (send saved pieces to a registry). Cart lines carry no product
+ * slug, so they cannot link back to their page for Babylist; save a piece to
+ * send it. A "Comparing N" line links to /compare once two are picked.
  */
+type Tab = 'cart' | 'saved' | 'babylist';
 export default function SideRail() {
   const pathname = usePathname();
   const { cart, hydrated, removeFromCart } = useCart();
@@ -38,15 +47,92 @@ export default function SideRail() {
   const unitPrices = useMemo(() => chargedUnitPrices(lines, hasBundlePrice), [lines]);
   const total = lines.reduce((sum, line, i) => sum + unitPrices[i] * line.quantity, 0);
   const onCheckout = Boolean(pathname?.startsWith('/checkout'));
+  const { saved, compare } = useSelections();
+  const [tab, setTab] = useState<Tab>('cart');
+  // Selections come from localStorage too, so wait for the same hydration.
+  const savedShown = useMemo(() => (hydrated ? saved : []), [hydrated, saved]);
+  const comparing = hydrated ? compare.length : 0;
+  const registryLines = useMemo<RegistryLine[]>(
+    () =>
+      savedShown.map(p => ({
+        key: p.slug,
+        title: p.finish ? `${p.name}, ${p.finish}` : p.name,
+        image: p.image,
+        href: p.href,
+        price: p.price,
+      })),
+    [savedShown],
+  );
+  const counts: Record<Tab, number> = { cart: lines.length, saved: savedShown.length, babylist: 0 };
+  const TABS: readonly { id: Tab; label: string }[] = [
+    { id: 'cart', label: 'Cart' },
+    { id: 'saved', label: 'Saved' },
+    { id: 'babylist', label: 'Babylist' },
+  ];
 
   return (
     <aside className="side-rail" aria-label="Your cart and help">
       {!onCheckout && (
         <section className="side-rail-cart" aria-labelledby="side-rail-cart-title">
           <h2 id="side-rail-cart-title" className="side-rail-title">
-            Your cart
+            Your nursery
           </h2>
-          {!hydrated ? null : lines.length === 0 ? (
+          <div className="side-rail-tabs" role="tablist" aria-label="Your nursery">
+            {TABS.map(t => (
+              <button
+                key={t.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === t.id}
+                onClick={() => setTab(t.id)}
+              >
+                {t.label}
+                {counts[t.id] > 0 ? ` (${counts[t.id]})` : ''}
+              </button>
+            ))}
+          </div>
+          {comparing >= 2 && (
+            <p className="side-rail-compare">
+              Comparing {comparing} ·{' '}
+              <Link href="/compare" className="side-rail-remove">
+                See them side by side
+              </Link>
+            </p>
+          )}
+          {tab === 'saved' &&
+            (savedShown.length === 0 ? (
+              <p className="body-md text-on-surface-variant side-rail-empty">Pieces you save show up here.</p>
+            ) : (
+              <ul className="side-rail-lines">
+                {savedShown.map(p => (
+                  <li key={p.slug} className="side-rail-line">
+                    <span className="side-rail-thumb">
+                      {p.image ? <Image src={p.image} alt="" fill sizes="48px" /> : null}
+                    </span>
+                    <div className="side-rail-line-body">
+                      <Link href={p.href} className="side-rail-line-name">
+                        {p.name}
+                      </Link>
+                      {p.finish && <span className="side-rail-line-meta">{p.finish}</span>}
+                      <span className="side-rail-line-meta">
+                        {formatPrice(p.price)}
+                        {' · '}
+                        <button
+                          type="button"
+                          className="side-rail-remove"
+                          onClick={() => removeSaved(p.slug)}
+                          aria-label={`Remove ${p.name} from saved`}
+                        >
+                          Remove
+                        </button>
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ))}
+          {tab === 'babylist' && <RegistryActions lines={registryLines} />}
+          {tab !== 'cart' ? null : !hydrated ? null : lines.length === 0 ? (
             <p className="body-md text-on-surface-variant side-rail-empty">Your cart is empty.</p>
           ) : (
             <>
