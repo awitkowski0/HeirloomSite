@@ -52,6 +52,22 @@ export function absoluteUrl(path: string): string {
 }
 
 /**
+ * Site-wide default Open Graph image (1200x630). Crop of a real Mackenzie
+ * Crib (Slat Back) catalog photo already published at
+ * https://heirloomcribsandmore.com/data/products/Mackenzie%20Crib%20(Slat%20Back)/mackenzie_crib_slat_back_12.jpg
+ * (product: https://heirloomcribsandmore.com/product/mackenzie-crib-slat-back).
+ * Always the brand host, never a *.vercel.app URL (L-20261123-7).
+ */
+export const DEFAULT_OG_IMAGE_PATH = '/og-default.jpg';
+export const DEFAULT_OG_IMAGE_URL = `${BRAND_SITE_URL}${DEFAULT_OG_IMAGE_PATH}`;
+export const DEFAULT_OG_IMAGE = {
+  url: DEFAULT_OG_IMAGE_URL,
+  width: 1200,
+  height: 630,
+  alt: 'Mackenzie Crib (Slat Back), Heirloom Cribs & More',
+} as const;
+
+/**
  * Google truncates description snippets around 155-160 characters. The
  * metaDescription stored in product.json is the full description paragraph
  * (~900 characters for some products), so this is not optional.
@@ -276,7 +292,8 @@ export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
  * sells rather than the whole product family. A colour page is its own
  * product: its name carries the colour, `sku` is that colour's SKU (the same
  * value the Merchant Center feed sends as `g:id`) and `url` / `offers.url`
- * are the page's own canonical URL.
+ * are this landing-page URL (the pre-selected variant), which may differ
+ * from the HTML rel=canonical Search-index URL.
  *
  * `brand` is the furniture builder, from the same BUILDERS table the feed's
  * `g:brand` reads; Heirloom is the seller, not the manufacturer. A SKU with no

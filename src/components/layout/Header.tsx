@@ -24,7 +24,8 @@ import HelpMenu from './HelpMenu';
  * wordmark alone below that, where the bar is 52px tall and the crib would
  * shrink to an unreadable smudge. Both are transparent PNGs sized at 128px
  * tall so they stay sharp at 2x. /logo-wide.png (the older brown artwork)
- * is still the og:image and is not used here.
+ * is not used here. The site-wide default og:image is the 1200x630 product
+ * photo in seo.ts.
  */
 export default function Header() {
   return (

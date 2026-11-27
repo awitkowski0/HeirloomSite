@@ -129,7 +129,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             Yes. Most cribs offer wood and stain options on the product page. If you are unsure
-            which finish will match your nursery, use <strong>Get Personal Assistance</strong> and
+            which finish to choose for your nursery, use <strong>Get Personal Assistance</strong> and
             share photos or inspiration before Confirm Order. Nothing is charged until after that
             call.
           </p>
@@ -377,7 +377,7 @@ const SECTIONS: Section[] = [
             <li>Delivery zip code</li>
             <li>Ideal delivery window (a month is fine)</li>
             <li>
-              Any constraints, such as an apartment, matching existing furniture, or gift timing
+              Any constraints, such as an apartment, a piece already in the room, or gift timing
             </li>
           </ol>
         ),

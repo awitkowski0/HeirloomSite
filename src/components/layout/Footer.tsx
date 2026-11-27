@@ -2,7 +2,9 @@ import Link from 'next/link';
 import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
 import BrandLogo from './BrandLogo';
 import {
+  FACEBOOK_URL,
   FOOTER_FAMILY_OWNED_LINE,
+  INSTAGRAM_URL,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
   PUBLISHED_PHONE_TEL,
@@ -26,6 +28,20 @@ export default function Footer() {
               <a href={`mailto:${PUBLISHED_EMAIL}`}>{PUBLISHED_EMAIL}</a>
             </p>
             <p className="body-md text-on-surface-variant footer-contact">{WAREHOUSE_FOOTER_LINE}</p>
+            {INSTAGRAM_URL ? (
+              <p className="body-md text-on-surface-variant footer-social">
+                <a href={INSTAGRAM_URL} rel="me noopener noreferrer" target="_blank">
+                  Instagram
+                </a>
+              </p>
+            ) : null}
+            {FACEBOOK_URL ? (
+              <p className="body-md text-on-surface-variant footer-social">
+                <a href={FACEBOOK_URL} rel="me noopener noreferrer" target="_blank">
+                  Facebook
+                </a>
+              </p>
+            ) : null}
           </div>
           <div>
             <h2 className="label-caps text-primary footer-heading">Shop</h2>

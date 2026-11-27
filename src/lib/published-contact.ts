@@ -24,3 +24,12 @@ export const WAREHOUSE_FOOTER_LINE =
  */
 export const FOOTER_FAMILY_OWNED_LINE =
   'Heirloom Cribs & More is a family-owned, women-owned shop.';
+
+/** Public Instagram profile. Used as a footer link only. */
+export const INSTAGRAM_URL = 'https://www.instagram.com/heirloomcribs/';
+
+/**
+ * Public Facebook Page URL. Unset until Phil decides the Page.
+ * Empty/null must render nothing in the footer (no placeholder, no comment cue).
+ */
+export const FACEBOOK_URL: string | null = null;
