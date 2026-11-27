@@ -80,7 +80,7 @@ export default function FinishesPage() {
         <p>
           Yes. Most cribs offer hardwood and stain options on the product page. Pick the silhouette
           first; the wood and the stain follow. Stain samples on product pages are photographs of the
-          actual finish on the actual wood. If you&rsquo;re matching an existing piece, ask us before
+          actual finish on the actual wood. Already have a piece in the room? Ask us before
           ordering.
         </p>
       </section>
@@ -92,7 +92,7 @@ export default function FinishesPage() {
             &ldquo;eco-friendly&rdquo; label.
           </li>
           <li>Read the Safety and Care pages alongside the product page.</li>
-          <li>Ask us before deposit if a sensitivity or matching project needs a precise answer.</li>
+          <li>Ask us before deposit if a sensitivity or a piece already in the room needs a precise answer.</li>
           <li>
             Remember: structural safety (CPSC/ASTM) and finish/emissions language answer different
             questions.

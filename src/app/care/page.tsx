@@ -109,8 +109,8 @@ export default function CarePage() {
         </p>
         <p>
           Stain samples on the product pages are photographs of the actual finish on the actual
-          wood, so a finish shown on one species will look different on another. If you are
-          matching an existing piece, ask us before ordering.
+          wood, so a finish shown on one species will look different on another. Already have
+          a piece in the room? Ask us before ordering.
         </p>
         <p>
           <Link href="/products" className="doc-link">
