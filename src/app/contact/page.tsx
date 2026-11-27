@@ -2,19 +2,30 @@ import type { Metadata } from 'next';
 import ContactPageForm from '@/components/contact/ContactPageForm';
 import { SUPPORT_INBOX } from '@/lib/email';
 import { PUBLISHED_PHONE, SERVICE_AREA_LINE } from '@/lib/published-contact';
+import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_URL } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
   description:
     'Reach Heirloom Cribs & More by email or phone about an order, a repair, or a question about our furniture.',
   alternates: { canonical: '/contact' },
-  openGraph: { url: '/contact' },
+  openGraph: {
+    url: '/contact',
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: [DEFAULT_OG_IMAGE_URL],
+  },
 };
 
 /* The same address /api/inquiry delivers to - one literal, two readers. */
 const EMAIL = SUPPORT_INBOX;
 const PHONE = PUBLISHED_PHONE;
 
+/* Static on purpose: reading the query string here would make /contact render on
+   every request. The form reads the UTM tags from the URL in the browser when
+   it is submitted. */
 export default function ContactPage() {
   return (
     <div className="container contact-page">

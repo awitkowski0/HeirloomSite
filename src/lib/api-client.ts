@@ -159,6 +159,11 @@ export interface InquiryRequest {
   timing?: string;
   /** Cloudflare Turnstile token; required only when the server has a secret. */
   turnstileToken?: string;
+  /** Optional UTM values read from the /contact URL. */
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
 }
 
 export interface InquiryResponse {

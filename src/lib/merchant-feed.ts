@@ -14,6 +14,9 @@ import {
   stripSiteSuffix,
 } from './seo';
 import { variantHref } from './variants';
+import { FEED_TITLE_NAMES } from './product-title';
+
+export { FEED_TITLE_NAMES } from './product-title';
 
 /**
  * Google Merchant Center product feed.
@@ -55,30 +58,6 @@ export const GOOGLE_PRODUCT_CATEGORY: Readonly<Record<string, string>> = {
 };
 
 /**
- * Feed titles for the products whose catalogue name carries no product type.
- *
- * "Arched Top in Seely" and "Mission in Brown Maple" tell a shopper nothing
- * about what the item is. Every Fisher one here is a crib - each description
- * calls it a "Convertible Crib" / "Style Crib" - and leads with the builder:
- * "Fisher Arched Top Crib in Seely". The Mini Newport's own copy calls it
- * "this compact crib". Only the feed title changes; the product name, slug
- * and page title stay as they are, and the colour suffix is still appended.
- */
-export const FEED_TITLE_NAMES: Readonly<Record<string, string>> = {
-  'arched-top': 'Fisher Arched Top Crib',
-  bloomington: 'Fisher Bloomington Crib',
-  darlington: 'Fisher Darlington Crib',
-  hudson: 'Fisher Hudson Crib',
-  mission: 'Fisher Mission Crib',
-  moyerton: 'Fisher Moyerton Crib',
-  princeton: 'Fisher Princeton Crib',
-  'mini-newport-with-mattress': 'Mini Newport Crib with Mattress',
-  // S10: brand prefix only. These are not cribs; do not add "Crib" or "Madison".
-  'changing-table-6-drawer': 'Fisher Changing Table - 6 Drawer',
-  'nightstand-2-drawer': 'Fisher Nightstand - 2 Drawer',
-};
-
-/**
  * Feed-only third level for `g:product_type` (Pricing App #59 S10 / S9).
  * Fisher crib styles have no `collection` in product.json (so the live feed
  * was `Nursery Furniture > Cribs`). Do not set collection on the product
@@ -98,7 +77,7 @@ export const FEED_PRODUCT_TYPE_COLLECTION: Readonly<Record<string, string>> = {
 /** Shared `g:product_highlight` bullets (S10). Used on every feed item. */
 export const SHARED_PRODUCT_HIGHLIGHTS: readonly string[] = [
   'We deliver in Pennsylvania, New Jersey and Maryland.',
-  'Shipping is charged. Curbside starts at $175 and White Glove starts at $299; the charge depends on the order total.',
+  'Shipping is charged; the charge depends on the order total. Delivery is Curbside or White Glove in Pennsylvania, New Jersey and Maryland.',
   'Assembly comes only with White Glove.',
   'Made to order. Built after you order; we confirm your lead time when you order.',
 ];

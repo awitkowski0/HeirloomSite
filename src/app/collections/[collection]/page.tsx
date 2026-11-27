@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import {
   getCollections,
@@ -6,6 +7,7 @@ import {
   getProductsInCollection,
   resolveLegacyCollectionSlug,
 } from '@/lib/collections';
+import { getCollectionIntro } from '@/lib/collection-intros';
 import { itemListJsonLd, breadcrumbJsonLd, jsonLdScript } from '@/lib/seo';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
@@ -27,6 +29,20 @@ export async function generateMetadata({
   const { collection: slug } = await params;
   const collection = getCollectionBySlug(slug);
   if (!collection) return { title: 'Collection not found', robots: { index: false } };
+
+  const intro = getCollectionIntro(slug);
+  if (intro) {
+    return {
+      title: { absolute: intro.title },
+      description: intro.metaDescription,
+      alternates: { canonical: `/collections/${slug}` },
+      openGraph: {
+        title: intro.title,
+        description: intro.metaDescription,
+        url: `/collections/${slug}`,
+      },
+    };
+  }
 
   const description =
     `The ${collection.name} collection: ${collection.count} pieces made to order by independent builders, ` +
@@ -58,6 +74,7 @@ export default async function CollectionPage({
   }
 
   const products = getProductsInCollection(collection.name);
+  const intro = getCollectionIntro(slug);
 
   return (
     <div className="container products-page">
@@ -81,11 +98,31 @@ export default async function CollectionPage({
       />
 
       <header className="page-header">
-        <h1 className="headline-lg text-primary">{collection.name}</h1>
-        <p className="body-lg text-on-surface-variant">
-          The full {collection.name} range — {collection.count} pieces designed to sit
-          together in one room.
-        </p>
+        <h1 className="headline-lg text-primary">{intro ? intro.h1 : collection.name}</h1>
+        {intro ? (
+          <div className="collection-intro">
+            {intro.introParagraphs.map(paragraph => (
+              <p key={paragraph.slice(0, 48)} className="body-lg text-on-surface-variant">
+                {paragraph}
+              </p>
+            ))}
+            <p className="body-md text-on-surface-variant collection-intro-links">
+              {intro.links.map((link, index) => (
+                <span key={link.href}>
+                  {index > 0 ? ' · ' : null}
+                  <Link href={link.href} className="doc-link">
+                    {link.label}
+                  </Link>
+                </span>
+              ))}
+            </p>
+          </div>
+        ) : (
+          <p className="body-lg text-on-surface-variant">
+            The full {collection.name} range — {collection.count} pieces designed to sit
+            together in one room.
+          </p>
+        )}
       </header>
 
       <section aria-label={`${collection.name} products`}>

@@ -242,28 +242,20 @@ test('google_product_category uses exact Google taxonomy strings, one per site c
   );
 });
 
-test('every feed title names the product type; Fisher cribs lead with the builder', () => {
+test('every feed title names the product type and follows the OTO pattern (no builder prefix)', () => {
   const xml = merchantFeedXml(getInventory());
   for (const title of tags(xml, 'g:title')) {
     assert.match(title, /crib|dresser|chest|nightstand|changing table/i, title);
   }
-  assert.match(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), /<g:title>Fisher Arched Top Crib in Seely<\/g:title>/);
-  assert.match(itemWithId(xml, 'FQP-101'), /<g:title>Fisher Mission Crib in Brown Maple<\/g:title>/);
+  assert.match(itemWithId(xml, 'FQP-201-BrownMaple_OCS_100_Seely'), /<g:title>Arched Top Crib in Seely<\/g:title>/);
+  assert.match(itemWithId(xml, 'FQP-101'), /<g:title>Mission Crib in Brown Maple<\/g:title>/);
   assert.match(itemWithId(xml, 'OTO-1301-BrownMaple_OCS_100_Carbon'), /<g:title>Newport Crib in Carbon<\/g:title>/);
-  assert.equal(FEED_TITLE_NAMES['arched-top'], 'Fisher Arched Top Crib');
-  assert.match(
-    itemWithId(xml, 'FQP 107 Madison Changing Table 6 Drawer'),
-    /<g:title>Fisher Changing Table - 6 Drawer<\/g:title>/,
-  );
-  assert.match(
-    itemWithId(xml, 'FQP 112 Madison Nightstand 2 Drawer'),
-    /<g:title>Fisher Nightstand - 2 Drawer<\/g:title>/,
-  );
+  assert.equal(FEED_TITLE_NAMES['arched-top'], 'Arched Top Crib');
   assert.deepEqual(tags(itemWithId(xml, 'FQP 107 Madison Changing Table 6 Drawer'), 'g:title'), [
-    'Fisher Changing Table - 6 Drawer',
+    'Changing Table - 6 Drawer',
   ]);
   assert.deepEqual(tags(itemWithId(xml, 'FQP 112 Madison Nightstand 2 Drawer'), 'g:title'), [
-    'Fisher Nightstand - 2 Drawer',
+    'Nightstand - 2 Drawer',
   ]);
 });
 
