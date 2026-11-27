@@ -2078,6 +2078,14 @@ main {
   gap: 48px;
   align-items: start;
 }
+/* At 1440px the side rail (300px from 1200px up) leaves the footer grid
+   narrower than five 200px auto-fit columns, so Support wrapped under the
+   brand column. Force five columns here; smaller widths keep auto-fit. */
+@media (min-width: 1440px) {
+  .footer-grid {
+    grid-template-columns: minmax(0, 1.2fr) repeat(4, minmax(0, 1fr));
+  }
+}
 .footer-brand {
   display: inline-flex;
   align-items: center;
