@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/finishes`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/timeline`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/safe-sleep`, changeFrequency: 'yearly', priority: 0.5 },
+    { url: `${SITE_URL}/guides/how-to-clean-a-wooden-crib`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/contact`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/about-heirloom`, changeFrequency: 'yearly', priority: 0.5 },
     { url: `${SITE_URL}/builders/old-town-oak`, changeFrequency: 'yearly', priority: 0.4 },

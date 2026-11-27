@@ -78,6 +78,9 @@ export default function Footer() {
               <li>
                 <Link href="/timeline">Timeline</Link>
               </li>
+              <li>
+                <Link href="/guides/how-to-clean-a-wooden-crib">How to Clean a Wooden Crib</Link>
+              </li>
             </ul>
           </div>
           {/*

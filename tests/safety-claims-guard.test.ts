@@ -21,6 +21,8 @@ const stripComments = (s: string) =>
 const ALLOW = new Set([
   'src/app/builders/old-town-oak/page.tsx',
   'src/app/builders/kids-comfort/page.tsx',
+  // Brand #51 v2: one attributed Fisher's cleaning quote uses the builder's word "non-toxic".
+  'src/app/guides/how-to-clean-a-wooden-crib/page.tsx',
 ]);
 
 const bannedCred = ['c', 'e', 'r', 't', 'i', 'f', 'i', 'e', 'd'].join('');
