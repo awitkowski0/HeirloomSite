@@ -53,7 +53,7 @@ const STRINGS: Record<string, { id: string; file: string; text: string }> = {
   '6a': {
     id: '6a',
     file: 'Newport Nightstand',
-    text: 'Add both style and function to your nursery with the Newport Nightstand. Crafted from solid Brown Maple hardwood, this compact nightstand provides the perfect spot for a lamp, a book or a glass of water beside the glider.',
+    text: 'Add both style and function to your nursery with the Newport Nightstand. Made from solid Brown Maple hardwood, this compact nightstand provides the perfect spot for a lamp, a book or a glass of water beside the glider.',
   },
   '6b': {
     id: '6b',
@@ -68,7 +68,7 @@ const STRINGS: Record<string, { id: string; file: string; text: string }> = {
   '7b': {
     id: '7b',
     file: 'Nightstand - 2 Drawer',
-    text: 'Two smooth-gliding drawers with dovetail construction provide space for pacifiers, burp cloths, lotions, books and a glass of water. The sturdy top is perfect for a lamp, monitor or small decor piece. Crafted from solid Brown Maple hardwood, this nightstand brings lasting durability and timeless style to your nursery.',
+    text: 'Two smooth-gliding drawers with dovetail construction provide space for pacifiers, burp cloths, lotions, books and a glass of water. The sturdy top is perfect for a lamp, monitor or small decor piece. Made from solid Brown Maple hardwood, this nightstand brings lasting durability and timeless style to your nursery.',
   },
   '7c': {
     id: '7c',

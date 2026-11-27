@@ -1,11 +1,12 @@
 import Link from 'next/link';
 import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
 import {
-  MAIL_OFFICE_LINE,
+  FACEBOOK_URL,
+  INSTAGRAM_URL,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
   PUBLISHED_PHONE_TEL,
-  SERVICE_AREA_LINE,
+  WAREHOUSE_FOOTER_LINE,
 } from '@/lib/published-contact';
 
 export default function Footer() {
@@ -23,8 +24,21 @@ export default function Footer() {
               {' · '}
               <a href={`mailto:${PUBLISHED_EMAIL}`}>{PUBLISHED_EMAIL}</a>
             </p>
-            <p className="body-md text-on-surface-variant footer-contact">{MAIL_OFFICE_LINE}</p>
-            <p className="body-md text-on-surface-variant footer-contact">{SERVICE_AREA_LINE}</p>
+            <p className="body-md text-on-surface-variant footer-contact">{WAREHOUSE_FOOTER_LINE}</p>
+            {INSTAGRAM_URL ? (
+              <p className="body-md text-on-surface-variant footer-social">
+                <a href={INSTAGRAM_URL} rel="me noopener noreferrer" target="_blank">
+                  Instagram
+                </a>
+              </p>
+            ) : null}
+            {FACEBOOK_URL ? (
+              <p className="body-md text-on-surface-variant footer-social">
+                <a href={FACEBOOK_URL} rel="me noopener noreferrer" target="_blank">
+                  Facebook
+                </a>
+              </p>
+            ) : null}
           </div>
           <div>
             <h2 className="label-caps text-primary footer-heading">Shop</h2>

@@ -70,8 +70,8 @@ const SECTIONS: Section[] = [
         question: 'Are your cribs solid hardwood?',
         answer: (
           <p>
-            Each builder describes its own materials. Old Town Oak states: “solid, American
-            handcrafted baby furniture.” <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
+            Each builder describes its own materials. Old Town Oak states: “solid,
+            American-made baby furniture.” <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
             (2026 catalog, p. 3) Kids Comfort states: “All cribs are completely solid wood
             including the mattress support.”{' '}
             <BuilderQuoteTag tag={BUILDER_QUOTE.kcCatalogP7Jan2023} />
@@ -96,7 +96,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             Every piece is made to order by an independent builder. Old Town Oak states: “solid,
-            American handcrafted baby furniture.” <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
+            American-made baby furniture.” <BuilderQuoteTag tag={BUILDER_QUOTE.oto2026p3} />
             (2026 catalog, p. 3) Fisher&rsquo;s pieces are made in Pennsylvania. You buy through
             us. Heirloom Cribs &amp; More is a women-owned shop in the Nazareth / Lehigh Valley,
             Pennsylvania area. We are the reseller, not the factory.
@@ -129,7 +129,7 @@ const SECTIONS: Section[] = [
         answer: (
           <p>
             Yes. Most cribs offer wood and stain options on the product page. If you are unsure
-            which finish will match your nursery, use <strong>Get Personal Assistance</strong> and
+            which finish to choose for your nursery, use <strong>Get Personal Assistance</strong> and
             share photos or inspiration before Confirm Order. Nothing is charged until after that
             call.
           </p>
@@ -377,7 +377,7 @@ const SECTIONS: Section[] = [
             <li>Delivery zip code</li>
             <li>Ideal delivery window (a month is fine)</li>
             <li>
-              Any constraints, such as an apartment, matching existing furniture, or gift timing
+              Any constraints, such as an apartment, a piece already in the room, or gift timing
             </li>
           </ol>
         ),

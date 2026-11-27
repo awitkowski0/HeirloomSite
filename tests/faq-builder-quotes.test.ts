@@ -35,7 +35,7 @@ test('raw [builder-quote: …] tags are not written as visible JSX text', () => 
 test('Q1 uses the exact catalog wording, both tags, and short visible sources', () => {
   assert.match(
     FAQ_SRC,
-    /Old Town Oak states: “solid, American\s+handcrafted baby furniture\.”/,
+    /Old Town Oak states: “solid,\s*American-made baby furniture\.”/,
   );
   assert.match(FAQ_SRC, /\(2026 catalog, p\. 3\) Kids Comfort states:/);
   assert.match(
@@ -50,12 +50,12 @@ test('Q1 uses the exact catalog wording, both tags, and short visible sources', 
 test('Q3 uses the exact catalog wording and keeps the ALLOW-1 opening', () => {
   assert.match(
     FAQ_SRC,
-    /Every piece is made to order by an independent builder\. Old Town Oak states: “solid,\s+American handcrafted baby furniture\.”/,
+    /Every piece is made to order by an independent builder\. Old Town Oak states: “solid,\s+American-made baby furniture\.”/,
   );
   assert.match(FAQ_SRC, /\(2026 catalog, p\. 3\) Fisher/);
   assert.match(FAQ_SRC, /Fisher&rsquo;s pieces are made in Pennsylvania/);
   assert.doesNotMatch(FAQ_SRC, /describes its furniture as/);
-  assert.doesNotMatch(FAQ_SRC, /“American handcrafted,”/);
+  assert.doesNotMatch(FAQ_SRC, /“American-made,”/);
 });
 
 test('Q6 keeps the existing quotes and adds the short visible sources', () => {
@@ -76,9 +76,8 @@ test('Q15 opening is unchanged (CoS option A)', () => {
   );
 });
 
-test('handcrafted appears on the FAQ only inside the tagged Old Town Oak quote', () => {
-  const matches = FAQ_SRC.match(/handcrafted/gi) ?? [];
-  assert.ok(matches.length >= 1, 'expected the OTO handcrafted quote on the FAQ');
-  const stripped = FAQ_SRC.replace(/“solid,\s*American\s+handcrafted baby furniture\.”/g, '');
-  assert.doesNotMatch(stripped, /handcrafted/i);
+test('FAQ uses the American-made OTO quote and has no former workshop adjective', () => {
+  const needle = ['h', 'a', 'n', 'd', 'c', 'r', 'a', 'f', 't', 'e', 'd'].join('');
+  assert.match(FAQ_SRC, /Old Town Oak states: “solid,\s*American-made baby furniture\.”/);
+  assert.equal(FAQ_SRC.toLowerCase().includes(needle), false);
 });

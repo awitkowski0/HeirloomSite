@@ -154,7 +154,7 @@ export default function ShippingPage() {
             heirloomcribs.care@heirloomcribsandmore.com
           </a>
         </p>
-        <p>421 Manor Dr, Nazareth, PA 18064 (business office: mail only, no showroom). Orders ship from our warehouse in Bethlehem, Pennsylvania.</p>
+        <p>Orders ship from our warehouse in Bethlehem, Pennsylvania.</p>
       </section>
     </div>
   );

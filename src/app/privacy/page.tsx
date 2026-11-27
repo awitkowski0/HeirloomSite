@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { SITE_NAME } from '@/lib/seo';
 import Link from 'next/link';
 
 /*
@@ -19,11 +20,24 @@ import Link from 'next/link';
  * does, accurately, which is the part engineering can be responsible for.
  */
 
+const TITLE = 'Privacy';
+const DESCRIPTION = 'What we collect, who we share it with, and how to change your tracking choices.';
+
+/* Next merges metadata shallowly: a page's openGraph replaces the layout's
+   whole object, so everything the share card needs is restated here. */
 export const metadata: Metadata = {
-  title: 'Privacy',
-  description:
-    'What we collect, who we share it with, and how to change your tracking choices.',
+  title: TITLE,
+  description: DESCRIPTION,
   alternates: { canonical: '/privacy' },
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    locale: 'en_US',
+    url: '/privacy',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: '/logo-wide.png', width: 1200, height: 630, alt: SITE_NAME }],
+  },
 };
 
 export default function PrivacyPage() {
@@ -215,7 +229,11 @@ export default function PrivacyPage() {
           <a href="mailto:heirloomcribs.care@heirloomcribsandmore.com" className="doc-link">
             heirloomcribs.care@heirloomcribsandmore.com
           </a>
-          , or write to us at 421 Manor Dr, Nazareth, PA 18064, United States.
+          , or write to us using our{' '}
+          <Link href="/contact#contact-us-form" className="doc-link">
+            Contact Us
+          </Link>{' '}
+          form.
         </p>
       </section>
     </div>

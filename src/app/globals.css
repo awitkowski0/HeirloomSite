@@ -2247,6 +2247,16 @@ main {
 .footer-contact a:hover {
   color: var(--primary);
 }
+.footer-social {
+  margin: 12px 0 0;
+}
+.footer-social a {
+  text-decoration: none;
+  color: var(--on-surface-variant);
+}
+.footer-social a:hover {
+  color: var(--primary);
+}
 .footer-heading {
   margin-bottom: 16px;
   font-size: 12px;
@@ -2580,6 +2590,13 @@ main {
 .page-header .body-md {
   margin-top: 8px;
   max-width: 60ch;
+}
+
+.page-header .collection-intro .body-lg + .body-lg {
+  margin-top: 1em;
+}
+.page-header .collection-intro-links {
+  margin-top: 16px;
 }
 
 .section-heading {

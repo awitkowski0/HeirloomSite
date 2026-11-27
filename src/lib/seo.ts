@@ -2,7 +2,7 @@ import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
 import { SHIPPABLE_STATE_CODES, deliveryChargeFor, type ShippingMethodId } from './order-terms';
 import { fromCents, toCents } from './format';
-import { MAIL_OFFICE_LINE, PUBLISHED_EMAIL, PUBLISHED_PHONE } from './published-contact';
+import { PUBLISHED_EMAIL, PUBLISHED_PHONE } from './published-contact';
 
 /**
  * Canonical origin. Server-only values are fine here: sitemap.ts, robots.ts and
@@ -50,6 +50,22 @@ export function absoluteUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) return path;
   return `${SITE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
 }
+
+/**
+ * Site-wide default Open Graph image (1200x630). Crop of a real Mackenzie
+ * Crib (Slat Back) catalog photo already published at
+ * https://heirloomcribsandmore.com/data/products/Mackenzie%20Crib%20(Slat%20Back)/mackenzie_crib_slat_back_12.jpg
+ * (product: https://heirloomcribsandmore.com/product/mackenzie-crib-slat-back).
+ * Always the brand host, never a *.vercel.app URL (L-20261123-7).
+ */
+export const DEFAULT_OG_IMAGE_PATH = '/og-default.jpg';
+export const DEFAULT_OG_IMAGE_URL = `${BRAND_SITE_URL}${DEFAULT_OG_IMAGE_PATH}`;
+export const DEFAULT_OG_IMAGE = {
+  url: DEFAULT_OG_IMAGE_URL,
+  width: 1200,
+  height: 630,
+  alt: 'Mackenzie Crib (Slat Back), Heirloom Cribs & More',
+} as const;
 
 /**
  * Google truncates description snippets around 155-160 characters. The
@@ -112,19 +128,15 @@ export function organizationJsonLd(): JsonLd {
     url: SITE_URL,
     logo: absoluteUrl('/logo-wide.png'),
     description:
-      'Heirloom Cribs & More sells solid hardwood nursery furniture made to order by our ' +
-      'builders and designed to grow with your child. Delivery is charged separately, with Curbside ' +
-      'and White Glove options.',
+      'Online retailer of hardwood nursery furniture. The Bethlehem location is a warehouse and fulfillment site and is not open to the public. No showroom or walk-in shopping. We deliver in Pennsylvania, New Jersey, and Maryland.',
     telephone: PUBLISHED_PHONE,
     email: PUBLISHED_EMAIL,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '421 Manor Dr',
-      addressLocality: 'Nazareth',
+      addressLocality: 'Bethlehem',
       addressRegion: 'PA',
-      postalCode: '18064',
+      postalCode: '18020',
       addressCountry: 'US',
-      description: MAIL_OFFICE_LINE,
     },
     areaServed: [
       { '@type': 'State', name: 'Pennsylvania' },
@@ -280,7 +292,8 @@ export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
  * sells rather than the whole product family. A colour page is its own
  * product: its name carries the colour, `sku` is that colour's SKU (the same
  * value the Merchant Center feed sends as `g:id`) and `url` / `offers.url`
- * are the page's own canonical URL.
+ * are this landing-page URL (the pre-selected variant), which may differ
+ * from the HTML rel=canonical Search-index URL.
  *
  * `brand` is the furniture builder, from the same BUILDERS table the feed's
  * `g:brand` reads; Heirloom is the seller, not the manufacturer. A SKU with no
