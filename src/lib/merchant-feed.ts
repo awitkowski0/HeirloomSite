@@ -14,6 +14,9 @@ import {
   stripSiteSuffix,
 } from './seo';
 import { variantHref } from './variants';
+import { FEED_TITLE_NAMES } from './product-title';
+
+export { FEED_TITLE_NAMES } from './product-title';
 
 /**
  * Google Merchant Center product feed.
@@ -52,27 +55,6 @@ export const GOOGLE_PRODUCT_CATEGORY: Readonly<Record<string, string>> = {
   Dressers: 'Furniture > Cabinets & Storage > Dressers',
   Chests: 'Furniture > Cabinets & Storage > Dressers',
   Nightstands: 'Furniture > Tables > Nightstands',
-};
-
-/**
- * Feed titles for the products whose catalogue name carries no product type.
- *
- * "Arched Top in Seely" and "Mission in Brown Maple" tell a shopper nothing
- * about what the item is. Every Fisher one here is a crib - each description
- * calls it a "Convertible Crib" / "Style Crib" - and leads with the builder:
- * "Fisher Arched Top Crib in Seely". The Mini Newport's own copy calls it
- * "this compact crib". Only the feed title changes; the product name, slug
- * and page title stay as they are, and the colour suffix is still appended.
- */
-export const FEED_TITLE_NAMES: Readonly<Record<string, string>> = {
-  'arched-top': 'Fisher Arched Top Crib',
-  bloomington: 'Fisher Bloomington Crib',
-  darlington: 'Fisher Darlington Crib',
-  hudson: 'Fisher Hudson Crib',
-  mission: 'Fisher Mission Crib',
-  moyerton: 'Fisher Moyerton Crib',
-  princeton: 'Fisher Princeton Crib',
-  'mini-newport-with-mattress': 'Mini Newport Crib with Mattress',
 };
 
 /** Wood species the catalogue uses as a `wood` variant, as the site names them. */

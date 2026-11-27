@@ -1,6 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { getBrowsableProducts, getTaxonomyNodes, getInventory } from '@/lib/content';
-import { variantPathsFor } from '@/lib/variants';
+import { getBrowsableProducts, getTaxonomyNodes } from '@/lib/content';
 import { getCollections } from '@/lib/collections';
 import { SITE_URL } from '@/lib/seo';
 
@@ -39,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE_URL}/builders/fishers-quality-products`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${SITE_URL}/builders/kids-comfort`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${SITE_URL}/woods-and-finishes`, changeFrequency: 'yearly', priority: 0.4 },
+    { url: `${SITE_URL}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
   /*
@@ -54,21 +54,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   /*
-   * Products plus every wood and finish that has its own URL.
-   *
-   * A finish page is a distinct offer - its own image and its own price - so
-   * it is submitted rather than left for a crawler to find. Priority steps
-   * down with depth so the product page stays the one that ranks.
+   * Base product URLs only. Variant finish pages stay HTTP 200 and crawlable
+   * (Merchant Center <g:link> landing pages) but they set rel=canonical at
+   * the base product, so the sitemap lists the preferred Search URL (Pricing
+   * App #55, Merchant Conditional GO 7118897871).
    */
-  const inventory = getInventory();
-  const productRoutes: MetadataRoute.Sitemap = getBrowsableProducts().flatMap(p => {
-    const configurations = inventory.filter(i => i.slug === p.slug);
-    return variantPathsFor(configurations).map(variant => ({
-      url: `${SITE_URL}/product/${[p.slug, ...variant].join('/')}`,
-      changeFrequency: 'monthly' as const,
-      priority: variant.length === 0 ? 0.8 : variant.length === 1 ? 0.6 : 0.5,
-    }));
-  });
+  const productRoutes: MetadataRoute.Sitemap = getBrowsableProducts().map(p => ({
+    url: `${SITE_URL}/product/${p.slug}`,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
 
   const collectionRoutes: MetadataRoute.Sitemap = getCollections().map(c => ({
     url: `${SITE_URL}/collections/${c.slug}`,

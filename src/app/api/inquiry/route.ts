@@ -17,7 +17,7 @@ export const dynamic = 'force-dynamic';
 
 const MAX_NAME = 200;
 const MAX_MESSAGE = 5000;
-/** Phone / ZIP / style interest / timing - context, not payload. */
+/** Phone / ZIP / style interest / timing / UTM - context, not payload. */
 const MAX_CONTEXT_FIELD = 300;
 
 /**
@@ -111,6 +111,10 @@ export async function POST(req: Request) {
     zip: context('zip'),
     interest: context('interest'),
     timing: context('timing'),
+    utm_source: context('utm_source'),
+    utm_medium: context('utm_medium'),
+    utm_campaign: context('utm_campaign'),
+    utm_content: context('utm_content'),
   };
 
   const alertSent = await sendInquiryAlert(inquiry);
