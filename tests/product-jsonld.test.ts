@@ -63,39 +63,44 @@ test('return policy: made-to-order goods cannot be returned (MerchantReturnNotPe
   assert.match(String(policy.merchantReturnLink), /\/returns$/);
 });
 
-test('shipping details list Curbside and White Glove rates for the page price, PA/NJ/MD, builder handling window', () => {
+test('shipping details list Curbside and White Glove for PA/NJ/MD with handling and transit, and no dollar shippingRate', () => {
   type Ship = {
     name: string;
-    shippingRate: { value: number; currency: string };
+    shippingRate?: unknown;
     shippingDestination: { addressRegion: string[] };
-    deliveryTime: { handlingTime: { minValue: number; maxValue: number }; transitTime?: unknown };
+    deliveryTime: {
+      handlingTime: { minValue: number; maxValue: number };
+      transitTime: { minValue: number; maxValue: number; unitCode: string };
+    };
   };
   const ships = ld({ priceDollars: 2500 }).offers.shippingDetails as Ship[];
   assert.equal(ships.length, 2);
   assert.equal(ships[0].name, 'Curbside');
-  assert.equal(ships[0].shippingRate.value, 325);
-  assert.equal(ships[0].shippingRate.currency, 'USD');
   assert.equal(ships[1].name, 'White Glove');
-  assert.equal(ships[1].shippingRate.value, 425);
+  assert.equal(ships[0].shippingRate, undefined);
+  assert.equal(ships[1].shippingRate, undefined);
   assert.deepEqual(ships[0].shippingDestination.addressRegion, ['PA', 'NJ', 'MD']);
   assert.deepEqual(ships[1].shippingDestination.addressRegion, ['PA', 'NJ', 'MD']);
   assert.deepEqual(
     [ships[0].deliveryTime.handlingTime.minValue, ships[0].deliveryTime.handlingTime.maxValue],
     [30, 40]
   );
-  assert.equal(ships[0].deliveryTime.transitTime, undefined);
+  assert.equal(ships[0].deliveryTime.transitTime.minValue, 1);
+  assert.equal(ships[0].deliveryTime.transitTime.maxValue, 10);
+  assert.equal(ships[0].deliveryTime.transitTime.unitCode, 'DAY');
   const fisher = ld({ sku: 'FQP-101', priceDollars: 2000 }).offers.shippingDetails as Ship[];
-  assert.equal(fisher[0].shippingRate.value, 175);
-  assert.equal(fisher[1].shippingRate.value, 299);
+  assert.equal(fisher[0].shippingRate, undefined);
   assert.deepEqual(
     [fisher[0].deliveryTime.handlingTime.minValue, fisher[0].deliveryTime.handlingTime.maxValue],
     [50, 70]
   );
+  assert.equal(fisher[0].deliveryTime.transitTime.minValue, 1);
+  assert.equal(fisher[0].deliveryTime.transitTime.maxValue, 10);
 });
 
 test('no invented identifiers, ratings or business address', () => {
   const json = JSON.stringify(ld());
-  for (const k of ['aggregateRating', 'review', 'gtin', 'mpn', 'priceValidUntil', 'transitTime', 'LocalBusiness', 'streetAddress']) {
+  for (const k of ['aggregateRating', 'review', 'gtin', 'mpn', 'priceValidUntil', 'shippingRate', 'LocalBusiness', 'streetAddress']) {
     assert.ok(!json.includes(`"${k}"`) && !json.includes(`"@type":"${k}"`), `unexpected ${k}`);
   }
   assert.ok(BRAND_SITE_URL.startsWith('https://'));

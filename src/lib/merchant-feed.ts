@@ -2,7 +2,6 @@ import type { InventoryItem } from '@/types';
 import { getBrowsableProducts, getInventory } from './content';
 import { pickDefaultImage } from './images';
 import { variantLabel } from './labels';
-import { SHIPPABLE_STATE_CODES, deliveryChargeFor, type ShippingMethodId } from './order-terms';
 import { toCents } from './format';
 import {
   BRAND_SITE_URL,
@@ -235,26 +234,11 @@ function renderItem(item: InventoryItem): string {
   const priceCents = toCents(priceDollars);
   const price = merchantPrice(priceCents);
   const handling = handlingBusinessDays(sku);
-  // Both checkout services, at this item's Curbside / White Glove band.
-  // Google requires advertised shipping not to be lower than checkout.
-  const shippingServices: { name: string; method: ShippingMethodId }[] = [
-    { name: 'Curbside', method: 'threshold' },
-    { name: 'White Glove', method: 'white_glove' },
-  ];
-  const shippingBlocks = shippingServices
-    .flatMap(({ name, method }) => {
-      const shipping = merchantPrice(deliveryChargeFor(priceCents, method));
-      return SHIPPABLE_STATE_CODES.map(
-        region =>
-          `      <g:shipping>\n` +
-          `        <g:country>${xmlEscape('US')}</g:country>\n` +
-          `        <g:region>${xmlEscape(region)}</g:region>\n` +
-          `        <g:service>${xmlEscape(name)}</g:service>\n` +
-          `        <g:price>${xmlEscape(shipping)}</g:price>\n` +
-          `      </g:shipping>`
-      );
-    })
-    .join('\n');
+  // Option B step 2: do not emit <g:shipping> rows. Account-level Merchant
+  // Center shipping (Curbside + White Glove, PA/NJ/MD, transit 1–10) now
+  // carries the rates. Item-level handling stays on the feed so builder
+  // windows (OTO 30–40, KC 40–40, Fisher 50–70) still override the account
+  // fallback. See https://support.google.com/merchants/answer/12578516
 
   const category = item.category ? GOOGLE_PRODUCT_CATEGORY[item.category] : undefined;
   const productType = itemProductType(item);
@@ -281,7 +265,6 @@ function renderItem(item: InventoryItem): string {
     ...(productType ? [el('g:product_type', productType)] : []),
     ...(color ? [el('g:color', color)] : []),
     ...(material ? [el('g:material', material)] : []),
-    shippingBlocks,
     el('g:min_handling_time', String(handling.minValue)),
     el('g:max_handling_time', String(handling.maxValue)),
     '    </item>',

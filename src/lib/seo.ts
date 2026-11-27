@@ -1,7 +1,7 @@
 import type { InventoryItem } from '@/types';
 import type { ProductIndexItem } from './content';
 import { SHIPPABLE_STATE_CODES, deliveryChargeFor, type ShippingMethodId } from './order-terms';
-import { fromCents, toCents } from './format';
+import { toCents } from './format';
 import { PUBLISHED_EMAIL, PUBLISHED_PHONE } from './published-contact';
 
 /**
@@ -213,20 +213,21 @@ export function productShippingCents(
 }
 
 function offerShippingDetails(
-  priceDollars: number,
   handling: { minValue: number; maxValue: number },
-  method: ShippingMethodId,
   name: string,
 ) {
+  // shippingRate (dollar amounts) is deliberately omitted. Phil does not
+  // publish shipping rates (fuel charges change); account-level Merchant
+  // Center shipping now carries the rates. Google Search Central's merchant
+  // listing docs require shippingRate, shippingDestination, and deliveryTime
+  // for the shipping details enhancement, so these offer-level details will
+  // not be eligible for that enhancement. We still emit destination and
+  // deliveryTime (handling + 1–10 business day transit) so the markup names
+  // the area and the time window without hardcoded dollars.
+  // https://developers.google.com/search/docs/appearance/structured-data/merchant-listing
   return {
     '@type': 'OfferShippingDetails',
     name,
-    shippingRate: {
-      '@type': 'MonetaryAmount',
-      value: fromCents(productShippingCents(priceDollars, method)),
-      currency: 'USD',
-    },
-    // US regions PA, NJ, MD — the same list checkout delivers to.
     shippingDestination: {
       '@type': 'DefinedRegion',
       addressCountry: 'US',
@@ -238,6 +239,13 @@ function offerShippingDetails(
         '@type': 'QuantitativeValue',
         minValue: handling.minValue,
         maxValue: handling.maxValue,
+        unitCode: 'DAY',
+        unitText: 'business days',
+      },
+      transitTime: {
+        '@type': 'QuantitativeValue',
+        minValue: 1,
+        maxValue: 10,
         unitCode: 'DAY',
         unitText: 'business days',
       },
@@ -302,7 +310,9 @@ export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
  * Deliberately absent: aggregateRating / review (there are none), gtin (the
  * builders publish none), mpn (the SKU is the store's code, not a confirmed
  * manufacturer part number), priceValidUntil (prices have no end date) and
- * transitTime (the site quotes a handling window only).
+ * shippingRate dollars (fuel charges change; Merchant Center carries rates).
+ * transitTime is set under offers.shippingDetails.deliveryTime (1–10
+ * business days after the piece is ready), not as a product-level field.
  */
 export function productJsonLd(opts: {
   /** Display name for this page: "Newport Crib", or "Newport Crib in Carbon" on a colour page. */
@@ -350,14 +360,13 @@ export function productJsonLd(opts: {
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
       /*
-       * shippingDetails lists both checkout services at this page's price
-       * band, the same rates the feed sends. A multi-item cart can still
-       * land in a higher band at checkout, where the charge is recomputed
-       * from the cart. See deliveryChargeFor in src/lib/order-terms.ts.
+       * shippingDetails names both checkout services and the PA/NJ/MD area,
+       * with builder handling and 1–10 business day transit. Dollar
+       * shippingRate values are omitted (see offerShippingDetails).
        */
       shippingDetails: [
-        offerShippingDetails(opts.priceDollars, handling, 'threshold', 'Curbside'),
-        offerShippingDetails(opts.priceDollars, handling, 'white_glove', 'White Glove'),
+        offerShippingDetails(handling, 'Curbside'),
+        offerShippingDetails(handling, 'White Glove'),
       ],
       hasMerchantReturnPolicy: merchantReturnPolicyJsonLd(),
     },

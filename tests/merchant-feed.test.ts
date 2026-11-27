@@ -20,7 +20,6 @@ import {
 } from '../src/lib/merchant-feed';
 import { getInventory } from '../src/lib/content';
 import { builderBrand, handlingBusinessDays, BUILDERS } from '../src/lib/seo';
-import { deliveryChargeFor, SHIPPABLE_STATE_CODES } from '../src/lib/order-terms';
 import { toCents } from '../src/lib/format';
 import { variantHref } from '../src/lib/variants';
 import type { InventoryItem } from '../src/types';
@@ -144,7 +143,7 @@ test('feed lists every sellable crib and case-good variant, and nothing else', (
   }
 });
 
-test('Addison Natural and Hudson match the product-page price, URL, brand, shipping and handling', () => {
+test('Addison Natural and Hudson match the product-page price, URL, brand and handling', () => {
   const inventory = getInventory();
   const xml = merchantFeedXml(inventory);
 
@@ -165,19 +164,8 @@ test('Addison Natural and Hudson match the product-page price, URL, brand, shipp
   assert.match(addisonItem, /<g:identifier_exists>no<\/g:identifier_exists>/);
   assert.equal(tags(addisonItem, 'g:min_handling_time')[0], '30');
   assert.equal(tags(addisonItem, 'g:max_handling_time')[0], '40');
-  const addisonShip = merchantPrice(deliveryChargeFor(toCents(addison.basePrice), 'threshold'));
-  const addisonWhiteGlove = merchantPrice(deliveryChargeFor(toCents(addison.basePrice), 'white_glove'));
-  assert.deepEqual(tags(addisonItem, 'g:region'), [...SHIPPABLE_STATE_CODES, ...SHIPPABLE_STATE_CODES]);
-  assert.equal(tags(addisonItem, 'g:country').every(c => c === 'US'), true);
-  assert.deepEqual(tags(addisonItem, 'g:service'), [
-    ...SHIPPABLE_STATE_CODES.map(() => 'Curbside'),
-    ...SHIPPABLE_STATE_CODES.map(() => 'White Glove'),
-  ]);
-  assert.equal(tags(addisonItem, 'g:price').filter(p => p === addisonShip).length, SHIPPABLE_STATE_CODES.length);
-  assert.equal(
-    tags(addisonItem, 'g:price').filter(p => p === addisonWhiteGlove).length,
-    SHIPPABLE_STATE_CODES.length,
-  );
+  assert.equal(tags(addisonItem, 'g:price').length, 1, 'item has only the product g:price; no g:shipping prices');
+  assert.doesNotMatch(addisonItem, /<g:shipping>/);
 
   const hudson = inventory.find(i => i.sku === 'FQP-301');
   assert.ok(hudson?.slug);
@@ -187,20 +175,27 @@ test('Addison Natural and Hudson match the product-page price, URL, brand, shipp
   assert.equal(tags(hudsonItem, 'g:price')[0], '1950.00 USD');
   assert.equal(tags(hudsonItem, 'g:min_handling_time')[0], '50');
   assert.equal(tags(hudsonItem, 'g:max_handling_time')[0], '70');
-  assert.equal(
-    tags(hudsonItem, 'g:price').filter(p => p === merchantPrice(deliveryChargeFor(195_000, 'threshold')))
-      .length,
-    SHIPPABLE_STATE_CODES.length
-  );
-  assert.equal(
-    tags(hudsonItem, 'g:price').filter(p => p === merchantPrice(deliveryChargeFor(195_000, 'white_glove')))
-      .length,
-    SHIPPABLE_STATE_CODES.length
-  );
-  assert.deepEqual(tags(hudsonItem, 'g:service'), [
-    ...SHIPPABLE_STATE_CODES.map(() => 'Curbside'),
-    ...SHIPPABLE_STATE_CODES.map(() => 'White Glove'),
-  ]);
+  assert.equal(tags(hudsonItem, 'g:price').length, 1);
+  assert.doesNotMatch(hudsonItem, /<g:shipping>/);
+});
+
+test('feed has 136 items, no g:shipping rows, and every item keeps builder handling times', () => {
+  const xml = merchantFeedXml(getInventory());
+  const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
+  assert.equal(items.length, 136);
+  assert.equal(xml.includes('<g:shipping>'), false);
+  assert.equal(xml.includes('g:min_transit_time'), false);
+  for (const item of items) {
+    assert.equal(tags(item, 'g:min_handling_time').length, 1);
+    assert.equal(tags(item, 'g:max_handling_time').length, 1);
+    assert.equal(tags(item, 'g:price').length, 1);
+  }
+  const pairs = items.map(item => [tags(item, 'g:min_handling_time')[0], tags(item, 'g:max_handling_time')[0]]);
+  const oto = pairs.filter(p => p[0] === '30' && p[1] === '40').length;
+  const fisher = pairs.filter(p => p[0] === '50' && p[1] === '70').length;
+  assert.equal(oto, 117);
+  assert.equal(fisher, 19);
+  assert.equal(oto + fisher, 136);
 });
 
 test('Kids Comfort items pick up brand and handling from the builder table', () => {
