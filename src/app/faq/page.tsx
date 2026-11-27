@@ -4,8 +4,6 @@ import Link from 'next/link';
 import { faqPageJsonLd, jsonLdScript } from '@/lib/seo';
 import { nodeTextCompact } from '@/lib/node-text';
 
-/* The delivery charges, from the same constant the checkout bills from. */
-
 export const metadata: Metadata = {
   title: 'FAQ',
   description:

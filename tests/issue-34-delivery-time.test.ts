@@ -21,9 +21,21 @@ test('/shipping keeps the week lines and adds matching business-day handling plu
   assert.ok(shippingPage.includes(`Fisher&rsquo;s: 10${en}14 weeks (50${en}70 business days)`));
   assert.match(
     shippingPage,
+    /The time to plan for is the builder&rsquo;s build lead plus\s+delivery 1 to 10 business days after your piece is ready/,
+  );
+  assert.match(
+    shippingPage,
     /Delivery 1 to 10 business days after your piece is ready,\s+for PA\/NJ\/MD Curbside and White\s+Glove\./,
   );
   assert.ok(shippingPage.includes('We contact you to schedule delivery once your furniture is ready.'));
+});
+
+test('/shipping and About do not publish a shipping rate table or dollar shipping rates', () => {
+  const about = readFileSync(resolve(process.cwd(), 'src/app/about-heirloom/page.tsx'), 'utf8');
+  assert.doesNotMatch(shippingPage, /\$175|\$299|\$325|Cart subtotal/);
+  assert.doesNotMatch(about, /\$175|\$299|full table/);
+  assert.ok(shippingPage.includes('Shipping is charged separately at checkout'));
+  assert.ok(about.includes('Shipping is charged on every order'));
 });
 
 test('every feed g:shipping row has transit 1/10, and the row count is 816', () => {
