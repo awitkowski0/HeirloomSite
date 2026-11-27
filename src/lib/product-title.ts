@@ -23,6 +23,10 @@ export const TYPED_TITLE_NAMES: Readonly<Record<string, string>> = {
  */
 export const FEED_ONLY_TITLE_NAMES: Readonly<Record<string, string>> = {
   'mini-newport-with-mattress': 'Mini Newport Crib with Mattress',
+  // Feed-only (page titles stay the catalogue names). These are not cribs;
+  // do not add "Crib" or "Madison". No builder prefix (same as #174).
+  'changing-table-6-drawer': 'Changing Table - 6 Drawer',
+  'nightstand-2-drawer': 'Nightstand - 2 Drawer',
 };
 
 export const FEED_TITLE_NAMES: Readonly<Record<string, string>> = {

@@ -57,6 +57,43 @@ export const GOOGLE_PRODUCT_CATEGORY: Readonly<Record<string, string>> = {
   Nightstands: 'Furniture > Tables > Nightstands',
 };
 
+/**
+ * Feed-only third level for `g:product_type` (Pricing App #59 S10 / S9).
+ * Fisher crib styles have no `collection` in product.json (so the live feed
+ * was `Nursery Furniture > Cribs`). Do not set collection on the product
+ * records: that would change on-site collection pages. The two Fisher case
+ * goods stay at two levels (no Madison third level).
+ */
+export const FEED_PRODUCT_TYPE_COLLECTION: Readonly<Record<string, string>> = {
+  'arched-top': 'Arched Top',
+  bloomington: 'Bloomington',
+  darlington: 'Darlington',
+  hudson: 'Hudson',
+  mission: 'Mission',
+  moyerton: 'Moyerton',
+  princeton: 'Princeton',
+};
+
+/** Shared `g:product_highlight` bullets (S10). Used on every feed item. */
+export const SHARED_PRODUCT_HIGHLIGHTS: readonly string[] = [
+  'We deliver in Pennsylvania, New Jersey and Maryland.',
+  'Shipping is charged; the charge depends on the order total. Delivery is Curbside or White Glove in Pennsylvania, New Jersey and Maryland.',
+  'Assembly comes only with White Glove.',
+  'Made to order. Built after you order; we confirm your lead time when you order.',
+];
+
+/** Extra sourced highlights, only for the two Fisher case goods (S10). */
+export const EXTRA_PRODUCT_HIGHLIGHTS: Readonly<Record<string, readonly string[]>> = {
+  'changing-table-6-drawer': [
+    'Six drawers.',
+    'It measures 50¼ inches wide, 21¼ inches deep and 33½ inches high.',
+  ],
+  'nightstand-2-drawer': [
+    'Two drawers with dovetail construction.',
+    'Solid Brown Maple hardwood.',
+  ],
+};
+
 /** Wood species the catalogue uses as a `wood` variant, as the site names them. */
 const WOOD_SPECIES: Readonly<Record<string, string>> = {
   BrownMaple: 'Brown Maple',
@@ -123,7 +160,14 @@ function itemTitle(item: InventoryItem): string {
 /** `g:product_type`: the site's own hierarchy - category, then collection. */
 export function itemProductType(item: InventoryItem): string | null {
   if (!item.category) return null;
-  return ['Nursery Furniture', item.category, item.collection].filter(Boolean).join(' > ');
+  const collection =
+    item.collection || (item.slug ? FEED_PRODUCT_TYPE_COLLECTION[item.slug] : undefined);
+  return ['Nursery Furniture', item.category, collection].filter(Boolean).join(' > ');
+}
+
+export function itemProductHighlights(item: InventoryItem): string[] {
+  const extra = item.slug ? EXTRA_PRODUCT_HIGHLIGHTS[item.slug] : undefined;
+  return [...SHARED_PRODUCT_HIGHLIGHTS, ...(extra ?? [])];
 }
 
 /**
@@ -281,6 +325,7 @@ function renderItem(item: InventoryItem): string {
     ...(productType ? [el('g:product_type', productType)] : []),
     ...(color ? [el('g:color', color)] : []),
     ...(material ? [el('g:material', material)] : []),
+    ...itemProductHighlights(item).map(h => el('g:product_highlight', h)),
     shippingBlocks,
     el('g:min_handling_time', String(handling.minValue)),
     el('g:max_handling_time', String(handling.maxValue)),
