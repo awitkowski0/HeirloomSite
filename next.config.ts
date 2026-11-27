@@ -146,6 +146,17 @@ const nextConfig: NextConfig = {
         destination: '/products/cribs',
         permanent: true,
       },
+      {
+        /*
+         * Pricing App #38 Q1: /about 404s on live; the about page lives at
+         * /about-heirloom. Permanent 308 so Google consolidates to the
+         * destination. Not gated on VERCEL_ENV: the preview must serve this
+         * redirect for proof. /about is omitted from the sitemap.
+         */
+        source: '/about',
+        destination: '/about-heirloom',
+        permanent: true,
+      },
       /*
        * The flat category list became a two-level taxonomy, so eight category
        * slugs no longer resolve. Permanent, because they were in the sitemap.
