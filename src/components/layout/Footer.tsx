@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import CookieSettingsLink from '@/components/consent/CookieSettingsLink';
+import BrandLogo from './BrandLogo';
 import {
   FACEBOOK_URL,
+  FOOTER_FAMILY_OWNED_LINE,
   INSTAGRAM_URL,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
@@ -15,10 +17,11 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <span className="footer-brand">Heirloom Cribs &amp; More</span>
+            <BrandLogo className="footer-brand" />
             <p className="body-md text-on-surface-variant footer-tagline">
               Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.
             </p>
+            <p className="body-md text-on-surface-variant footer-tagline">{FOOTER_FAMILY_OWNED_LINE}</p>
             <p className="body-md text-on-surface-variant footer-contact">
               <a href={`tel:${PUBLISHED_PHONE_TEL}`}>{PUBLISHED_PHONE}</a>
               {' · '}

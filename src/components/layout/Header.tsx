@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import BrandLogo from './BrandLogo';
 import SearchBar from '@/components/search/SearchBar';
 import CartBadge from './CartBadge';
 import CategoryBar from './CategoryBar';
@@ -20,17 +20,18 @@ import HelpMenu from './HelpMenu';
  * with 369px of air on one side and 32px on the other. Splitting the bars
  * removes the constraint that caused it rather than tuning around it.
  *
- * The mark is text, not the logo PNG it replaced. That removes an image
- * request from every page in the site and lets the mark inherit colour.
- * The site-wide default og:image is the 1200x630 product photo in seo.ts.
+ * The mark is the brand logo: crib and "Heirloom" from 768px up, the
+ * wordmark alone below that, where the bar is 52px tall and the crib would
+ * shrink to an unreadable smudge. Both are transparent PNGs sized at 128px
+ * tall so they stay sharp at 2x. /logo-wide.png (the older brown artwork)
+ * is not used here. The site-wide default og:image is the 1200x630 product
+ * photo in seo.ts.
  */
 export default function Header() {
   return (
     <header className="app-header">
       <div className="header-inner">
-        <Link href="/" className="wordmark" aria-label="Heirloom Cribs & More, home">
-          Heirloom
-        </Link>
+        <BrandLogo className="wordmark" />
 
         {/* The middle column, and the widest thing in the bar. On a catalogue
             this size, search is how someone who knows what they want gets

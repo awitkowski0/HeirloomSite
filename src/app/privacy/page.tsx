@@ -107,6 +107,11 @@ export default function PrivacyPage() {
             come from a person rather than a script.
           </li>
           <li>
+            <strong>Crisp</strong> — live chat. It loads only when you press &ldquo;Chat with
+            us&rdquo;, and then keeps your conversation with us and a cookie so the chat
+            remembers you on your next visit. What you type goes to us through Crisp.
+          </li>
+          <li>
             <strong>Radar</strong> — address autocomplete on the checkout street field.
           </li>
           <li>

@@ -4,7 +4,8 @@ import { itemListJsonLd,
   jsonLdScript,
 } from '@/lib/seo';
 import CategoryPills from '@/components/products/CategoryPills';
-import VisibleProductGrid from '@/components/products/VisibleProductGrid';
+import ShopBrowser from '@/components/shop/ShopBrowser';
+import { toShopItems } from '@/lib/shop';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export default function ProductsPage() {
       <CategoryPills categories={categories} activeSlug={null} />
 
       <section aria-label="Product grid">
-        <VisibleProductGrid products={products} />
+        <ShopBrowser items={toShopItems(products)} />
         <ListingAnalytics />
       </section>
     </div>

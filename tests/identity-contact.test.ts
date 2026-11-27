@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  FOOTER_FAMILY_OWNED_LINE,
   PUBLISHED_EMAIL,
   PUBLISHED_PHONE,
   SERVICE_AREA_LINE,
@@ -13,9 +14,10 @@ import { organizationJsonLd } from '../src/lib/seo';
 
 /*
  * Pricing App #243 / #269 / CONTACT-1 / ADDR-1: footer shows the approved
- * warehouse line; /contact has phone, email, the service-area sentence and
- * the Contact Us form, and no mailing address. Organization JSON-LD is a
- * Bethlehem PostalAddress with no street and the approved description.
+ * warehouse line plus the family-owned line and BrandLogo; /contact has
+ * phone, email, the service-area sentence and the Contact Us form, and no
+ * mailing address. Organization JSON-LD is a Bethlehem PostalAddress with
+ * no street and the approved description.
  */
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -42,7 +44,7 @@ test('published contact values match the live /contact phone and email', () => {
   );
 });
 
-test('footer has phone, email, and the warehouse line; /contact has no mailing address and links to the form', () => {
+test('footer has phone, email, the warehouse line, and the family-owned line; /contact has no mailing address and links to the form', () => {
   const footer = read('src/components/layout/Footer.tsx');
   const contact = read('src/app/contact/page.tsx');
 
@@ -52,6 +54,16 @@ test('footer has phone, email, and the warehouse line; /contact has no mailing a
     'footer missing email',
   );
   assert.ok(footer.includes('WAREHOUSE_FOOTER_LINE'), 'footer missing warehouse line');
+  assert.ok(footer.includes('FOOTER_FAMILY_OWNED_LINE'), 'footer missing family-owned line');
+  assert.equal(WAREHOUSE_FOOTER_LINE, WAREHOUSE_FOOTER);
+  assert.equal(
+    FOOTER_FAMILY_OWNED_LINE,
+    'Heirloom Cribs & More is a family-owned, women-owned shop.',
+  );
+  assert.ok(
+    footer.includes('Solid hardwood nursery furniture, made to order. Choose Curbside or White Glove delivery.'),
+    'existing footer tagline was dropped',
+  );
   assert.doesNotMatch(footer, /openingHours|Monday|hours:/i);
 
   assert.ok(contact.includes('PUBLISHED_PHONE') || contact.includes(PUBLISHED_PHONE), '/contact missing phone');
@@ -64,7 +76,6 @@ test('footer has phone, email, and the warehouse line; /contact has no mailing a
   assert.ok(contact.includes('<ContactPageForm'), '/contact missing the Contact Us form');
   assert.doesNotMatch(contact, /WAREHOUSE_FOOTER_LINE|4651|Hanoverville/);
   assert.doesNotMatch(contact, /openingHours|Monday|hours:/i);
-  assert.doesNotMatch(footer, /openingHours|Monday|hours:/i);
 });
 
 test('Organization JSON-LD has telephone, email, a Bethlehem PostalAddress, and no street', () => {
@@ -92,10 +103,16 @@ test('Organization JSON-LD has telephone, email, a Bethlehem PostalAddress, and 
   assert.ok(!/"LocalBusiness"/.test(raw), 'LocalBusiness must not appear in Organization JSON-LD');
 });
 
-test('footer identity heading is Heirloom Cribs & More', () => {
+test('header and footer use the updated logo with the full company name as the accessible label', () => {
+  const header = read('src/components/layout/Header.tsx');
   const footer = read('src/components/layout/Footer.tsx');
-  assert.match(footer, /footer-brand">Heirloom Cribs &(?:amp;)? More</);
-  assert.doesNotMatch(footer, /footer-brand">Heirloom</);
+  const logo = read('src/components/layout/BrandLogo.tsx');
+  assert.ok(header.includes('<BrandLogo className="wordmark"'), 'header missing BrandLogo');
+  assert.ok(footer.includes('<BrandLogo className="footer-brand"'), 'footer missing BrandLogo');
+  assert.ok(logo.includes('/brand/logo-wide.png'), 'desktop logo path missing');
+  assert.ok(logo.includes('/brand/logo-text.png'), 'phone logo path missing');
+  assert.ok(logo.includes('aria-label="Heirloom Cribs & More, home"'), 'accessible name must be the full company name');
+  assert.doesNotMatch(logo, /aria-label="Heirloom"/);
 });
 
 test('Organization JSON-LD lists areaServed for PA, NJ and MD and is injected site-wide once', () => {

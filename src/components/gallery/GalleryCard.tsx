@@ -38,8 +38,8 @@ export default function GalleryCard({
   onOpenFinishes,
 }: Props) {
   const priceLabel = hasActiveSelection
-    ? formatPriceApprox(displayPrice)
-    : `From ${formatPriceApprox(product.minPrice)}`;
+    ? `Starting at ${formatPriceApprox(displayPrice)}`
+    : `Starting at ${formatPriceApprox(product.minPrice)}`;
 
   return (
     <div className="product-card-wrapper">

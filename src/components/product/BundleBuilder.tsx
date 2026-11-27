@@ -82,7 +82,7 @@ export default function BundleBuilder({
           {baseImage ? <img src={baseImage} alt="" /> : null}
         </span>
         <span className="bundle-name body-md">{productName}</span>
-        <span className="bundle-price body-md">{formatPrice(basePrice)}</span>
+        <span className="bundle-price body-md">Starting at {formatPrice(basePrice)}</span>
       </div>
 
       {included.length > 0 && (
@@ -140,7 +140,7 @@ export default function BundleBuilder({
                     {/* The add-on's own item price, shown plainly (no "+"): for a crib with
                         bundlePriceOverrides this is that crib's rail price. Variant
                         surcharges in StainSelector keep their "(+$x)" delta. */}
-                    <span className="bundle-price body-md">{formatPrice(item.price)}</span>
+                    <span className="bundle-price body-md">Starting at {formatPrice(item.price)}</span>
                   </label>
                   {item.slug === TWIN_BED_CONVERSION_SLUG ? (
                     <p className="bundle-addon-line body-md text-on-surface-variant">{TWIN_BED_CONVERSION_ADDON_LINE}</p>
@@ -157,7 +157,7 @@ export default function BundleBuilder({
         {/* Announced, because ticking a row changes a number further down the
             page than the control that changed it. */}
         <span className="headline-md" role="status" aria-live="polite">
-          {formatPrice(total)}
+          Starting at {formatPrice(total)}
         </span>
       </div>
     </section>

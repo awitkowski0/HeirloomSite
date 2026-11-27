@@ -39,6 +39,19 @@ const posthogOrigins = [
  * CSP that only permits the pixel in the one environment where it runs is a
  * policy nobody can test before it ships.
  */
+/*
+ * Crisp live chat (src/lib/live-chat.ts). Only ever loaded after a visitor
+ * presses "Chat with us", and only when NEXT_PUBLIC_CRISP_WEBSITE_ID is set,
+ * but named unconditionally for the same reason as Meta below: a policy that
+ * only permits it where it runs cannot be tested before it ships. l.js pulls
+ * its own stylesheet, fonts, images and media from client.crisp.chat, talks
+ * to the relay over websockets, and frames game.crisp.chat for its
+ * mini-games, so it needs an entry in nearly every directive.
+ */
+const CRISP_SCRIPT_ORIGINS = 'https://client.crisp.chat https://settings.crisp.chat';
+const CRISP_CONNECT_ORIGINS =
+  'https://client.crisp.chat https://storage.crisp.chat wss://client.relay.crisp.chat wss://stream.relay.crisp.chat';
+
 const META_SCRIPT_ORIGIN = 'https://connect.facebook.net';
 const META_CONNECT_ORIGINS = 'https://www.facebook.com https://connect.facebook.net';
 
@@ -239,9 +252,9 @@ const nextConfig: NextConfig = {
       // 'unsafe-inline' is required by the JSON-LD blocks and Next's inline
       // bootstrap. A nonce would need middleware, which would opt every route
       // out of static prerendering - the one thing this site cannot trade away.
-      `script-src 'self' 'unsafe-inline' https://babylist.com ${posthogOrigins} https://challenges.cloudflare.com ${META_SCRIPT_ORIGIN} ${HEYCATCH_ORIGIN}`,
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com data:",
+      `script-src 'self' 'unsafe-inline' https://babylist.com ${posthogOrigins} https://challenges.cloudflare.com ${META_SCRIPT_ORIGIN} ${HEYCATCH_ORIGIN} ${CRISP_SCRIPT_ORIGINS}`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://client.crisp.chat",
+      "font-src 'self' https://fonts.gstatic.com https://client.crisp.chat data:",
       "img-src 'self' data: blob: https:",
       // No api.stripe.com: the browser never talks to Stripe. The server does,
       // from /api/quotes, which a page CSP has no say over.
@@ -258,10 +271,11 @@ const nextConfig: NextConfig = {
       // SDK never reaches that path - but turning it on there is a dashboard
       // click with no diff, and the replays would break silently. Add
       // `worker-src blob:` at the same time, not afterwards.
-      `connect-src 'self' ${posthogOrigins} https://api.radar.io ${META_CONNECT_ORIGINS} ${HEYCATCH_ORIGIN}`,
+      `connect-src 'self' ${posthogOrigins} https://api.radar.io ${META_CONNECT_ORIGINS} ${HEYCATCH_ORIGIN} ${CRISP_CONNECT_ORIGINS}`,
       // Stripe.js is gone with the card form: nothing embeds a Stripe iframe
       // any more, and payment happens on Stripe's own hosted invoice page.
-      "frame-src https://challenges.cloudflare.com",
+      "frame-src https://challenges.cloudflare.com https://game.crisp.chat",
+      "media-src 'self' https://client.crisp.chat",
       "form-action 'self'",
       "base-uri 'self'",
       "object-src 'none'",
