@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import ConversionDiagram from './ConversionDiagram';
+import { HOME_H1, HOME_INTRO } from '@/lib/s2a-home-cribs-copy';
 
 /*
  * Four-column asymmetric hero, edge to edge.
@@ -33,11 +34,7 @@ export default function HomeHero({ detail, heroImage }: Props) {
   return (
     <section className="home-hero">
       <div className="home-hero-copy">
-        <h1 className="home-hero-headline">
-          Built from Solid Wood.
-          <br />
-          Built to Grow Up.
-        </h1>
+        <h1 className="home-hero-headline">{HOME_H1}</h1>
 
         <div className="home-ornament" aria-hidden="true">
           <span className="home-ornament-rule" />
@@ -46,8 +43,9 @@ export default function HomeHero({ detail, heroImage }: Props) {
         </div>
 
         <p className="home-hero-sub">
-          Hardwood cribs that can convert to a toddler bed and a full-size bed.
-          Made to order in solid hardwood.
+          {HOME_INTRO.replace(/ See how conversion works and why solid hardwood\.$/, '')}{' '}
+          See <Link href="/how-conversion-works">how conversion works</Link> and{' '}
+          <Link href="/why-hardwood">why solid hardwood</Link>.
         </p>
 
         <Link href="/products/cribs" className="button-primary home-hero-cta">

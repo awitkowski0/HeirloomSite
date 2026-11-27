@@ -16,6 +16,7 @@ import { TAXONOMY, sourcesFor } from '@/lib/taxonomy';
 import CategoryPills from '@/components/products/CategoryPills';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import ListingAnalytics from '@/components/products/ListingAnalytics';
+import { CRIBS_H1, CRIBS_INTRO, CRIBS_META, CRIBS_TITLE } from '@/lib/s2a-home-cribs-copy';
 
 export const dynamicParams = false;
 
@@ -45,6 +46,15 @@ export async function generateMetadata({
   const { category: slug } = await params;
   const node = getTaxonomyNodeBySlug(slug);
   if (!node) return { title: 'Category not found', robots: { index: false } };
+
+  if (slug === 'cribs') {
+    return {
+      title: { absolute: CRIBS_TITLE },
+      description: CRIBS_META,
+      alternates: { canonical: `/products/${slug}` },
+      openGraph: { title: CRIBS_TITLE, description: CRIBS_META, url: `/products/${slug}` },
+    };
+  }
 
   return {
     title: node.name,
@@ -113,8 +123,8 @@ export default async function CategoryPage({
             <Link href={`/products/${parent.slug}`}>{parent.name}</Link>
           </p>
         )}
-        <h1 className="headline-lg text-primary">{node.name}</h1>
-        <p className="body-lg text-on-surface-variant">{node.description}</p>
+        <h1 className="headline-lg text-primary">{slug === 'cribs' ? CRIBS_H1 : node.name}</h1>
+        <p className="body-lg text-on-surface-variant">{slug === 'cribs' ? CRIBS_INTRO : node.description}</p>
       </header>
 
       <CategoryPills categories={categories} activeSlug={parent?.slug ?? slug} />
