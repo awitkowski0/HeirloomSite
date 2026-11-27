@@ -1,6 +1,3 @@
-import { formatPriceApprox } from './format';
-import { deliveryChargeFor } from './order-terms';
-
 /*
  * The purchase-assurance block under Add to Cart (delivery tiers, standards,
  * lead time, talk to a person) - which product pages show it.
@@ -25,10 +22,8 @@ export function showsPurchaseAssurances(category: string | null | undefined): bo
   return !ADD_ON_CATEGORIES.includes(category);
 }
 
-/* Read from order-terms so this line can never quote a different number from
-   the checkout that charges it. */
+/* Names the two services only. Dollar rates are not published on product pages
+   (fuel charges can change); checkout shows the charge for the order. */
 export function deliveryLineTitle(): string {
-  const curbside = formatPriceApprox(deliveryChargeFor(0, 'threshold') / 100);
-  const whiteGlove = formatPriceApprox(deliveryChargeFor(0, 'white_glove') / 100);
-  return `Delivery: Curbside from ${curbside} or White Glove from ${whiteGlove}`;
+  return 'Delivery: Curbside or White Glove';
 }

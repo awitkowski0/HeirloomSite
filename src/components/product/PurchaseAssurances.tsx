@@ -1,6 +1,5 @@
 import Link from 'next/link';
-/* The delivery title reads from order-terms (via delivery-line) so it can never
-   quote a different number from the checkout that charges it. */
+/* The delivery title names Curbside and White Glove only (no published dollar rates). */
 import { deliveryLineTitle } from '@/lib/delivery-line';
 import type { TwoStageNote } from '@/lib/mini-newport-conversion';
 

@@ -4,27 +4,17 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Delivery',
   description:
-    'Where we deliver, Curbside and White Glove options, delivery charges by cart subtotal, and builder lead times.',
+    'Where we deliver, Curbside and White Glove options, shipping is charged at checkout, and builder lead times.',
   alternates: { canonical: '/shipping' },
   openGraph: { url: '/shipping' },
 };
-
-const RATES = [
-  { subtotal: 'Under $2,500', curbside: '$175', whiteGlove: '$299' },
-  { subtotal: '$2,500 – $3,499.99', curbside: '$325', whiteGlove: '$425' },
-  { subtotal: '$3,500 – $4,499.99', curbside: '$425', whiteGlove: '$550' },
-  { subtotal: '$4,500 – $5,999.99', curbside: '$575', whiteGlove: '$725' },
-  { subtotal: '$6,000 – $7,499.99', curbside: '$725', whiteGlove: '$925' },
-  { subtotal: '$7,500 – $8,999.99', curbside: '$850', whiteGlove: '$1,100' },
-  { subtotal: '$9,000 and up', curbside: '$1,150', whiteGlove: '$1,475' },
-] as const;
 
 export default function ShippingPage() {
   return (
     <div className="container doc-page">
       <p className="label-caps text-on-surface-variant">Support</p>
       <h1 className="headline-xl">Delivery</h1>
-      <p className="body-md text-on-surface-variant">Last updated: October 2026</p>
+      <p className="body-md text-on-surface-variant">Last updated: November 2026</p>
 
       <section>
         <h2 className="headline-md">Where we deliver</h2>
@@ -62,39 +52,25 @@ export default function ShippingPage() {
       <section>
         <h2 className="headline-md">Delivery charges</h2>
         <p>
-          Delivery is charged separately at checkout and is based on your cart subtotal:
+          Shipping is charged separately at checkout. You choose Curbside or White Glove when you
+          order. Rates can change with fuel costs, so we do not publish a rate table; the charge
+          for your order is shown at checkout.
         </p>
-        <div className="doc-table-wrap">
-          <table className="doc-table">
-            <thead>
-              <tr>
-                <th scope="col">Cart subtotal</th>
-                <th scope="col">Curbside</th>
-                <th scope="col">White Glove</th>
-              </tr>
-            </thead>
-            <tbody>
-              {RATES.map(row => (
-                <tr key={row.subtotal}>
-                  <td>{row.subtotal}</td>
-                  <td>{row.curbside}</td>
-                  <td>{row.whiteGlove}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </section>
 
       <hr className="doc-rule" />
 
       <section>
         <h2 className="headline-md">Lead times</h2>
-        <p>Every piece is made to order. Lead times are estimates, confirmed at order time:</p>
+        <p>
+          Every piece is made to order. The time to plan for is the builder&rsquo;s build lead plus
+          delivery 1 to 10 business days after your piece is ready. Build leads are estimates,
+          confirmed at order time:
+        </p>
         <ul className="doc-list">
-          <li>Old Town Oak: about 6–8 weeks</li>
-          <li>Kids Comfort: about 8 weeks</li>
-          <li>Fisher&rsquo;s: 10–14 weeks</li>
+          <li>Old Town Oak: about 6–8 weeks (30–40 business days)</li>
+          <li>Kids Comfort: about 8 weeks (about 40 business days)</li>
+          <li>Fisher&rsquo;s: 10–14 weeks (50–70 business days)</li>
         </ul>
         <p>
           Your build starts when we receive your deposit (see{' '}
@@ -110,6 +86,10 @@ export default function ShippingPage() {
       <section>
         <h2 className="headline-md">Scheduling</h2>
         <p>We contact you to schedule delivery once your furniture is ready.</p>
+        <p>
+          Delivery 1 to 10 business days after your piece is ready, for PA/NJ/MD Curbside and White
+          Glove.
+        </p>
       </section>
 
       <hr className="doc-rule" />

@@ -165,6 +165,9 @@ test('Addison Natural and Hudson match the product-page price, URL, brand, shipp
   assert.match(addisonItem, /<g:identifier_exists>no<\/g:identifier_exists>/);
   assert.equal(tags(addisonItem, 'g:min_handling_time')[0], '30');
   assert.equal(tags(addisonItem, 'g:max_handling_time')[0], '40');
+  assert.equal(tags(addisonItem, 'g:min_transit_time').every(v => v === '1'), true);
+  assert.equal(tags(addisonItem, 'g:max_transit_time').every(v => v === '10'), true);
+  assert.equal(tags(addisonItem, 'g:min_transit_time').length, SHIPPABLE_STATE_CODES.length * 2);
   const addisonShip = merchantPrice(deliveryChargeFor(toCents(addison.basePrice), 'threshold'));
   const addisonWhiteGlove = merchantPrice(deliveryChargeFor(toCents(addison.basePrice), 'white_glove'));
   assert.deepEqual(tags(addisonItem, 'g:region'), [...SHIPPABLE_STATE_CODES, ...SHIPPABLE_STATE_CODES]);
@@ -187,6 +190,8 @@ test('Addison Natural and Hudson match the product-page price, URL, brand, shipp
   assert.equal(tags(hudsonItem, 'g:price')[0], '1950.00 USD');
   assert.equal(tags(hudsonItem, 'g:min_handling_time')[0], '50');
   assert.equal(tags(hudsonItem, 'g:max_handling_time')[0], '70');
+  assert.equal(tags(hudsonItem, 'g:min_transit_time').every(v => v === '1'), true);
+  assert.equal(tags(hudsonItem, 'g:max_transit_time').every(v => v === '10'), true);
   assert.equal(
     tags(hudsonItem, 'g:price').filter(p => p === merchantPrice(deliveryChargeFor(195_000, 'threshold')))
       .length,

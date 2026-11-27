@@ -143,7 +143,7 @@ export default function AboutHeirloomPage() {
             </div>
           </div>
           <p>
-            {`Shipping is charged on every order, based on your cart subtotal. For orders under $2,500, Curbside is $175 and White Glove is $299. The full table is on our `}
+            {`Shipping is charged on every order. You choose Curbside or White Glove when you order. The charge for your order is shown at checkout. Details are on our `}
             <Link href="/shipping" className="doc-link">Delivery</Link>
             {` page.`}
           </p>

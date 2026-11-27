@@ -251,6 +251,8 @@ function renderItem(item: InventoryItem): string {
           `        <g:region>${xmlEscape(region)}</g:region>\n` +
           `        <g:service>${xmlEscape(name)}</g:service>\n` +
           `        <g:price>${xmlEscape(shipping)}</g:price>\n` +
+          `        <g:min_transit_time>1</g:min_transit_time>\n` +
+          `        <g:max_transit_time>10</g:max_transit_time>\n` +
           `      </g:shipping>`
       );
     })

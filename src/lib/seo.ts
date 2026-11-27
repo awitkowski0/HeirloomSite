@@ -241,6 +241,13 @@ function offerShippingDetails(
         unitCode: 'DAY',
         unitText: 'business days',
       },
+      transitTime: {
+        '@type': 'QuantitativeValue',
+        minValue: 1,
+        maxValue: 10,
+        unitCode: 'DAY',
+        unitText: 'business days',
+      },
     },
   };
 }
@@ -302,7 +309,8 @@ export function merchantReturnPolicyJsonLd(): Record<string, unknown> {
  * Deliberately absent: aggregateRating / review (there are none), gtin (the
  * builders publish none), mpn (the SKU is the store's code, not a confirmed
  * manufacturer part number), priceValidUntil (prices have no end date) and
- * transitTime (the site quotes a handling window only).
+ * transitTime is set under offers.shippingDetails.deliveryTime (1–10
+ * business days after the piece is ready), not as a product-level field.
  */
 export function productJsonLd(opts: {
   /** Display name for this page: "Newport Crib", or "Newport Crib in Carbon" on a colour page. */

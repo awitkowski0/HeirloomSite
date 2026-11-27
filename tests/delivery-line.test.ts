@@ -1,7 +1,7 @@
 /*
- * The "Delivery: Curbside from $175 or White Glove from $299" assurance block on
- * product pages (src/lib/delivery-line.ts, used by ProductConfigurator). The
- * amounts are the opening band; checkout charges the band for the cart.
+ * The "Delivery: Curbside or White Glove" assurance block on product pages
+ * (src/lib/delivery-line.ts, used by ProductConfigurator). Dollar rates are
+ * not published here; checkout shows the charge for the order.
  * Run with `npm test`.
  */
 import { test } from 'node:test';
@@ -13,8 +13,9 @@ interface InventoryRow { productName: string; category: string | null; variantTy
 const inventory = JSON.parse(readFileSync(new URL('../public/data/inventory.json', import.meta.url), 'utf8')) as InventoryRow[];
 const byName = new Map(inventory.map(r => [r.productName, r]));
 
-test('delivery line wording and opening-band amounts come from order-terms ($175 / $299)', () => {
-  assert.equal(deliveryLineTitle(), 'Delivery: Curbside from $175 or White Glove from $299');
+test('delivery line names Curbside and White Glove and does not publish dollar rates', () => {
+  assert.equal(deliveryLineTitle(), 'Delivery: Curbside or White Glove');
+  assert.doesNotMatch(deliveryLineTitle(), /\$/);
 });
 
 test('every crib and mini crib shows the delivery line, whatever its variant type', () => {
