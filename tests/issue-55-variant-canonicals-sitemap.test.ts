@@ -40,11 +40,13 @@ function classify(
   return 'static';
 }
 
-test('#55 sitemap has exactly 76 brand-host URLs: 21 static incl. /privacy, 5 category, 5 collection, 45 base products, 0 variants', () => {
+// Counts are derived, not hard-coded: adding, hiding or de-listing a product
+// must not break this test. The rules it guards are structural.
+test('#55 sitemap: brand host only, no duplicates, /privacy present, base product URLs only (no variants)', () => {
   const entries = sitemap();
   const urls = entries.map(e => e.url);
-  assert.equal(urls.length, 76);
-  assert.equal(new Set(urls).size, 76);
+  assert.ok(urls.length > 0);
+  assert.equal(new Set(urls).size, urls.length);
   assert.equal(BRAND_SITE_URL, BRAND);
   assert.equal(SITE_URL.includes('vercel.app'), false);
   for (const url of urls) {
@@ -64,12 +66,12 @@ test('#55 sitemap has exactly 76 brand-host URLs: 21 static incl. /privacy, 5 ca
   };
   for (const url of urls) counts[classify(url)]++;
   assert.equal(counts.home, 1);
-  assert.equal(counts.static, 20);
-  assert.equal(counts.home + counts.static, 21);
-  assert.equal(counts.category, 5);
-  assert.equal(counts.collection, 5);
-  assert.equal(counts.product_base, 45);
   assert.equal(counts.product_variant, 0);
+  assert.ok(counts.product_base > 0);
+  const slugs = new Set(getAllProductSlugs());
+  for (const url of urls.filter(u => classify(u) === 'product_base')) {
+    assert.ok(slugs.has(pathOf(url).split('/')[2]), `sitemap names an unknown product: ${url}`);
+  }
   assert.ok(urls.includes(`${HOST}/privacy`));
   const sitemapSrc = read('src/app/sitemap.ts');
   assert.match(sitemapSrc, /url: `\$\{SITE_URL\}\/privacy`/);
@@ -91,7 +93,11 @@ test('#55 robots.txt still allows product paths and does not noindex them', () =
 test('#55 /privacy metadata is self-canonical with matching og:url', () => {
   const src = read('src/app/privacy/page.tsx');
   assert.match(src, /alternates:\s*\{\s*canonical:\s*'\/privacy'\s*\}/);
-  assert.match(src, /openGraph:\s*\{\s*url:\s*'\/privacy'\s*\}/);
+  assert.match(src, /url:\s*'\/privacy'/);
+  // A page-level openGraph replaces the layout's: the share card must be whole.
+  for (const field of ['title:', 'description:', 'images:', 'siteName:']) {
+    assert.ok(src.includes(field), `/privacy openGraph missing ${field}`);
+  }
 });
 
 test('#55 productCanonicalPath is the base product, distinct from a finish landing URL', () => {
@@ -143,16 +149,16 @@ test('#55 product page JSON-LD offer path stays the variant URL, not the base ca
   assert.match(src, /sku:\s*config\.sku/);
 });
 
-test('#55 feed.xml is unchanged: 136 items keep variant <g:link> and item_group_id (guards 1 and 7)', () => {
+test('#55 feed.xml is unchanged: every item keeps variant <g:link> and item_group_id (guards 1 and 7)', () => {
   const inventory = getInventory();
   const xml = merchantFeedXml(inventory);
   const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
-  assert.equal(items.length, 136);
-  assert.equal(feedItems(inventory).length, 136);
+  assert.ok(items.length > 0);
+  assert.equal(items.length, feedItems(inventory).length);
   const links = [...xml.matchAll(/<g:link>([^<]+)<\/g:link>/g)].map(m => m[1]);
   const groups = [...xml.matchAll(/<g:item_group_id>([^<]+)<\/g:item_group_id>/g)].map(m => m[1]);
-  assert.equal(links.length, 136);
-  assert.equal(groups.length, 136);
+  assert.equal(links.length, items.length);
+  assert.equal(groups.length, items.length);
   assert.equal(xml.includes('<g:canonical_link>'), false);
   const samples = [
     {
@@ -171,12 +177,9 @@ test('#55 feed.xml is unchanged: 136 items keep variant <g:link> and item_group_
     const escaped = sample.link.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     assert.match(item, new RegExp(`<g:link>${escaped}</g:link>`));
   }
-  assert.equal(
-    links.filter(l => {
-      const path = l.replace(BRAND, '');
-      const parts = path.split('/').filter(Boolean);
-      return parts[0] === 'product' && parts.length > 2;
-    }).length,
-    107,
+  // Variant landing URLs are still used as <g:link> (not collapsed to the base).
+  assert.ok(
+    links.some(l => l.replace(BRAND, '').split('/').filter(Boolean).length > 2),
+    'no feed item links to a variant URL',
   );
 });

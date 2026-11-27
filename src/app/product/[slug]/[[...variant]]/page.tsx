@@ -81,11 +81,13 @@ type Params = { slug: string; variant: string[] };
 /**
  * Every product, every wood, and every finish that is distinct from its wood.
  *
- * ~800 pages rather than 73. The point is that a finish is a real URL a
- * crawler can index and a customer can send to someone: /product/bloomington
+ * ~800 pages rather than 73. A finish is a real URL a customer can send to
+ * someone and a Merchant <g:link> can land on: /product/bloomington
  * /cherry_wood/antique_slate renders that exact configuration in the server
  * HTML, instead of every finish sharing one URL behind a ?stain= parameter
- * applied after hydration.
+ * applied after hydration. For search, every variant page canonicalises to
+ * the base /product/<slug> (Pricing App #55), and only the base is in the
+ * sitemap.
  */
 export function generateStaticParams(): Params[] {
   const slugs = getAllProductSlugs();
