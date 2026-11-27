@@ -1805,79 +1805,230 @@ main {
   }
 }
 
-.lightbox-overlay {
+/*
+ * Product lightbox (ProductLightbox). The page, enlarged: paper, ink and
+ * hairline rules rather than a black overlay, so the photographs sit on the
+ * same ground as everywhere else and their white plate multiplies away.
+ * Three rows - title bar, photo stage, thumbnail rail - filling the viewport.
+ *
+ * It is a native <dialog> in the top layer, so there is no z-index here to
+ * keep ahead of the site header. `display` is only set on [open]: set
+ * unconditionally it would override the closed state.
+ */
+.lightbox {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.9);
-  z-index: 2000;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  height: 100dvh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  /* hidden, not clip: it has to remain a scroll container for
+     overscroll-behavior to stop a wheel or swipe reaching the page behind. */
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: var(--background);
+  color: var(--ink);
+  opacity: 0;
+  /* display and overlay keep it rendered, and in the top layer, for the
+     length of the closing fade. Where they cannot be transitioned (Firefox,
+     Safari) it closes at once, which is the old behaviour. */
+  transition-property: opacity, display, overlay;
+  transition-duration: 180ms;
+  transition-timing-function: ease-out;
+  transition-behavior: allow-discrete;
+}
+.lightbox[open] {
+  display: grid;
+  opacity: 1;
+}
+@starting-style {
+  .lightbox[open] {
+    opacity: 0;
+  }
+}
+.lightbox::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: var(--background);
+}
+.lightbox-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  gap: var(--spacing-md);
+  padding: max(10px, env(safe-area-inset-top)) max(var(--spacing-gutter), env(safe-area-inset-right)) 10px
+    max(var(--spacing-gutter), env(safe-area-inset-left));
+  border-bottom: 1px solid var(--rule);
 }
-
-/*
- * A real target, not a bare glyph.
- *
- * This was `background: none; border: none; color: white` in a corner - a thin
- * white outline on a near-black backdrop, with no boundary to aim at. The
- * overlay does close on a backdrop click, but .lightbox-img-wrap covers
- * 90vw x 80vh, so there was barely any backdrop left to hit and the practical
- * way out was Escape, which is not an affordance anyone can see.
- */
-.lightbox-close-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 1;
-  display: flex;
+.lightbox-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: var(--text-headline-md);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lightbox-count {
+  margin: 0;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+.lightbox-close {
+  display: inline-flex;
+  flex: none;
   align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: white;
-  cursor: pointer;
-}
-.lightbox-close-btn:hover {
-  background: rgba(0, 0, 0, 0.85);
-  border-color: white;
-}
-.lightbox-close-btn .material-symbols-outlined {
-  font-size: 26px;
-}
-
-.lightbox-img {
-  max-width: 90vw;
-  max-height: 90vh;
-  object-fit: contain;
-}
-
-.lightbox-nav-btn {
-  position: absolute;
-  /* Above the dismiss surface, or the arrows would close instead of paginate. */
-  z-index: 1;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
+  gap: 6px;
+  min-height: 44px;
+  /* The negative margin lines the glyph up with the gutter; the padding keeps
+     the whole 44px target. */
+  margin-right: -10px;
+  padding: 0 10px;
+  border: 0;
   border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.lightbox-close:active {
+  opacity: 0.6;
+}
+.lightbox-close .material-symbols-outlined {
+  font-size: 20px;
+}
+.lightbox-close .label-caps {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px;
+  padding-bottom: 2px;
+  transition: background-size 200ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lightbox-close:hover .label-caps {
+    background-size: 100% 1px;
+  }
+}
+.lightbox-stage {
+  position: relative;
+  min-height: 0;
+}
+.lightbox-track {
+  /* Both axes here: nothing behind a modal should move. */
+  overscroll-behavior: contain;
+}
+/* Zoomed, the photo pans with the cursor; the track must not scroll under it. */
+.lightbox-track[data-zoomed] {
+  overflow: hidden;
+}
+.lightbox-slide {
+  position: relative;
+  flex: 0 0 100%;
+  overflow: hidden;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+.lightbox-slide img {
+  mix-blend-mode: multiply;
+  padding: var(--spacing-md) 88px;
+  transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+  transition: transform 240ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lightbox-track[data-zoomed] .lightbox-slide img {
+  transform: scale(2.5);
+}
+/* Two classes: .slide-nav is declared further down and would otherwise win. */
+.slide-nav.lightbox-nav {
   width: 48px;
   height: 48px;
-  cursor: pointer;
-  color: white;
+}
+.lightbox-nav.slide-nav-prev {
+  left: max(var(--spacing-gutter), env(safe-area-inset-left));
+}
+.lightbox-nav.slide-nav-next {
+  right: max(var(--spacing-gutter), env(safe-area-inset-right));
+}
+.lightbox-rail {
+  position: relative;
   display: flex;
-  align-items: center;
   justify-content: center;
+  padding: 10px max(var(--spacing-gutter), env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
+    max(var(--spacing-gutter), env(safe-area-inset-left));
+  border-top: 1px solid var(--rule);
 }
-
-.lightbox-nav-prev {
-  left: 24px;
+.lightbox-hint {
+  display: none;
+  position: absolute;
+  top: 50%;
+  right: var(--spacing-gutter);
+  margin: 0;
+  translate: 0 -50%;
+  color: var(--ink-muted);
 }
-
-.lightbox-nav-next {
-  right: 24px;
+@media (hover: hover) and (pointer: fine) {
+  .lightbox-slide {
+    cursor: zoom-in;
+  }
+  .lightbox-track[data-zoomed] .lightbox-slide {
+    cursor: zoom-out;
+  }
+  .lightbox-hint {
+    display: block;
+  }
+}
+@media (max-width: 767px) {
+  /* The page's own phone gutter, and a tighter bar: at 320px the wider one
+     left the product name ~110px and cut "Addison Crib" short. */
+  .lightbox-bar {
+    gap: 12px;
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-left: max(16px, env(safe-area-inset-left));
+  }
+  .lightbox-slide img {
+    padding: var(--spacing-sm);
+  }
+  /* No room beside the rail for it, and a narrow fine-pointer window can
+     read the cursor. */
+  .lightbox-hint {
+    display: none;
+  }
+}
+/* A phone on its side: the bar and rail were taking 154 of 390px. Give the
+   photograph the room; the thumbnails stay 44px targets. */
+@media (max-height: 500px) and (orientation: landscape) {
+  .lightbox-bar {
+    padding-top: max(4px, env(safe-area-inset-top));
+    padding-bottom: 4px;
+  }
+  .lightbox-rail {
+    padding-top: 4px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+  }
+  .lightbox-rail .photo-thumb {
+    width: 48px;
+    height: 50px;
+  }
+  .lightbox-slide img {
+    padding: 8px 88px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox {
+    transition-duration: 80ms;
+  }
+  .lightbox-slide img,
+  .lightbox-close .label-caps {
+    transition: none;
+  }
 }
 
 .cart-popup-overlay {
@@ -2060,6 +2211,11 @@ main {
   margin-top: 0;
   border-top: 1px solid var(--rule);
   padding: 64px 24px;
+}
+/* The published email address is one unbreakable 372px word; without this it
+   widened every page past the viewport on phones narrower than 412px. */
+.site-footer a {
+  overflow-wrap: anywhere;
 }
 .footer-grid {
   display: grid;
@@ -2783,8 +2939,18 @@ a.product-inline-link:focus-visible {
 
 .product-image {
   position: relative;
-  min-height: 420px;
   background-color: transparent;
+}
+/*
+ * From 768px only. Unscoped, this came after - and so beat - the phone rule
+ * (min-height: 320px), and aspect-ratio turns a min-height into a min-width:
+ * on a 320px phone the 4:5 frame was forced to 336px and the whole page
+ * scrolled sideways.
+ */
+@media (min-width: 768px) {
+  .product-image {
+    min-height: 420px;
+  }
 }
 /*
  * Phone scroll preview (ProductGallery). The track adds --scrub-length of
@@ -2850,7 +3016,7 @@ a.product-inline-link:focus-visible {
   .stain-scrub-layers img.is-visible {
     opacity: 1;
   }
-  .product-image.is-previewing .product-image-trigger img {
+  .product-image.is-previewing .product-slide img {
     opacity: 0;
   }
   .stain-scrub-panel {
@@ -2895,45 +3061,226 @@ a.product-inline-link:focus-visible {
   text-align: center;
   color: var(--error);
 }
-.product-image-trigger {
+/*
+ * The product photograph is a carousel (ProductGallery): a native horizontal
+ * scroll-snap track with one full-width slide per photo. Native scrolling is
+ * the whole mechanism - swipe momentum, snapping and trackpad gestures come
+ * from the browser - and a vertical swipe still scrolls the page, which the
+ * phone finish preview depends on.
+ *
+ * .slide-track, .slide-nav and .photo-thumb(s) are shared with the lightbox,
+ * which is the same carousel at full size.
+ */
+.slide-track {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  /* The x axis only: a swipe that runs off either end stays on the carousel
+     instead of starting a back/forward navigation, and the page still scrolls
+     vertically under the pointer. */
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  /* Same reason as .stain-scrub-pin's background: the photographs use
+     mix-blend-mode: multiply to drop their white plate into the page, and a
+     browser that composites this scroller as its own layer would blend them
+     against a transparent box instead. Painting the page colour here keeps
+     the result identical either way. */
+  background-color: var(--background);
+}
+.product-slide {
+  position: relative;
+  flex: 0 0 100%;
   height: 100%;
-  border: none;
+  padding: 0;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  border: 0;
+  border-radius: 0;
   background: transparent;
   cursor: zoom-in;
+  /* No double-tap zoom delay on the tap that opens the lightbox. */
+  touch-action: manipulation;
+  /* A long press must not select the photo or raise the image callout - but
+     the tap highlight stays: it is the only press feedback this has. */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+/* Inset: the track clips, so the site's outset ring would be cut off. */
+.product-slide:focus-visible {
+  outline-offset: -2px;
+}
+/*
+ * Previous / next. Hairline squares on the paper, ink on hover. Only where
+ * there is a pointer to hover with - a phone swipes, and arrows there would
+ * only cover the photograph.
+ */
+.slide-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
   padding: 0;
+  translate: 0 -50%;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  background: var(--background);
+  color: var(--ink);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+.slide-nav .material-symbols-outlined {
+  font-size: 22px;
+}
+.slide-nav-prev {
+  left: 0;
+}
+.slide-nav-next {
+  right: 0;
+}
+.slide-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.slide-nav:not(:disabled):active {
+  border-color: var(--ink);
+}
+@media (hover: hover) and (pointer: fine) {
+  .slide-nav {
+    display: grid;
+  }
+  .slide-nav:not(:disabled):hover {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
+  }
+}
+/*
+ * Where the visitor is in the set: a hairline along the foot of the frame, one
+ * segment per photo with the current one inked, and the count at its end.
+ * Decorative - the thumbnails are the controls.
+ */
+.product-slides-status {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  pointer-events: none;
+}
+.product-slides-progress {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+.product-slides-progress span {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  transition: background-color 200ms ease;
+}
+.product-slides-progress .is-current {
+  background: var(--ink);
+}
+.product-slides-count {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+/* The finish preview has its own counter in the panel beneath. */
+.product-image.is-previewing .product-slides-status {
+  visibility: hidden;
 }
 
-.gallery-thumbs {
+/*
+ * Thumbnails (PhotoThumbs), under the carousel and along the foot of the
+ * lightbox. The current photo is full strength over an ink rule; the rule is a
+ * second signal beside the opacity, so "which one" never rests on tone alone.
+ */
+.photo-thumbs {
+  position: relative;
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 4px;
+  max-width: 100%;
   overflow-x: auto;
-  padding-bottom: 4px;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
 }
-.gallery-thumb {
-  width: 72px;
-  height: 72px;
-  padding: 0;
-  border-radius: var(--radius);
-  cursor: pointer;
-  border: 2px solid transparent;
-  opacity: 0.6;
-  transition: opacity 0.2s, border-color 0.2s;
-  flex-shrink: 0;
+.gallery-thumbs {
+  margin-top: 12px;
+}
+.photo-thumb {
+  position: relative;
+  flex: none;
+  width: 64px;
+  height: 68px;
+  padding: 0 0 6px;
+  border: 0;
+  border-radius: 0;
   background: transparent;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 160ms ease;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
-.gallery-thumb.active {
-  border-color: var(--primary);
+.photo-thumb::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: var(--ink);
+  scale: 0 1;
+  transition: scale 200ms ease;
+}
+/* Hover only where there is one: on a phone it sticks to the last thumbnail
+   tapped. :active is the press feedback everywhere. */
+@media (hover: hover) and (pointer: fine) {
+  .photo-thumb:hover {
+    opacity: 0.85;
+  }
+}
+.photo-thumb:active {
+  opacity: 0.85;
+}
+.photo-thumb[aria-current='true'] {
   opacity: 1;
 }
-.gallery-thumb img {
+.photo-thumb[aria-current='true']::after {
+  scale: 1;
+}
+.photo-thumb:focus-visible {
+  outline-offset: -2px;
+}
+.photo-thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  border-radius: 0;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-nav,
+  .photo-thumb,
+  .photo-thumb::after,
+  .product-slides-progress span {
+    transition: none;
+  }
 }
 
 .babylist-btn {
@@ -3007,35 +3354,6 @@ a.product-inline-link:focus-visible {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.lightbox-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* Sits behind everything and fills the dialog, so a click anywhere that is not
-   the photograph or a control dismisses. `zoom-out` because the image was
-   opened with `zoom-in`. */
-.lightbox-dismiss {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  padding: 0;
-  background: none;
-  border: none;
-  cursor: zoom-out;
-}
-
-.lightbox-img-wrap {
-  position: relative;
-  z-index: 1;
-  width: 86vw;
-  height: 78vh;
 }
 
 .gallery-carousel-content {

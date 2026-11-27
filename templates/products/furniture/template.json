@@ -1,0 +1,7 @@
+{
+  "summary": "Dresser, chest, nightstand or changing table: one configuration, one price.",
+  "notes": [
+    "category starts as Dressers: pass --category Chests, Nightstands or \"Changing Tables\" for the others",
+    "set \"collection\" and fill \"related\" with the slugs of the matching pieces, and add this slug to theirs"
+  ]
+}

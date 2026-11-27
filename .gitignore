@@ -44,3 +44,6 @@ data/pricing.json
 
 # TypeScript incremental build cache
 *.tsbuildinfo
+
+# scripts/product.mjs preview: screenshots and the dev-server log it starts
+.preview/

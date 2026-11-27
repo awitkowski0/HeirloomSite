@@ -1,6 +1,8 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync, mkdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { checkPageMedia, defaultMediaKey, mediaKey, photosFor } from "./lib/product-page.mjs";
+import { placeholderProblems, variantTypeProblem } from "./lib/product-checks.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -60,50 +62,58 @@ function collapseRepeatedWords(text, where) {
  * Declaring it is only half the fix; a declaration that can drift from the data
  * is worth little, so it is checked here against the actual variant names.
  */
-const WOOD_SPECIES = new Set(["brownmaple", "cherrywood", "redoak"]);
-const VARIANT_TYPES = new Set(["wood", "size", "finish", "none"]);
-
-function inferVariantType(names) {
-  if (names.length === 1 && names[0] === "Default Title") return "none";
-  if (names.every(n => WOOD_SPECIES.has(n.toLowerCase().replace(/\s/g, "")))) return "wood";
-  if (names.every(n => n.includes('"') || /\d'/.test(n))) return "size";
-  return "finish";
-}
-
 const variantTypeProblems = [];
 const availabilityProblems = [];
 const hiddenProblems = [];
 const hiddenVariants = [];
 const hiddenProducts = [];
 const relationProblems = [];
+const mediaProblems = [];
 const relationNotices = [];
+const placeholderIssues = [];
+const draftsLeftOut = [];
+const draftsIncluded = [];
 function checkVariantType(dirName, declared, names) {
-  if (!declared) {
-    variantTypeProblems.push(`${dirName}: product.json has no variantType`);
-    return;
-  }
-  if (!VARIANT_TYPES.has(declared)) {
-    variantTypeProblems.push(`${dirName}: variantType "${declared}" is not one of ${[...VARIANT_TYPES].join(", ")}`);
-    return;
-  }
-  // A composite "BrownMaple / Antique Slate" is the specific corruption this
-  // guard exists to keep out: it reads as a finish but hides a wood.
-  const composite = names.filter(n => n.includes(" / "));
-  if (composite.length > 0) {
-    variantTypeProblems.push(
-      `${dirName}: variant names still encode wood AND finish (${composite[0]}); split them`
-    );
-    return;
-  }
-  const inferred = inferVariantType(names);
-  if (inferred !== declared) {
-    variantTypeProblems.push(
-      `${dirName}: variantType is "${declared}" but the variant names look like "${inferred}" (${names.slice(0, 2).join(", ")})`
-    );
-  }
+  // The rule itself is in scripts/lib/product-checks.mjs, shared with the CLI.
+  const problem = variantTypeProblem(dirName, declared, names);
+  if (problem) variantTypeProblems.push(problem);
 }
 
 const MIN_EXPECTED_PRODUCTS = 67;
+
+/*
+ * Drafts: `"draft": true` in product.json.
+ *
+ * A draft is a product still being set up. It is left out of everything this
+ * script writes - exactly like `hidden`, so no route, no sitemap entry, no
+ * search document and no pricing.json row, which is what makes it unbuyable -
+ * UNLESS the caller asks for drafts with --include-drafts. Only two callers
+ * do: the `dev` npm script and `npm run product -- preview`, so a draft's page
+ * can be looked at on localhost before it is published.
+ *
+ * The default is the safe one. `npm run build`, `npm test`, `npm run
+ * data:build` and a bare `node scripts/build-data.mjs` pass no flag and get no
+ * drafts. And the flag alone is not enough: under NODE_ENV=production, on
+ * Vercel or in CI it is ignored, so a build command that somehow gained the
+ * flag still ships none. src/lib/content.ts is the last line - it refuses to
+ * read data that contains a draft in a production build, which covers a bare
+ * `next build` run on top of data a dev session left behind.
+ *
+ * --dry-run runs every guard and writes nothing. `check` and `publish` use it
+ * to ask "would the build accept this?" without touching the generated files
+ * a running dev server is reading. Nothing is emitted, so it may look at
+ * drafts whatever the environment.
+ */
+const ARGS = new Set(process.argv.slice(2));
+const DRY_RUN = ARGS.has("--dry-run");
+const PRODUCTION_CONTEXT =
+  process.env.NODE_ENV === "production" || Boolean(process.env.VERCEL) || Boolean(process.env.CI);
+const INCLUDE_DRAFTS = ARGS.has("--include-drafts") && (DRY_RUN || !PRODUCTION_CONTEXT);
+if (ARGS.has("--include-drafts") && !INCLUDE_DRAFTS) {
+  console.warn("  --include-drafts ignored: production/CI environment. Drafts are left out.");
+}
+const write = DRY_RUN ? () => {} : writeFileSync;
+const makeDir = DRY_RUN ? () => {} : mkdirSync;
 
 function fail(message) {
   console.error(`\n  FATAL: ${message}\n`);
@@ -170,6 +180,24 @@ for (const dirName of productDirs) {
     continue;
   }
 
+  /*
+   * A draft is skipped the same way, and for the same reason, unless this run
+   * was asked for drafts (see INCLUDE_DRAFTS above). Anything but a real
+   * boolean is refused: `"draft": "true"` would otherwise read as "not a
+   * draft" and publish a half-made product.
+   */
+  if (meta.draft !== undefined && typeof meta.draft !== "boolean") {
+    fail(`${dirName}/product.json: "draft" must be true or absent, got ${JSON.stringify(meta.draft)}`);
+  }
+  const isDraft = meta.draft === true;
+  if (isDraft && !INCLUDE_DRAFTS) {
+    draftsLeftOut.push({ dirName, slug: meta.slug || null });
+    continue;
+  }
+  if (isDraft) draftsIncluded.push(dirName);
+  // A draft may still carry template placeholders; a live product may not.
+  else placeholderIssues.push(...placeholderProblems(meta, variants).map(p => `${dirName}/${p}`));
+
   const productName = meta.productName;
 
   /*
@@ -206,6 +234,12 @@ for (const dirName of productDirs) {
   if (visibleVariants.length > 0) {
     checkVariantType(dirName, meta.variantType, visibleVariants.map(v => v.variant));
   }
+  // Hero, shared gallery photos and every media.json reference must name a
+  // file that exists: a typo would otherwise ship a broken image, and these
+  // are the fields an assistant edits most. See scripts/lib/product-page.mjs.
+  mediaProblems.push(...checkPageMedia(dir, dirName, meta, media));
+  const landingKey = defaultMediaKey(visibleVariants);
+
   const imageBase = `/data/products/${encodeURIComponent(dirName)}/`;
   let minPrice = Infinity;
 
@@ -237,8 +271,8 @@ for (const dirName of productDirs) {
     }
 
     const stains = (v.stains || []).map(stainName => {
-      const mediaKey = `${v.variant}||${stainName}`;
-      const images = media[mediaKey] || [];
+      const key = mediaKey(v.variant, stainName);
+      const images = photosFor(meta, media, key, key === landingKey);
       const firstImage = images[0] ? imageBase + images[0] : null;
       const gallery = images.slice(1).map(url => ({ url: imageBase + url }));
 
@@ -282,12 +316,13 @@ for (const dirName of productDirs) {
       bundle: [],
       related: [],
       stains,
+      // Only ever present in dev data; the product page shows a marker for it.
+      ...(isDraft ? { draft: true } : {}),
     });
   }
 
-  const firstStain = visibleVariants[0]?.stains?.[0];
-  const defaultKey = firstStain ? `${visibleVariants[0].variant}||${firstStain}` : null;
-  const defaultImage = defaultKey && media[defaultKey]?.[0] ? imageBase + media[defaultKey][0] : null;
+  const landingPhoto = photosFor(meta, media, landingKey, true)[0];
+  const defaultImage = landingPhoto ? imageBase + landingPhoto : null;
 
   productIndex.push({
     productName,
@@ -296,6 +331,7 @@ for (const dirName of productDirs) {
     collection: meta.collection || null,
     minPrice: minPrice === Infinity ? 0 : minPrice,
     defaultImage,
+    ...(isDraft ? { draft: true } : {}),
   });
 
   /*
@@ -371,6 +407,9 @@ const bySlug = new Map(productIndex.filter(p => p.slug).map(p => [p.slug, p]));
  * a deliberate act and is dropped; the second is a mistake and fails the build.
  */
 const hiddenSlugs = new Set(hiddenProducts.map(p => p.slug).filter(Boolean));
+// A draft that was left out behaves the same: a live product may already name
+// it in `related`, and that row simply waits until the draft is published.
+const draftSlugs = new Set(draftsLeftOut.map(p => p.slug).filter(Boolean));
 
 const rowsBySlug = new Map();
 for (const item of inventory) {
@@ -422,6 +461,10 @@ function resolveRelation(dirName, field, slugs, ownSlug, priceOverrides, optiona
        * a bundle that quietly lost a row.
        */
       relationNotices.push(`${dirName}: ${field} drops "${slug}", which is hidden`);
+      continue;
+    }
+    if (draftSlugs.has(slug)) {
+      relationNotices.push(`${dirName}: ${field} drops "${slug}", which is a draft`);
       continue;
     }
 
@@ -536,12 +579,25 @@ if (relationProblems.length > 0) {
  * whoever hits it to lower the number without thinking - and that is exactly
  * the reflex the guard depends on not existing.
  */
-const parsedProducts = productIndex.length + hiddenProducts.length;
+// Drafts that were left out parsed too, for the same reason.
+const parsedProducts = productIndex.length + hiddenProducts.length + draftsLeftOut.length;
 if (parsedProducts < MIN_EXPECTED_PRODUCTS) {
   fail(
     `only ${parsedProducts} products parsed, expected at least ${MIN_EXPECTED_PRODUCTS}.\n` +
       `    If a product was removed on purpose, lower MIN_EXPECTED_PRODUCTS in this file.`
   );
+}
+
+if (placeholderIssues.length > 0) {
+  fail(
+    `a product that is not a draft still has template placeholders:\n` +
+      placeholderIssues.map(p => `    - ${p}`).join("\n") +
+      `\n    Fill them in, or put "draft": true back in its product.json.`
+  );
+}
+
+if (mediaProblems.length > 0) {
+  fail(`photos do not match the files on disk:\n` + mediaProblems.map(p => `    - ${p}`).join("\n"));
 }
 
 if (hiddenProblems.length > 0) {
@@ -580,9 +636,9 @@ if (duplicates.length > 0) {
 // Artifacts
 // ---------------------------------------------------------------------------
 
-writeFileSync(join(PUBLIC, "data", "inventory.json"), JSON.stringify(inventory, null, 2) + "\n");
-writeFileSync(join(PUBLIC, "data", "products.json"), JSON.stringify(productIndex, null, 2) + "\n");
-writeFileSync(join(PUBLIC, "data", "images.json"), JSON.stringify(allImages, null, 2) + "\n");
+write(join(PUBLIC, "data", "inventory.json"), JSON.stringify(inventory, null, 2) + "\n");
+write(join(PUBLIC, "data", "products.json"), JSON.stringify(productIndex, null, 2) + "\n");
+write(join(PUBLIC, "data", "images.json"), JSON.stringify(allImages, null, 2) + "\n");
 
 // Search corpus: shipped to the browser as a lazily-imported chunk, so it holds
 // only what MiniSearch indexes or what a result row renders. Deliberately not
@@ -609,8 +665,8 @@ for (const item of inventory) {
     stainImages: Object.fromEntries(item.stains.map(s => [s.name, s.image || ""])),
   });
 }
-mkdirSync(join(root, "src", "data"), { recursive: true });
-writeFileSync(join(root, "src", "data", "search-docs.json"), JSON.stringify(searchDocs) + "\n");
+makeDir(join(root, "src", "data"), { recursive: true });
+write(join(root, "src", "data", "search-docs.json"), JSON.stringify(searchDocs) + "\n");
 
 /*
  * Checkout recommendations: "you may also like".
@@ -642,7 +698,7 @@ for (const item of inventory) {
   }));
   if (recs.length > 0) recommendations[item.productName] = recs;
 }
-writeFileSync(
+write(
   join(root, "src", "data", "recommendations.json"),
   JSON.stringify(recommendations) + "\n"
 );
@@ -658,7 +714,7 @@ for (const [parent, recs] of Object.entries(recommendations)) {
   const kits = recs.filter(r => r.bundleOverride).map(r => r.productName);
   if (kits.length > 0) bundlePrices[parent] = kits;
 }
-writeFileSync(join(root, "src", "data", "bundle-prices.json"), JSON.stringify(bundlePrices) + "\n");
+write(join(root, "src", "data", "bundle-prices.json"), JSON.stringify(bundlePrices) + "\n");
 
 // Pricing table: the only catalogue data /api/quotes needs. Imported
 // statically by src/lib/pricing.ts so it is always in the function bundle -- public/ is
@@ -683,10 +739,19 @@ const pricing = inventory.map(item => ({
 }));
 // data/ holds only generated output now that the stale hand-maintained copies
 // of the catalogue were removed, so it will not exist in a fresh clone.
-mkdirSync(join(root, "data"), { recursive: true });
-writeFileSync(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
+makeDir(join(root, "data"), { recursive: true });
+write(join(root, "data", "pricing.json"), JSON.stringify(pricing) + "\n");
 
 console.log(`Generated from ${productDirs.length} product directories`);
+if (DRY_RUN) console.log("  dry run: every guard passed, nothing written");
+if (draftsIncluded.length > 0) {
+  console.log(`  INCLUDED ${draftsIncluded.length} draft(s) - dev data, not for deploy:`);
+  for (const d of draftsIncluded) console.log(`    ${d}`);
+}
+if (draftsLeftOut.length > 0) {
+  console.log(`  left out ${draftsLeftOut.length} draft(s) (dev and preview only):`);
+  for (const d of draftsLeftOut) console.log(`    ${d.dirName}`);
+}
 if (hiddenProducts.length > 0) {
   console.log(`  hid ${hiddenProducts.length} product(s) entirely:`);
   for (const h of hiddenProducts) console.log(`    ${h.dirName}`);

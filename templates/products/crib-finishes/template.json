@@ -1,0 +1,9 @@
+{
+  "summary": "Collection crib sold in the ten named finishes, like Newport or Addison.",
+  "notes": [
+    "each finish is its own variant: media.json keys are \"Natural||Natural\", \"Almond||Almond\", ...",
+    "bundle starts with the mattress only. A collection's own toddler bed, bed rail kit and guard rails are separate products: make them with --template conversion-kit, then add their slugs to \"bundle\" (see Newport Crib for bundlePriceOverrides, bundleOptional and bundleUnchecked)",
+    "set \"collection\" and fill \"related\" with the matching dressers and nightstands",
+    "for a crib in a collection that already exists, --like \"<that collection's crib>\" copies all of this"
+  ]
+}

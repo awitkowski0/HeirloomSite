@@ -4,13 +4,14 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/build-data.mjs && next dev",
+    "dev": "node scripts/build-data.mjs --include-drafts && next dev",
     "build": "node scripts/build-data.mjs && next build",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/build-data.mjs && node --conditions=react-server --import ./tests/register.mjs --test \"tests/**/*.test.ts\"",
-    "data:build": "node scripts/build-data.mjs"
+    "data:build": "node scripts/build-data.mjs",
+    "product": "node scripts/product.mjs"
   },
   "dependencies": {
     "@heycatch/sdk": "^0.8.5",

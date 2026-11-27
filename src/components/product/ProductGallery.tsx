@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import Image from 'next/image';
-import Modal from '@/components/ui/Modal';
+import PhotoThumbs from './PhotoThumbs';
+import ProductLightbox from './ProductLightbox';
+import { useSlideTrack } from './useSlideTrack';
 
 /** One finish in the scroll preview: its key, what to call it, and its photograph. */
 export interface FeedItem {
@@ -40,7 +42,28 @@ function subscribePhone(onChange: () => void) {
 }
 
 export default function ProductGallery({ images, productName, priority = false, feed }: Props) {
-  const [index, setIndex] = useState(0);
+  /*
+   * The slide index belongs to one photo list. Choosing another finish swaps
+   * the list and remounts the carousel at its first photo (it is keyed on
+   * imagesKey below), so the index has to start over with it - tracked here
+   * by key rather than reset in an effect, which would render one frame
+   * pointing at the old position.
+   */
+  const imagesKey = images.join('|');
+  const [position, setPosition] = useState({ key: imagesKey, index: 0 });
+  const index = position.key === imagesKey ? position.index : 0;
+  const setIndex = (i: number) => setPosition({ key: imagesKey, index: i });
+  const count = images.length;
+  const safeIndex = Math.min(index, Math.max(0, count - 1));
+  /*
+   * The carousel is a native scroll-snap track; useSlideTrack keeps the index
+   * and its scroll position in step. Lightbox moves pass 'instant' - the
+   * carousel is behind the lightbox then, and nobody is there to watch it
+   * glide.
+   */
+  const { trackRef: slidesRef, goTo, onScroll, onScrollEnd } = useSlideTrack(count, safeIndex, setIndex);
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   /*
@@ -158,40 +181,128 @@ export default function ProductGallery({ images, productName, priority = false, 
     );
   }
 
-  const safeIndex = Math.min(index, images.length - 1);
-  const prev = () => setIndex(i => (i - 1 + images.length) % images.length);
-  const next = () => setIndex(i => (i + 1) % images.length);
+  /*
+   * An arrow at the end of its run is disabled, and a disabled button drops
+   * focus onto <body> - which would send a keyboard back to the top of the
+   * page. Hand focus to the arrow that still works instead.
+   */
+  const stepTo = (target: number) => {
+    goTo(target);
+    if (target <= 0) nextRef.current?.focus();
+    else if (target >= count - 1) prevRef.current?.focus();
+  };
 
+  /*
+   * The dialog hands focus back to whichever slide opened it, but the visitor
+   * may have moved on since and that slide is now off screen and out of the
+   * tab order. Put focus on the photo they are looking at, without letting the
+   * focus scroll the carousel.
+   */
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    (slidesRef.current?.children[safeIndex] as HTMLElement | undefined)?.focus({ preventScroll: true });
+  };
+
+  /*
+   * The photograph is a carousel: every photo is a slide in one horizontal
+   * scroll-snap track. Swipe on a phone, arrows on a pointer device, and the
+   * thumbnails below jump. It is one DOM tree in every viewport - CSS hides
+   * the arrows where there is no hover - and only the first slide is a
+   * priority (LCP) image; the rest load lazily as they near the viewport.
+   *
+   * The old single photo had no arrows on purpose: they duplicated the
+   * thumbnails while only ever showing one image at a time. A carousel is the
+   * other way round - swiping is the main way through it on a phone, where
+   * the thumbnails are below the fold during the finish preview.
+   */
   const photo = (
     <div className={`image-container product-image${preview !== null ? ' is-previewing' : ''}`}>
-      <button
-        type="button"
-        onClick={() => setLightboxOpen(true)}
-        aria-label={`Open fullscreen view of ${productName}`}
-        className="product-image-trigger"
+      {count > 1 && (
+        <>
+          <button
+            ref={prevRef}
+            type="button"
+            className="slide-nav slide-nav-prev"
+            onClick={() => stepTo(safeIndex - 1)}
+            disabled={safeIndex === 0}
+            aria-label="Previous photo"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+          </button>
+          <button
+            ref={nextRef}
+            type="button"
+            className="slide-nav slide-nav-next"
+            onClick={() => stepTo(safeIndex + 1)}
+            disabled={safeIndex === count - 1}
+            aria-label="Next photo"
+          >
+            <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+          </button>
+        </>
+      )}
+      <div
+        key={imagesKey}
+        ref={slidesRef}
+        onScroll={onScroll}
+        onScrollEnd={onScrollEnd}
+        className="slide-track product-slides"
+        role={count > 1 ? 'region' : undefined}
+        aria-roledescription={count > 1 ? 'carousel' : undefined}
+        aria-label={count > 1 ? `${productName} photos` : undefined}
       >
-        <Image
-          src={images[safeIndex]}
-          alt={productName}
-          fill
-          priority={priority}
-          /* The grid does not split until 1024px, but this claimed 55vw from
-            769px up - so every tablet was told to fetch roughly half the
-            pixels it actually renders. Pre-existing, unrelated to the
-            layout change. */
-          sizes="(max-width: 1023px) 100vw, 50vw"
-          style={{ objectFit: 'contain' }}
-        />
-      </button>
+        {images.map((src, i) => (
+          <button
+            key={src}
+            type="button"
+            onClick={() => {
+              setIndex(i);
+              setLightboxOpen(true);
+            }}
+            aria-label={
+              count > 1
+                ? `Open fullscreen view of ${productName}, photo ${i + 1} of ${count}`
+                : `Open fullscreen view of ${productName}`
+            }
+            // Only the visible slide is in the tab order; the arrows and
+            // thumbnails are how a keyboard moves between them.
+            tabIndex={i === safeIndex ? 0 : -1}
+            className="product-slide"
+          >
+            <Image
+              src={src}
+              alt={i === 0 ? productName : `${productName}, photo ${i + 1}`}
+              fill
+              /* The first photo is the page's LCP image: fetch it eagerly
+                and at high priority. `priority` is deprecated in Next 16 and
+                no longer raises the fetch priority; the rest stay lazy. */
+              loading={priority && i === 0 ? 'eager' : undefined}
+              fetchPriority={priority && i === 0 ? 'high' : undefined}
+              /* The grid does not split until 1024px, but this claimed 55vw
+                from 769px up - so every tablet was told to fetch roughly half
+                the pixels it actually renders. */
+              sizes="(max-width: 1023px) 100vw, 50vw"
+              style={{ objectFit: 'contain' }}
+            />
+          </button>
+        ))}
+      </div>
 
-      {/*
-        The arrows over the main image and a dot `tablist` beneath it used
-        to live here, giving this component four ways to change image -
-        arrows, dots, thumbnails, and the lightbox's own arrows - three of
-        which did exactly the same thing. The thumbnails are strictly better
-        than the dots (they show what you are selecting) and the lightbox
-        keeps its arrows, so both of these went.
-      */}
+      {count > 1 && (
+        <div className="product-slides-status">
+          <span className="product-slides-progress" aria-hidden="true">
+            {images.map((src, i) => (
+              <span key={src} className={i === safeIndex ? 'is-current' : undefined} />
+            ))}
+          </span>
+          <span className="product-slides-count" aria-hidden="true">
+            {safeIndex + 1} / {count}
+          </span>
+          <span className="visually-hidden" role="status">
+            Photo {safeIndex + 1} of {count}
+          </span>
+        </div>
+      )}
 
       {/* The preview's finish photographs, stacked over the selected one and
           faded in one at a time. Decorative: the swatch radiogroup above is
@@ -218,19 +329,20 @@ export default function ProductGallery({ images, productName, priority = false, 
     <>
       {hasFeed ? (
         /* The track is the scroll distance the preview runs over; the pin
-           sticks inside it. Both are inert from 768px. */
+           sticks inside it. Both are inert from 768px.
+
+           The length and the panel are in the server HTML rather than added
+           once the phone query resolves: CSS only reads them at phone width,
+           and adding ~900px of page under the photograph after hydration
+           shoved the bundle and price down the screen (CLS 0.13-0.21). */
         <div
           ref={trackRef}
           className="stain-scrub"
-          style={
-            scrubOn
-              ? ({ '--scrub-length': `${(itemCount + 1) * SCRUB_STEP_PX}px` } as CSSProperties)
-              : undefined
-          }
+          style={{ '--scrub-length': `${(itemCount + 1) * SCRUB_STEP_PX}px` } as CSSProperties}
         >
           <div className="stain-scrub-pin">
             {photo}
-            {scrubOn && (
+            {hasFeed && (
               <div className="stain-scrub-panel">
                 <p className="stain-scrub-name">
                   {feed.items[preview ?? feed.activeIndex]?.label ?? ''}
@@ -267,88 +379,26 @@ export default function ProductGallery({ images, productName, priority = false, 
         photo
       )}
 
-      {images.length > 1 && (
-        <div className="gallery-thumbs" role="tablist" aria-label="Image thumbnails">
-          {images.map((url, i) => (
-            <button
-              key={url}
-              type="button"
-              role="tab"
-              aria-selected={i === safeIndex}
-              aria-label={`View image ${i + 1} of ${images.length}`}
-              onClick={() => setIndex(i)}
-              className={`gallery-thumb ${i === safeIndex ? 'active' : ''}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element -- 72px
-                  thumbnail strip; optimizing these would multiply Vercel image
-                  transformations by every image on every product. */}
-              <img src={url} alt="" loading="lazy" />
-            </button>
-          ))}
-        </div>
+      {count > 1 && (
+        <PhotoThumbs
+          images={images}
+          index={safeIndex}
+          onSelect={goTo}
+          label={`${productName} photos`}
+          className="gallery-thumbs"
+        />
       )}
 
-      <Modal
+      <ProductLightbox
         open={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-        title={`${productName}, image ${safeIndex + 1} of ${images.length}`}
-        overlayClassName="lightbox-overlay"
-        className="lightbox-content"
-      >
-        {/*
-          A real dismiss surface behind the photograph.
-
-          Modal closes when the overlay is clicked directly, but
-          .lightbox-content is width:100%/height:100% and covers the whole
-          overlay, so the click never landed on the overlay itself and
-          click-outside-to-close silently did nothing. With that gone and the
-          close button drawn as a bare white glyph, Escape was the only exit
-          anyone could find.
-
-          A button rather than a div with a handler: it is a control, it should
-          be reachable and announced as one.
-        */}
-        <button
-          type="button"
-          onClick={() => setLightboxOpen(false)}
-          className="lightbox-dismiss"
-          aria-label="Close fullscreen view"
-          tabIndex={-1}
-        />
-
-        <button
-          type="button"
-          onClick={() => setLightboxOpen(false)}
-          className="lightbox-close-btn"
-          aria-label="Close fullscreen view"
-        >
-          <span className="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-
-        <div className="lightbox-img-wrap">
-          <Image
-            src={images[safeIndex]}
-            alt={productName}
-            fill
-            sizes="100vw"
-            style={{ objectFit: 'contain' }}
-          />
-        </div>
-
-        {images.length > 1 && (
-          <>
-            <button type="button" onClick={prev} className="lightbox-nav-btn lightbox-nav-prev" aria-label="Previous image">
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_left</span>
-            </button>
-            <button type="button" onClick={next} className="lightbox-nav-btn lightbox-nav-next" aria-label="Next image">
-              <span className="material-symbols-outlined" aria-hidden="true">chevron_right</span>
-            </button>
-            <p role="status" aria-live="polite" className="visually-hidden">
-              Image {safeIndex + 1} of {images.length}
-            </p>
-          </>
-        )}
-      </Modal>
+        onClose={closeLightbox}
+        images={images}
+        productName={productName}
+        index={safeIndex}
+        // Keep the page carousel on the same photo, so closing lands where
+        // the visitor left off.
+        onIndexChange={i => goTo(i, 'instant')}
+      />
     </>
   );
 }

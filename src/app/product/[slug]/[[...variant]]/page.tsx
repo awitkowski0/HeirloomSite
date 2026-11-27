@@ -17,6 +17,7 @@ import { resolveVariant, variantPathsFor, variantHref, productCanonicalPath } fr
 import { TYPED_TITLE_NAMES, productTitleName } from '@/lib/product-title';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
+import DraftMarker from '@/components/product/DraftMarker';
 import type { ReactNode } from 'react';
 
 // Unknown slugs - and unknown wood/finish segments - 404 instead of rendering
@@ -298,6 +299,9 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumbJsonLd(breadcrumb)) }}
       />
+
+      {/* Dev data only: a draft has no row in any production artifact. */}
+      {primary.draft && <DraftMarker slug={slug} />}
 
       <nav aria-label="Breadcrumb" className="breadcrumb">
         <ol>
