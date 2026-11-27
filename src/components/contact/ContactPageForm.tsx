@@ -8,6 +8,7 @@ import TurnstileWidget, {
   type TurnstileStatus,
 } from '@/components/checkout/TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
+import { presentUtm, utmFromSearchParams } from '@/lib/utm';
 
 /**
  * The /contact form.
@@ -28,7 +29,11 @@ import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
  * auto-response asks for exactly those and a required ZIP would gate a visitor
  * who has not chosen a nursery location yet.
  */
-export default function ContactPageForm({ email: supportEmail }: { email: string }) {
+export default function ContactPageForm({
+  email: supportEmail,
+}: {
+  email: string;
+}) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -55,7 +60,19 @@ export default function ContactPageForm({ email: supportEmail }: { email: string
     setError(null);
 
     try {
-      const result = await submitInquiry({ name, email, message, phone, zip, interest, timing, turnstileToken });
+      const result = await submitInquiry({
+        name,
+        email,
+        message,
+        phone,
+        zip,
+        interest,
+        timing,
+        turnstileToken,
+        // Read from the address bar at submit time, so /contact stays a
+        // static page (see src/app/contact/page.tsx).
+        ...presentUtm(utmFromSearchParams(new URLSearchParams(window.location.search))),
+      });
       // Marked only after the server confirmed delivery - this event must keep
       // meaning "a contact attempt exists", which it did not under mailto.
       contactMessageSubmitted();
