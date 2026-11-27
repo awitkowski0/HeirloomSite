@@ -15,3 +15,12 @@ export const WAREHOUSE_FOOTER_LINE =
 /** Existing /shipping service-area sentence (no street). Kept for /contact. */
 export const SERVICE_AREA_LINE =
   'We deliver in Pennsylvania, New Jersey and Maryland.';
+
+/** Public Instagram profile. Used as a footer link only. */
+export const INSTAGRAM_URL = 'https://www.instagram.com/heirloomcribs/';
+
+/**
+ * Public Facebook Page URL. Unset until Phil decides the Page.
+ * Empty/null must render nothing in the footer (no placeholder, no comment cue).
+ */
+export const FACEBOOK_URL: string | null = null;

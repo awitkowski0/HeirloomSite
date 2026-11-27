@@ -582,6 +582,10 @@ export interface InquiryDetails {
   zip?: string;
   interest?: string;
   timing?: string;
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_content?: string;
 }
 
 /**
@@ -601,6 +605,10 @@ export function sendInquiryAlert(inquiry: InquiryDetails): Promise<boolean> {
     inquiry.zip ? `<p><strong>Delivery ZIP:</strong> ${esc(inquiry.zip)}</p>` : '',
     inquiry.interest ? `<p><strong>Considering:</strong> ${esc(inquiry.interest)}</p>` : '',
     inquiry.timing ? `<p><strong>Timing:</strong> ${esc(inquiry.timing)}</p>` : '',
+    inquiry.utm_source ? `<p><strong>utm_source:</strong> ${esc(inquiry.utm_source)}</p>` : '',
+    inquiry.utm_medium ? `<p><strong>utm_medium:</strong> ${esc(inquiry.utm_medium)}</p>` : '',
+    inquiry.utm_campaign ? `<p><strong>utm_campaign:</strong> ${esc(inquiry.utm_campaign)}</p>` : '',
+    inquiry.utm_content ? `<p><strong>utm_content:</strong> ${esc(inquiry.utm_content)}</p>` : '',
   ]
     .filter(Boolean)
     .join('\n');
