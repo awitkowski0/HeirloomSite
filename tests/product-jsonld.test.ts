@@ -68,7 +68,7 @@ test('shipping details list Curbside and White Glove rates for the page price, P
     name: string;
     shippingRate: { value: number; currency: string };
     shippingDestination: { addressRegion: string[] };
-    deliveryTime: { handlingTime: { minValue: number; maxValue: number }; transitTime?: unknown };
+    deliveryTime: { handlingTime: { minValue: number; maxValue: number }; transitTime: { minValue: number; maxValue: number; unitCode: string } };
   };
   const ships = ld({ priceDollars: 2500 }).offers.shippingDetails as Ship[];
   assert.equal(ships.length, 2);
@@ -83,7 +83,9 @@ test('shipping details list Curbside and White Glove rates for the page price, P
     [ships[0].deliveryTime.handlingTime.minValue, ships[0].deliveryTime.handlingTime.maxValue],
     [30, 40]
   );
-  assert.equal(ships[0].deliveryTime.transitTime, undefined);
+  assert.equal(ships[0].deliveryTime.transitTime.minValue, 1);
+  assert.equal(ships[0].deliveryTime.transitTime.maxValue, 10);
+  assert.equal(ships[0].deliveryTime.transitTime.unitCode, 'DAY');
   const fisher = ld({ sku: 'FQP-101', priceDollars: 2000 }).offers.shippingDetails as Ship[];
   assert.equal(fisher[0].shippingRate.value, 175);
   assert.equal(fisher[1].shippingRate.value, 299);
@@ -91,11 +93,13 @@ test('shipping details list Curbside and White Glove rates for the page price, P
     [fisher[0].deliveryTime.handlingTime.minValue, fisher[0].deliveryTime.handlingTime.maxValue],
     [50, 70]
   );
+  assert.equal(fisher[0].deliveryTime.transitTime.minValue, 1);
+  assert.equal(fisher[0].deliveryTime.transitTime.maxValue, 10);
 });
 
 test('no invented identifiers, ratings or business address', () => {
   const json = JSON.stringify(ld());
-  for (const k of ['aggregateRating', 'review', 'gtin', 'mpn', 'priceValidUntil', 'transitTime', 'LocalBusiness', 'streetAddress']) {
+  for (const k of ['aggregateRating', 'review', 'gtin', 'mpn', 'priceValidUntil', 'LocalBusiness', 'streetAddress']) {
     assert.ok(!json.includes(`"${k}"`) && !json.includes(`"@type":"${k}"`), `unexpected ${k}`);
   }
   assert.ok(BRAND_SITE_URL.startsWith('https://'));

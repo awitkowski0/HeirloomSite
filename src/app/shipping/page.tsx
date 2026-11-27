@@ -92,9 +92,9 @@ export default function ShippingPage() {
         <h2 className="headline-md">Lead times</h2>
         <p>Every piece is made to order. Lead times are estimates, confirmed at order time:</p>
         <ul className="doc-list">
-          <li>Old Town Oak: about 6–8 weeks</li>
-          <li>Kids Comfort: about 8 weeks</li>
-          <li>Fisher&rsquo;s: 10–14 weeks</li>
+          <li>Old Town Oak: about 6–8 weeks (30–40 business days)</li>
+          <li>Kids Comfort: about 8 weeks (about 40 business days)</li>
+          <li>Fisher&rsquo;s: 10–14 weeks (50–70 business days)</li>
         </ul>
         <p>
           Your build starts when we receive your deposit (see{' '}
@@ -110,6 +110,10 @@ export default function ShippingPage() {
       <section>
         <h2 className="headline-md">Scheduling</h2>
         <p>We contact you to schedule delivery once your furniture is ready.</p>
+        <p>
+          Delivery 1 to 10 business days after your piece is ready, for PA/NJ/MD Curbside and White
+          Glove.
+        </p>
       </section>
 
       <hr className="doc-rule" />
