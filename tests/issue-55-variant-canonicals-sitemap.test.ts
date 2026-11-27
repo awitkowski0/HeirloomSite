@@ -115,7 +115,8 @@ test('#55 generateMetadata sets canonical and og:url to the base; titles stay va
   assert.match(src, /const canonical = productCanonicalPath\(slug\);/);
   assert.match(src, /alternates:\s*\{\s*canonical\s*\}/);
   assert.match(src, /url:\s*canonical/);
-  assert.match(src, /const title = variantName \? `\$\{product\.productName\} in \$\{variantName\}` : baseTitle;/);
+  // #307: titles use the typed display name ("Arched Top Crib in ...").
+  assert.match(src, /const title = variantName \? `\$\{displayName\} in \$\{variantName\}` : baseTitle;/);
   assert.match(src, /robots:\s*\{\s*index:\s*false\s*\}/);
   const robotsLine = src.indexOf('robots: { index: false }');
   const notFoundReturn = src.indexOf("if (!data) return { title: 'Product not found'");
