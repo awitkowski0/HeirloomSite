@@ -63,7 +63,7 @@ export default function WoodsAndFinishesPage() {
             {`Brown maple is the wood we list on this site. Kids Comfort's catalog names brown maple; Old Town Oak's lists "Brown Soft Maple"; Fisher's catalog shows its pieces in "Maple Wood."`}
           </p>
           <p>
-            {`The stain is the color you pick, and brown maple is the wood under it. If you're matching a room or an existing piece, ask us before you order.`}
+            {`The stain is the color you pick, and brown maple is the wood under it. If you're unsure which finish to choose for your nursery, ask us before you order.`}
           </p>
         </section>
 
