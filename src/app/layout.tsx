@@ -6,7 +6,7 @@ import { Providers } from './providers';
 import Header from '@/components/layout/Header';
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
-import { SITE_NAME, SITE_URL, organizationJsonLd, jsonLdScript } from '@/lib/seo';
+import { SITE_NAME, SITE_URL, DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_URL, organizationJsonLd, jsonLdScript } from '@/lib/seo';
 
 /*
  * GFS Didot is the classical Didone serif the editorial look is built on now:
@@ -60,13 +60,13 @@ export const metadata: Metadata = {
     description:
       'Solid hardwood nursery furniture, made to order and designed to grow with your child. ' +
       'Delivery is charged separately, with Curbside and White Glove options.',
-    images: [{ url: '/logo-wide.png', width: 1200, height: 630, alt: SITE_NAME }],
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Heirloom Cribs — Built to Grow Up.',
     description: 'Solid hardwood nursery furniture, made to order and designed to grow with your child.',
-    images: ['/logo-wide.png'],
+    images: [DEFAULT_OG_IMAGE_URL],
   },
   icons: {
     icon: [
