@@ -14,7 +14,7 @@ import {
 import { galleryImagesFor } from '@/lib/images';
 import { humanizeWood, stainLabel, variantLabel } from '@/lib/labels';
 import { resolveVariant, variantPathsFor, variantHref } from '@/lib/variants';
-import { productTitleName } from '@/lib/product-title';
+import { TYPED_TITLE_NAMES, productTitleName } from '@/lib/product-title';
 import ProductConfigurator from '@/components/product/ProductConfigurator';
 import VisibleProductGrid from '@/components/products/VisibleProductGrid';
 import type { ReactNode } from 'react';
@@ -145,7 +145,9 @@ export async function generateMetadata({
 
   // Stored titles already end in "— Heirloom Cribs and More" (all 73 of them),
   // so the layout's "%s | Heirloom Cribs & More" template would double it.
-  const baseTitle = stripSiteSuffix(primary.title || displayName);
+  // A typed name ("Arched Top Crib") wins over the stored title ("Arched
+  // Top"), so the base page's <title> and og:title match its H1.
+  const baseTitle = TYPED_TITLE_NAMES[slug] ?? stripSiteSuffix(primary.title || displayName);
   // Each variant gets its own title and description. Without that, 800 pages
   // would carry 73 distinct titles and read as duplicates.
   // variantLabel joins with a bullet for on-page display; a title tag reads

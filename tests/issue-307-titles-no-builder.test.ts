@@ -142,9 +142,16 @@ test('the 17 previously prefixed Fisher crib titles and their brand/link stay co
 
 test('product page title, H1, og:title and JSON-LD name use productTitleName', () => {
   const page = read('src/app/product/[slug]/[[...variant]]/page.tsx');
-  assert.ok(page.includes("import { productTitleName } from '@/lib/product-title'"));
+  assert.ok(page.includes("import { TYPED_TITLE_NAMES, productTitleName } from '@/lib/product-title'"));
   assert.ok(page.includes('productTitleName(slug, product.productName)'));
   assert.ok(page.includes('`${displayName} in ${variantName}`'));
   assert.ok(page.includes('<h1 className="product-title">{displayName}</h1>'));
   assert.doesNotMatch(page, /TODO/i);
+});
+
+test('#307 base product <title>/og:title use the typed name, matching the H1', () => {
+  // The stored title is "Arched Top"; without this the base page's <title>
+  // and og:title say "Arched Top" while its H1 says "Arched Top Crib".
+  const page = read('src/app/product/[slug]/[[...variant]]/page.tsx');
+  assert.ok(page.includes('const baseTitle = TYPED_TITLE_NAMES[slug] ?? stripSiteSuffix('));
 });
