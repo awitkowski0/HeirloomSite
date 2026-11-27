@@ -12,10 +12,15 @@ import JourneyStep from '@/components/home/JourneyStep';
 import JourneyPoints from '@/components/home/JourneyPoints';
 import BrandSketch from '@/components/marketing/BrandSketch';
 import { SHIPPING_METHODS, SHIPPING_LIMIT_NOTE } from '@/lib/order-terms';
+import { HOME_TITLE, HOME_META } from '@/lib/s2a-home-cribs-copy';
 import '@/styles/home.css';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
+  title: { absolute: HOME_TITLE },
+  description: HOME_META,
+  openGraph: { title: HOME_TITLE, description: HOME_META, url: '/' },
+  twitter: { title: HOME_TITLE, description: HOME_META },
 };
 
 /**
