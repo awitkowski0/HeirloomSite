@@ -8,7 +8,7 @@ import TurnstileWidget, {
   type TurnstileStatus,
 } from '@/components/checkout/TurnstileWidget';
 import { TURNSTILE_ACTIONS } from '@/lib/turnstile-action';
-import { UTM_KEYS, emptyUtm, presentUtm, type UtmFields } from '@/lib/utm';
+import { presentUtm, utmFromSearchParams } from '@/lib/utm';
 
 /**
  * The /contact form.
@@ -31,10 +31,8 @@ import { UTM_KEYS, emptyUtm, presentUtm, type UtmFields } from '@/lib/utm';
  */
 export default function ContactPageForm({
   email: supportEmail,
-  utm = emptyUtm(),
 }: {
   email: string;
-  utm?: UtmFields;
 }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -71,7 +69,9 @@ export default function ContactPageForm({
         interest,
         timing,
         turnstileToken,
-        ...presentUtm(utm),
+        // Read from the address bar at submit time, so /contact stays a
+        // static page (see src/app/contact/page.tsx).
+        ...presentUtm(utmFromSearchParams(new URLSearchParams(window.location.search))),
       });
       // Marked only after the server confirmed delivery - this event must keep
       // meaning "a contact attempt exists", which it did not under mailto.
@@ -220,9 +220,6 @@ export default function ContactPageForm({
           required
         />
       </div>
-      {UTM_KEYS.map(key => (
-        <input key={key} type="hidden" name={key} value={utm[key]} />
-      ))}
       {/*
         interaction-only, so Cloudflare renders nothing unless it actually wants
         a challenge. The visitor navigated here deliberately, but a visible

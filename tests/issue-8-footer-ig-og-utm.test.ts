@@ -125,20 +125,22 @@ test('utm_source, utm_medium, utm_campaign, and utm_content are read from the UR
   assert.deepEqual(presentUtm(dirty), { utm_source: 'igbot' });
 });
 
-test('/contact hidden UTM fields reach submitInquiry and the shop alert', () => {
+test('/contact stays static and UTM fields reach submitInquiry and the shop alert', () => {
   const page = read('src/app/contact/page.tsx');
   const form = read('src/components/contact/ContactPageForm.tsx');
   const route = read('src/app/api/inquiry/route.ts');
   const email = read('src/lib/email.ts');
   const client = read('src/lib/api-client.ts');
 
-  assert.ok(page.includes('utmFromSearchParams(await searchParams)'), '/contact does not read search params');
-  assert.ok(page.includes('utm={utm}'), '/contact does not pass utm to the form');
+  // /contact must stay statically prerendered (AGENTS.md): no searchParams.
+  assert.doesNotMatch(page, /searchParams/, '/contact reads searchParams, which makes it dynamic');
   assert.doesNotMatch(page, /4651|Hanoverville|WAREHOUSE_FOOTER_LINE/);
 
-  assert.ok(form.includes('type="hidden"'), 'form missing hidden UTM inputs');
-  assert.ok(form.includes('UTM_KEYS.map'), 'form does not render a hidden field per UTM key');
-  assert.ok(form.includes('...presentUtm(utm)'), 'submitInquiry is not given the UTM values');
+  assert.ok(
+    form.includes('utmFromSearchParams(new URLSearchParams(window.location.search))'),
+    'form does not read UTM tags from the URL at submit time',
+  );
+  assert.ok(form.includes('...presentUtm('), 'submitInquiry is not given the UTM values');
 
   for (const key of UTM_KEYS) {
     assert.ok(client.includes(`${key}?: string`), `InquiryRequest missing ${key}`);

@@ -3,7 +3,6 @@ import ContactPageForm from '@/components/contact/ContactPageForm';
 import { SUPPORT_INBOX } from '@/lib/email';
 import { PUBLISHED_PHONE, SERVICE_AREA_LINE } from '@/lib/published-contact';
 import { DEFAULT_OG_IMAGE, DEFAULT_OG_IMAGE_URL } from '@/lib/seo';
-import { utmFromSearchParams } from '@/lib/utm';
 
 export const metadata: Metadata = {
   title: 'Contact Us',
@@ -24,13 +23,10 @@ export const metadata: Metadata = {
 const EMAIL = SUPPORT_INBOX;
 const PHONE = PUBLISHED_PHONE;
 
-export default async function ContactPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const utm = utmFromSearchParams(await searchParams);
-
+/* Static on purpose: reading the query string here would make /contact render on
+   every request. The form reads the UTM tags from the URL in the browser when
+   it is submitted. */
+export default function ContactPage() {
   return (
     <div className="container contact-page">
       <header className="page-header">
@@ -66,7 +62,7 @@ export default async function ContactPage({
         {' — use the form below to send us a message.'}
       </p>
 
-      <ContactPageForm email={EMAIL} utm={utm} />
+      <ContactPageForm email={EMAIL} />
     </div>
   );
 }
